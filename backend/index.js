@@ -17,7 +17,7 @@ const startServer = async () => {
       await mongoose.connect(process.env.MONGODB_URI);
       console.log("MongoDB connected");
     } catch (error) {
-      console.error("MongoDB connection error:", error);
+      console.error("MongoDB connection failed. Please verify MONGODB_URI environment variable:", error);
       process.exit(1);
     }
   }
