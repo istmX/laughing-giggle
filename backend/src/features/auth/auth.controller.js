@@ -154,3 +154,13 @@ export const logoutUser = async (req,res)=>{
 }
 
 
+
+export const getMe = async (req,res)=>{
+    try{
+        res.status(200).json({user: req.user});
+    }
+    catch (error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).json({message:"Server error"});
+    }
+}
