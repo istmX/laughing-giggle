@@ -136,7 +136,7 @@ export const logoutUser = async (req,res)=>{
             await Blacklist.findOneAndUpdate(
                 { token },
                 { token },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: 'after' }
             );
         }
 
