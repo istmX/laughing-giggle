@@ -24,8 +24,16 @@ export const registerUser = async (req,res)=> {
 
     const hashedPassword = await bcrypt.hash(password,12);
   
+    const newUser = new User({
+        name,
+        username,
+        email,
+        password:hashedPassword
+    })
+    await newUser.save();
+
     //jwt 
-    const token = jwt.sign({email},process.env.JWT_SECRET,{expiresIn:'7d'})
+    const token = jwt.sign({email, id: newUser._id},process.env.JWT_SECRET,{expiresIn:'7d'})
 
     //cookies
     res.cookie('token',token,{
@@ -35,28 +43,16 @@ export const registerUser = async (req,res)=> {
         maxAge:7*24*60*60*1000
     })
 
-
-    const newUser = new User({
-        id: new mongoose.Types.ObjectId(),
-        name,
-        username,
-        email,
-        password:hashedPassword
-    })
-    await newUser.save();
-
     res.status(201).json({message:"User registered successfully",userId:newUser._id});
  }
     catch (error) {
-    const duplicateKey = error?.keyValue ?? {};
-    const duplicateMessage = typeof error?.message === 'string' ? error.message : '';
-
-    if (error?.code === 11000 || error?.name === 'MongoServerError' || error?.name === 'MongoError') {
-        if (duplicateKey.email || duplicateMessage.includes('email')) {
+    if (error?.code === 11000 || (error?.keyValue && Object.keys(error?.keyValue).length > 0)) {
+        const duplicateKey = error.keyValue || {};
+        if (duplicateKey.email) {
             return res.status(400).json({message:"User already exists with this email"});
         }
 
-        if (duplicateKey.username || duplicateMessage.includes('username')) {
+        if (duplicateKey.username) {
             return res.status(400).json({message:"Username already taken"});
         }
     }
@@ -68,7 +64,7 @@ export const registerUser = async (req,res)=> {
 
 
 
-export const LoginUser = async (req,res)=>{
+export const loginUser = async (req,res)=>{
     try {
         const {email,password} = req.body;
         
@@ -89,7 +85,7 @@ export const LoginUser = async (req,res)=>{
         }
 
         //jwt 
-        const token = jwt.sign({email},process.env.JWT_SECRET,{expiresIn:'7d'})
+        const token = jwt.sign({email, id: user._id},process.env.JWT_SECRET,{expiresIn:'7d'})
 
         //cookies
         res.cookie('token',token,{

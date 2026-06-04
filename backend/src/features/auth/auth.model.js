@@ -1,11 +1,6 @@
 import mongoose from 'mongoose';
 
 export const UserSchema = new mongoose.Schema({
-    id: {
-        type:mongoose.Schema.Types.ObjectId,
-        required: true,
-        unique: true,
-    },
     name:{
         type:String,
         required: true
