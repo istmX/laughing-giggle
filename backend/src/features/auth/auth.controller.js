@@ -1,7 +1,7 @@
-import User from './auth/auth.model.js';
+import mongoose from 'mongoose';
+import User from './auth.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import cookies from 'cookie-parser'
 
 
 
