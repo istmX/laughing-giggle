@@ -160,13 +160,29 @@ export const logoutUser = async (req,res)=>{
 
 
 
-export const getMe = async (req,res)=>{
-    try{
-        res.status(200).json({user: req.user});
-    }
-    catch (error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).json({message:"Server error"});
-    }
-}
 
+
+export const getMe = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        const user = await User.findOne({ username }).select('name username email createdAt');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            user: {
+                id: user._id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                joinedAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
