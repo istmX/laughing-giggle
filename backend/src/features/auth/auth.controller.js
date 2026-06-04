@@ -10,12 +10,21 @@ export const registerUser = async (req,res)=> {
     if(!name || !username || !email || !password){
         return res.status(400).json({message:"All fields are required"});
     }
+     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({message:"Invalid email format"});
+    }
+
     const existingUser = await User.findOne({email})
     if (existingUser) {
         return res.status(400).json({message:"User already exists with this email"});
     }
-
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+        return res.status(400).json({message:"Username can only contain letters, numbers, and underscores"});
+    }
     const existingUsername = await User.findOne({username})
+
 
     if(existingUsername){
         return res.status(400).json({message:"Username already taken"});
