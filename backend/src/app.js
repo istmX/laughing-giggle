@@ -1,5 +1,5 @@
 import express from 'express';
-import Router from './features/auth/auth.route';
+import Router from './features/auth/auth.route.js';
 const app = express();
 
 app.use(express.json());
