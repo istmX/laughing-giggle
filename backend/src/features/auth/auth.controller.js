@@ -53,7 +53,11 @@ export const registerUser = async (req,res)=> {
         maxAge:7*24*60*60*1000
     })
 
-    res.status(201).json({message:"User registered successfully",userId:newUser._id});
+    res.status(201).json({
+        message:"User registered successfully",
+        userId:newUser._id,
+        token: `Bearer ${token}`
+    });
  }
     catch (error) {
     if (error?.code === 11000 || (error?.keyValue && Object.keys(error?.keyValue).length > 0)) {
@@ -105,7 +109,11 @@ export const loginUser = async (req,res)=>{
             maxAge:7*24*60*60*1000
         })
 
-        res.status(200).json({message:"Login successful",userId:user._id});
+        res.status(200).json({
+            message:"Login successful",
+            userId:user._id,
+            token: `Bearer ${token}`
+        });
 
     }
     catch (error) {
@@ -118,7 +126,11 @@ export const loginUser = async (req,res)=>{
 
 export const logoutUser = async (req,res)=>{
     try {
-        const token = req.cookies.token;
+        let token = req.cookies.token;
+
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
 
         if (token) {
             await Blacklist.findOneAndUpdate(
