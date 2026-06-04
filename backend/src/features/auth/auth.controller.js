@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import User from './auth.model.js';
+import Blacklist from './blacklist.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
@@ -112,3 +113,32 @@ export const loginUser = async (req,res)=>{
         res.status(500).json({message:"Server error"});
     }
 }
+
+
+
+export const logoutUser = async (req,res)=>{
+    try {
+        const token = req.cookies.token;
+
+        if (token) {
+            await Blacklist.findOneAndUpdate(
+                { token },
+                { token },
+                { upsert: true, new: true }
+            );
+        }
+
+        res.clearCookie('token',{
+            httpOnly:true,
+            secure:process.env.NODE_ENV === 'production',
+            sameSite:'strict',
+        })
+        res.status(200).json({message:"Logout successful"});
+    }
+    catch (error) {
+        console.error('Error logging out user:', error);
+        res.status(500).json({message:"Server error"});
+    }
+}
+
+
