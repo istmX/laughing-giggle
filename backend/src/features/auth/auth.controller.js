@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 import User from './auth.model.js';
 import Blacklist from './blacklist.model.js';
 import jwt from 'jsonwebtoken';
@@ -128,14 +129,18 @@ export const logoutUser = async (req,res)=>{
     try {
         let token = req.cookies.token;
 
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-            token = req.headers.authorization.split(' ')[1];
+        if (req.headers.authorization) {
+            const match = req.headers.authorization.match(/^Bearer\s+(.+)$/i);
+            if (match) {
+                token = match[1];
+            }
         }
 
         if (token) {
+            const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
             await Blacklist.findOneAndUpdate(
-                { token },
-                { token },
+                { tokenHash },
+                { tokenHash },
                 { upsert: true, returnDocument: 'after' }
             );
         }
@@ -164,3 +169,4 @@ export const getMe = async (req,res)=>{
         res.status(500).json({message:"Server error"});
     }
 }
+
