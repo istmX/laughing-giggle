@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node -e \"console.log('No tests specified')\"",
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.6.3"
+    "mongoose": "^9.6.3",
+    "nodemon": "^3.1.14"
   }
 }
