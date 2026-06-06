@@ -4,6 +4,9 @@ import User from './auth.model.js';
 import Blacklist from './blacklist.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import {verifyGoogleToken} from './auth.service.js'
+
+
 
 export const registerUser = async (req,res)=> {
  try {
@@ -183,4 +186,87 @@ export const getMe = async (req, res) => {
         console.error('Error fetching user profile:', error);
         res.status(500).json({ message: "Server error" });
     }
+};
+
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({
+        message: "Google credential is required",
+      });
+    }
+
+    const payload = await verifyGoogleToken(credential);
+
+    const {
+      sub: googleId,
+      email,
+      name,
+      picture,
+    } = payload;
+
+    let user = await User.findOne({
+      $or: [
+        { email },
+        { googleId }
+      ]
+    });
+
+    if (!user) {
+      const baseUsername = email.split("@")[0];
+
+      let username = baseUsername;
+
+      const existingUsername = await User.findOne({
+        username,
+      });
+
+      if (existingUsername) {
+        username = `${baseUsername}_${Date.now()}`;
+      }
+
+      user = await User.create({
+        name,
+        username,
+        email,
+        googleId,
+        provider: "google",
+        avatar: picture,
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        email: user.email,
+        id: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Google login successful",
+      userId: user._id,
+      token: `Bearer ${token}`,
+    });
+
+  } catch (error) {
+    console.error("Google login error:", error);
+
+    return res.status(500).json({
+      message: "Google authentication failed",
+    });
+  }
 };

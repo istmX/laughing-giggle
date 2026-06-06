@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import AuthRouter from './features/auth/auth.route.js';
 import ProjectRouter from './features/projects/project.routes.js';
-import TaskRouter from './features/auth/tasks/task.routes.js';
+import TaskRouter from './features/tasks/task.routes.js';
 
 const app = express();
 
