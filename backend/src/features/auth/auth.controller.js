@@ -164,9 +164,7 @@ export const logoutUser = async (req,res)=>{
 
 export const getMe = async (req, res) => {
     try {
-        const { username } = req.params;
-
-        const user = await User.findOne({ username }).select('name username email createdAt');
+        const user = req.user;
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
