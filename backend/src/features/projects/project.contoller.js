@@ -89,6 +89,9 @@ export const getProjectById = async (req, res) => {
 export const deleteProject = async (req,res)=>{
     try{
         const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({message: "Invalid project id"});
+        }
         const project = await Project.findOneAndDelete({ _id: id, owner: req.user._id });
 
         if(!project){
@@ -106,6 +109,9 @@ export const deleteProject = async (req,res)=>{
 export const updateProject = async (req,res)=>{
     try{
         const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({message: "Invalid project id"});
+        }
         const { project_title, project_description, project_status } = req.body;
 
         const project = await Project.findOne({ _id: id, owner: req.user._id });
