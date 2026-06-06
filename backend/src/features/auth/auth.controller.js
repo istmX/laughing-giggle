@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 import User from './auth.model.js';
 import Blacklist from './blacklist.model.js';
 import jwt from 'jsonwebtoken';
@@ -128,14 +129,18 @@ export const logoutUser = async (req,res)=>{
     try {
         let token = req.cookies.token;
 
-        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-            token = req.headers.authorization.split(' ')[1];
+        if (req.headers.authorization) {
+            const match = req.headers.authorization.match(/^Bearer\s+(.+)$/i);
+            if (match) {
+                token = match[1];
+            }
         }
 
         if (token) {
+            const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
             await Blacklist.findOneAndUpdate(
-                { token },
-                { token },
+                { tokenHash },
+                { tokenHash },
                 { upsert: true, returnDocument: 'after' }
             );
         }
@@ -155,12 +160,29 @@ export const logoutUser = async (req,res)=>{
 
 
 
-export const getMe = async (req,res)=>{
-    try{
-        res.status(200).json({user: req.user});
+
+
+export const getMe = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        const user = await User.findOne({ username }).select('name username email createdAt');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            user: {
+                id: user._id,
+                name: user.name,
+                username: user.username,
+                email: user.email,
+                joinedAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        res.status(500).json({ message: "Server error" });
     }
-    catch (error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).json({message:"Server error"});
-    }
-}
+};
