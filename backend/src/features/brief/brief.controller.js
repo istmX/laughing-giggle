@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Brief from "./brief.model.js";
+import Idea from "../ideas/idea.model.js";
 
 export const createBrief = async (req, res) => {
     try {
@@ -11,7 +12,27 @@ export const createBrief = async (req, res) => {
             });
         }
 
-        const existingBrief = await Brief.findOne({ idea });
+        if (!mongoose.Types.ObjectId.isValid(idea)) {
+            return res.status(400).json({
+                message: "Invalid idea id"
+            });
+        }
+
+        const existingIdea = await Idea.findOne({
+            _id: idea,
+            owner: req.user._id
+        });
+
+        if (!existingIdea) {
+            return res.status(404).json({
+                message: "Idea not found"
+            });
+        }
+
+        const existingBrief = await Brief.findOne({
+            idea,
+            owner: req.user._id
+        });
 
         if (existingBrief) {
             return res.status(409).json({
@@ -43,7 +64,10 @@ export const getBriefs = async (req, res) => {
         const briefs = await Brief.find({
             owner: req.user._id
         })
-        .populate("idea")
+        .populate({
+            path: "idea",
+            select: "prompt createdAt"
+        })
         .sort({ createdAt: -1 });
 
         return res.status(200).json({
@@ -74,7 +98,11 @@ export const getBriefById = async (req, res) => {
         const brief = await Brief.findOne({
             _id: id,
             owner: req.user._id
-        }).populate("idea");
+        })
+        .populate({
+            path: "idea",
+            select: "prompt createdAt"
+        });
 
         if (!brief) {
             return res.status(404).json({
