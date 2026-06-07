@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import AuthRouter from './features/auth/auth.route.js';
 import ProjectRouter from './features/projects/project.routes.js';
 import TaskRouter from './features/tasks/task.routes.js';
-import IdeaRouter from './features/idea/idea.routes.js';
+import IdeaRouter from './features/ideas/idea.routes.js';
 
 const app = express();
 
