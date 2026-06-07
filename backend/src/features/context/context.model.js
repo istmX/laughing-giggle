@@ -23,57 +23,68 @@ const contextSchema = new mongoose.Schema(
 
     project_overview: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     build_plan: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     architecture: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     code_standards: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     library_docs: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     progress_tracker: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     ui_rules: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     ui_tokens: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     ui_registry: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     agents: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     },
 
     readme: {
       type: String,
-      default: ""
+      default: "",
+      maxlength: 10000
     }
   },
   {

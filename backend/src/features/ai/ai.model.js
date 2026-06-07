@@ -34,11 +34,6 @@ const aiGenerationSchema = new mongoose.Schema(
       default: "pending",
       index: true,
     },
-    generation_status: {
-      type: String,
-      enum: ["pending", "processing", "completed", "failed"],
-      default: "pending",
-    },
 
     generated_context: {
       type: mongoose.Schema.Types.ObjectId,

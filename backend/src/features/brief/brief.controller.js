@@ -180,11 +180,33 @@ export const updateBrief = async (req, res) => {
         if (ui_style !== undefined)
             brief.ui_style = ui_style;
 
-        if (answers !== undefined)
+        if (answers !== undefined) {
+            if (typeof answers === 'string') {
+                try {
+                    answers = JSON.parse(answers);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid answers format" });
+                }
+            }
+            if (typeof answers !== 'object' || answers === null) {
+                return res.status(400).json({ message: "Answers must be an object or array" });
+            }
             brief.answers = answers;
+        }
 
-        if (missing_fields !== undefined)
+        if (missing_fields !== undefined) {
+            if (typeof missing_fields === 'string') {
+                try {
+                    missing_fields = JSON.parse(missing_fields);
+                } catch (e) {
+                    return res.status(400).json({ message: "Invalid missing_fields format" });
+                }
+            }
+            if (!Array.isArray(missing_fields)) {
+                return res.status(400).json({ message: "Missing fields must be an array" });
+            }
             brief.missing_fields = missing_fields;
+        }
 
         if (is_complete !== undefined)
             brief.is_complete = is_complete;

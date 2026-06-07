@@ -12,18 +12,19 @@ const briefSchema = new mongoose.Schema(
     idea: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Idea",
-      required: true,
-      unique: true
+      required: true
     },
 
     application_type: {
       type: String,
-      default: null
+      default: null,
+      maxlength: 500
     },
 
     target_users: {
       type: String,
-      default: null
+      default: null,
+      maxlength: 500
     },
 
     platform: {
@@ -107,6 +108,8 @@ const briefSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+briefSchema.index({ idea: 1, owner: 1 }, { unique: true });
 
 const Brief = mongoose.model("Brief", briefSchema);
 
