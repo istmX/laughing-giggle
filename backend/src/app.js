@@ -12,7 +12,7 @@ import errorMiddleware from './middleware/error.middleware.js';
 
 const app = express();
 
-app.set('trust proxy', 1);
+app.set('trust proxy', process.env.TRUST_PROXY || 'loopback');
 
 app.use(express.json());
 app.use(cookieParser());
