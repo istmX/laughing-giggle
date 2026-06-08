@@ -36,7 +36,7 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
 
     // Correct SDK method for @google/genai
     const response = await client.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
@@ -79,7 +79,7 @@ export const analyzeIdea = async (userId, ideaId) => {
     idea: ideaId,
     status: 'processing',
     generation_hash: generationHash,
-    model: 'gemini-2.0-flash-lite'
+    model: 'gemini-1.5-flash'
   });
 
   const startTime = Date.now();
@@ -203,7 +203,7 @@ export const generateContext = async (userId, ideaId) => {
     const prompt = buildContextGenerationPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
@@ -290,7 +290,7 @@ export const generateTasks = async (userId, ideaId) => {
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
     const response = await client.models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
