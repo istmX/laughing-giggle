@@ -5,8 +5,6 @@ import { validateOwnership, validateId } from '../../utils/ownership.js';
 import AppError from '../../utils/AppError.js';
 
 export const createContext = async (userId, ideaId) => {
-  validateId(ideaId, 'idea id');
-  
   await validateOwnership(Idea, ideaId, userId, 'Idea');
 
   return await Context.create({
@@ -17,16 +15,15 @@ export const createContext = async (userId, ideaId) => {
 
 export const getContexts = async (userId) => {
   return await Context.find({ owner: userId })
-    .populate('idea')
-    .populate('project')
+    .populate('idea', 'prompt')
+    .populate('project', 'project_title')
     .sort({ createdAt: -1 });
 };
 
 export const getContextById = async (userId, contextId) => {
-  validateId(contextId, 'context id');
   const context = await Context.findOne({ _id: contextId, owner: userId })
-    .populate('idea')
-    .populate('project');
+    .populate('idea', 'prompt')
+    .populate('project', 'project_title');
 
   if (!context) {
     throw new AppError('Context not found', 404);

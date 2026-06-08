@@ -4,8 +4,6 @@ import { validateOwnership, validateId } from '../../utils/ownership.js';
 import AppError from '../../utils/AppError.js';
 
 export const createBrief = async (userId, ideaId) => {
-  validateId(ideaId, 'idea id');
-  
   const existingIdea = await validateOwnership(Idea, ideaId, userId, 'Idea');
 
   const existingBrief = await Brief.findOne({
