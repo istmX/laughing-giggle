@@ -43,7 +43,8 @@ Use this data to verify the API endpoints defined in `API_DOCUMENTATION.md`.
 {
   "title": "Setup database",
   "description": "Configure MongoDB connection",
-  "priority": "high"
+  "priority": "high",
+  "kanban_status": "todo"
 }
 ```
 
@@ -66,24 +67,46 @@ This workflow must be executed in order.
 
 ### Step 3: Fetch Questions
 `GET /api/brief/<BRIEF_ID>`
-*Check the `questions` array in the response.*
+*Check the `questions` array in the response to verify status is "pending".*
 
-### Step 4: Submit Answers
+### Step 4: Submit Answers (Mapping Verification)
 `POST /api/ai/answers/<IDEA_ID>`
 ```json
 {
   "answers": {
+    "application_type": "web",
     "target_audience": "Home cooks",
     "platform": "web"
   }
 }
 ```
-*Note: Make sure the `key` matches the one generated in the previous step.*
+*Verification Checklist:*
+1.  *Verify the response `brief` object has `application_type: "web"`, `target_users: "Home cooks"`, and `platform: "web"` (fields are now mapped from answers).*
+2.  *Check the `questions` array in the response; verify the corresponding items now have `status: "answered"` and include the `answer` and `answeredAt` timestamps.*
 
 ### Step 5: Generate Context
 `POST /api/ai/context/<IDEA_ID>`
-*Result: Generates `project_overview`, `architecture`, `mermaid_diagram`, etc.*
+*Result: Generates `project_overview`, `architecture`, `mermaid_diagram`, etc. Persisted to `Context` model.*
 
 ### Step 6: Generate Tasks
 `POST /api/ai/tasks/<IDEA_ID>`
 *Result: Automatically creates a `Project` and populates it with AI-generated `Tasks`.*
+
+
+
+ {
+    2     "application_type": "web",
+    3     "target_users": "Home cooks",
+    4     "platform": "web",
+    5     "frontend_stack": "ai-decide",
+    6     "backend_stack": "ai-decide",
+    7     "database": "ai-decide",
+    8     "ui_style": "ai-decide",
+    9     "is_complete": false,
+   10     "generated_by_ai": false,
+   11     "answers": {
+   12         "target_audience": "Home cooks",
+   13         "platform": "web",
+   14         "application_type": "web"
+   15     }
+   16 }
