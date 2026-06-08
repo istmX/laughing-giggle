@@ -35,11 +35,11 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
-    const text = response.text();
+    const text = response.text;
     const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -78,7 +78,7 @@ export const analyzeIdea = async (userId, ideaId) => {
     idea: ideaId,
     status: 'processing',
     generation_hash: generationHash,
-    model: 'gemini-2.5-flash'
+    model: 'gemini-1.5-flash'
   });
 
   const startTime = Date.now();
@@ -202,11 +202,11 @@ export const generateContext = async (userId, ideaId) => {
     const prompt = buildContextGenerationPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
-    const text = response.text();
+    const text = response.text;
     const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -289,11 +289,11 @@ export const generateTasks = async (userId, ideaId) => {
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
     const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-1.5-flash",
       contents: prompt
     });
     
-    const text = response.text();
+    const text = response.text;
     const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
