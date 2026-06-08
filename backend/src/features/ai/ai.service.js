@@ -215,15 +215,13 @@ export const generateContext = async (userId, ideaId) => {
     throw new AppError("Brief not found", 404);
   }
 
-  // Diagnostic logging
-  console.log("DEBUG: generateContext completion check");
-  console.log("DEBUG: Brief ID:", brief._id);
-  console.log("DEBUG: Brief is_complete:", brief.is_complete);
-  console.log("DEBUG: Brief required fields check:", {
-      application_type: brief.application_type,
-      target_users: brief.target_users,
-      is_app_type_valid: brief.application_type !== null && brief.application_type !== undefined && brief.application_type !== '',
-      is_target_users_valid: brief.target_users !== null && brief.target_users !== undefined && brief.target_users !== ''
+  // Deep inspection
+  console.log("DEBUG: Full Brief Object Fields:", {
+    _id: brief._id,
+    is_complete: brief.is_complete,
+    application_type: brief.application_type,
+    target_users: brief.target_users,
+    keys: Object.keys(brief.toObject())
   });
 
   if (!brief.is_complete) {
