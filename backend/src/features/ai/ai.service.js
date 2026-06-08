@@ -215,17 +215,19 @@ export const generateContext = async (userId, ideaId) => {
     throw new AppError("Brief not found", 404);
   }
 
-  // Deep inspection
-  console.log("DEBUG: Full Brief Object Fields:", {
-    _id: brief._id,
-    is_complete: brief.is_complete,
-    application_type: brief.application_type,
-    target_users: brief.target_users,
-    keys: Object.keys(brief.toObject())
-  });
+  // Fields that MUST be filled by user
+  const requiredByUser = ['application_type', 'target_users'];
+  
+  // A brief is complete if mandatory fields are not null, undefined, or empty.
+  // Fields defaulted to 'ai-decide' are considered acceptable for context generation.
+  const isComplete = requiredByUser.every(field => 
+    brief[field] !== null && 
+    brief[field] !== undefined && 
+    brief[field] !== ''
+  );
 
-  if (!brief.is_complete) {
-    throw new AppError("Brief is not complete. Please answer all questions first.", 400);
+  if (!isComplete) {
+    throw new AppError("Brief is not complete. Please answer all mandatory questions first.", 400);
   }
 
   let context = await Context.findOne({ idea: ideaId, owner: userId });
