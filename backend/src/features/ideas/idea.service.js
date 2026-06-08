@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Idea from './idea.model.js';
 import Brief from '../brief/brief.model.js';
 import Context from '../context/context.model.js';
@@ -28,23 +29,28 @@ export const getIdeaById = async (userId, ideaId) => {
 export const updateIdea = async (userId, ideaId, updateData) => {
   const idea = await validateOwnership(Idea, ideaId, userId, 'Idea');
 
-  const { prompt, status } = updateData;
-  if (prompt) idea.prompt = prompt;
-  if (status) idea.status = status;
+  if (updateData.prompt !== undefined) idea.prompt = updateData.prompt;
+  if (updateData.status !== undefined) idea.status = updateData.status;
 
   await idea.save();
   return idea;
 };
 
 export const deleteIdea = async (userId, ideaId) => {
-  const idea = await validateOwnership(Idea, ideaId, userId, 'Idea');
+  await validateOwnership(Idea, ideaId, userId, 'Idea');
   
-  /* Cascade deletion */
-  await Promise.all([
-    Idea.findByIdAndDelete(ideaId),
-    Brief.deleteMany({ idea: ideaId }),
-    Context.deleteMany({ idea: ideaId })
-  ]);
-
-  return idea;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    await Brief.deleteMany({ idea: ideaId }, { session });
+    await Context.deleteMany({ idea: ideaId }, { session });
+    await Idea.findByIdAndDelete(ideaId, { session });
+    await session.commitTransaction();
+    return { deleted: true };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
