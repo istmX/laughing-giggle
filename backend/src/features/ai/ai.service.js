@@ -39,11 +39,6 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
       contents: prompt
     });
     
-    // DEBUG: Inspect response
-    console.log("DEBUG: Response Type:", typeof response);
-    console.log("DEBUG: Response Keys:", Object.keys(response));
-    console.log("DEBUG: Response Text property:", response.text);
-
     const text = response.text;
     const usage = response.usageMetadata;
 
@@ -155,6 +150,23 @@ export const submitAnswers = async (userId, ideaId, answers) => {
     ...brief.answers,
     ...answers,
   };
+
+  // Map answers to schema fields
+  const fieldMapping = {
+    application_type: 'application_type',
+    target_audience: 'target_users',
+    platform: 'platform',
+    frontend_stack: 'frontend_stack',
+    backend_stack: 'backend_stack',
+    database: 'database',
+    ui_style: 'ui_style'
+  };
+
+  Object.keys(answers).forEach(key => {
+    if (fieldMapping[key] && brief.schema.paths[fieldMapping[key]]) {
+      brief[fieldMapping[key]] = answers[key];
+    }
+  });
 
   /* Update status and answer for questions that have been answered */
   if (brief.questions && brief.questions.length > 0) {
