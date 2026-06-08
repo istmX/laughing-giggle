@@ -142,6 +142,7 @@ export const submitAnswers = async (userId, ideaId, answers) => {
     ...brief.answers,
     ...answers,
   };
+  brief.markModified('answers');
 
   // Map answers to schema fields
   const fieldMapping = {
@@ -188,6 +189,7 @@ export const submitAnswers = async (userId, ideaId, answers) => {
   const isComplete = requiredByUser.every(field => brief[field] !== null && brief[field] !== undefined && brief[field] !== '');
   
   brief.is_complete = isComplete;
+  brief.markModified('is_complete');
   await brief.save();
 
   return brief;
