@@ -15,7 +15,7 @@ export const initSocket = (server) => {
     }
   });
 
-  // JWT Authentication Middleware
+  /* *** JWT Authentication Middleware *** */
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
@@ -32,7 +32,7 @@ export const initSocket = (server) => {
   io.on('connection', (socket) => {
     console.log('Client connected:', socket.id, 'User:', socket.userId);
     
-    // Automatically join room based on authenticated userId
+    /* *** Automatically join room based on authenticated userId *** */
     socket.join(socket.userId);
 
     socket.on('disconnect', () => {

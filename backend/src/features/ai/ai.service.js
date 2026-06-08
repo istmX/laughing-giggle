@@ -21,12 +21,16 @@ let aiClient = null;
 const getAIClient = () => {
   if (!aiClient) {
     if (!process.env.GEMINI_API_KEY) {
-      throw new Error("GEMINI_API_KEY is not set");
+      throw new AppError("GEMINI_API_KEY is not set", 500);
     }
-    // Correct initialization for @google/genai
     aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
   return aiClient;
+};
+
+export const isBriefComplete = (brief) => {
+  const requiredByUser = ['application_type', 'target_users'];
+  return requiredByUser.every(field => brief[field] !== null && brief[field] !== undefined && brief[field] !== '');
 };
 
 export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
@@ -49,7 +53,6 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
 
     const parsedData = JSON.parse(jsonMatch[0]);
     
-    // Store token usage in AIGeneration tracking
     if (tracking && usage) {
       tracking.prompt_tokens = usage.promptTokenCount;
       tracking.completion_tokens = usage.candidatesTokenCount;
@@ -89,16 +92,17 @@ export const analyzeIdea = async (userId, ideaId) => {
     brief.is_complete = result.is_complete;
     brief.missing_fields = result.missing_fields;
 
-    /* Overwrite with new questions from AI */
-    brief.questions = result.questions.map((q) => ({
-      key: q.key,
-      question: q.question,
-      status: "pending",
-    }));
+    /* *** Smart merge: preserve status of existing questions *** */
+    const existingQuestions = new Map(brief.questions.map(q => [q.key, q]));
+    brief.questions = result.questions.map((q) => {
+      const existing = existingQuestions.get(q.key);
+      return existing ? 
+        { ...existing.toObject(), question: q.question } : 
+        { key: q.key, question: q.question, status: "pending" };
+    });
 
     await brief.save();
 
-    /* Update tracking */
     tracking.status = 'completed';
     tracking.generation_time_ms = Date.now() - startTime;
     await tracking.save();
@@ -144,7 +148,6 @@ export const submitAnswers = async (userId, ideaId, answers) => {
   };
   brief.markModified('answers');
 
-  // Map answers to schema fields
   const fieldMapping = {
     application_type: 'application_type',
     target_audience: 'target_users',
@@ -161,7 +164,6 @@ export const submitAnswers = async (userId, ideaId, answers) => {
     }
   });
 
-  /* Update status and answer for questions that have been answered */
   if (brief.questions && brief.questions.length > 0) {
     const answeredKeys = Object.keys(answers);
     brief.questions = brief.questions.map((q) => {
@@ -177,18 +179,7 @@ export const submitAnswers = async (userId, ideaId, answers) => {
     });
   }
 
-  await brief.save();
-
-  // Check completion status
-  // Fields that MUST be filled by user
-  const requiredByUser = [
-    'application_type',
-    'target_users'
-  ];
-  
-  const isComplete = requiredByUser.every(field => brief[field] !== null && brief[field] !== undefined && brief[field] !== '');
-  
-  brief.is_complete = isComplete;
+  brief.is_complete = isBriefComplete(brief);
   brief.markModified('is_complete');
   await brief.save();
 
@@ -207,7 +198,6 @@ export const getIdeaAndBrief = async (userId, ideaId) => {
 };
 
 export const generateContext = async (userId, ideaId) => {
-  // Always fetch a fresh brief to ensure is_complete is up-to-date
   const idea = await validateOwnership(Idea, ideaId, userId, "Idea");
   const brief = await Brief.findOne({ idea: ideaId, owner: userId });
 
@@ -215,18 +205,7 @@ export const generateContext = async (userId, ideaId) => {
     throw new AppError("Brief not found", 404);
   }
 
-  // Fields that MUST be filled by user
-  const requiredByUser = ['application_type', 'target_users'];
-  
-  // A brief is complete if mandatory fields are not null, undefined, or empty.
-  // Fields defaulted to 'ai-decide' are considered acceptable for context generation.
-  const isComplete = requiredByUser.every(field => 
-    brief[field] !== null && 
-    brief[field] !== undefined && 
-    brief[field] !== ''
-  );
-
-  if (!isComplete) {
+  if (!isBriefComplete(brief)) {
     throw new AppError("Brief is not complete. Please answer all mandatory questions first.", 400);
   }
 
@@ -312,13 +291,13 @@ export const generateTasks = async (userId, ideaId) => {
     throw new AppError("Context must be generated before tasks.", 400);
   }
 
-  /* Find or create project */
-  let project = await Project.findOne({ owner: userId, project_title: idea.prompt.substring(0, 100) });
+  const safeTitle = (idea && idea.prompt) ? idea.prompt.substring(0, 100) : 'New Project';
+  let project = await Project.findOne({ owner: userId, project_title: safeTitle });
   if (!project) {
     project = await Project.create({
       owner: userId,
-      project_title: idea.prompt.substring(0, 100),
-      project_description: idea.prompt
+      project_title: safeTitle,
+      project_description: idea.prompt || ''
     });
   }
 
@@ -352,15 +331,16 @@ export const generateTasks = async (userId, ideaId) => {
 
     if (!data.tasks || !Array.isArray(data.tasks)) throw new Error("No tasks generated");
 
-    /* Remove existing tasks */
-    await Task.deleteMany({ project: project._id });
+    /* Remove existing tasks - Scoped to AI generated ones */
+    await Task.deleteMany({ project: project._id, ai_generated: true });
 
     const createdTasks = await Task.insertMany(
       data.tasks.map(t => ({
         project: project._id,
         title: t.title,
         description: t.description,
-        priority: t.priority
+        priority: t.priority,
+        ai_generated: true
       }))
     );
 
