@@ -3,11 +3,13 @@ import {buildIdeaAnalysisPrompt} from './ai.prompt.js';
 import {IdeaAnalysisSchema} from './ai.validator.js';
 
 
-const ai = GoogleGenAI({
-    apikey:process.env.GEMINI_API_KEY
-});
+const getAI = () => {
+  return new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+  });
+};
 
-
+const ai = getAI();
 
 export const analyzeIdeaWithAI = async (
   idea,
@@ -21,9 +23,10 @@ export const analyzeIdeaWithAI = async (
 
     const response =
       await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
         contents: prompt
       });
+
 
     const text =
       response.text

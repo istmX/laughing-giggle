@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Idea from "../ideas/idea.model.js";
 import Brief from "../brief/brief.model.js";
+import { analyzeIdeaWithAI } from "./ai.service.js";
 
 const getIdeaAndBrief = async (ideaId, userId) => {
   if (!mongoose.Types.ObjectId.isValid(ideaId)) {

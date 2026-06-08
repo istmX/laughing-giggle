@@ -6,6 +6,7 @@ import TaskRouter from './features/tasks/task.routes.js';
 import IdeaRouter from './features/ideas/idea.routes.js';
 import ContextRouter from './features/context/context.routes.js';
 import BriefRouter from './features/brief/brief.routes.js';
+import AIRouter from './features/ai/ai.routes.js';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(cookieParser());
     * Idea routes
     * Context routes
     * Brief routes
+    * AI routes
 **/
 app.use('/api/auth',AuthRouter)
 app.use('/api/projects', ProjectRouter);
@@ -29,6 +31,7 @@ app.use('/api/tasks', TaskRouter);
 app.use('/api/ideas', IdeaRouter);
 app.use('/api/context', ContextRouter);
 app.use('/api/brief', BriefRouter);
+app.use('/api/ai', AIRouter)
 
 
 
