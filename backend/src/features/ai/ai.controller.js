@@ -1,70 +1,21 @@
-import mongoose from "mongoose";
+import * as aiService from "./ai.service.js";
 
-import Idea from "../ideas/idea.model.js";
-import Brief from "../brief/brief.model.js";
-import { analyzeIdeaWithAI } from "./ai.service.js";
-
-const getIdeaAndBrief = async (ideaId, userId) => {
-  if (!mongoose.Types.ObjectId.isValid(ideaId)) {
-    return { error: { status: 400, message: "Invalid idea id" } };
-  }
-
-  const idea = await Idea.findOne({
-    _id: ideaId,
-    owner: userId,
-  });
-
-  if (!idea) {
-    return { error: { status: 404, message: "Idea not found" } };
-  }
-
-  const brief = await Brief.findOne({
-    idea: idea._id,
-    owner: userId,
-  });
-
-  if (!brief) {
-    return { error: { status: 404, message: "Brief not found" } };
-  }
-
-  return { idea, brief };
-};
-
-export const analyzeIdea = async (req, res) => {
+export const analyzeIdea = async (req, res, next) => {
   try {
-    const { ideaId } = req.params;
-    const { idea, brief, error } = await getIdeaAndBrief(ideaId, req.user._id);
+    const result = await aiService.analyzeIdea(req.user._id, req.params.ideaId);
 
-    if (error) {
-      return res.status(error.status).json({ message: error.message });
-    }
-const result =
-  await analyzeIdeaWithAI(
-    idea,
-    brief
-  );
-
-return res.status(200).json({
-  success: true,
-  data: result
-});
-  } catch (error) {
-    console.error("Error analyzing idea:", error);
-
-    return res.status(500).json({
-      message: "Server error",
+    return res.status(200).json({
+      success: true,
+      data: result,
     });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const generateQuestions = async (req, res) => {
+export const generateQuestions = async (req, res, next) => {
   try {
-    const { ideaId } = req.params;
-    const { idea, brief, error } = await getIdeaAndBrief(ideaId, req.user._id);
-
-    if (error) {
-      return res.status(error.status).json({ message: error.message });
-    }
+    const { idea, brief } = await aiService.getIdeaAndBrief(req.user._id, req.params.ideaId);
 
     return res.status(200).json({
       success: true,
@@ -73,43 +24,14 @@ export const generateQuestions = async (req, res) => {
       message: "Ready for question generation",
     });
   } catch (error) {
-    console.error("Error generating questions:", error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    next(error);
   }
 };
 
 
-export const submitAnswers = async (req, res) => {
+export const submitAnswers = async (req, res, next) => {
   try {
-    const { ideaId } = req.params;
-    const { answers } = req.body;
-
-    const { idea, brief, error } = await getIdeaAndBrief(
-      ideaId,
-      req.user._id
-    );
-
-    if (error) {
-      return res.status(error.status).json({
-        message: error.message,
-      });
-    }
-
-    if (!answers || typeof answers !== "object") {
-      return res.status(400).json({
-        message: "Answers are required",
-      });
-    }
-
-    brief.answers = {
-      ...brief.answers,
-      ...answers,
-    };
-
-    await brief.save();
+    const brief = await aiService.submitAnswers(req.user._id, req.params.ideaId, req.body.answers);
 
     return res.status(200).json({
       success: true,
@@ -117,48 +39,36 @@ export const submitAnswers = async (req, res) => {
       brief,
     });
   } catch (error) {
-    console.error("Error saving answers:", error);
-
-    return res.status(500).json({
-      message: "Server error",
-    });
+    next(error);
   }
 };
 
 
 
-export const generateContext = async (req, res) => {
+export const generateContext = async (req, res, next) => {
   try {
-    const { ideaId } = req.params;
-
-    const { idea, brief, error } = await getIdeaAndBrief(
-      ideaId,
-      req.user._id
-    );
-
-    if (error) {
-      return res.status(error.status).json({
-        message: error.message,
-      });
-    }
-
-    if (!brief.is_complete) {
-      return res.status(400).json({
-        message: "Brief is not complete",
-      });
-    }
+    const context = await aiService.generateContext(req.user._id, req.params.ideaId);
 
     return res.status(200).json({
       success: true,
-      message: "Ready for context generation",
-      idea,
-      brief,
+      message: "Context generated successfully",
+      data: context,
     });
   } catch (error) {
-    console.error("Error generating context:", error);
+    next(error);
+  }
+};
 
-    return res.status(500).json({
-      message: "Server error",
+export const generateTasks = async (req, res, next) => {
+  try {
+    const result = await aiService.generateTasks(req.user._id, req.params.ideaId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Tasks generated successfully",
+      data: result,
     });
+  } catch (error) {
+    next(error);
   }
 };

@@ -40,6 +40,12 @@ const contextSchema = new mongoose.Schema(
       maxlength: 10000,
     },
 
+    mermaid_diagram: {
+      type: String,
+      default: "",
+      maxlength: 10000,
+    },
+
     code_standards: {
       type: String,
       default: "",

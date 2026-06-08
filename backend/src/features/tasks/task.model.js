@@ -24,6 +24,11 @@ const taskSchema = new mongoose.Schema({
         enum:["pending","in_progress","completed"],
         default:"pending"
     },
+    kanban_status: {
+        type: String,
+        enum: ["todo", "in_progress", "done"],
+        default: "todo"
+    },
     priority:{
         type:String,
         enum:["low","medium","high"],

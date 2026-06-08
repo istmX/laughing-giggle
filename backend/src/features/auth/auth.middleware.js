@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import Blacklist from './blacklist.model.js';
 import User from './auth.model.js';
 
-// Helper to extract and verify token and get user
+/* Helper to extract and verify token and get user */
 const verifyTokenAndGetUser = async (req) => {
     let token = req.cookies.token;
 
@@ -18,7 +18,7 @@ const verifyTokenAndGetUser = async (req) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Check if token is blacklisted (using hash)
+    /* Check if token is blacklisted (using hash) */
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const isBlacklisted = await Blacklist.findOne({ tokenHash });
     if (isBlacklisted) return null;
@@ -48,7 +48,7 @@ export const authMiddleware = async (req, res, next) => {
 export const isLoggedIn = async (req, res, next) => {
     try {
         const user = await verifyTokenAndGetUser(req);
-        req.user = user; // Will be null if not logged in
+        req.user = user; /* Will be null if not logged in */
         next();
     } catch (error) {
         console.error('isLoggedIn middleware error:', error);

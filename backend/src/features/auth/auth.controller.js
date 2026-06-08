@@ -46,10 +46,10 @@ export const registerUser = async (req,res)=> {
     })
     await newUser.save();
 
-    //jwt 
+    /* */jwt 
     const token = jwt.sign({email, id: newUser._id},process.env.JWT_SECRET,{expiresIn:'7d'})
 
-    //cookies
+    /* */cookies
     res.cookie('token',token,{
         httpOnly:true,
         secure:process.env.NODE_ENV === 'production',
@@ -102,10 +102,10 @@ export const loginUser = async (req,res)=>{
             return res.status(400).json({message:"Invalid email or password"});
         }
 
-        //jwt 
+        /* */jwt 
         const token = jwt.sign({email, id: user._id},process.env.JWT_SECRET,{expiresIn:'7d'})
 
-        //cookies
+        /* */cookies
         res.cookie('token',token,{
             httpOnly:true,
             secure:process.env.NODE_ENV === 'production',
