@@ -35,7 +35,7 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       contents: prompt
     });
     
@@ -78,7 +78,7 @@ export const analyzeIdea = async (userId, ideaId) => {
     idea: ideaId,
     status: 'processing',
     generation_hash: generationHash,
-    model: 'gemini-1.5-flash'
+    model: 'gemini-1.5-flash-latest'
   });
 
   const startTime = Date.now();
@@ -202,7 +202,7 @@ export const generateContext = async (userId, ideaId) => {
     const prompt = buildContextGenerationPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       contents: prompt
     });
     
@@ -289,7 +289,7 @@ export const generateTasks = async (userId, ideaId) => {
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash",
+      model: "gemini-1.5-flash-latest",
       contents: prompt
     });
     
