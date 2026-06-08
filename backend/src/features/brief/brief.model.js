@@ -113,6 +113,8 @@ const briefSchema = new mongoose.Schema(
           enum: ["pending", "answered"],
           default: "pending",
         },
+        answer: { type: String, default: null },
+        answeredAt: { type: Date, default: null },
         createdAt: { type: Date, default: Date.now },
       },
     ],

@@ -29,7 +29,7 @@ const getAIModel = () => {
   return aiModel;
 };
 
-export const analyzeIdeaWithAI = async (idea, brief) => {
+export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
   try {
     const model = getAIModel();
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
@@ -37,6 +37,7 @@ export const analyzeIdeaWithAI = async (idea, brief) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+    const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -44,6 +45,14 @@ export const analyzeIdeaWithAI = async (idea, brief) => {
     }
 
     const parsedData = JSON.parse(jsonMatch[0]);
+    
+    // Store token usage in AIGeneration tracking
+    if (tracking && usage) {
+      tracking.prompt_tokens = usage.promptTokenCount;
+      tracking.completion_tokens = usage.candidatesTokenCount;
+      tracking.total_tokens = usage.totalTokenCount;
+    }
+
     return IdeaAnalysisSchema.parse(parsedData);
   } catch (error) {
     console.error("AI analysis failed:", error);
@@ -72,7 +81,7 @@ export const analyzeIdea = async (userId, ideaId) => {
   const startTime = Date.now();
 
   try {
-    const result = await analyzeIdeaWithAI(idea, brief);
+    const result = await analyzeIdeaWithAI(idea, brief, tracking);
 
     brief.is_complete = result.is_complete;
     brief.missing_fields = result.missing_fields;
@@ -131,12 +140,17 @@ export const submitAnswers = async (userId, ideaId, answers) => {
     ...answers,
   };
 
-  /* Update status of questions that have been answered */
+  /* Update status and answer for questions that have been answered */
   if (brief.questions && brief.questions.length > 0) {
     const answeredKeys = Object.keys(answers);
     brief.questions = brief.questions.map((q) => {
       if (answeredKeys.includes(q.key)) {
-        return { ...q.toObject(), status: "answered" };
+        return { 
+          ...q.toObject(), 
+          status: "answered",
+          answer: answers[q.key],
+          answeredAt: new Date()
+        };
       }
       return q;
     });
@@ -185,7 +199,9 @@ export const generateContext = async (userId, ideaId) => {
     const prompt = buildContextGenerationPrompt(idea, brief);
 
     const result = await model.generateContent(prompt);
-    const text = (await result.response).text();
+    const response = await result.response;
+    const text = response.text();
+    const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Invalid AI response");
@@ -204,6 +220,9 @@ export const generateContext = async (userId, ideaId) => {
     tracking.status = 'completed';
     tracking.generated_context = context._id;
     tracking.generation_time_ms = Date.now() - startTime;
+    tracking.prompt_tokens = usage.promptTokenCount;
+    tracking.completion_tokens = usage.candidatesTokenCount;
+    tracking.total_tokens = usage.totalTokenCount;
     await tracking.save();
 
     emitToUser(userId, 'ai_generation_completed', {
@@ -264,7 +283,9 @@ export const generateTasks = async (userId, ideaId) => {
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
     const result = await model.generateContent(prompt);
-    const text = (await result.response).text();
+    const response = await result.response;
+    const text = response.text();
+    const usage = response.usageMetadata;
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Invalid AI response");
@@ -272,6 +293,9 @@ export const generateTasks = async (userId, ideaId) => {
     const data = JSON.parse(jsonMatch[0]);
 
     if (!data.tasks || !Array.isArray(data.tasks)) throw new Error("No tasks generated");
+
+    /* Remove existing tasks */
+    await Task.deleteMany({ project: project._id });
 
     const createdTasks = await Task.insertMany(
       data.tasks.map(t => ({
@@ -285,6 +309,9 @@ export const generateTasks = async (userId, ideaId) => {
     tracking.status = 'completed';
     tracking.generated_project = project._id;
     tracking.generation_time_ms = Date.now() - startTime;
+    tracking.prompt_tokens = usage.promptTokenCount;
+    tracking.completion_tokens = usage.candidatesTokenCount;
+    tracking.total_tokens = usage.totalTokenCount;
     await tracking.save();
 
     emitToUser(userId, 'ai_generation_completed', {
