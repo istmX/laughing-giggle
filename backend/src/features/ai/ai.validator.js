@@ -5,8 +5,11 @@ export const IdeaAnalysisSchema = z.object({
   missing_fields: z.array(z.string()),
   questions: z.array(
     z.object({
-      key: z.string(),
-      question: z.string()
+      key: z.string().min(1),
+      question: z.string().min(1)
     })
   )
+}).refine(data => data.is_complete || data.questions.length > 0, {
+  message: "If the idea is not complete, questions must be provided.",
+  path: ["questions"]
 });

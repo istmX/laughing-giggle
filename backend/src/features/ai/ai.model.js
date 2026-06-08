@@ -48,7 +48,7 @@ const aiGenerationSchema = new mongoose.Schema(
     },
     model: {
       type: String,
-      default: "gemini-2.5-flash",
+      default: "pending",
     },
 
     generation_hash: {

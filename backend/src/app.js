@@ -6,7 +6,7 @@ import TaskRouter from './features/tasks/task.routes.js';
 import IdeaRouter from './features/ideas/idea.routes.js';
 import ContextRouter from './features/context/context.routes.js';
 import BriefRouter from './features/brief/brief.routes.js';
-import AIRouter from './features/ai/ai.routes.js';
+import AIRouter from './features/ai/routes/ai.routes.js';
 import AppError from './utils/AppError.js';
 import errorMiddleware from './middleware/error.middleware.js';
 
