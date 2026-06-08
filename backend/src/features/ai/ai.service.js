@@ -199,6 +199,17 @@ export const submitAnswers = async (userId, ideaId, answers) => {
   
   const isComplete = requiredFields.every(field => brief[field] && brief[field] !== 'ai-decide');
   
+  console.log("DEBUG: Brief Fields:", { 
+    application_type: brief.application_type,
+    target_users: brief.target_users,
+    platform: brief.platform,
+    frontend_stack: brief.frontend_stack,
+    backend_stack: brief.backend_stack,
+    database: brief.database,
+    ui_style: brief.ui_style
+  });
+  console.log("DEBUG: Is Complete Calculated:", isComplete);
+  
   if (brief.is_complete !== isComplete) {
     brief.is_complete = isComplete;
     await brief.save();
