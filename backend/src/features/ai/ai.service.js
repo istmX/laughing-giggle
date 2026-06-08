@@ -16,26 +16,30 @@ import { validateOwnership } from "../../utils/ownership.js";
 import AppError from "../../utils/AppError.js";
 import { emitToUser } from "../../config/socket.js";
 
-let aiModel = null;
+let aiClient = null;
 
-const getAIModel = () => {
-  if (!aiModel) {
+const getAIClient = () => {
+  if (!aiClient) {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("GEMINI_API_KEY is not set");
     }
-    const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
-    aiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Correct initialization for @google/genai
+    aiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return aiModel;
+  return aiClient;
 };
 
 export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
   try {
-    const model = getAIModel();
+    const client = getAIClient();
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    // Correct SDK method for @google/genai
+    const response = await client.models.generateContent({
+      model: "gemini-2.0-flash-lite",
+      contents: prompt
+    });
+    
     const text = response.text();
     const usage = response.usageMetadata;
 
@@ -75,7 +79,7 @@ export const analyzeIdea = async (userId, ideaId) => {
     idea: ideaId,
     status: 'processing',
     generation_hash: generationHash,
-    model: 'gemini-1.5-flash'
+    model: 'gemini-2.0-flash-lite'
   });
 
   const startTime = Date.now();
@@ -195,11 +199,14 @@ export const generateContext = async (userId, ideaId) => {
   const startTime = Date.now();
 
   try {
-    const model = getAIModel();
+    const client = getAIClient();
     const prompt = buildContextGenerationPrompt(idea, brief);
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = await client.models.generateContent({
+      model: "gemini-2.0-flash-lite",
+      contents: prompt
+    });
+    
     const text = response.text();
     const usage = response.usageMetadata;
 
@@ -279,11 +286,14 @@ export const generateTasks = async (userId, ideaId) => {
   const startTime = Date.now();
 
   try {
-    const model = getAIModel();
+    const client = getAIClient();
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = await client.models.generateContent({
+      model: "gemini-2.0-flash-lite",
+      contents: prompt
+    });
+    
     const text = response.text();
     const usage = response.usageMetadata;
 
