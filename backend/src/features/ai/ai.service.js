@@ -63,14 +63,6 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
   }
 };
 
-// ... (rest of the functions remain the same, but let's update all model strings)
-// (Wait, I need to provide the full file or just update the others?)
-// (I will update all model strings to gemini-2.5-flash and the text access)
-// (Actually, just write the whole file to be safe.)
-// (I will continue from here in the same file to keep consistency.)
-// (Wait, the instructions say "write the complete content".)
-// (I'll do that.)
-
 export const analyzeIdea = async (userId, ideaId) => {
   const idea = await validateOwnership(Idea, ideaId, userId, "Idea");
   const brief = await Brief.findOne({ idea: ideaId, owner: userId });
@@ -226,7 +218,7 @@ export const generateContext = async (userId, ideaId) => {
   if (!brief.is_complete) {
     throw new AppError("Brief is not complete. Please answer all questions first.", 400);
   }
-...
+
   let context = await Context.findOne({ idea: ideaId, owner: userId });
   if (!context) {
     context = await Context.create({ owner: userId, idea: ideaId });
