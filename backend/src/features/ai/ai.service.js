@@ -215,12 +215,18 @@ export const getIdeaAndBrief = async (userId, ideaId) => {
 };
 
 export const generateContext = async (userId, ideaId) => {
-  const { idea, brief } = await getIdeaAndBrief(userId, ideaId);
+  // Always fetch a fresh brief to ensure is_complete is up-to-date
+  const idea = await validateOwnership(Idea, ideaId, userId, "Idea");
+  const brief = await Brief.findOne({ idea: ideaId, owner: userId });
+
+  if (!brief) {
+    throw new AppError("Brief not found", 404);
+  }
 
   if (!brief.is_complete) {
     throw new AppError("Brief is not complete. Please answer all questions first.", 400);
   }
-
+...
   let context = await Context.findOne({ idea: ideaId, owner: userId });
   if (!context) {
     context = await Context.create({ owner: userId, idea: ideaId });
