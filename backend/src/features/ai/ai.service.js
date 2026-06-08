@@ -34,8 +34,6 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
     const client = getAIClient();
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
 
-    // Using gemini-1.5-flash as the stable available model.
-    // gemini-2.5-flash is not currently available in the public API.
     const response = await client.models.generateContent({
       model: "gemini-1.5-flash",
       contents: prompt
