@@ -1,49 +1,8 @@
-import mongoose from "mongoose";
-import Brief from "./brief.model.js";
-import Idea from "../ideas/idea.model.js";
+import * as briefService from "./brief.service.js";
 
-export const createBrief = async (req, res) => {
+export const createBrief = async (req, res, next) => {
     try {
-        const { idea } = req.body;
-
-        if (!idea) {
-            return res.status(400).json({
-                message: "Idea id is required"
-            });
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(idea)) {
-            return res.status(400).json({
-                message: "Invalid idea id"
-            });
-        }
-
-        const existingIdea = await Idea.findOne({
-            _id: idea,
-            owner: req.user._id
-        });
-
-        if (!existingIdea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
-        }
-
-        const existingBrief = await Brief.findOne({
-            idea,
-            owner: req.user._id
-        });
-
-        if (existingBrief) {
-            return res.status(409).json({
-                message: "Brief already exists for this idea"
-            });
-        }
-
-        const brief = await Brief.create({
-            owner: req.user._id,
-            idea
-        });
+        const brief = await briefService.createBrief(req.user._id, req.body.idea);
 
         return res.status(201).json({
             success: true,
@@ -51,24 +10,13 @@ export const createBrief = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error creating brief:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const getBriefs = async (req, res) => {
+export const getBriefs = async (req, res, next) => {
     try {
-        const briefs = await Brief.find({
-            owner: req.user._id
-        })
-        .populate({
-            path: "idea",
-            select: "prompt createdAt"
-        })
-        .sort({ createdAt: -1 });
+        const briefs = await briefService.getBriefs(req.user._id);
 
         return res.status(200).json({
             success: true,
@@ -77,38 +25,13 @@ export const getBriefs = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error fetching briefs:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const getBriefById = async (req, res) => {
+export const getBriefById = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid brief id"
-            });
-        }
-
-        const brief = await Brief.findOne({
-            _id: id,
-            owner: req.user._id
-        })
-        .populate({
-            path: "idea",
-            select: "prompt createdAt"
-        });
-
-        if (!brief) {
-            return res.status(404).json({
-                message: "Brief not found"
-            });
-        }
+        const brief = await briefService.getBriefById(req.user._id, req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -116,105 +39,13 @@ export const getBriefById = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error fetching brief:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const updateBrief = async (req, res) => {
+export const updateBrief = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid brief id"
-            });
-        }
-
-        const brief = await Brief.findOne({
-            _id: id,
-            owner: req.user._id
-        });
-
-        if (!brief) {
-            return res.status(404).json({
-                message: "Brief not found"
-            });
-        }
-
-        const {
-            application_type,
-            target_users,
-            platform,
-            frontend_stack,
-            backend_stack,
-            database,
-            ui_style,
-            answers,
-            missing_fields,
-            is_complete,
-            generated_by_ai
-        } = req.body;
-
-        if (application_type !== undefined)
-            brief.application_type = application_type;
-
-        if (target_users !== undefined)
-            brief.target_users = target_users;
-
-        if (platform !== undefined)
-            brief.platform = platform;
-
-        if (frontend_stack !== undefined)
-            brief.frontend_stack = frontend_stack;
-
-        if (backend_stack !== undefined)
-            brief.backend_stack = backend_stack;
-
-        if (database !== undefined)
-            brief.database = database;
-
-        if (ui_style !== undefined)
-            brief.ui_style = ui_style;
-
-        if (answers !== undefined) {
-            if (typeof answers === 'string') {
-                try {
-                    answers = JSON.parse(answers);
-                } catch (e) {
-                    return res.status(400).json({ message: "Invalid answers format" });
-                }
-            }
-            if (typeof answers !== 'object' || answers === null) {
-                return res.status(400).json({ message: "Answers must be an object or array" });
-            }
-            brief.answers = answers;
-        }
-
-        if (missing_fields !== undefined) {
-            if (typeof missing_fields === 'string') {
-                try {
-                    missing_fields = JSON.parse(missing_fields);
-                } catch (e) {
-                    return res.status(400).json({ message: "Invalid missing_fields format" });
-                }
-            }
-            if (!Array.isArray(missing_fields)) {
-                return res.status(400).json({ message: "Missing fields must be an array" });
-            }
-            brief.missing_fields = missing_fields;
-        }
-
-        if (is_complete !== undefined)
-            brief.is_complete = is_complete;
-
-        if (generated_by_ai !== undefined)
-            brief.generated_by_ai = generated_by_ai;
-
-        await brief.save();
+        const brief = await briefService.updateBrief(req.user._id, req.params.id, req.body);
 
         return res.status(200).json({
             success: true,
@@ -222,34 +53,13 @@ export const updateBrief = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error updating brief:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const deleteBrief = async (req, res) => {
+export const deleteBrief = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid brief id"
-            });
-        }
-
-        const brief = await Brief.findOneAndDelete({
-            _id: id,
-            owner: req.user._id
-        });
-
-        if (!brief) {
-            return res.status(404).json({
-                message: "Brief not found"
-            });
-        }
+        await briefService.deleteBrief(req.user._id, req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -257,10 +67,6 @@ export const deleteBrief = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error deleting brief:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };

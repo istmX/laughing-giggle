@@ -102,7 +102,22 @@ const briefSchema = new mongoose.Schema(
     generated_by_ai: {
       type: Boolean,
       default: false
-    }
+    },
+
+    questions: [
+      {
+        key: { type: String, required: true },
+        question: { type: String, required: true },
+        status: {
+          type: String,
+          enum: ["pending", "answered"],
+          default: "pending",
+        },
+        answer: { type: String, default: null },
+        answeredAt: { type: Date, default: null },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true

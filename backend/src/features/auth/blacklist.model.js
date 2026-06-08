@@ -9,7 +9,7 @@ const blacklistSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now,
-        expires: 7 * 24 * 60 * 60, // 7 days - same as JWT expiry
+        expires: 7 * 24 * 60 * 60, /* 7 days - same as JWT expiry */
     },
 });
 

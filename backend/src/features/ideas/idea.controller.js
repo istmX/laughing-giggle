@@ -1,20 +1,8 @@
-import mongoose from "mongoose";
-import Idea from "./idea.model.js";
+import * as ideaService from "./idea.service.js";
 
-export const createIdea = async (req, res) => {
+export const createIdea = async (req, res, next) => {
     try {
-        const { prompt } = req.body;
-
-        if (!prompt) {
-            return res.status(400).json({
-                message: "Idea prompt is required"
-            });
-        }
-
-        const idea = await Idea.create({
-            owner: req.user._id,
-            prompt
-        });
+        const idea = await ideaService.createIdea(req.user._id, req.body);
 
         return res.status(201).json({
             success: true,
@@ -22,19 +10,13 @@ export const createIdea = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error creating idea:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const getIdeas = async (req, res) => {
+export const getIdeas = async (req, res, next) => {
     try {
-        const ideas = await Idea.find({
-            owner: req.user._id
-        }).sort({ createdAt: -1 });
+        const ideas = await ideaService.getIdeas(req.user._id);
 
         return res.status(200).json({
             success: true,
@@ -43,34 +25,13 @@ export const getIdeas = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error fetching ideas:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const getIdeaById = async (req, res) => {
+export const getIdeaById = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid idea id"
-            });
-        }
-
-        const idea = await Idea.findOne({
-            _id: id,
-            owner: req.user._id
-        });
-
-        if (!idea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
-        }
+        const idea = await ideaService.getIdeaById(req.user._id, req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -78,40 +39,13 @@ export const getIdeaById = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error fetching idea:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const updateIdea = async (req, res) => {
+export const updateIdea = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        const { prompt, status } = req.body;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid idea id"
-            });
-        }
-
-        const idea = await Idea.findOne({
-            _id: id,
-            owner: req.user._id
-        });
-
-        if (!idea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
-        }
-
-        if (prompt) idea.prompt = prompt;
-        if (status) idea.status = status;
-
-        await idea.save();
+        const idea = await ideaService.updateIdea(req.user._id, req.params.id, req.body);
 
         return res.status(200).json({
             success: true,
@@ -119,34 +53,13 @@ export const updateIdea = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error updating idea:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
 
-export const deleteIdea = async (req, res) => {
+export const deleteIdea = async (req, res, next) => {
     try {
-        const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid idea id"
-            });
-        }
-
-        const idea = await Idea.findOneAndDelete({
-            _id: id,
-            owner: req.user._id
-        });
-
-        if (!idea) {
-            return res.status(404).json({
-                message: "Idea not found"
-            });
-        }
+        await ideaService.deleteIdea(req.user._id, req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -154,10 +67,6 @@ export const deleteIdea = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error deleting idea:", error);
-
-        return res.status(500).json({
-            message: "Server error"
-        });
+        next(error);
     }
 };
