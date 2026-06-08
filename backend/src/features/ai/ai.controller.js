@@ -37,13 +37,16 @@ export const analyzeIdea = async (req, res) => {
     if (error) {
       return res.status(error.status).json({ message: error.message });
     }
+const result =
+  await analyzeIdeaWithAI(
+    idea,
+    brief
+  );
 
-    return res.status(200).json({
-      success: true,
-      message: "Ready for AI analysis",
-      idea,
-      brief,
-    });
+return res.status(200).json({
+  success: true,
+  data: result
+});
   } catch (error) {
     console.error("Error analyzing idea:", error);
 
