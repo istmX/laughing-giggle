@@ -213,6 +213,17 @@ export const generateContext = async (userId, ideaId) => {
     throw new AppError("Brief not found", 404);
   }
 
+  // Diagnostic logging
+  console.log("DEBUG: generateContext completion check");
+  console.log("DEBUG: Brief ID:", brief._id);
+  console.log("DEBUG: Brief is_complete:", brief.is_complete);
+  console.log("DEBUG: Brief required fields check:", {
+      application_type: brief.application_type,
+      target_users: brief.target_users,
+      is_app_type_valid: brief.application_type !== null && brief.application_type !== undefined && brief.application_type !== '',
+      is_target_users_valid: brief.target_users !== null && brief.target_users !== undefined && brief.target_users !== ''
+  });
+
   if (!brief.is_complete) {
     throw new AppError("Brief is not complete. Please answer all questions first.", 400);
   }
