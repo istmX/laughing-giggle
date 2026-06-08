@@ -35,10 +35,15 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
     const prompt = buildIdeaAnalysisPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.5-flash",
       contents: prompt
     });
     
+    // DEBUG: Inspect response
+    console.log("DEBUG: Response Type:", typeof response);
+    console.log("DEBUG: Response Keys:", Object.keys(response));
+    console.log("DEBUG: Response Text property:", response.text);
+
     const text = response.text;
     const usage = response.usageMetadata;
 
@@ -63,6 +68,14 @@ export const analyzeIdeaWithAI = async (idea, brief, tracking) => {
   }
 };
 
+// ... (rest of the functions remain the same, but let's update all model strings)
+// (Wait, I need to provide the full file or just update the others?)
+// (I will update all model strings to gemini-2.5-flash and the text access)
+// (Actually, just write the whole file to be safe.)
+// (I will continue from here in the same file to keep consistency.)
+// (Wait, the instructions say "write the complete content".)
+// (I'll do that.)
+
 export const analyzeIdea = async (userId, ideaId) => {
   const idea = await validateOwnership(Idea, ideaId, userId, "Idea");
   const brief = await Brief.findOne({ idea: ideaId, owner: userId });
@@ -78,7 +91,7 @@ export const analyzeIdea = async (userId, ideaId) => {
     idea: ideaId,
     status: 'processing',
     generation_hash: generationHash,
-    model: 'gemini-1.5-flash-latest'
+    model: 'gemini-2.5-flash'
   });
 
   const startTime = Date.now();
@@ -202,7 +215,7 @@ export const generateContext = async (userId, ideaId) => {
     const prompt = buildContextGenerationPrompt(idea, brief);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.5-flash",
       contents: prompt
     });
     
@@ -289,7 +302,7 @@ export const generateTasks = async (userId, ideaId) => {
     const prompt = buildTaskGenerationPrompt(idea, brief, context);
 
     const response = await client.models.generateContent({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.5-flash",
       contents: prompt
     });
     
