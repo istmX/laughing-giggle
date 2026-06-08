@@ -95,18 +95,18 @@ This workflow must be executed in order.
 
 
  {
-    2     "application_type": "web",
-    3     "target_users": "Home cooks",
-    4     "platform": "web",
-    5     "frontend_stack": "ai-decide",
-    6     "backend_stack": "ai-decide",
-    7     "database": "ai-decide",
-    8     "ui_style": "ai-decide",
-    9     "is_complete": false,
-   10     "generated_by_ai": false,
-   11     "answers": {
-   12         "target_audience": "Home cooks",
-   13         "platform": "web",
-   14         "application_type": "web"
-   15     }
-   16 }
+        "application_type": "web",
+         "target_users": "Home cooks",
+         "platform": "web",
+         "frontend_stack": "ai-decide",
+         "backend_stack": "ai-decide",
+         "database": "ai-decide",
+         "ui_style": "ai-decide",
+         "is_complete": false,
+        "generated_by_ai": false,
+        "answers": {
+            "target_audience": "Home cooks",
+            "platform": "web",
+            "application_type": "web"
+        }
+    }
