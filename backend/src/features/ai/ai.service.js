@@ -215,6 +215,13 @@ export const generateContext = async (userId, ideaId) => {
     throw new AppError("Brief not found", 404);
   }
 
+  console.log("DEBUG: Checking completion for brief:", brief._id);
+  console.log("DEBUG: Brief data:", {
+    is_complete: brief.is_complete,
+    application_type: brief.application_type,
+    target_users: brief.target_users
+  });
+
   if (!brief.is_complete) {
     throw new AppError("Brief is not complete. Please answer all questions first.", 400);
   }
