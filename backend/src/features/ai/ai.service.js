@@ -185,6 +185,25 @@ export const submitAnswers = async (userId, ideaId, answers) => {
   }
 
   await brief.save();
+
+  // Check completion status
+  const requiredFields = [
+    'application_type',
+    'target_users',
+    'platform',
+    'frontend_stack',
+    'backend_stack',
+    'database',
+    'ui_style'
+  ];
+  
+  const isComplete = requiredFields.every(field => brief[field] && brief[field] !== 'ai-decide');
+  
+  if (brief.is_complete !== isComplete) {
+    brief.is_complete = isComplete;
+    await brief.save();
+  }
+
   return brief;
 };
 
