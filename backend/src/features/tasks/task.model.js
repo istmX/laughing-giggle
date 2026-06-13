@@ -18,6 +18,20 @@ const taskSchema = new mongoose.Schema({
         trim:true,
         maxlength:2000
     },
+   
+    ai_prompt: {
+        type: String,
+        default: null
+    },
+    required_context: [String],
+    implementation_steps: [String],
+    expected_files: [String],
+    success_criteria: [String],
+    complexity: {
+        type: String,
+        enum: ["Low", "Medium", "High"],
+        default: "Medium"
+    },
 
     /* status = Logical workflow state (pending, in_progress, completed) */
     status:{
@@ -25,10 +39,10 @@ const taskSchema = new mongoose.Schema({
         enum:["pending","in_progress","completed"],
         default:"pending"
     },
-    /* kanban_status = Visual board position (todo, in_progress, done) */
+    /* kanban_status = Visual board position (todo, in_progress, review, done) */
     kanban_status: {
         type: String,
-        enum: ["todo", "in_progress", "done"],
+        enum: ["todo", "in_progress", "review", "done"],
         default: "todo"
     },
     priority:{

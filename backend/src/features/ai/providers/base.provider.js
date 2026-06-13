@@ -14,4 +14,12 @@ export default class BaseProvider {
   async generateTasks(data) {
     throw new Error("generateTasks() not implemented");
   }
+
+  async generateRefinedSpec(data) {
+    throw new Error("generateRefinedSpec() not implemented");
+  }
+
+  async generateDocumentation(data) {
+    throw new Error("generateDocumentation() not implemented");
+  }
 }

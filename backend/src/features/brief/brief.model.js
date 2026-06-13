@@ -98,8 +98,12 @@ const briefSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-
+    requires_brief: {
+      type: Boolean,
+      default: true
+    },
     generated_by_ai: {
+
       type: Boolean,
       default: false
     },

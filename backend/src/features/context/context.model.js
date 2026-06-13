@@ -23,75 +23,63 @@ const contextSchema = new mongoose.Schema(
     },
 
     project_overview: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     build_plan: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     architecture: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     mermaid_diagram: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     code_standards: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     library_docs: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     progress_tracker: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     ui_rules: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     ui_tokens: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     ui_registry: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     agents: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
 
     readme: {
-      type: String,
-      default: "",
-      maxlength: 10000,
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
   },
   {
