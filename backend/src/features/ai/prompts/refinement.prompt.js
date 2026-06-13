@@ -5,27 +5,23 @@ export const buildRefinementPrompt = (data) => {
 ${buildBasePrompt()}
 
 ### Task
-Refine the project specification based on the original idea, questions asked, and user answers.
+Generate a Refined Project Specification based on:
+1. Original Idea: ${data.idea}
+2. Questions Asked: ${JSON.stringify(data.questions)}
+3. User Answers: ${JSON.stringify(data.answers)}
 
-### Original Idea
------BEGIN USER INPUT-----
-${data.idea}
------END USER INPUT-----
+### Responsibilities
+- Create a comprehensive, implementation-ready project specification.
+- Act as the single source of truth for downstream agents.
+- Resolve any ambiguities identified in the Q&A process.
 
-### Questions & Answers
------BEGIN USER INPUT-----
-${JSON.stringify(data.qa)}
------END USER INPUT-----
-
-### Instructions
-Combine the original idea with the answers to generate a detailed, implementation-ready project specification. 
-This specification will serve as the source of truth for all downstream AI agents.
-
-### Output Requirements
-- Detailed project overview
-- Technical constraints/decisions
-- Feature list
-- User personas (if applicable)
-- Database schema requirements
+### Output Structure
+Return a detailed Refined Project Specification document containing:
+- Executive Summary
+- Refined Core Vision & Objectives
+- Finalized Functional Requirements
+- Technical Constraints & Decisions
+- User Personas & Flows
+- Database Schema Overview
 `;
 };

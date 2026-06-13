@@ -5,23 +5,26 @@ export const buildTaskPrompt = (data) => {
 ${buildBasePrompt()}
 
 ### Task
-Generate 10 AI-ready implementation missions for the project idea: "${data.idea}"
+Generate 10 AI-ready implementation MISSIONS for the following project specification:
+
+-----BEGIN USER INPUT-----
+${data.idea}
+-----END USER INPUT-----
 
 ### Mission Structure
-Each mission must include:
+Each mission must be directly executable by an AI coding agent and include:
 - title
 - objective
-- required_context (List specific files to read first)
-- instructions
-- implementation_steps
+- required_context (List specific files/documents to read first)
+- instructions (Detailed engineering instructions)
+- implementation_steps (Numbered)
 - expected_files
 - success_criteria
 - estimated_complexity (Low, Medium, High)
 
-### Role
-Think like a Senior Software Architect, Senior Engineering Manager, and Technical Lead.
-
-### Goal
-The generated output must be directly usable as a prompt for AI coding assistants (e.g., Cursor, Claude Code).
+### Rules
+- Tasks must be highly specific, actionable, and self-contained.
+- Do not generate generic management tasks.
+- If a mission depends on another, explicitly state the dependency.
 `;
 };

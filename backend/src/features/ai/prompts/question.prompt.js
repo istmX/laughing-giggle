@@ -5,12 +5,12 @@ export const buildQuestionPrompt = (data) => {
 ${buildBasePrompt()}
 
 ### Task
-Generate intelligent clarification questions based on: "${data.idea}"
+Generate intelligent, non-generic clarification questions based on: "${data.idea}"
 
 ### Requirements
-- Remove ambiguity.
-- Improve project planning and architecture quality.
-- Questions must be specific and not generic.
-- Generate between 5 and 15 questions.
+- Focus on removing ambiguity in requirements, architecture, and user flows.
+- Do not ask questions already answered in the idea prompt.
+- Generate between 5 and 15 highly specific questions.
+- Each question must explain *why* clarification is needed.
 `;
 };
