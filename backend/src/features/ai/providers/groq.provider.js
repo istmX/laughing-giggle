@@ -1,9 +1,17 @@
 import Groq from "groq-sdk";
+import BaseProvider from "./base.provider.js";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-  model:"llama-3.3-70b-versatile"
+export class GroqProvider extends BaseProvider {
+  constructor() {
+    super();
+    this.groq = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+  }
 
-});
-
-export default groq;
+  async analyzeIdea(data) { return { content: "Groq Analysis" }; }
+  async generateQuestions(data) { return { content: "Groq Questions" }; }
+  async generateContext(data) { return { content: "Groq Context" }; }
+  async generateTasks(data) { return { content: "Groq Tasks" }; }
+  async generateDocumentation(data) { return { content: "Groq Documentation" }; }
+}

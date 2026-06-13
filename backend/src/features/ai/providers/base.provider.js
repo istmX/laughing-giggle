@@ -14,4 +14,8 @@ export default class BaseProvider {
   async generateTasks(data) {
     throw new Error("generateTasks() not implemented");
   }
+
+  async generateDocumentation(data) {
+    throw new Error("generateDocumentation() not implemented");
+  }
 }

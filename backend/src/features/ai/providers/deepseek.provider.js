@@ -1,9 +1,18 @@
 import OpenAI from "openai";
+import BaseProvider from "./base.provider.js";
 
-const deepseek = new OpenAI({
-    apiKey: process.env.DEEPSEEK_API_KEY,
-    baseURL: 'https://api.deepseek.com/v1',
-    model:"deepseek-chat"
-});
+export class DeepSeekProvider extends BaseProvider {
+  constructor() {
+    super();
+    this.openai = new OpenAI({
+      baseURL: "https://api.deepseek.com",
+      apiKey: process.env.DEEPSEEK_API_KEY,
+    });
+  }
 
-export default deepseek;
+  async analyzeIdea(data) { return { content: "DeepSeek Analysis" }; }
+  async generateQuestions(data) { return { content: "DeepSeek Questions" }; }
+  async generateContext(data) { return { content: "DeepSeek Context" }; }
+  async generateTasks(data) { return { content: "DeepSeek Tasks" }; }
+  async generateDocumentation(data) { return { content: "DeepSeek Documentation" }; }
+}
