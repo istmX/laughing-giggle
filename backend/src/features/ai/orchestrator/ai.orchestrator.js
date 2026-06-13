@@ -9,6 +9,7 @@ class AiOrchestrator {
       grok: new GroqProvider(),
       deepseek: new DeepSeekProvider(),
     };
+    this.TIMEOUT_MS = 10000; // 10s
   }
 
   async execute(taskType, data) {
@@ -19,8 +20,15 @@ class AiOrchestrator {
     for (let i = 0; i < strategy.length; i++) {
       const providerKey = strategy[i];
       try {
-        const response = await this.providers[providerKey][taskType](data);
-        
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout after ${this.TIMEOUT_MS}ms`)), this.TIMEOUT_MS)
+        );
+
+        const response = await Promise.race([
+          this.providers[providerKey][taskType](data),
+          timeoutPromise
+        ]);
+
         return {
           response,
           providerUsed: providerKey,
@@ -29,7 +37,7 @@ class AiOrchestrator {
         };
       } catch (error) {
         console.error(`[AI FALLBACK] Provider: ${providerKey} | Task: ${taskType} | Error: ${error.message}`);
-        
+
         if (i < strategy.length - 1) {
           fallbackUsed = true;
           fallbackProvider = providerKey;
@@ -37,7 +45,7 @@ class AiOrchestrator {
         }
       }
     }
-    
+
     throw new Error(`All providers failed for task: ${taskType}`);
   }
 

@@ -11,10 +11,12 @@ export const documentationService = {
     });
     
     try {
-      const result = await documentationAgent.generateDocumentation({ ideaId, userId });
+      const { response, providerUsed, fallbackUsed, fallbackProvider } = await documentationAgent.generateDocumentation({ idea: ideaId });
       generation.status = "completed";
+      generation.model = providerUsed;
+      generation.metadata = { fallbackUsed, fallbackProvider };
       await generation.save();
-      return result;
+      return response;
     } catch (error) {
       generation.status = "failed";
       generation.error_message = error.message;

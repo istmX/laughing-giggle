@@ -11,10 +11,12 @@ export const contextService = {
     });
     
     try {
-      const result = await contextAgent.generateContext({ ideaId, userId });
+      const { response, providerUsed, fallbackUsed, fallbackProvider } = await contextAgent.generateContext({ ideaId });
       generation.status = "completed";
+      generation.model = providerUsed;
+      generation.metadata = { fallbackUsed, fallbackProvider };
       await generation.save();
-      return result;
+      return response;
     } catch (error) {
       generation.status = "failed";
       generation.error_message = error.message;
