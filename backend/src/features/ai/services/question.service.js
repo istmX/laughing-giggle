@@ -1,8 +1,12 @@
 import { questionAgent } from "../agents/question.agent.js";
 import AIGeneration from "../ai.model.js";
+import Idea from "../../ideas/idea.model.js";
 
 export const questionService = {
   async generateQuestions(ideaId, userId) {
+    const ideaDoc = await Idea.findById(ideaId);
+    if (!ideaDoc) throw new Error("Idea not found");
+
     const generation = await AIGeneration.create({
       owner: userId,
       idea: ideaId,
@@ -11,10 +15,12 @@ export const questionService = {
     });
     
     try {
-      const result = await questionAgent.generateQuestions({ ideaId, userId });
+      const result = await questionAgent.generateQuestions({ idea: ideaDoc.prompt, ideaId, userId });
       generation.status = "completed";
+      generation.model = result.providerUsed;
+      generation.metadata = { fallbackUsed: result.fallbackUsed, fallbackProvider: result.fallbackProvider };
       await generation.save();
-      return result;
+      return result.response;
     } catch (error) {
       generation.status = "failed";
       generation.error_message = error.message;
