@@ -5,19 +5,23 @@ export const buildTaskPrompt = (data) => {
 ${buildBasePrompt()}
 
 ### Task
-Generate AI-development implementation tasks for: "${data.idea}"
+Generate 10 AI-ready implementation missions for the project idea: "${data.idea}"
 
-### Task Structure
-Each task must include:
+### Mission Structure
+Each mission must include:
 - title
-- description
 - objective
-- required_context (e.g., agents.md, architecture.md)
+- required_context (List specific files to read first)
+- instructions
 - implementation_steps
 - expected_files
 - success_criteria
+- estimated_complexity (Low, Medium, High)
+
+### Role
+Think like a Senior Software Architect, Senior Engineering Manager, and Technical Lead.
 
 ### Goal
-Tasks must be directly usable as prompts for AI coding assistants.
+The generated output must be directly usable as a prompt for AI coding assistants (e.g., Cursor, Claude Code).
 `;
 };
