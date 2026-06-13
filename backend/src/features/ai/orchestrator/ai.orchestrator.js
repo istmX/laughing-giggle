@@ -13,13 +13,28 @@ class AiOrchestrator {
 
   async execute(taskType, data) {
     const strategy = this.getStrategy(taskType);
-    
-    for (const providerKey of strategy) {
+    let fallbackUsed = false;
+    let fallbackProvider = null;
+
+    for (let i = 0; i < strategy.length; i++) {
+      const providerKey = strategy[i];
       try {
-        return await this.providers[providerKey][taskType](data);
+        const response = await this.providers[providerKey][taskType](data);
+        
+        return {
+          response,
+          providerUsed: providerKey,
+          fallbackUsed,
+          fallbackProvider
+        };
       } catch (error) {
-        console.error(`Provider ${providerKey} failed for ${taskType}:`, error);
-        // Continue to next provider in strategy (fallback)
+        console.error(`[AI FALLBACK] Provider: ${providerKey} | Task: ${taskType} | Error: ${error.message}`);
+        
+        if (i < strategy.length - 1) {
+          fallbackUsed = true;
+          fallbackProvider = providerKey;
+          console.error(`Fallback: ${strategy[i + 1]}`);
+        }
       }
     }
     
