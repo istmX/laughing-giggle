@@ -18,7 +18,7 @@ const taskSchema = new mongoose.Schema({
         trim:true,
         maxlength:2000
     },
-    /* AI Mission Fields */
+   
     ai_prompt: {
         type: String,
         default: null

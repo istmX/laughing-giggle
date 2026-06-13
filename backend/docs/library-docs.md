@@ -1,1 +1,0 @@
-The project will utilize the following libraries and frameworks: Node.js, Express.js, MongoDB, React, Angular, TensorFlow, and PyTorch. The rationale for selecting these libraries is based on their popularity, community support, and relevance to the project requirements.

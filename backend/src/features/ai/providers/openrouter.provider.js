@@ -12,14 +12,15 @@ export class OpenRouterProvider extends BaseProvider {
         "X-OpenRouter-Title": "Zenix",
       },
     });
-    // Using a reliable model alias provided by OpenRouter
-    this.model = "openai/gpt-4o"; 
+    // Using a reliable model
+    this.model = "meta-llama/llama-3.3-70b-instruct"; 
   }
 
   async _call(prompt) {
     const completion = await this.client.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: this.model,
+      max_tokens: 4000, // Capping tokens to fit in free tier/credits
     });
     return { content: completion.choices[0].message.content };
   }

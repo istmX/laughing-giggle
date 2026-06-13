@@ -11,7 +11,7 @@ class AiOrchestrator {
       deepseek: new DeepSeekProvider(),
       openrouter: new OpenRouterProvider(),
     };
-    this.TIMEOUT_MS = 10000; // 10s
+    this.TIMEOUT_MS = 30000; // 30s
   }
 
   async execute(taskType, data) {
@@ -56,11 +56,13 @@ class AiOrchestrator {
       case 'analyzeIdea':
       case 'generateQuestions':
       case 'generateRefinedSpec':
-        return ['grok', 'deepseek', 'openrouter'];
+        // Groq is primary here, others as fallback
+        return ['grok', 'gemini', 'deepseek', 'openrouter'];
       case 'generateContext':
       case 'generateTasks':
       case 'generateDocumentation':
-        return ['gemini', 'deepseek', 'openrouter'];
+        // Gemini is primary here, Groq as final fallback
+        return ['gemini', 'deepseek', 'openrouter', 'grok'];
       default:
         throw new Error(`Unknown task type: ${taskType}`);
     }

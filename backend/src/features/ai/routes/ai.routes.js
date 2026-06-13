@@ -4,11 +4,11 @@ import { generateQuestions } from '../controllers/question.controller.js';
 import { generateContext } from '../controllers/context.controller.js';
 import { generateTasks } from '../controllers/task.controller.js';
 import { generateDocumentation } from '../controllers/documentation.controller.js';
-import { protect } from '../../auth/auth.middleware.js';
+import { authMiddleware } from '../../auth/auth.middleware.js';
 
 const router = express.Router();
 
-router.use(protect);
+router.use(authMiddleware);
 
 router.post('/analyze/:ideaId', analyzeIdea);
 router.post('/questions/:ideaId', generateQuestions);
