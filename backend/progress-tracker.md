@@ -4,6 +4,7 @@
 
 ### Summary
 Implementing a multi-agent AI architecture with Orchestrator, Agents, Services, and Controllers.
+Added a centralized, reusable, provider-agnostic prompt system.
 
 ### Status
 - Orchestrator: Completed
@@ -12,6 +13,7 @@ Implementing a multi-agent AI architecture with Orchestrator, Agents, Services, 
 - Services: Completed
 - Controllers: Completed
 - Routes: Completed
+- Prompt System: Completed
 - Verification: Completed (Manual check of file structure and imports)
 
 ### Files Created
@@ -32,6 +34,12 @@ Implementing a multi-agent AI architecture with Orchestrator, Agents, Services, 
 - `src/features/ai/controllers/task.controller.js`
 - `src/features/ai/controllers/documentation.controller.js`
 - `src/features/ai/routes/ai.routes.js`
+- `src/features/ai/prompts/base.prompt.js`
+- `src/features/ai/prompts/idea.prompt.js`
+- `src/features/ai/prompts/question.prompt.js`
+- `src/features/ai/prompts/context.prompt.js`
+- `src/features/ai/prompts/task.prompt.js`
+- `src/features/ai/prompts/documentation.prompt.js`
 
 ### Files Modified
 - `src/features/ai/providers/base.provider.js`
@@ -45,6 +53,7 @@ Implementing a multi-agent AI architecture with Orchestrator, Agents, Services, 
 - Implemented a provider strategy mapping tasks to specific providers.
 - Controllers are kept thin, relying on services.
 - Agents act as the workflow layer, using the orchestrator to interact with providers.
+- Centralized prompt system using a base builder and task-specific builders for reusability.
 
 ### Remaining Work
 - None
