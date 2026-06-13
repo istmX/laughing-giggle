@@ -53,6 +53,7 @@ class AiOrchestrator {
     switch (taskType) {
       case 'analyzeIdea':
       case 'generateQuestions':
+      case 'generateRefinedSpec':
         return ['grok', 'deepseek'];
       case 'generateContext':
       case 'generateTasks':

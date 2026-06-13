@@ -22,5 +22,6 @@ export class GroqProvider extends BaseProvider {
   async generateQuestions(prompt) { return await this._call(prompt); }
   async generateContext(prompt) { return await this._call(prompt); }
   async generateTasks(prompt) { return await this._call(prompt); }
+  async generateRefinedSpec(prompt) { return await this._call(prompt); }
   async generateDocumentation(prompt) { return await this._call(prompt); }
 }
