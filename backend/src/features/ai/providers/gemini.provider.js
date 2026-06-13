@@ -1,17 +1,22 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import BaseProvider from "./base.provider.js";
 
 export class GeminiProvider extends BaseProvider {
   constructor() {
     super();
-    this.gemini = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
   }
 
-  async analyzeIdea(data) { return { content: "Gemini Analysis" }; }
-  async generateQuestions(data) { return { content: "Gemini Questions" }; }
-  async generateContext(data) { return { content: "Gemini Context" }; }
-  async generateTasks(data) { return { content: "Gemini Tasks" }; }
-  async generateDocumentation(data) { return { content: "Gemini Documentation" }; }
+  async _call(prompt) {
+    const result = await this.model.generateContent(prompt);
+    const response = await result.response;
+    return { content: response.text() };
+  }
+
+  async analyzeIdea(prompt) { return await this._call(prompt); }
+  async generateQuestions(prompt) { return await this._call(prompt); }
+  async generateContext(prompt) { return await this._call(prompt); }
+  async generateTasks(prompt) { return await this._call(prompt); }
+  async generateDocumentation(prompt) { return await this._call(prompt); }
 }

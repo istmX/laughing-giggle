@@ -8,11 +8,20 @@ export class DeepSeekProvider extends BaseProvider {
       baseURL: "https://api.deepseek.com",
       apiKey: process.env.DEEPSEEK_API_KEY,
     });
+    this.model = "deepseek-chat";
   }
 
-  async analyzeIdea(data) { return { content: "DeepSeek Analysis" }; }
-  async generateQuestions(data) { return { content: "DeepSeek Questions" }; }
-  async generateContext(data) { return { content: "DeepSeek Context" }; }
-  async generateTasks(data) { return { content: "DeepSeek Tasks" }; }
-  async generateDocumentation(data) { return { content: "DeepSeek Documentation" }; }
+  async _call(prompt) {
+    const completion = await this.openai.chat.completions.create({
+      messages: [{ role: "user", content: prompt }],
+      model: this.model,
+    });
+    return { content: completion.choices[0].message.content };
+  }
+
+  async analyzeIdea(prompt) { return await this._call(prompt); }
+  async generateQuestions(prompt) { return await this._call(prompt); }
+  async generateContext(prompt) { return await this._call(prompt); }
+  async generateTasks(prompt) { return await this._call(prompt); }
+  async generateDocumentation(prompt) { return await this._call(prompt); }
 }
