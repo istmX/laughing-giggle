@@ -1,6 +1,7 @@
 import { GeminiProvider } from "../providers/gemini.provider.js";
 import { GroqProvider } from "../providers/groq.provider.js";
 import { DeepSeekProvider } from "../providers/deepseek.provider.js";
+import { OpenRouterProvider } from "../providers/openrouter.provider.js";
 
 class AiOrchestrator {
   constructor() {
@@ -8,6 +9,7 @@ class AiOrchestrator {
       gemini: new GeminiProvider(),
       grok: new GroqProvider(),
       deepseek: new DeepSeekProvider(),
+      openrouter: new OpenRouterProvider(),
     };
     this.TIMEOUT_MS = 10000; // 10s
   }
@@ -54,11 +56,11 @@ class AiOrchestrator {
       case 'analyzeIdea':
       case 'generateQuestions':
       case 'generateRefinedSpec':
-        return ['grok', 'deepseek'];
+        return ['grok', 'deepseek', 'openrouter'];
       case 'generateContext':
       case 'generateTasks':
       case 'generateDocumentation':
-        return ['gemini', 'deepseek'];
+        return ['gemini', 'deepseek', 'openrouter'];
       default:
         throw new Error(`Unknown task type: ${taskType}`);
     }
