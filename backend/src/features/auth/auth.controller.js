@@ -6,6 +6,16 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import {verifyGoogleToken} from './auth.service.js'
 
+const buildUserResponse = (user) => ({
+  id: user._id,
+  name: user.name,
+  username: user.username,
+  email: user.email,
+  provider: user.provider,
+  avatar: user.avatar,
+  joinedAt: user.createdAt
+})
+
 
 
 export const registerUser = async (req,res)=> {
@@ -59,7 +69,8 @@ export const registerUser = async (req,res)=> {
     res.status(201).json({
         message:"User registered successfully",
         userId:newUser._id,
-        token: `Bearer ${token}`
+      token: `Bearer ${token}`,
+      user: buildUserResponse(newUser)
     });
  }
     catch (error) {
@@ -114,7 +125,8 @@ export const loginUser = async (req,res)=>{
         res.status(200).json({
             message:"Login successful",
             userId:user._id,
-            token: `Bearer ${token}`
+          token: `Bearer ${token}`,
+          user: buildUserResponse(user)
         });
 
     }
@@ -258,6 +270,7 @@ export const googleLogin = async (req, res) => {
       message: "Google login successful",
       userId: user._id,
       token: `Bearer ${token}`,
+      user: buildUserResponse(user),
     });
 
   } catch (error) {

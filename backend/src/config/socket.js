@@ -1,12 +1,13 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { getAllowedOrigins } from './cors.js';
 
 let io;
 
 export const initSocket = (server) => {
-  const allowedOrigins = process.env.ALLOWED_SOCKET_ORIGINS 
-    ? process.env.ALLOWED_SOCKET_ORIGINS.split(',') 
-    : [];
+  const allowedOrigins = process.env.ALLOWED_SOCKET_ORIGINS
+    ? process.env.ALLOWED_SOCKET_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : getAllowedOrigins();
 
   io = new Server(server, {
     cors: {
