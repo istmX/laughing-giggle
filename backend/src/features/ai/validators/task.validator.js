@@ -12,5 +12,18 @@ export const taskMissionSchema = z.object({
 });
 
 export const validateTaskMission = (data) => {
-  return taskMissionSchema.safeParse(data);
+  const transformedData = { ...data };
+  if (transformedData.objective) {
+    transformedData.description = transformedData.objective;
+    delete transformedData.objective;
+  }
+  if (transformedData.instructions) {
+    transformedData.ai_prompt = transformedData.instructions;
+    delete transformedData.instructions;
+  }
+  if (transformedData.estimated_complexity) {
+    transformedData.complexity = transformedData.estimated_complexity;
+    delete transformedData.estimated_complexity;
+  }
+  return taskMissionSchema.safeParse(transformedData);
 };
