@@ -1,5 +1,5 @@
-"use client";;
-import React, { useEffect, useState, useMemo } from "react";
+
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 
@@ -9,13 +9,6 @@ export function PerspectiveGrid({
     showOverlay = true,
     fadeRadius = 80
 }) {
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    // Memoize tiles array to prevent unnecessary re-renders
     const tiles = useMemo(() => Array.from({ length: gridSize * gridSize }), [gridSize]);
 
     return (
@@ -41,12 +34,11 @@ export function PerspectiveGrid({
                     gridTemplateRows: `repeat(${gridSize}, 1fr)`,
                 }}>
                 {/* Tiles */}
-                {mounted &&
-                    tiles.map((_, i) => (
-                        <div
-                            key={i}
-                            className="tile min-h-[1px] min-w-[1px] border border-border/70 bg-transparent transition-colors duration-[1500ms] hover:duration-0" />
-                    ))}
+                {tiles.map((_, i) => (
+                    <div
+                        key={i}
+                        className="tile min-h-[1px] min-w-[1px] border border-border/70 bg-transparent transition-colors duration-[1500ms] hover:duration-0" />
+                ))}
             </div>
             {/* Radial Gradient Mask (Overlay) */}
             {showOverlay && (

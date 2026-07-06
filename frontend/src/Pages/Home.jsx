@@ -1,14 +1,7 @@
-import Hero from "@/Landing/Hero"
-
+import LandingPage from '@/Landing/LandingPage'
 
 const Home = () => {
-  return (
-
-    <main>
-      <Hero />
-    </main>
-
-  )
+  return <LandingPage />
 }
 
 export default Home

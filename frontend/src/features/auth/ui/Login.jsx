@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Eye, LockKeyhole, Mail } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowRight, LockKeyhole, Mail } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth'
-import AnimatedForm from '@/components/forgeui/animated-form'
 
 import AuthShell from './AuthShell'
+import AuthField from './AuthField'
+import AuthSocialSection from './AuthSocialSection'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -27,8 +28,13 @@ const Login = () => {
     setFormError('')
 
     try {
-      await login({ email: email.trim(), password })
-      navigate('/dashboard')
+      const auth = await login({ email: email.trim(), password })
+
+      if (auth?.token) {
+        navigate('/dashboard')
+      } else {
+        setFormError('Sign-in did not return user data. Please try again.')
+      }
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign in')
     }
@@ -39,7 +45,13 @@ const Login = () => {
 
     try {
       await signInWithGoogle()
-      navigate('/dashboard')
+      const { token } = useAuthStore.getState()
+
+      if (token) {
+        navigate('/dashboard')
+      } else {
+        setFormError('Google sign-in did not return user data. Please try again.')
+      }
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign in with Google')
     }
@@ -47,80 +59,43 @@ const Login = () => {
 
   return (
     <AuthShell
-      headline="Your ideas. Structured. Ready to"
-      headlineAccent="build."
-      description="Zenix turns your ideas into implementation-ready context for teams that want to move quickly without losing clarity."
-      topActionPrefix="Don't have an account?"
-      topActionLabel="Sign up"
-      topActionHref="/signup"
+      panelTitle="Welcome back"
+      panelDescription="Sign in to continue to your workspace."
     >
-      <div className="space-y-5 max-[820px]:space-y-4">
-        <div className="flex justify-center max-[820px]:justify-start">
-          <AnimatedForm name="Alex Morgan" delay={5600} />
-        </div>
+      <div className="space-y-6">
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <AuthField
+            label="Email"
+            name="login-email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            inputMode="email"
+            icon={Mail}
+          />
 
-        <div className="space-y-2">
-          <h2 className="text-3xl tracking-[-0.05em] max-[820px]:text-2xl sm:text-4xl">
-            Welcome back
-          </h2>
-          <p className="max-w-lg text-base leading-7 text-muted-foreground">
-            Sign in to continue building with Zenix.
-          </p>
-        </div>
+          <AuthField
+            label="Password"
+            name="login-password"
+            type="password"
+            placeholder="Enter your password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            icon={LockKeyhole}
+          />
 
-        <form className="space-y-4 max-[820px]:space-y-3" onSubmit={handleSubmit}>
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-foreground/80" htmlFor="login-email">
-              Email
-            </label>
-            <div className="relative">
-              <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="login-email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl border-border bg-card pl-11 pr-4 text-base shadow-sm placeholder:text-muted-foreground"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-foreground/80" htmlFor="login-password">
-              Password
-            </label>
-            <div className="relative">
-              <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                id="login-password"
-                name="password"
-                type="password"
-                placeholder="••••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl border-border bg-card pl-11 pr-14 text-base shadow-sm placeholder:text-muted-foreground"
-              />
-              <button
-                type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                aria-label="Preview password"
-              >
-                <Eye className="size-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <label className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex items-center gap-3 text-[0.95rem] text-white/60">
               <input
                 type="checkbox"
-                className="size-4 rounded border-border text-primary focus:ring-primary"
+                className="size-4 rounded border-white/20 bg-transparent text-white focus:ring-white/30"
               />
               Remember me
             </label>
-            <button type="button" className="text-sm font-medium text-primary">
+            <button type="button" className="text-[0.95rem] font-medium text-white transition-colors hover:text-white/80">
               Forgot password?
             </button>
           </div>
@@ -129,55 +104,30 @@ const Login = () => {
             type="submit"
             disabled={status === 'loading'}
             size="lg"
-            className="h-12 w-full rounded-full max-[820px]:h-11 disabled:translate-y-0"
+            className="h-14 w-full rounded-[18px] bg-white text-[15px] font-medium text-black hover:bg-white/92 disabled:translate-y-0"
           >
             {status === 'loading' ? 'Signing in...' : 'Sign in'}
-            <span className="ml-3 text-xl leading-none">→</span>
+            <ArrowRight className="ml-3 size-5" />
           </Button>
         </form>
 
-        {(formError || error || googleError) ? (
-          <p className="text-sm text-destructive">{formError || error || googleError}</p>
+        {formError || error || googleError ? (
+          <p className="text-sm text-[#ff7b7b]">{formError || error || googleError}</p>
         ) : null}
 
-        <div className="flex items-center gap-4 max-[820px]:hidden">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-sm text-muted-foreground">or</span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
+        <AuthSocialSection
+          onAction={handleGoogleSignIn}
+          ready={googleReady}
+          loading={googleLoading}
+          disabled={status === 'loading'}
+        />
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleGoogleSignIn}
-          disabled={!googleReady || googleLoading || status === 'loading'}
-          size="lg"
-          className="h-12 w-full rounded-full text-base max-[820px]:hidden"
-        >
-          <span className="flex items-center gap-4">
-            <span className="grid size-7 place-items-center rounded-full bg-muted text-lg font-semibold text-foreground shadow-sm">
-              G
-            </span>
-            {googleLoading ? 'Connecting...' : 'Continue with Google'}
-          </span>
-        </Button>
-
-        <div className="rounded-2xl border border-border bg-card px-5 py-4 text-sm leading-6 text-muted-foreground shadow-sm max-[820px]:hidden">
-          <div className="flex items-start gap-3">
-            <LockKeyhole className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-            <p>
-              Your data is encrypted and secure. By continuing, you agree to our{' '}
-              <button type="button" className="font-medium text-primary">
-                Terms
-              </button>{' '}
-              and{' '}
-              <button type="button" className="font-medium text-primary">
-                Privacy Policy
-              </button>
-              .
-            </p>
-          </div>
-        </div>
+        <p className="text-center text-[0.95rem] text-white/52">
+          Don&apos;t have an account?{' '}
+          <Link to="/signup" className="font-medium text-white transition-colors hover:text-white/80">
+            Sign up
+          </Link>
+        </p>
       </div>
     </AuthShell>
   )
