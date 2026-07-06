@@ -65,14 +65,16 @@ const AuthField = ({
         transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
         className="relative"
       >
-        <span
-          className={cn(
-            'pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-white/42 transition-colors duration-200',
-            isTyping && 'text-white/75',
-          )}
-        >
-          <Icon className="size-4" />
-        </span>
+        {Icon ? (
+          <span
+            className={cn(
+              'pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-white/42 transition-colors duration-200',
+              isTyping && 'text-white/75',
+            )}
+          >
+            <Icon className="size-4" />
+          </span>
+        ) : null}
 
         <Input
           id={name}

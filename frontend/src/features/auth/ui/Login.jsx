@@ -4,6 +4,7 @@ import { ArrowRight, LockKeyhole, Mail } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth'
 
 import AuthShell from './AuthShell'
@@ -31,6 +32,8 @@ const Login = () => {
 
       if (auth?.token) {
         navigate('/dashboard')
+      } else {
+        setFormError('Sign-in did not return user data. Please try again.')
       }
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign in')
@@ -42,7 +45,13 @@ const Login = () => {
 
     try {
       await signInWithGoogle()
-      navigate('/dashboard')
+      const { token } = useAuthStore.getState()
+
+      if (token) {
+        navigate('/dashboard')
+      } else {
+        setFormError('Google sign-in did not return user data. Please try again.')
+      }
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign in with Google')
     }

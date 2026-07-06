@@ -33,6 +33,8 @@ const Signup = () => {
 
       if (auth?.token) {
         navigate('/dashboard')
+      } else {
+        setFormError('Account created but sign-in failed. Please try logging in.')
       }
     } catch (submitError) {
       setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign up')
