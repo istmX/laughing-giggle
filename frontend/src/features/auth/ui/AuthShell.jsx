@@ -1,139 +1,93 @@
 import { Link } from 'react-router-dom'
-import {
-  ArrowRight,
-  Circle,
-  Layers3,
-  Sparkles,
-  SquareStack,
-  Zap,
-} from 'lucide-react'
 
-const defaultFeatures = [
-  {
-    icon: Layers3,
-    title: 'Structured workflows for every project',
-  },
-  {
-    icon: Sparkles,
-    title: 'Clean context layers for faster building',
-  },
-  {
-    icon: Zap,
-    title: 'Designed for sharp teams and solo founders',
-  },
-  {
-    icon: SquareStack,
-    title: 'A foundation that scales with your ideas',
-  },
-]
-
-const AuthShell = ({
-  brand = 'zenix*',
-  eyebrow = 'BUILD BETTER WITH CONTEXT',
-  headline,
-  headlineAccent,
-  description,
-  features = defaultFeatures,
-  topActionLabel,
-  topActionHref,
-  topActionPrefix,
-  children,
-}) => {
+const AuthShell = ({ children, panelTitle, panelDescription }) => {
   return (
-    <main className="relative min-h-screen bg-background text-foreground lg:h-[100dvh] lg:overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_28%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.16),transparent_26%)]" />
-      <div className="relative grid min-h-screen xl:h-full xl:grid-cols-[1.04fr_0.96fr]">
-        <section className="relative hidden h-full flex-col border-b border-border px-6 py-6 sm:px-8 md:px-10 xl:flex xl:border-b-0 xl:border-r xl:px-12 xl:py-6">
-          <div className="flex items-start justify-between">
-            <div className="text-[1.55rem] font-semibold tracking-[-0.05em]">
-              {brand}
-            </div>
-            <div className="hidden items-center gap-2 rounded-full border border-border bg-background/70 px-3 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur md:flex">
-              <Circle className="size-2 fill-primary text-primary" />
-              Context first
-            </div>
+    <main className="relative min-h-screen overflow-hidden bg-[#080808] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_24%)]" />
+      <div className="relative grid min-h-screen lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="relative hidden min-h-screen overflow-hidden border-r border-white/8 lg:flex">
+          <div className="absolute inset-y-0 left-0 w-full bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_25%,transparent_75%,rgba(255,255,255,0.02))]" />
+          <div className="absolute left-0 top-0 h-full w-full opacity-45">
+            <svg
+              aria-hidden="true"
+              className="h-full w-full"
+              viewBox="0 0 960 1200"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="authWave" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.02" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.38" />
+                </linearGradient>
+              </defs>
+              {[
+                'M-40,160 C150,110 238,248 354,340 C478,438 602,462 742,412 C842,376 892,300 982,236',
+                'M-40,210 C134,164 240,294 364,392 C496,495 620,520 754,466 C854,426 902,350 982,286',
+                'M-40,260 C118,222 248,348 378,454 C518,570 646,602 774,548 C868,508 912,438 982,378',
+                'M-40,314 C116,286 254,408 392,520 C544,646 672,684 796,628 C882,588 918,520 982,466',
+                'M-40,372 C126,350 266,474 406,592 C558,724 684,764 812,710 C894,676 926,600 982,550',
+                'M-40,434 C142,422 284,548 426,668 C580,798 700,840 822,790 C900,758 930,684 982,648',
+                'M-40,498 C160,496 298,618 448,746 C598,874 712,916 828,866 C904,832 930,762 982,724',
+                'M-40,566 C166,576 312,700 470,830 C620,954 724,994 834,944 C908,910 932,844 982,810',
+              ].map((d, index) => (
+                <path
+                  key={d}
+                  d={d}
+                  stroke="url(#authWave)"
+                  strokeWidth={index % 2 === 0 ? 1 : 0.85}
+                  opacity={0.78 - index * 0.065}
+                />
+              ))}
+            </svg>
           </div>
 
-          <div className="flex flex-1 flex-col justify-between gap-8 pt-10">
-            <div className="max-w-xl space-y-5">
-              <p className="text-[0.72rem] font-semibold tracking-[0.16em] text-muted-foreground">
-                {eyebrow}
-                <span className="inline-block align-middle text-primary">•</span>
-              </p>
+          <div className="relative flex w-full items-center p-8 xl:p-10">
+            <Link
+              to="/"
+              className="absolute left-8 top-8 inline-flex items-start gap-0.5 text-[1.7rem] font-semibold tracking-[-0.06em] xl:left-10 xl:top-10"
+            >
+              <span>zenix</span>
+              <span className="-translate-y-1 text-[1.2rem] leading-none">*</span>
+            </Link>
 
-              <h1 className="max-w-lg text-5xl leading-[0.94] tracking-[-0.07em] text-balance sm:text-6xl lg:text-[4.75rem]">
-                {headline}
-                {headlineAccent ? (
-                  <>
-                    {' '}
-                    <span className="text-primary">{headlineAccent}</span>
-                  </>
-                ) : null}
+            <div className="max-w-[34rem] pt-24 pb-8">
+              <h1 className="max-w-[8ch] text-[clamp(4.2rem,6.8vw,5.9rem)] leading-[0.9] tracking-[-0.05em] text-balance">
+                Build better.
+                <br />
+                Ship faster.
               </h1>
-
-              <p className="max-w-md text-base leading-7 text-muted-foreground lg:max-w-[28rem]">
-                {description}
+              <p className="mt-8 max-w-[22ch] text-[1.05rem] leading-8 text-white/55">
+                Everything you need to turn ideas into implementation-ready context.
               </p>
-
-              <div className="space-y-0">
-                {features.map((feature) => {
-                  const Icon = feature.icon
-
-                  return (
-                    <div
-                      key={feature.title}
-                      className="flex items-center gap-4 border-b border-border py-4 last:border-b-0"
-                    >
-                      <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-border bg-background shadow-sm">
-                        <Icon className="size-5 text-foreground" />
-                      </div>
-                      <p className="text-base text-foreground/80">{feature.title}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="relative h-48 w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_12px_12px,hsl(var(--foreground)/0.08)_1px,transparent_1.5px)] bg-[length:14px_14px] opacity-45" />
-              <div className="absolute left-10 top-10 h-28 w-28 rounded-full border-4 border-primary/60 border-t-transparent border-r-transparent" />
-              <div className="absolute inset-x-0 bottom-5 flex items-end justify-between px-6">
-                <div className="space-y-1">
-                  <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground">
-                    CONTEXT IS
-                  </div>
-                  <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground">
-                    THE NEW CODE
-                  </div>
-                </div>
-                <div className="text-[0.65rem] font-semibold tracking-[0.18em] text-muted-foreground">
-                  READY TO SHIP
-                </div>
-              </div>
             </div>
           </div>
         </section>
 
-        <section className="relative flex items-start justify-center px-5 py-6 sm:px-8 md:px-10 xl:h-full xl:items-center xl:px-12 xl:py-6">
-          <div className="w-full max-w-xl xl:max-h-full">
-            {(topActionLabel && topActionHref) || topActionPrefix ? (
-              <div className="mb-4 flex justify-end text-sm max-[820px]:mb-3">
-                {topActionPrefix ? (
-                  <span className="mr-2 text-muted-foreground">{topActionPrefix}</span>
-                ) : null}
-                {topActionLabel && topActionHref ? (
-                  <Link
-                    to={topActionHref}
-                    className="inline-flex items-center gap-1 font-medium text-primary transition-colors hover:opacity-80"
-                  >
-                    {topActionLabel}
-                    <ArrowRight className="size-4" />
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
+        <section className="relative flex min-h-screen items-center justify-center px-4 py-5 sm:px-6 lg:px-8">
+          <div className="w-full max-w-[40rem]">
+            <div className="mb-4 flex items-center justify-between text-[1.45rem] font-semibold tracking-[-0.06em] lg:hidden">
+              <Link to="/" className="inline-flex items-start gap-0.5">
+                <span>zenix</span>
+                <span className="-translate-y-1 text-[1rem] leading-none">*</span>
+              </Link>
+              <span className="text-sm font-normal text-white/45">Context first</span>
+            </div>
 
-            {children}
+            <div className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0.025))] p-4 sm:p-6 lg:p-8">
+            <div className="rounded-[18px] border border-white/6 bg-black/20 px-4 py-6 sm:px-6 sm:py-8 lg:px-9 lg:py-10">
+              <div className="space-y-3 text-center">
+                <h2 className="text-[clamp(2rem,3.2vw,3.1rem)] leading-none tracking-[-0.05em] text-balance">
+                  {panelTitle}
+                </h2>
+                <p className="mx-auto max-w-[30ch] text-[1.05rem] leading-7 text-white/58">
+                  {panelDescription}
+                </p>
+              </div>
+
+              <div className="mt-8 sm:mt-10">{children}</div>
+            </div>
+            </div>
           </div>
         </section>
       </div>
