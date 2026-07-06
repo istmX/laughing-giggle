@@ -1,496 +1,525 @@
-# AGENTS.md
+# agents.md
 
-# Project
+# Zenix — AI Agent Working Instructions
 
-Zenix
+This document defines how AI coding agents should understand, architect, and implement Zenix.
 
----
+Everything written here is considered project context.
 
-# What Is Zenix?
-
-Zenix is an AI-powered project planning platform that transforms rough software ideas into implementation-ready development context.
-
-Most developers repeatedly explain the same project to AI coding tools.
-
-They describe:
-
-* Architecture
-* Features
-* UI requirements
-* Database structure
-* Coding standards
-* Development plans
-
-over and over again.
-
-Zenix solves this problem.
-
-Instead of generating code directly, Zenix generates the context that AI coding assistants need to build software correctly.
-
-The output becomes reusable project intelligence.
-
-Generated outputs include:
-
-* agents.md
-* architecture.md
-* build-plan.md
-* ui-rules.md
-* code-standards.md
-* implementation missions
-* documentation
-* developer workflows
-
-These outputs can then be used with:
-
-* Claude Code
-* Gemini CLI
-* OpenAI Codex
-* Cursor
-* Windsurf
-* GitHub Copilot
-* Future AI coding agents
+Never ignore these rules.
 
 ---
 
-# Product Vision
+# Project Overview
 
-AI coding tools are becoming more powerful.
+Zenix transforms rough software ideas into complete, implementation-ready development context for AI coding agents.
 
-The bottleneck is no longer code generation.
+Instead of repeatedly explaining a project to different AI tools, users describe their idea once.
 
-The bottleneck is context.
+Zenix analyzes the project, identifies missing requirements, structures the architecture, and generates a complete AI-ready development context.
 
-Zenix exists to become the context layer between human ideas and AI implementation.
+The generated context becomes a single source of truth that can be used with any AI coding tool.
 
-The goal is:
+Examples include:
 
-Idea → Context → Development
+- agents.md
+- architecture.md
+- build-plan.md
+- ui-rules.md
+- ui-tokens.md
+- code-standards.md
+- implementation missions
+- development roadmap
+- technical documentation
 
-instead of:
+The goal is consistency.
 
-Idea → Endless Prompting
-
----
-
-# Current Phase
-
-Frontend Landing Page
-
-Backend exists separately.
-
-Current objective:
-
-Build a premium marketing website for Zenix.
-
-The landing page must feel like a product experience rather than a traditional SaaS website.
+Every AI coding assistant should understand the project exactly the same way.
 
 ---
 
-# Design Direction
+# Core Product Principles
 
-Primary Inspirations:
+The product should always feel:
 
-* Wispr Flow
-* Apple
-* Linear
-* Notion
-* Awwwards Editorial Websites
+- Professional
+- Developer-first
+- Minimal
+- Premium
+- Fast
+- Predictable
+- Structured
 
-The site should feel:
+Never make the application feel like a generic AI chatbot.
 
-* Premium
-* Intelligent
-* Technical
-* Editorial
-* Minimal
-* Confident
+Users are building software, not chatting.
 
-Avoid generic startup aesthetics.
+Everything should feel like a professional development workspace.
 
 ---
 
-# Do Not Use
+# Primary User Flow
 
-Never use:
+User enters an idea.
 
-* Purple AI gradients
-* Robot illustrations
-* AI badges
-* Dashboard hero screenshots
-* Floating glass cards everywhere
-* Fake metrics
-* Fake testimonials
-* Fake company logos
-* Fake reviews
-* Crypto aesthetics
-* Neon effects
-
-This is not an AI startup website.
-
----
-
-# Core Design Principle
-
-The product output becomes the visual language.
-
-Instead of decorative graphics, use:
-
-* generated documents
-* architecture previews
-* workflow diagrams
-* implementation missions
-* project artifacts
-
-as the visual content.
-
-The product should explain itself.
-
----
-
-# Color System
-
-Background:
-
-#FFFFFF
-
-Foreground:
-
-#000000
-
-Muted:
-
-#595959
-
-Border:
-
-#E2E2E2
-
-Primary Accent:
-
-#4D49FC
-
-Document Colors:
-
-Blue:
-#61A8FF
-
-Orange:
-#FF7237
-
-Green:
-#24CB71
-
-Purple:
-#8B7CFF
-
-Dark Storytelling Sections:
-
-#121826
-
-Teal Accent:
-
-#33DFDF
-
-Important:
-
-Color should appear primarily inside:
-
-* diagrams
-* illustrations
-* generated files
-* architecture previews
-* document previews
-
-Avoid large colorful backgrounds.
-
-The site should remain mostly monochrome.
-
----
-
-# Typography
-
-Display Font:
-
-Cormorant Garamond
-
-Used for:
-
-* Hero headlines
-* Editorial statements
-* Large storytelling sections
-
-UI Font:
-
-Inter
-
-Used for:
-
-* Navigation
-* Body text
-* Buttons
-* Cards
-* Interface elements
-
-Technical Font:
-
-JetBrains Mono
-
-Used for:
-
-* agents.md
-* architecture.md
-* mission files
-* labels
-* developer artifacts
-
----
-
-# Layout Rules
-
-Maximum Width:
-
-1440px
-
-Section Spacing:
-
-120px
-
-Card Radius:
-
-0px
-
-Prompt Panel Radius:
-
-16px
-
-Button Radius:
-
-8px
-
-Navigation Pills:
-
-999px
-
-Whitespace is important.
-
-Never cram content.
-
----
-
-# Landing Page Structure
-
-Section 1 — Hero
-
-Purpose:
-
-Introduce Zenix.
-
-Hero contains:
-
-* Large editorial heading
-* Prompt input panel
-* CTA
-* Minimal supporting text
-
-No dashboard screenshots.
-
-No illustrations of robots.
-
-No feature cards.
-
-The prompt panel is the visual centerpiece.
-
----
-
-Section 2 — Problem
-
-Explain:
-
-AI coding agents are powerful.
-
-But they lack context.
-
-Use large typography.
-
-Use storytelling.
-
-Focus on the problem.
-
----
-
-Section 3 — Process
-
-Show:
-
-Idea
 ↓
-Requirements
+
+Zenix analyzes the project.
+
 ↓
-Architecture
+
+Requirements are completed automatically.
+
 ↓
-Context
+
+Architecture is generated.
+
 ↓
-Missions
+
+Development plan is generated.
+
 ↓
-Development
 
-Use diagrams.
+AI implementation missions are generated.
 
-Not cards.
+↓
 
----
-
-Section 4 — Generated For You
-
-Show generated outputs:
-
-* agents.md
-* architecture.md
-* build-plan.md
-* ui-rules.md
-* mission-01.md
-
-These should feel like premium documents.
-
-Not code blocks.
-
-Not screenshots.
+Context becomes usable inside any AI coding assistant.
 
 ---
 
-Section 5 — AI Ecosystem
+# Supported AI Tools
 
-Show tools that use Zenix outputs.
+Generated context should work with any AI coding environment.
 
-Include:
+Examples include:
 
-* Claude Code
-* Gemini CLI
-* OpenAI Codex
-* Cursor
-* Windsurf
-* GitHub Copilot
+- OpenAI Codex
+- Claude Code
+- Gemini CLI
+- Cursor
+- Windsurf
+- GitHub Copilot
+- Continue
+- Roo Code
+- Cline
+- Any Markdown-based AI workflow
 
-Use real icons.
-
-Never use emojis.
-
-Purpose:
-
-Show where generated context gets used.
+Never optimize for only one AI provider.
 
 ---
 
-Section 6 — Bento Grid
+# Development Principles
 
-Topics:
+Always prefer:
 
-* Architecture
-* AI Agents
-* Mission Generation
-* Documentation
-* Development Workflow
-* Team Alignment
+- Maintainability
+- Scalability
+- Readability
+- Reusability
+- Type safety where applicable
+- Predictable architecture
 
-Every card should be visually unique.
+Never write code only because it works.
 
----
-
-Section 7 — Hover Gallery
-
-Interactive showcase.
-
-Hover items:
-
-* Architecture
-* Missions
-* Documentation
-* Agents
-* Deployment
-* Design System
-
-Display artwork and previews.
+Write code that another engineer can immediately understand.
 
 ---
 
-Section 8 — Final CTA
+# Planning Before Coding
 
-Large editorial statement.
+Never immediately start implementing.
 
-Examples:
+Before writing code:
 
-"Your AI needs context."
+1. Understand the feature.
+2. Understand dependencies.
+3. Break the feature into small tasks.
+4. Explain the implementation plan.
+5. Ask questions if information is missing.
+6. Only then begin implementation.
 
-"Stop repeating your project."
+Never guess requirements.
 
-"Context is the new code."
-
-Simple CTA.
-
-Premium footer.
-
----
-
-# Animation System
-
-Use:
-
-* GSAP
-* ScrollTrigger
-* SplitText
-* MotionPathPlugin
-* Flip Plugin
-* Lenis
-
-Key Animations:
-
-Hero Text Reveal
-
-SVG Path Drawing
-
-Document Parallax
-
-Horizontal Scroll Storytelling
-
-Card Stacking
-
-Hover Reveal Gallery
-
-Motion Path Timeline
-
-SplitText Footer Reveal
-
-Do not animate everything.
-
-Motion should feel intentional.
+If anything is unclear, ask.
 
 ---
 
-# Development Rules
+# Feature Development Process
 
-1. Use React.
-2. Use Tailwind CSS v4.
-3. Use shadcn/ui.
-4. Build reusable components.
-5. Use semantic HTML.
-6. Mobile-first.
-7. Avoid hardcoded spacing.
-8. Use design tokens.
-9. Use proper accessibility.
-10. Maintain consistent typography.
+Every feature should follow this workflow:
+
+Understand
+
+↓
+
+Plan
+
+↓
+
+Break into tasks
+
+↓
+
+Implement task-by-task
+
+↓
+
+Verify
+
+↓
+
+Refactor
+
+↓
+
+Update progress.md
+
+Never implement multiple unrelated features together.
 
 ---
 
-# Most Important Rule
+# Folder Structure
 
-When making design decisions:
+Use Feature-Based Architecture.
 
-Do not ask:
+Never place business logic inside pages.
 
-"How do SaaS websites look?"
+Recommended structure:
 
-Ask:
+src/
 
-"How would the product itself look if it became the website?"
+pages/
+login/
+signup/
+dashboard/
+projects/
+settings/
 
-Generated outputs should be the design language.
+features/
+
+auth/
+api/
+hooks/
+store/
+ui/
+utils/
+constants/
+types/
+index.js
+
+projects/
+api/
+hooks/
+store/
+ui/
+utils/
+constants/
+types/
+index.js
+
+dashboard/
+api/
+hooks/
+store/
+ui/
+utils/
+constants/
+types/
+index.js
+
+missions/
+
+documents/
+
+settings/
+
+shared/
+
+components/
+hooks/
+layouts/
+providers/
+services/
+utils/
+constants/
+types/
+
+assets/
+
+lib/
+
+Every feature owns its own:
+
+- API
+- Hooks
+- Store
+- Constants
+- Types
+- UI
+- Utilities
+
+Only reusable components belong inside shared/components.
+
+Never place feature-specific components inside shared.
+
+---
+
+# Pages
+
+Pages should remain extremely small.
+
+Pages only render feature components.
+
+Example:
+
+pages/login
+
+↓
+
+renders
+
+features/auth/Login
+
+No business logic inside pages.
+
+No API calls inside pages.
+
+No state management inside pages.
+
+Pages are routing layers only.
+
+---
+
+# Component Rules
+
+Keep components focused.
+
+One responsibility.
+
+If a component grows too much, split it.
+
+Avoid giant files.
+
+Prefer composition over complexity.
+
+---
+
+# File Length
+
+No source file should exceed approximately 150 lines whenever reasonably possible.
+
+If a file becomes too large:
+
+Split it.
+
+Extract:
+
+- hooks
+- components
+- helpers
+- utilities
+- constants
+
+Never create 400-line React components.
+
+---
+
+# State Management
+
+Keep state local whenever possible.
+
+Lift state only when required.
+
+Global state should only exist when multiple features genuinely require it.
+
+Avoid unnecessary global stores.
+
+---
+
+# Constants
+
+Never hardcode values.
+
+Create constants for:
+
+- routes
+- labels
+- navigation
+- limits
+- validation
+- animation values
+- configuration
+- default settings
+
+Use dedicated constants folders.
+
+---
+
+# Styling Rules
+
+Never hardcode:
+
+- colors
+- spacing
+- typography
+- border radius
+- shadows
+
+Always use design tokens.
+
+Use values defined in the project's design system.
+
+---
+
+# React Guidelines
+
+Use the latest React patterns.
+
+Prefer:
+
+- functional components
+- hooks
+- composition
+- reusable abstractions
+
+Avoid outdated patterns.
+
+---
+
+# API Layer
+
+Keep networking isolated.
+
+Never call APIs directly inside UI components.
+
+Use dedicated API modules.
+
+---
+
+# Hooks
+
+Business logic belongs inside hooks whenever appropriate.
+
+Components should primarily render UI.
+
+---
+
+# Reusability
+
+Before creating something new:
+
+Check whether it already exists.
+
+Avoid duplicate components.
+
+Avoid duplicate utilities.
+
+Avoid duplicate logic.
+
+---
+
+# Error Handling
+
+Never silently fail.
+
+Provide clear loading, empty, success, and error states.
+
+---
+
+# Accessibility
+
+Every UI should include:
+
+- semantic HTML
+- keyboard navigation
+- proper labels
+- focus states
+- accessible buttons
+- accessible forms
+
+Accessibility is required.
+
+---
+
+# Performance
+
+Prefer:
+
+- lazy loading
+- code splitting
+- memoization when justified
+- optimized rendering
+
+Never optimize prematurely.
+
+Optimize obvious bottlenecks.
+
+---
+
+# Documentation
+
+Write clear code.
+
+Prefer descriptive names.
+
+Avoid unnecessary comments.
+
+When complex logic exists, document the reasoning rather than the syntax.
+
+---
+
+# Progress Tracking
+
+A file named:
+
+progress.md
+
+exists in the project.
+
+It starts empty.
+
+After completing meaningful work:
+
+Update progress.md with:
+
+- completed work
+- current status
+- pending work
+- blockers
+- next tasks
+
+This file acts as long-term memory for AI agents.
+
+---
+
+# When Stuck
+
+Never invent requirements.
+
+Never guess.
+
+Stop.
+
+Ask questions.
+
+Wait for clarification.
+
+Then continue.
+
+---
+
+# Definition of Done
+
+A task is complete only when:
+
+- Feature works correctly
+- Code follows project architecture
+- No hardcoded values
+- Components are reusable
+- Folder structure is respected
+- Pages remain thin
+- Documentation is updated
+- progress.md is updated
+
+Only then should the task be considered finished.
