@@ -301,6 +301,11 @@
     min-height: 100vh;
   }
 
+  ::selection {
+    background: rgb(255 255 255 / 0.18);
+    color: white;
+  }
+
   h1,
   h2,
   h3,
@@ -308,5 +313,11 @@
   h5,
   h6 {
     font-family: var(--font-display);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
