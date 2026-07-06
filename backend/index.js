@@ -11,7 +11,7 @@ const startServer = async () => {
     try {
         await ConnectDB();
         
-        /* Initialize Socket.io */
+       
         initSocket(server);
 
         server.listen(PORT, () => {

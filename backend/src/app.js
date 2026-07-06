@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import { corsMiddleware } from './config/cors.js';
 import AuthRouter from './features/auth/auth.route.js';
 import ProjectRouter from './features/projects/project.routes.js';
 import TaskRouter from './features/tasks/task.routes.js';
@@ -14,6 +15,8 @@ const app = express();
 
 app.set('trust proxy', process.env.TRUST_PROXY || 'loopback');
 
+app.use(corsMiddleware);
+app.options(/.*/, corsMiddleware);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -46,5 +49,4 @@ app.use((req, res, next) => {
 app.use(errorMiddleware);
 
 export default app;
-
 
