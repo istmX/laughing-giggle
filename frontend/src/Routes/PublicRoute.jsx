@@ -2,18 +2,18 @@ import { Navigate, Outlet } from 'react-router-dom'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-const ProtectedRoute = () => {
+const PublicRoute = () => {
   const { hasHydrated, isAuthenticated } = useAuth()
 
   if (!hasHydrated) {
     return null
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return <Outlet />
 }
 
-export default ProtectedRoute
+export default PublicRoute
