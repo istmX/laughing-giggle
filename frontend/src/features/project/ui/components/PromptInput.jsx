@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { ArrowRight, Loader2 } from 'lucide-react'
 
+import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
+
 export function PromptInput({ onSubmit, isLoading }) {
   const [val, setVal] = useState('')
   const textareaRef = useRef(null)
@@ -56,10 +58,15 @@ export function PromptInput({ onSubmit, isLoading }) {
           className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[140px] text-button font-480 text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
         >
           {isLoading ? (
-            <>
-              Analyzing
-              <Loader2 className="h-4 w-4 animate-spin" />
-            </>
+            <TextShimmerWave 
+              className="text-button font-480 [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
+              duration={1}
+              spread={1}
+              zDistance={1}
+              yDistance={-1}
+            >
+              Analyzing...
+            </TextShimmerWave>
           ) : (
             <>
               Continue

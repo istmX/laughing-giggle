@@ -8,6 +8,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
 import { analyzeIdea, generateQuestions, generateRefinement } from '../api/ai.api'
 import { updateProject, getProject } from '../api/projects.api'
+import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 import toast from 'react-hot-toast'
 
 export function NewProjectPage() {
@@ -187,8 +188,14 @@ export function NewProjectPage() {
       <div className="w-full max-w-6xl mx-auto relative px-4 sm:px-8">
         {isPageLoading ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <Loader2 className="h-8 w-8 text-ink animate-spin mb-4" />
-            <p className="text-body text-ink-muted">Loading project context...</p>
+            <TextShimmerWave 
+              className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
+              duration={1.2}
+              zDistance={2}
+              yDistance={-2}
+            >
+              Loading project context...
+            </TextShimmerWave>
           </div>
         ) : (
         <AnimatePresence mode="wait">
@@ -240,8 +247,14 @@ export function NewProjectPage() {
             >
               {isRefining ? (
                 <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                  <Loader2 className="h-8 w-8 text-ink animate-spin mb-4" />
-                  <p className="text-body text-ink-muted">Synthesizing your project context... This may take a moment.</p>
+                  <TextShimmerWave 
+                    className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
+                    duration={1.2}
+                    zDistance={2}
+                    yDistance={-2}
+                  >
+                    Synthesizing your project context...
+                  </TextShimmerWave>
                 </div>
               ) : step <= aiQuestions.length && aiQuestions.length > 0 ? (
                 <QuestionCard 
