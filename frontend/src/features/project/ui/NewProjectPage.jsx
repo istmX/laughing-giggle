@@ -7,7 +7,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
 import { analyzeIdea, generateQuestions } from '../api/ai.api'
-import { updateProject } from '../api/projects.api'
+import { updateProject, getProject } from '../api/projects.api'
 import toast from 'react-hot-toast'
 
 export function NewProjectPage() {
@@ -15,40 +15,36 @@ export function NewProjectPage() {
   const navigate = useNavigate()
   const { token } = useAuth()
   
-  const [step, setStep] = useState(() => {
-    const saved = localStorage.getItem(`project_wizard_${projectId}`)
-    if (saved) return JSON.parse(saved).step || 0
-    return 0
-  })
-  const [prompt, setPrompt] = useState(() => {
-    const saved = localStorage.getItem(`project_wizard_${projectId}`)
-    if (saved) return JSON.parse(saved).prompt || ''
-    return ''
-  })
-  const [answers, setAnswers] = useState(() => {
-    const saved = localStorage.getItem(`project_wizard_${projectId}`)
-    if (saved) return JSON.parse(saved).answers || {}
-    return {}
-  })
-  const [aiQuestions, setAiQuestions] = useState(() => {
-    const saved = localStorage.getItem(`project_wizard_${projectId}`)
-    if (saved) return JSON.parse(saved).aiQuestions || []
-    return []
-  })
-  const [ideaId, setIdeaId] = useState(() => {
-    const saved = localStorage.getItem(`project_wizard_${projectId}`)
-    if (saved) return JSON.parse(saved).ideaId || null
-    return null
-  })
-  
+  const [step, setStep] = useState(0) // 0 = Prompt, 1 = Q1, etc., 999 = Already Completed
+  const [prompt, setPrompt] = useState('')
+  const [answers, setAnswers] = useState({})
+  const [aiQuestions, setAiQuestions] = useState([])
+  const [ideaId, setIdeaId] = useState(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isPageLoading, setIsPageLoading] = useState(true)
+  const [completedProjectData, setCompletedProjectData] = useState(null)
 
-  // Persist state changes
+  // Fetch project on mount to check if idea is already submitted
   useEffect(() => {
-    localStorage.setItem(`project_wizard_${projectId}`, JSON.stringify({
-      step, prompt, answers, aiQuestions, ideaId
-    }))
-  }, [step, prompt, answers, aiQuestions, ideaId, projectId])
+    const checkProjectStatus = async () => {
+      try {
+        const res = await getProject(token, projectId)
+        const project = res.data
+        if (project && project.project_title !== 'Untitled Project') {
+          setCompletedProjectData(project)
+          setStep(999) // Special step for already completed
+        }
+      } catch (err) {
+        console.error('Failed to fetch project status', err)
+      } finally {
+        setIsPageLoading(false)
+      }
+    }
+    
+    if (token && projectId) {
+      checkProjectStatus()
+    }
+  }, [token, projectId])
 
   const parseAIResponse = (res) => {
     try {
@@ -159,6 +155,12 @@ export function NewProjectPage() {
       </div>
 
       <div className="w-full max-w-6xl mx-auto relative px-4 sm:px-8">
+        {isPageLoading ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <Loader2 className="h-8 w-8 text-ink animate-spin mb-4" />
+            <p className="text-body text-ink-muted">Loading project context...</p>
+          </div>
+        ) : (
         <AnimatePresence mode="wait">
           {step === 0 ? (
             <motion.div
@@ -169,6 +171,34 @@ export function NewProjectPage() {
               transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             >
               <PromptInput onSubmit={handlePromptSubmit} isLoading={isAnalyzing} />
+            </motion.div>
+          ) : step === 999 ? (
+            <motion.div
+              key="completed"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+            >
+              <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
+                <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
+                <h2 className="text-[32px] font-340 tracking-tight text-ink mb-4">Brief Already Completed</h2>
+                <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
+                  You have already generated the idea and context for this project.
+                </p>
+                <div className="bg-canvas border border-hairline rounded-xl p-6 text-left">
+                  <p className="text-sm font-semibold text-ink mb-2">Project Title:</p>
+                  <p className="text-ink-muted text-sm mb-6">{completedProjectData?.project_title}</p>
+                  <p className="text-sm font-semibold text-ink mb-2">Project Idea:</p>
+                  <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData?.project_description}</p>
+                </div>
+                <div className="mt-8">
+                  {/* Context Gen API Button will go here in the future */}
+                  <button className="bg-ink text-canvas hover:bg-ink/90 px-6 py-3 rounded-full text-body-sm font-340 transition-colors cursor-not-allowed opacity-50">
+                    Generate Context (Coming Soon)
+                  </button>
+                </div>
+              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -208,6 +238,7 @@ export function NewProjectPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        )}
       </div>
     </div>
   )

@@ -61,6 +61,13 @@ export const getProjects = async (token) => {
   })
 }
 
+export const getProject = async (token, projectId) => {
+  return authFetch(`/projects/${projectId}`, {
+    method: 'GET',
+    token,
+  })
+}
+
 export const deleteProject = async (token, projectId) => {
   return authFetch(`/projects/${projectId}`, {
     method: 'DELETE',
