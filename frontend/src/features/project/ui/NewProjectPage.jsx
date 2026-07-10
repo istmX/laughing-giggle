@@ -312,23 +312,13 @@ export function NewProjectPage() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             >
-              {isRefining ? (
-                <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                  <TextShimmerWave 
-                    className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
-                    duration={1.2}
-                    zDistance={2}
-                    yDistance={-2}
-                  >
-                    Synthesizing your project context...
-                  </TextShimmerWave>
-                </div>
-              ) : currentQuestion ? (
+              {currentQuestion ? (
                 <QuestionCard 
                   currentStep={step}
-                  totalSteps={5} // We don't know the exact total anymore, but we cap at 5
+                  totalSteps={5}
                   question={currentQuestion}
                   onSubmit={handleQuestionSubmit}
+                  isLoading={isRefining}
                 />
               ) : (
                 <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">

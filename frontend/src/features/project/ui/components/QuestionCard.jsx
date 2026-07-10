@@ -1,87 +1,101 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { OptionButton } from './OptionButton'
 import { ProgressIndicator } from './ProgressIndicator'
+import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 
-export function QuestionCard({ currentStep, totalSteps, question, onSubmit }) {
-  const [selectedOption, setSelectedOption] = useState(null)
-  const [customValue, setCustomValue] = useState('')
+/**
+ * QuestionCard — works with conversational AI questions.
+ * `question` can be:
+ *   - A string (new conversational format from AI)
+ *   - An object { title, options } (legacy format)
+ *   - An object { key, question } from the conversational agent
+ */
+export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLoading }) {
+  const [answer, setAnswer] = useState('')
+  const textareaRef = useRef(null)
 
-  const isCustomSelected = selectedOption === 'custom'
-  const isSubmitDisabled = !selectedOption || (isCustomSelected && !customValue.trim())
+  // Extract the question text regardless of format
+  const questionText = typeof question === 'string'
+    ? question
+    : question?.question || question?.title || 'Tell us more about your project.'
+
+  useEffect(() => {
+    setAnswer('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.focus()
+    }
+  }, [questionText])
+
+  const handleInput = (e) => {
+    setAnswer(e.target.value)
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }
 
   const handleSubmit = () => {
-    if (isSubmitDisabled) return
-    onSubmit(isCustomSelected ? customValue.trim() : selectedOption)
-    setSelectedOption(null)
-    setCustomValue('')
+    if (!answer.trim() || isLoading) return
+    onSubmit(answer.trim())
   }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSubmit()
+    }
+  }
+
+  const isSubmitDisabled = !answer.trim() || isLoading
 
   return (
     <div className="w-full flex flex-col">
       <div className="mb-8">
         <ProgressIndicator current={currentStep} total={totalSteps} />
-        <h2 className="text-[40px] leading-[1.1] font-340 tracking-tight text-ink mt-6 mb-8">
-          {question.title}
+        <h2 className="text-[40px] leading-[1.1] font-340 tracking-tight text-ink mt-6 mb-4">
+          {questionText}
         </h2>
+        <p className="text-body text-ink-muted">
+          Be as specific as you like — the more detail, the better the output.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        {question.options.map((opt) => (
-          <OptionButton
-            key={opt}
-            label={opt}
-            badge="Suggested"
-            isSelected={selectedOption === opt}
-            onClick={() => {
-              setSelectedOption(opt)
-              setCustomValue('')
-            }}
-          />
-        ))}
-        
-        <OptionButton
-          label="Let AI decide"
-          description="Best for beginners. Let Zenix choose the optimal stack."
-          isSelected={selectedOption === 'ai_decide'}
-          onClick={() => {
-            setSelectedOption('ai_decide')
-            setCustomValue('')
-          }}
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          value={answer}
+          onChange={handleInput}
+          onKeyDown={handleKeyDown}
+          disabled={isLoading}
+          placeholder="Type your answer..."
+          rows={3}
+          className="w-full resize-none rounded-xl border border-hairline bg-canvas p-6 text-body-lg tracking-body-lg font-320 text-ink placeholder:text-ink-faint focus:border-ink/30 focus:outline-none focus:ring-4 focus:ring-ink/5 transition-all shadow-sm disabled:opacity-50"
         />
-
-        <OptionButton
-          label="Write my own..."
-          description="For professionals. Specify a custom tool not listed above."
-          isSelected={isCustomSelected}
-          onClick={() => setSelectedOption('custom')}
-        />
-
-        {isCustomSelected && (
-          <div className="mt-2 pl-[3.25rem] pr-4">
-            <input
-              autoFocus
-              type="text"
-              value={customValue}
-              onChange={(e) => setCustomValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSubmit()
-              }}
-              placeholder="E.g. Firebase Authentication"
-              className="w-full rounded-md border-b border-hairline bg-transparent py-2 text-body font-330 text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none transition-colors"
-            />
-          </div>
-        )}
       </div>
 
-      <div className="mt-10 flex justify-start">
+      <div className="mt-8 flex justify-end">
         <button
           onClick={handleSubmit}
           disabled={isSubmitDisabled}
-          className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-button font-480 text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[160px] text-button font-480 text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
         >
-          Continue
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          {isLoading ? (
+            <TextShimmerWave
+              className="text-button font-480 [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
+              duration={1}
+              spread={1}
+              zDistance={1}
+              yDistance={-1}
+            >
+              Thinking...
+            </TextShimmerWave>
+          ) : (
+            <>
+              Continue
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </>
+          )}
         </button>
       </div>
     </div>
