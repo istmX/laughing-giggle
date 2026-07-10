@@ -42,6 +42,8 @@ Latest hero pass:
 - `$impeccable polish`: wired hero CTAs to `/login` and `/signup`, switched harsh black CTAs to the brand indigo treatment, removed video play overlays, increased the resting video radius, and lengthened the pinned scroll takeover with Lenis smoothing
 - `$impeccable polish` follow-up: deepened the background glow field, added more far-field cubes and lower-section hints, and delayed the headline fade so the scroll takeover feels less abrupt
 - `$impeccable polish` follow-up 2: removed the fake control bar from the big video so the stage reads as a clean film surface
+- Added global Lenis smooth scrolling at the app shell and removed the duplicate Lenis instance from the hero hook.
+- Added the first post-hero comparison section with GSAP scroll reveal, Zenix context engine center node, and generated-output list.
 
 The home page now includes:
 - the original `hero-03.jsx` hero structure with split text animation
@@ -159,3 +161,16 @@ The home page now includes:
 
 
 
+- **Project Creation UI built**:
+  - Added `EmptyProjects.jsx` with a minimal, premium empty state
+  - Added `CreateProjectDialog.jsx` with an auto-resizing, hero-style textarea, example prompt buttons, and polished focus states
+  - Added `ProjectCard.jsx` for reusable project display
+  - Integrated the empty state and dialog into `Dashboard/components/Overview.jsx`
+  - Used exact typography and border-radius tokens from `DESIGN.md` (no hardcoded CSS values)
+  - Focused strictly on UI components, without backend logic
+
+- **Project AI API Integration**:
+  - Wired up `POST /ideas` API to save the user's raw prompt and generate an idea ID.
+  - Connected `POST /ai/analyze/:ideaId` API to generate an intelligent project title and description via the AI orchestrator.
+  - Automatically synced AI analysis results to the Project object using the `PATCH /projects/:projectId` endpoint.
+  - Updated `PromptInput.jsx` UI with loading states and `react-hot-toast` notifications to handle the multi-step async flow seamlessly.
