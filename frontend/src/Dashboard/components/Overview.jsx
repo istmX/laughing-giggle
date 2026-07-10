@@ -24,7 +24,7 @@ export function Overview() {
             transition={{ delay: 0.2, type: "spring", stiffness: 180, damping: 15 }}
             className="mb-10 flex items-center justify-center p-12 rounded-[32px] border border-hairline bg-surface-soft shadow-sm rotate-3 hover:rotate-0 transition-transform duration-500 ease-out"
           >
-            <FolderOpen className="h-20 w-20 text-[#ff3d8b] -rotate-3 transition-transform duration-500" strokeWidth={1.5} />
+            <FolderOpen className="h-20 w-20 text-primary -rotate-3 transition-transform duration-500" strokeWidth={1.5} />
           </motion.div>
           
           <motion.h3 
@@ -42,7 +42,7 @@ export function Overview() {
             transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 25 }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.95 }}
-            className="group flex items-center gap-3 rounded-full bg-[#ff3d8b] px-10 py-4 text-lg font-medium text-white hover:bg-[#e6367c] transition-colors shadow-sm hover:shadow-lg hover:shadow-[#ff3d8b]/20"
+            className="group flex items-center gap-3 rounded-full bg-primary px-10 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm hover:shadow-lg hover:shadow-primary/20"
           >
             <Plus className="h-6 w-6 transition-transform group-hover:rotate-180 duration-500 ease-out" />
             Create a project

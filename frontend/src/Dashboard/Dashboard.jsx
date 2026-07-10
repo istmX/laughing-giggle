@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { Outlet } from 'react-router-dom'
 import { Sidebar } from './components/Sidebar'
 import { Header } from './components/Header'
-import { Overview } from './components/Overview'
 
 export default function DashboardShell() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -17,7 +17,7 @@ export default function DashboardShell() {
       />
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header setIsMobileMenuOpen={setIsMobileMenuOpen} />
-        <Overview />
+        <Outlet />
       </main>
     </div>
   )

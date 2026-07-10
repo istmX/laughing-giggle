@@ -42,7 +42,7 @@ const navGroups = [
   {
     label: 'Settings',
     items: [
-      { name: 'Account', href: '/dashboard/settings/account', icon: User },
+      { name: 'Account', href: '/dashboard/profile', icon: User },
       { name: 'Preferences', href: '/dashboard/settings/preferences', icon: Sliders },
       { name: 'API Keys', href: '/dashboard/settings/keys', icon: Key },
       { name: 'Billing', href: '/dashboard/settings/billing', icon: CreditCard },
@@ -150,16 +150,24 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
               
               <div className="p-4 border-t border-hairline/50 shrink-0">
                 <div className="flex items-center justify-between mb-4 px-2">
-                  <div className="flex items-center gap-3">
-                    <UserCircle className="h-8 w-8 text-ink-muted" />
+                  <Link to="/dashboard/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
+                    {user ? (
+                      <img 
+                        src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
+                      />
+                    ) : (
+                      <UserCircle className="h-8 w-8 text-ink-muted shrink-0" />
+                    )}
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">{user?.name || 'Profile'}</span>
+                      <span className="text-sm font-medium text-ink">{user?.name || 'Profile'}</span>
                     </div>
-                  </div>
+                  </Link>
                 </div>
                 <button
                   onClick={() => logout()}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-red-500/10 transition-colors"
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   <LogOut className="h-5 w-5" />
                   Sign out
@@ -215,15 +223,23 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
         <div className="p-3 border-t border-hairline/50 shrink-0">
           {isSidebarOpen ? (
              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 px-3 py-2">
-                  <UserCircle className="h-8 w-8 text-ink-muted" />
+                <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
+                  {user ? (
+                    <img 
+                      src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                      alt={user.name}
+                      className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
+                    />
+                  ) : (
+                    <UserCircle className="h-8 w-8 text-ink-muted shrink-0" />
+                  )}
                   <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-medium truncate">{user?.name || 'Profile'}</span>
+                    <span className="text-sm font-medium truncate text-ink">{user?.name || 'Profile'}</span>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={() => logout()}
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
                   <span className="whitespace-nowrap">Sign out</span>
@@ -231,10 +247,20 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
              </div>
           ) : (
             <div className="flex flex-col gap-4 items-center py-2">
-              <UserCircle className="h-6 w-6 text-ink-muted" />
+              <Link to="/dashboard/profile" title="Profile" className="hover:opacity-80 transition-opacity">
+                {user ? (
+                  <img 
+                    src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                    alt={user.name}
+                    className="h-6 w-6 rounded-full bg-surface-soft object-cover border border-hairline"
+                  />
+                ) : (
+                  <UserCircle className="h-6 w-6 text-ink-muted" />
+                )}
+              </Link>
               <button
                 onClick={() => logout()}
-                className="text-destructive hover:text-red-600 transition-colors"
+                className="text-destructive hover:opacity-80 transition-opacity"
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5" />
