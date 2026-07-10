@@ -50,7 +50,7 @@ const AuthField = ({
 
   return (
     <div className={cn('space-y-3', className)}>
-      <label className="text-[0.95rem] font-medium text-white" htmlFor={name}>
+      <label className="text-body-sm font-medium text-foreground" htmlFor={name}>
         {label}
       </label>
 
@@ -68,8 +68,8 @@ const AuthField = ({
         {Icon ? (
           <span
             className={cn(
-              'pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-white/42 transition-colors duration-200',
-              isTyping && 'text-white/75',
+              'pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-ink-soft transition-colors duration-200',
+              isTyping && 'text-foreground',
             )}
           >
             <Icon className="size-4" />
@@ -89,8 +89,8 @@ const AuthField = ({
           autoComplete={autoComplete}
           inputMode={inputMode}
           className={cn(
-            'h-14 rounded-[16px] border-white/12 bg-white/[0.03] pl-11 pr-11 text-[15px] text-white shadow-none',
-            'placeholder:text-white/34 focus-visible:border-white/60 focus-visible:bg-white/[0.05] focus-visible:ring-0',
+            'h-14 rounded-md border-border bg-background pl-11 pr-11 text-body-sm text-foreground shadow-none',
+            'placeholder:text-ink-soft focus-visible:border-primary focus-visible:bg-background focus-visible:ring-0',
             'transition-[border-color,background-color,transform] duration-200',
           )}
         />
@@ -99,7 +99,7 @@ const AuthField = ({
           <button
             type="button"
             onClick={() => setShowPassword((value) => !value)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/42 transition-colors hover:text-white"
+            className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-soft transition-colors hover:text-foreground"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
