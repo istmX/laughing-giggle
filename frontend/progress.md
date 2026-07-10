@@ -34,6 +34,15 @@ Auth forms now use a shared dark shell, centered heading treatment, and input-le
 
 Landing page work is now underway on the `/` route.
 
+Latest hero pass:
+- replaced the old document-card hero with a video-led Zenix hero that matches the new reference direction more closely
+- added an inline autoplay video chip inside the headline using the same source as the main hero film
+- introduced GSAP `ScrollTrigger` expansion so the rounded hero video stage pins and grows toward a full-viewport takeover on desktop scroll
+- kept reduced-motion users on a static version without scroll choreography
+- `$impeccable polish`: wired hero CTAs to `/login` and `/signup`, switched harsh black CTAs to the brand indigo treatment, removed video play overlays, increased the resting video radius, and lengthened the pinned scroll takeover with Lenis smoothing
+- `$impeccable polish` follow-up: deepened the background glow field, added more far-field cubes and lower-section hints, and delayed the headline fade so the scroll takeover feels less abrupt
+- `$impeccable polish` follow-up 2: removed the fake control bar from the big video so the stage reads as a clean film surface
+
 The home page now includes:
 - the original `hero-03.jsx` hero structure with split text animation
 - GSAP plugin setup plus Lenis smooth scrolling with reduced-motion fallback
@@ -103,6 +112,12 @@ The home page now includes:
 - Verify responsive edge cases in the dashboard view
 
 ### Active
+- `$impeccable theme`: Built a multi-theme architecture for the Dashboard (Light, Dark, Midnight, Emerald) with Zustand persistence.
+- Added strict route-checking so public marketing/auth pages remain Light mode, while Dashboard fully respects the user's selected theme.
+- Globally audited and purged hardcoded colors (`bg-white`, `text-white`, `#ff3d8b`, etc.) across all Dashboard components to ensure perfect semantic scaling.
+- Added global Toast notifications for auth flows and a reusable Loader component.
+- Built a custom 404 Not Found page.
+- Created the Profile Page with avatar randomization via DiceBear API and user data fetching.
 - `$impeccable layout`: Fixed dashboard scrolling (used `h-dvh` instead of `h-screen` for mobile Safari compatibility).
 - Hid scrollbars across the dashboard sidebar and main content areas to reduce visual clutter.
 - `$impeccable onboard`: Overhauled dashboard empty state with a clear "No projects yet" message, larger icon treatment, and a primary CTA to create a project.
