@@ -174,3 +174,5 @@ The home page now includes:
   - Connected `POST /ai/analyze/:ideaId` API to generate an intelligent project title and description via the AI orchestrator.
   - Automatically synced AI analysis results to the Project object using the `PATCH /projects/:projectId` endpoint.
   - Updated `PromptInput.jsx` UI with loading states and `react-hot-toast` notifications to handle the multi-step async flow seamlessly.
+  - Wired up `POST /ai/questions/:ideaId` API to generate dynamic, intelligent clarification questions based on the user's specific idea prompt.
+  - Implemented a dummy "Brief Complete" screen that displays the polished prompt structure and the user's clarification answers after the question flow finishes.
