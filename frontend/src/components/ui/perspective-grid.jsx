@@ -37,7 +37,7 @@ export function PerspectiveGrid({
                 {tiles.map((_, i) => (
                     <div
                         key={i}
-                        className="tile min-h-[1px] min-w-[1px] border border-border/70 bg-transparent transition-colors duration-[1500ms] hover:duration-0" />
+                        className="tile min-h-[1px] min-w-[1px] border border-border/70 bg-transparent transition-colors duration-1000 hover:duration-0" />
                 ))}
             </div>
             {/* Radial Gradient Mask (Overlay) */}

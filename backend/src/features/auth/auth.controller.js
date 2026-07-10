@@ -184,13 +184,7 @@ export const getMe = async (req, res) => {
         }
 
         res.status(200).json({
-            user: {
-                id: user._id,
-                name: user.name,
-                username: user.username,
-                email: user.email,
-                joinedAt: user.createdAt
-            }
+            user: buildUserResponse(user)
         });
     } catch (error) {
         console.error('Error fetching user profile:', error);

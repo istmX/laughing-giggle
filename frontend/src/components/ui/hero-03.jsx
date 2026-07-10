@@ -1,95 +1,192 @@
-import { Separator } from '@/components/ui/separator'
-import { BadgeQuestionMark } from '@aliimam/icons'
-import { Instagram, Threads, X } from '@aliimam/logos'
+import { ArrowRight, Sparkles } from 'lucide-react'
+import { useRef } from 'react'
+import { Link } from 'react-router-dom'
+
+import { Button } from '@/components/ui/button'
+import { useHeroStageMotion } from '@/components/ui/use-hero-stage-motion'
+
+const HERO_VIDEO_SRC =
+  'https://ik.imagekit.io/urb829e4h/VID_20260710_140339.mp4?tr=orig&updatedAt=1783672813679'
+
+const TRUSTED_LOGOS = ['Razorpay', 'Waiturn', 'BuildShip', 'Relevance AI', 'Attio', 'Peerlist']
+
+const EDGE_CUBES = [
+  'left-[-2.5rem] top-[13rem] h-24 w-24',
+  'right-[-1.25rem] top-[16rem] h-20 w-20',
+  'left-[2rem] bottom-[14rem] h-16 w-16',
+  'right-[3rem] bottom-[12rem] h-24 w-24',
+  'left-[12%] top-[4rem] h-14 w-14',
+  'right-[16%] bottom-[4rem] h-14 w-14',
+]
 
 export function HeroSection03() {
-  return (
-    <section className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle,_black_1px,_transparent_1px)] opacity-15 [background-size:20px_20px] dark:bg-[radial-gradient(circle,_white_1px,_transparent_1px)]" />
+  const sectionRef = useRef(null)
+  const navRef = useRef(null)
+  const badgeRef = useRef(null)
+  const summaryRef = useRef(null)
+  const ctasRef = useRef(null)
+  const stageTrackRef = useRef(null)
+  const stageShellRef = useRef(null)
+  const trustRef = useRef(null)
 
-      <header className="relative z-10 flex items-center justify-between px-6 pt-6 md:px-8">
-        <div className="text-2xl font-semibold italic tracking-tight">zenix</div>
-        <nav className="hidden gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#" className="font-semibold text-foreground transition-opacity hover:opacity-60">Overview</a>
-          <a href="#" className="transition-opacity hover:opacity-60">Context</a>
-          <a href="#" className="transition-opacity hover:opacity-60">Missions</a>
-          <a href="#" className="transition-opacity hover:opacity-60">Docs</a>
+  useHeroStageMotion({
+    badgeRef,
+    ctasRef,
+    navRef,
+    sectionRef,
+    stageShellRef,
+    stageTrackRef,
+    summaryRef,
+    trustRef,
+  })
+
+  return (
+    <section ref={sectionRef} className="relative border-b border-hairline bg-background text-foreground">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgb(77_73_252/0.08),transparent_22%),radial-gradient(circle_at_12%_62%,rgb(106_92_255/0.07),transparent_18%),radial-gradient(circle_at_84%_64%,rgb(243_201_182/0.16),transparent_18%),radial-gradient(circle_at_50%_112%,rgb(77_73_252/0.05),transparent_28%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgb(77_73_252/0.12)_1px,transparent_1.2px)] bg-[length:26px_26px] opacity-[0.08]" />
+      <div className="absolute inset-x-0 bottom-0 h-[28rem] bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.56)_28%,rgba(255,255,255,0.92))]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-[8rem] h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.18)_18%,rgba(77,73,252,0.18)_82%,transparent)]" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {EDGE_CUBES.map((cube) => (
+          <span
+            key={cube}
+            data-hero-cube
+            className={`absolute ${cube} rounded-[26px] border border-[rgb(77_73_252/0.14)] bg-[linear-gradient(180deg,rgb(255_255_255/0.78),rgb(197_176_244/0.26))] shadow-[0_20px_80px_rgb(77_73_252/0.16),0_0_42px_rgb(77_73_252/0.28)] backdrop-blur-xl`}
+          />
+        ))}
+      </div>
+
+      <header
+        ref={navRef}
+        className="relative z-20 mx-auto flex max-w-[1360px] items-center justify-between px-6 pt-6 md:px-8"
+      >
+        <div className="text-[2.25rem] font-[540] tracking-[-0.06em]">
+          zenix<span className="align-top text-brand-indigo">*</span>
+        </div>
+        <nav className="hidden items-center gap-8 text-body-sm text-ink-muted lg:flex">
+          {['Product', 'How it works', 'Templates', 'Use cases', 'Pricing', 'Docs', 'Changelog'].map((item) => (
+            <a key={item} href="#product" className="transition-colors hover:text-foreground">
+              {item}
+            </a>
+          ))}
         </nav>
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline" className="h-11 rounded-full px-5 text-body-sm">
+            <Link to="/login">Log in</Link>
+          </Button>
+          <Button
+            asChild
+            className="h-11 rounded-full bg-brand-indigo px-5 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
+          >
+            <Link to="/signup">
+              Get started free
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </header>
 
-      <main className="relative z-10 pb-20 pt-16 md:pt-20">
-        <div className="flex w-full flex-col items-center justify-center gap-2 px-6 md:items-center">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-            <p className="max-w-[220px] text-start text-xs leading-5 text-muted-foreground md:max-w-[180px] md:text-right md:text-sm">
-              Zenix turns rough product ideas into implementation-ready context for modern AI teams.
-            </p>
-            <h1 className="text-6xl font-light leading-none tracking-[0.2em] md:text-7xl xl:text-[10rem]">
-              CONTEXT
-            </h1>
+      <main className="relative z-10 mx-auto max-w-[1360px] px-6 pb-24 pt-8 md:px-8 md:pb-32 md:pt-10" id="product">
+        <div className="mx-auto max-w-[58rem] text-center">
+          <div ref={badgeRef} className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white/80 px-4 py-2 text-body-sm text-ink-muted backdrop-blur-sm">
+            <span className="inline-flex size-2 rounded-full bg-brand-indigo" />
+            v1.0 is now live
+            <span className="text-foreground">Explore what&apos;s new</span>
+            <ArrowRight className="size-3.5" />
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-            <h1 className="flex text-6xl font-light leading-none tracking-[0.2em] md:text-7xl xl:text-[10rem]">
-              <span>FOR</span>
-              <BadgeQuestionMark type="solid" className="size-14 text-primary md:size-18 lg:size-40" />
-              <span>BUILD</span>
-            </h1>
-            <p className="max-w-[250px] pt-2 text-xs leading-5 text-muted-foreground md:max-w-[180px] md:pt-8 md:text-sm">
-              Shape architecture, requirements, workflows, and delivery missions in one place.
-            </p>
-          </div>
+          <h1 className="mt-8 text-balance text-[clamp(3.5rem,8vw,6rem)] font-[540] leading-[0.94] tracking-[-0.03em]">
+            <span data-hero-line className="block">
+              Turn ideas into
+            </span>
+            <span data-hero-line className="mt-2 block">
+              implementation-ready
+            </span>
+            <span data-hero-line className="mt-2 flex flex-wrap items-center justify-center gap-4">
+              <span className="text-brand-indigo">context</span>
+              <span className="relative inline-flex h-16 w-28 overflow-hidden rounded-[18px] border border-[rgb(77_73_252/0.2)] shadow-[0_18px_40px_rgb(77_73_252/0.12)]">
+                <video
+                  className="h-full w-full object-cover"
+                  src={HERO_VIDEO_SRC}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-hidden="true"
+                />
+                <span className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgb(11_13_18/0.18))]" />
+              </span>
+              <span>for AI coding agents</span>
+            </span>
+          </h1>
 
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-6">
-            <h1 className="flex flex-col text-6xl font-light leading-none tracking-[0.2em] md:flex-row md:text-7xl xl:text-[10rem]">
-              <span>SMART</span>
-              <div className="hidden lg:block">
-                <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 24 24" fill="#4D49FC">
-                  <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
-                </svg>
-              </div>
-              <div className="block lg:hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24" fill="#4D49FC">
-                  <path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
-                </svg>
-              </div>
-              <span>TEAMS</span>
-            </h1>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-10 w-full max-w-7xl px-6">
-          <div className="grid items-center gap-3 md:mx-8 md:flex md:justify-end">
-            <Separator className="my-6 w-full max-w-3xl md:mx-auto" />
-            <div className="text-xs whitespace-nowrap text-muted-foreground md:text-sm">SAN FRANCISCO • NEW YORK • REMOTE</div>
-            <div className="flex w-full items-end gap-3">
-              <span className="text-2xl font-thin md:text-4xl">PRODUCT</span>
-              <span className="text-3xl font-bold italic text-primary md:text-5xl">context</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12 flex flex-col gap-6 px-6 md:flex-row md:items-end md:px-20">
-          <div className="mb-8 h-48 w-full overflow-hidden rounded-md border shadow-lg md:mb-0 md:w-84">
-            <img
-              src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=80"
-              alt="Product documentation workflow"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <p className="max-w-xl text-xs leading-5 text-muted-foreground md:pt-8 md:text-sm">
-            Every mission, architecture note, and UI rule becomes a reusable artifact that AI coding tools can execute with clarity.
+          <p
+            ref={summaryRef}
+            className="mx-auto mt-8 max-w-[42rem] text-body-lg text-ink-muted"
+            data-hero-copy
+          >
+            Zenix understands your project, asks the right questions, and generates everything your AI agents need to build with clarity and consistency.
           </p>
+
+          <div ref={ctasRef} className="mt-8 flex flex-wrap items-center justify-center gap-4" data-hero-copy>
+            <Button
+              asChild
+              className="h-13 rounded-full bg-brand-indigo px-6 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
+            >
+              <Link to="/signup">
+                Get started for free
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-13 rounded-full px-6 text-body-sm">
+              See how it works
+              <span className="grid size-6 place-items-center rounded-full border border-hairline">
+                <Sparkles className="size-3.5" />
+              </span>
+            </Button>
+          </div>
         </div>
 
-        <div className="absolute bottom-8 right-8 flex gap-6 md:right-12">
-          <Instagram />
-          <X />
-          <Threads />
+        <div ref={stageTrackRef} className="relative z-20 mx-auto mt-14 h-[clamp(22rem,48vw,42rem)] w-full max-w-[1170px] will-change-transform lg:mt-18">
+          <div
+            ref={stageShellRef}
+            className="relative h-full overflow-hidden rounded-[2rem] border border-white/60 bg-[rgb(244_246_255)] shadow-[0_32px_120px_rgb(12_20_48/0.18)]"
+          >
+            <video
+              className="absolute inset-0 h-full w-full object-cover"
+              src={HERO_VIDEO_SRC}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_255_255/0.14),transparent_26%,transparent_74%,rgb(5_10_20/0.32))]" />
+            <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(255_255_255/0.2),transparent)]" />
+          </div>
         </div>
 
-        <div className="fixed right-0 top-1/2 flex h-36 -translate-y-1/2 items-center">
-          <div className="bg-foreground px-3 py-6 text-sm font-bold text-background">
-            <span className="rotate-180 [writing-mode:vertical-rl]">Context First</span>
+        <div ref={trustRef} className="mx-auto mt-10 max-w-[1180px] text-center" data-hero-copy>
+          <p className="text-caption uppercase tracking-caption text-ink-soft">Trusted by developers and teams at</p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-body-sm text-ink-muted">
+            {TRUSTED_LOGOS.map((logo) => (
+              <span key={logo}>{logo}</span>
+            ))}
+          </div>
+        </div>
+
+        <div className="pointer-events-none mx-auto mt-14 max-w-[1170px]">
+          <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.28)_18%,rgba(77,73,252,0.28)_82%,transparent)]" />
+          <div className="mt-8 grid grid-cols-3 gap-4 opacity-75 md:grid-cols-6">
+            {['Architecture', 'Schemas', 'Contracts', 'Rules', 'Plan', 'Ship'].map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.25rem] border border-hairline bg-[rgb(255_255_255/0.72)] px-4 py-5 text-left text-sm text-ink-muted shadow-[0_10px_30px_rgb(77_73_252/0.06)] backdrop-blur-sm"
+              >
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </main>

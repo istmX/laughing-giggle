@@ -40,7 +40,7 @@ const Animatedform = ({
   const passwordStaggerDelay = passwordAnimationDuration / password.length;
 
   return (
-    <div className={cn("relative w-full max-w-[22rem] sm:max-w-[26rem]") }>
+    <div className={cn("relative w-full max-w-[22rem] sm:max-w-[26rem]")}>
       <div
         className="w-full rounded-2xl border border-border bg-card p-1.5 shadow-sm">
         <div
@@ -50,7 +50,7 @@ const Animatedform = ({
           )}>
           <div
             className={cn(
-              "px-3 pt-3 pb-2 text-sm font-medium tracking-[0.16em] text-muted-foreground"
+              "px-3 pt-3 pb-2 text-sm font-medium tracking-wider text-muted-foreground"
             )}>
             GOOGLE OR EMAIL
           </div>
