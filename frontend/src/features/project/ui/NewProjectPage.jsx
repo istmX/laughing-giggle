@@ -37,7 +37,7 @@ export function NewProjectPage() {
         const res = await getProject(token, projectId)
         const project = res.data
         if (project) {
-          if (project.wizard_state && Object.keys(project.wizard_state).length > 0) {
+          if (project.wizard_state && project.wizard_state.ideaId) {
             const ws = project.wizard_state
             if (isMounted) {
               setIdeaId(ws.ideaId)
@@ -49,18 +49,17 @@ export function NewProjectPage() {
               if (ws.isComplete) {
                 setCompletedProjectData(project)
                 setStep(999)
-              } else {
-                // Resume from where they left off
+              } else if (ws.currentQuestion) {
+                // Resume to the question they left off on
                 setStep((ws.history?.length || 0) + 1)
+              } else {
+                // ideaId saved but conversation was interrupted before first Q
+                // Re-request first question silently
+                setStep('recovering')
               }
             }
-          } else if (project.project_title !== 'Untitled Project' || project.project_description) {
-            // Legacy completed projects
-            if (isMounted) {
-              setCompletedProjectData(project)
-              setStep(999)
-            }
           }
+          // If no wizard_state.ideaId, stay at step 0 (prompt input)
         }
       } catch (err) {
         console.error('Failed to fetch project status', err)
@@ -79,6 +78,38 @@ export function NewProjectPage() {
       isMounted = false;
     }
   }, [token, projectId])
+
+  // Recovery: ideaId is set but no currentQuestion. Re-request first AI question silently.
+  useEffect(() => {
+    if (step !== 'recovering' || !ideaId || !token) return
+    let cancelled = false
+    const recover = async () => {
+      try {
+        const res = await processConversation(token, ideaId, { history: [] })
+        const parsed = parseAIResponse(res)
+        if (cancelled) return
+        if (parsed.is_complete) {
+          const newState = { ideaId, prompt, history: [], currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true }
+          await syncStateToBackend(newState)
+          setRefinedSpec(parsed.refined_spec)
+          setStep(999)
+        } else {
+          const questionObj = { key: 'q1', question: parsed.next_question || 'What is the primary feature?' }
+          setCurrentQuestion(questionObj)
+          const newState = { ideaId, prompt, history: [], currentQuestion: questionObj, refinedSpec: null, isComplete: false }
+          await syncStateToBackend(newState)
+          setStep(1)
+        }
+      } catch (err) {
+        console.error('Recovery failed', err)
+        // Stay on recovering step — user can retry by refreshing
+        toast.error('Could not load your question. Please refresh to retry.')
+        if (!cancelled) setStep(0)
+      }
+    }
+    recover()
+    return () => { cancelled = true }
+  }, [step, ideaId, token])
 
   const parseAIResponse = (res) => {
     try {
@@ -141,6 +172,10 @@ export function NewProjectPage() {
         project_description: description
       })
       
+      // Save a minimal state BEFORE calling conversation so if it fails, user can resume
+      const minimalState = { ideaId: newIdeaId, prompt: val, history: [], currentQuestion: null, refinedSpec: null, isComplete: false }
+      await syncStateToBackend(minimalState)
+
       // Start conversational flow
       const convoRes = await processConversation(token, newIdeaId, { history: [] })
       const parsedConvo = parseAIResponse(convoRes)
@@ -175,8 +210,8 @@ export function NewProjectPage() {
       const res = await processConversation(token, ideaId, { history: newHistory })
       const parsed = parseAIResponse(res)
       
-      if (parsed.is_complete || newHistory.length >= 5) {
-        // Complete
+      if (parsed.is_complete) {
+        // Complete — AI decided it has enough context
         const finalSpec = parsed.refined_spec || 'Project specification completed based on constraints.'
         const newState = { ideaId, prompt, history: newHistory, currentQuestion: null, refinedSpec: finalSpec, isComplete: true }
         await syncStateToBackend(newState)
@@ -213,20 +248,25 @@ export function NewProjectPage() {
       </div>
 
       <div className="w-full max-w-6xl mx-auto relative px-4 sm:px-8">
-        {isPageLoading ? (
-          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <TextShimmerWave 
-              className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
-              duration={1.2}
-              zDistance={2}
-              yDistance={-2}
-            >
-              Loading project context...
-            </TextShimmerWave>
-          </div>
-        ) : (
         <AnimatePresence mode="wait">
-          {step === 0 ? (
+          {(step === 'recovering' || isPageLoading) ? (
+            <motion.div
+              key="recovering"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center min-h-[50vh]"
+            >
+              <TextShimmerWave 
+                className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
+                duration={1.2}
+                zDistance={2}
+                yDistance={-2}
+              >
+                Resuming your session...
+              </TextShimmerWave>
+            </motion.div>
+          ) : step === 0 ? (
             <motion.div
               key="prompt"
               initial={{ opacity: 0, y: 15 }}
@@ -311,7 +351,6 @@ export function NewProjectPage() {
             </motion.div>
           )}
         </AnimatePresence>
-        )}
       </div>
     </div>
   )
