@@ -18,7 +18,6 @@ const projectSchema = new mongoose.Schema(
 
     project_description: {
       type: String,
-      required: true,
       trim: true,
       maxlength: 2000
     },
@@ -27,6 +26,11 @@ const projectSchema = new mongoose.Schema(
       type: String,
       enum: ["active", "completed", "archived"],
       default: "active"
+    },
+
+    wizard_state: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
     }
   },
   {

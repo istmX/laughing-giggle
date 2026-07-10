@@ -127,7 +127,7 @@ const useAuthStore = create(
           const currentToken = get().token
           await logoutUser(currentToken)
           toast.success('Logged out successfully', { id: loadingToast })
-        } catch (error) {
+        } catch {
           toast.error('Failed to log out cleanly', { id: loadingToast })
         } finally {
           sessionStorage.clear()

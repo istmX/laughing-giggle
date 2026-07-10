@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
-import { analyzeIdea, generateQuestions, generateRefinement } from '../api/ai.api'
+import { processConversation, analyzeIdea } from '../api/ai.api'
 import { updateProject, getProject } from '../api/projects.api'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 import toast from 'react-hot-toast'
@@ -18,11 +18,14 @@ export function NewProjectPage() {
   
   const [step, setStep] = useState(0) // 0 = Prompt, 1 = Q1, etc., 999 = Already Completed
   const [prompt, setPrompt] = useState('')
-  const [answers, setAnswers] = useState({})
-  const [aiQuestions, setAiQuestions] = useState([])
+  const [history, setHistory] = useState([]) // [{ question, answer }]
+  const [currentQuestion, setCurrentQuestion] = useState(null)
   const [ideaId, setIdeaId] = useState(null)
+  
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
+  const [isRefining, setIsRefining] = useState(false)
+  const [refinedSpec, setRefinedSpec] = useState('')
   const [completedProjectData, setCompletedProjectData] = useState(null)
 
   // Fetch project on mount to check if idea is already submitted
@@ -33,10 +36,30 @@ export function NewProjectPage() {
       try {
         const res = await getProject(token, projectId)
         const project = res.data
-        if (project && (project.project_title !== 'Untitled Project' || project.project_description)) {
-          if (isMounted) {
-            setCompletedProjectData(project)
-            setStep(999) // Special step for already completed
+        if (project) {
+          if (project.wizard_state && Object.keys(project.wizard_state).length > 0) {
+            const ws = project.wizard_state
+            if (isMounted) {
+              setIdeaId(ws.ideaId)
+              setPrompt(ws.prompt || '')
+              setHistory(ws.history || [])
+              setCurrentQuestion(ws.currentQuestion)
+              setRefinedSpec(ws.refinedSpec || '')
+              
+              if (ws.isComplete) {
+                setCompletedProjectData(project)
+                setStep(999)
+              } else {
+                // Resume from where they left off
+                setStep((ws.history?.length || 0) + 1)
+              }
+            }
+          } else if (project.project_title !== 'Untitled Project' || project.project_description) {
+            // Legacy completed projects
+            if (isMounted) {
+              setCompletedProjectData(project)
+              setStep(999)
+            }
           }
         }
       } catch (err) {
@@ -50,9 +73,6 @@ export function NewProjectPage() {
     
     if (token && projectId) {
       checkProjectStatus()
-    } else if (!token) {
-      // If token is null, wait for auth. If it never comes, we shouldn't get here because of ProtectedRoute, but just in case:
-      // We will let the effect re-run when token changes.
     }
     
     return () => {
@@ -62,44 +82,42 @@ export function NewProjectPage() {
 
   const parseAIResponse = (res) => {
     try {
-      if (typeof res === 'object' && !res.content && (res.project_title || res.questions)) return res;
+      if (typeof res === 'object' && !res.content && (res.project_title || res.next_question || res.is_complete !== undefined)) return res;
       
       let content = res.content || res.data?.content || res;
       if (typeof content !== 'string') return content;
       
       content = content.replace(/```json/gi, '').replace(/```/g, '').trim();
       
-      // Find the first '{' or '[' and last '}' or ']'
       const startObj = content.indexOf('{');
       const startArr = content.indexOf('[');
       const endObj = content.lastIndexOf('}');
       const endArr = content.lastIndexOf(']');
       
-      let start = -1;
-      let end = -1;
+      let start = -1, end = -1;
       
       if (startObj !== -1 && (startArr === -1 || startObj < startArr)) {
-        start = startObj;
-        end = endObj;
+        start = startObj; end = endObj;
       } else if (startArr !== -1) {
-        start = startArr;
-        end = endArr;
+        start = startArr; end = endArr;
       }
       
       if (start !== -1 && end !== -1 && end > start) {
         content = content.substring(start, end + 1);
       }
       
-      const parsed = JSON.parse(content);
-      
-      // If the LLM returned an array directly instead of { questions: [...] }
-      if (Array.isArray(parsed)) {
-        return { questions: parsed };
-      }
-      return parsed;
+      return JSON.parse(content);
     } catch (e) {
       console.error("Failed to parse AI response:", e, res);
       return {};
+    }
+  }
+
+  const syncStateToBackend = async (newState) => {
+    try {
+      await updateProject(token, projectId, { wizard_state: newState })
+    } catch (err) {
+      console.error('Failed to sync state', err)
     }
   }
 
@@ -108,16 +126,13 @@ export function NewProjectPage() {
     setIsAnalyzing(true)
     
     try {
-      // 1. Save the idea prompt
       const ideaRes = await createIdea(token, { prompt: val })
       const newIdeaId = ideaRes.data?._id || ideaRes._id
       setIdeaId(newIdeaId)
       
-      // 2. Analyze the idea using AI
       const analyzeRes = await analyzeIdea(token, newIdeaId)
       const parsedAnalysis = parseAIResponse(analyzeRes)
       
-      // 3. Update the project with the generated title and description
       const title = parsedAnalysis.project_title || 'Untitled Project'
       const description = parsedAnalysis.project_description || val
 
@@ -126,20 +141,23 @@ export function NewProjectPage() {
         project_description: description
       })
       
-      // 4. Generate clarification questions
-      const questionsRes = await generateQuestions(token, newIdeaId)
-      const parsedQuestionsRes = parseAIResponse(questionsRes)
-      const fetchedQuestions = parsedQuestionsRes.questions || []
-      setAiQuestions(fetchedQuestions)
+      // Start conversational flow
+      const convoRes = await processConversation(token, newIdeaId, { history: [] })
+      const parsedConvo = parseAIResponse(convoRes)
       
-      toast.success('Idea analyzed and questions generated!')
-      
-      // Fallback if no questions were generated
-      if (fetchedQuestions.length === 0) {
-        setStep(1) // this will trigger the dummy screen since length is 0
+      if (parsedConvo.is_complete) {
+        const newState = { ideaId: newIdeaId, prompt: val, history: [], currentQuestion: null, refinedSpec: parsedConvo.refined_spec, isComplete: true }
+        await syncStateToBackend(newState)
+        setRefinedSpec(parsedConvo.refined_spec)
+        setStep(999)
       } else {
-        setStep(1) // Move to first question
+        const questionObj = { key: 'q1', question: parsedConvo.next_question || 'What is the primary feature?' }
+        setCurrentQuestion(questionObj)
+        const newState = { ideaId: newIdeaId, prompt: val, history: [], currentQuestion: questionObj, refinedSpec: null, isComplete: false }
+        await syncStateToBackend(newState)
+        setStep(1)
       }
+      toast.success('Idea analyzed successfully!')
     } catch (err) {
       console.error('Failed to process idea:', err)
       toast.error('Failed to analyze the idea. Please try again.')
@@ -148,31 +166,40 @@ export function NewProjectPage() {
     }
   }
 
-  const [isRefining, setIsRefining] = useState(false)
-  const [refinedSpec, setRefinedSpec] = useState('')
-
   const handleQuestionSubmit = async (answer) => {
-    const newAnswers = { ...answers, [step]: answer }
-    setAnswers(newAnswers)
-    
-    if (step < aiQuestions.length) {
-      setStep(prev => prev + 1)
-    } else {
-      setIsRefining(true)
-      try {
-        const payload = { answers: newAnswers, questions: aiQuestions }
-        const res = await generateRefinement(token, ideaId, payload)
-        const content = res.content || res.data?.content || res;
-        // The refined spec might be just text or markdown.
-        setRefinedSpec(content)
-        setStep(aiQuestions.length + 1)
+    setIsRefining(true)
+    try {
+      const newHistoryItem = { question: currentQuestion.question, answer }
+      const newHistory = [...history, newHistoryItem]
+      
+      const res = await processConversation(token, ideaId, { history: newHistory })
+      const parsed = parseAIResponse(res)
+      
+      if (parsed.is_complete || newHistory.length >= 5) {
+        // Complete
+        const finalSpec = parsed.refined_spec || 'Project specification completed based on constraints.'
+        const newState = { ideaId, prompt, history: newHistory, currentQuestion: null, refinedSpec: finalSpec, isComplete: true }
+        await syncStateToBackend(newState)
+        
+        setHistory(newHistory)
+        setRefinedSpec(finalSpec)
+        setStep(999)
         toast.success('Project specification refined successfully!')
-      } catch (err) {
-        console.error('Failed to refine specification:', err)
-        toast.error('Failed to generate refined spec.')
-      } finally {
-        setIsRefining(false)
+      } else {
+        // Next question
+        const nextQ = { key: `q${newHistory.length + 1}`, question: parsed.next_question || 'Any other details?' }
+        const newState = { ideaId, prompt, history: newHistory, currentQuestion: nextQ, refinedSpec: null, isComplete: false }
+        await syncStateToBackend(newState)
+        
+        setHistory(newHistory)
+        setCurrentQuestion(nextQ)
+        setStep(newHistory.length + 1)
       }
+    } catch (err) {
+      console.error('Failed to process conversation:', err)
+      toast.error('Failed to process answer.')
+    } finally {
+      setIsRefining(false)
     }
   }
 
@@ -256,11 +283,11 @@ export function NewProjectPage() {
                     Synthesizing your project context...
                   </TextShimmerWave>
                 </div>
-              ) : step <= aiQuestions.length && aiQuestions.length > 0 ? (
+              ) : currentQuestion ? (
                 <QuestionCard 
                   currentStep={step}
-                  totalSteps={aiQuestions.length}
-                  question={aiQuestions[step - 1]}
+                  totalSteps={5} // We don't know the exact total anymore, but we cap at 5
+                  question={currentQuestion}
                   onSubmit={handleQuestionSubmit}
                 />
               ) : (

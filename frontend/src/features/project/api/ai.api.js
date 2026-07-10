@@ -21,3 +21,11 @@ export const generateRefinement = async (token, ideaId, payload) => {
     body: JSON.stringify(payload)
   })
 }
+
+export const processConversation = async (token, ideaId, payload) => {
+  return authFetch(`/ai/conversation/${ideaId}`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload)
+  })
+}

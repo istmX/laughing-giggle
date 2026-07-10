@@ -18,6 +18,8 @@ Context: ${data.brief || "None"}
 ### Output Requirements
 Return a strictly structured JSON object:
 {
+  "project_title": "string",
+  "project_description": "string",
   "is_complete": boolean,
   "completeness_score": number,
   "missing_fields": string[],

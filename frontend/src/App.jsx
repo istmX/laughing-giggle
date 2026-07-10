@@ -1,8 +1,37 @@
+import { useEffect } from 'react'
+import gsap from 'gsap'
+import Lenis from 'lenis'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import AppRoutes from './Routes/AppRoutes'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/features/preferences/ui/ThemeProvider'
 
+gsap.registerPlugin(ScrollTrigger)
+
 const App = () => {
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (reduceMotion) return undefined
+
+    const lenis = new Lenis({
+      lerp: 0.085,
+      smoothWheel: true,
+      syncTouch: false,
+      wheelMultiplier: 0.82,
+    })
+    const raf = (time) => lenis.raf(time * 1000)
+
+    lenis.on('scroll', ScrollTrigger.update)
+    gsap.ticker.add(raf)
+    gsap.ticker.lagSmoothing(0)
+
+    return () => {
+      gsap.ticker.remove(raf)
+      lenis.destroy()
+    }
+  }, [])
+
   return (
     <ThemeProvider>
       <Toaster 

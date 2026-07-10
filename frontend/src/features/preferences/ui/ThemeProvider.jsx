@@ -10,7 +10,7 @@ export const ThemeProvider = ({ children }) => {
     const root = window.document.documentElement
     root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
 
-    const isDashboard = location.pathname.startsWith('/dashboard')
+    const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/projects/')
     if (!isDashboard) {
       root.classList.add('light')
       return
