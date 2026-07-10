@@ -7,7 +7,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
   --font-sans: "Geist Variable", sans-serif;
   --font-display: var(--font-sans);
   --font-mono: "Geist Mono", monospace;
@@ -86,30 +86,30 @@
   --radius-4xl: 9999px;
 
   /* Typography: font-size + line-height pairs */
-  --font-size-display-xl: 86px;
-  --font-size-display-xl--line-height: 1;
-  --font-size-display-lg: 64px;
-  --font-size-display-lg--line-height: 1.1;
-  --font-size-headline: 26px;
-  --font-size-headline--line-height: 1.35;
-  --font-size-subhead: 26px;
-  --font-size-subhead--line-height: 1.35;
-  --font-size-card-title: 24px;
-  --font-size-card-title--line-height: 1.45;
-  --font-size-body-lg: 20px;
-  --font-size-body-lg--line-height: 1.4;
-  --font-size-body: 18px;
-  --font-size-body--line-height: 1.45;
-  --font-size-body-sm: 16px;
-  --font-size-body-sm--line-height: 1.45;
-  --font-size-link: 20px;
-  --font-size-link--line-height: 1.4;
-  --font-size-button: 20px;
-  --font-size-button--line-height: 1.4;
-  --font-size-eyebrow: 18px;
-  --font-size-eyebrow--line-height: 1.3;
-  --font-size-caption: 12px;
-  --font-size-caption--line-height: 1;
+  --text-display-xl: 86px;
+  --text-display-xl--line-height: 1;
+  --text-display-lg: 64px;
+  --text-display-lg--line-height: 1.1;
+  --text-headline: 26px;
+  --text-headline--line-height: 1.35;
+  --text-subhead: 26px;
+  --text-subhead--line-height: 1.35;
+  --text-card-title: 24px;
+  --text-card-title--line-height: 1.45;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 1.4;
+  --text-body: 18px;
+  --text-body--line-height: 1.45;
+  --text-body-sm: 16px;
+  --text-body-sm--line-height: 1.45;
+  --text-link: 20px;
+  --text-link--line-height: 1.4;
+  --text-button: 20px;
+  --text-button--line-height: 1.4;
+  --text-eyebrow: 18px;
+  --text-eyebrow--line-height: 1.3;
+  --text-caption: 12px;
+  --text-caption--line-height: 1;
 
   /* Typography: font-weight (figmaSans variable axis) */
   --font-weight-320: 320;

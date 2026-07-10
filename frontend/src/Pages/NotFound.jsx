@@ -8,22 +8,24 @@ const NotFound = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-8 max-w-lg"
+        className="space-y-6 w-full max-w-[672px] flex flex-col items-center"
       >
-        <div className="space-y-2">
-          <h1 className="text-display-xl font-340 tracking-display-xl text-ink">404</h1>
+        <div className="space-y-2 flex flex-col items-center">
+          <h1 className="text-[100px] leading-none font-340 tracking-display-xl text-ink">404</h1>
           <p className="text-headline font-340 text-ink-muted tracking-subhead">
             We couldn't find the page you're looking for.
           </p>
         </div>
         
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-button font-480 px-8 py-4 rounded-full hover:scale-105 transition-transform"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          Back to Home
-        </Link>
+        <div className="pt-4">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-button font-480 px-8 py-4 rounded-full hover:scale-105 transition-transform"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            Back to Home
+          </Link>
+        </div>
       </motion.div>
     </div>
   )

@@ -1,21 +1,21 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import {
   FolderOpen, Plus, X, PanelLeftClose, PanelLeftOpen,
-  UserCircle, PlaySquare, Library, LayoutTemplate,
+  PlaySquare, Library, LayoutTemplate,
   Clock, Star, FileText, History, User, Sliders,
   Key, CreditCard, LogOut
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { createProject } from '@/features/project/api/projects.api'
 
 const navGroups = [
   {
     label: 'Projects',
     items: [
       { name: 'All Projects', href: '/dashboard', icon: FolderOpen },
-      { name: 'New Project', href: '/dashboard/projects/new', icon: Plus },
     ]
   },
   {
@@ -51,7 +51,7 @@ const navGroups = [
   }
 ]
 
-function renderNavContent({ mobile = false, isSidebarOpen, currentPath }) {
+function renderNavContent({ mobile = false, isSidebarOpen, currentPath, handleAction, closeMobileMenu }) {
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {navGroups.map((group) => (
@@ -71,18 +71,9 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath }) {
           {/* Links */}
           {group.items.map((item) => {
             const isActive = currentPath === item.href
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                title={(!isSidebarOpen && !mobile) ? item.name : undefined}
-                className={cn(
-                  "relative flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium transition-colors",
-                  isActive ? "text-ink" : "text-ink-muted hover:text-ink",
-                  (!isSidebarOpen && !mobile) && "justify-center px-2"
-                )}
-              >
-              
+            
+            const ItemContent = (
+              <>
                 {isActive && (
                   <motion.div
                     layoutId={mobile ? "mobile-active-nav" : "desktop-active-nav"}
@@ -104,6 +95,37 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath }) {
                     {item.name}
                   </motion.span>
                 )}
+              </>
+            )
+
+            const className = cn(
+              "relative flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium transition-colors w-full text-left",
+              isActive ? "text-ink" : "text-ink-muted hover:text-ink",
+              (!isSidebarOpen && !mobile) && "justify-center px-2"
+            )
+
+            if (item.actionId) {
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => handleAction(item.actionId)}
+                  title={(!isSidebarOpen && !mobile) ? item.name : undefined}
+                  className={className}
+                >
+                  {ItemContent}
+                </button>
+              )
+            }
+
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={closeMobileMenu}
+                title={(!isSidebarOpen && !mobile) ? item.name : undefined}
+                className={className}
+              >
+                {ItemContent}
               </Link>
             )
           })}
@@ -115,22 +137,39 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath }) {
 
 export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const location = useLocation()
-  const { logout, user } = useAuth()
+  const navigate = useNavigate()
+  const { logout, user, token } = useAuth()
   const currentPath = location.pathname
+
+  const handleAction = async (actionId) => {
+    if (actionId === 'new_project') {
+      try {
+        const res = await createProject(token, { project_title: 'Untitled Project' })
+        if (res?.data?._id) {
+          navigate(`/projects/${res.data._id}`)
+          if (isMobileMenuOpen) setIsMobileMenuOpen(false)
+        }
+      } catch (err) {
+        console.error('Failed to create project', err)
+      }
+    }
+  }
+
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false)
+    }
+    if (isMobileMenuOpen) {
+      window.addEventListener('keydown', handleEscape)
+    }
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [isMobileMenuOpen, setIsMobileMenuOpen])
 
   return (
     <>
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Escape key listener */}
-            {useEffect(() => {
-              const handleEscape = (e) => {
-                if (e.key === 'Escape') setIsMobileMenuOpen(false)
-              }
-              window.addEventListener('keydown', handleEscape)
-              return () => window.removeEventListener('keydown', handleEscape)
-            }, [setIsMobileMenuOpen])}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -156,7 +195,7 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                 </button>
               </div>
               
-              {renderNavContent({ mobile: true, isSidebarOpen, currentPath })}
+              {renderNavContent({ mobile: true, isSidebarOpen, currentPath, handleAction, closeMobileMenu: () => setIsMobileMenuOpen(false) })}
               
               <div className="p-4 border-t border-hairline/50 shrink-0">
                 <div className="flex items-center justify-between mb-4 px-2">
@@ -230,7 +269,7 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
           </button>
         </div>
 
-        {renderNavContent({ mobile: false, isSidebarOpen, currentPath })}
+        {renderNavContent({ mobile: false, isSidebarOpen, currentPath, handleAction })}
 
         <div className="p-3 border-t border-hairline/50 shrink-0">
           {isSidebarOpen ? (

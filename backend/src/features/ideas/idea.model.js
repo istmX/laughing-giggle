@@ -9,6 +9,7 @@ const ideaSchema = new mongoose.Schema(
       index: true,
     },
 
+    
     prompt: {
       type: String,
       required: true,

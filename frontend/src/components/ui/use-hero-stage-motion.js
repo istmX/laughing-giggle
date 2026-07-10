@@ -1,7 +1,6 @@
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Lenis from 'lenis'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -33,8 +32,6 @@ export function useHeroStageMotion({
       const heroCtas = ctas.querySelectorAll('[data-slot="button"]')
       const heroCubes = section.querySelectorAll('[data-hero-cube]')
       const mediaQuery = gsap.matchMedia()
-      let lenis
-      let lenisRaf
 
       mediaQuery.add(
         {
@@ -48,17 +45,6 @@ export function useHeroStageMotion({
             gsap.set([nav, badge, heroLines, summary, heroCtas, stageTrack, trust], { clearProps: 'all' })
             return
           }
-
-          lenis = new Lenis({
-            lerp: 0.085,
-            smoothWheel: true,
-            syncTouch: false,
-            wheelMultiplier: 0.82,
-          })
-          lenis.on('scroll', ScrollTrigger.update)
-          lenisRaf = (time) => lenis.raf(time * 1000)
-          gsap.ticker.add(lenisRaf)
-          gsap.ticker.lagSmoothing(0)
 
           gsap.set(stageTrack, { transformOrigin: 'center center' })
 
@@ -138,19 +124,10 @@ export function useHeroStageMotion({
               },
               0.12
             )
-
-          return () => {
-            if (lenisRaf) gsap.ticker.remove(lenisRaf)
-            if (lenis) lenis.destroy()
-          }
         }
       )
 
-      return () => {
-        mediaQuery.revert()
-        if (lenisRaf) gsap.ticker.remove(lenisRaf)
-        if (lenis) lenis.destroy()
-      }
+      return () => mediaQuery.revert()
     },
     { scope: sectionRef }
   )
