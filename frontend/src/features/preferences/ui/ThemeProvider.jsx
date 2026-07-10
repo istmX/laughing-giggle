@@ -17,9 +17,16 @@ export const ThemeProvider = ({ children }) => {
     }
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      root.classList.add(systemTheme)
-      return
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const applySystemTheme = (e) => {
+        root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
+        root.classList.add(e.matches ? 'dark' : 'light')
+      }
+      
+      applySystemTheme(mediaQuery)
+      mediaQuery.addEventListener('change', applySystemTheme)
+      
+      return () => mediaQuery.removeEventListener('change', applySystemTheme)
     }
 
     if (theme === 'midnight') {
@@ -33,7 +40,7 @@ export const ThemeProvider = ({ children }) => {
     }
 
     root.classList.add(theme)
-  }, [theme])
+  }, [theme, location.pathname])
 
   return children
 }

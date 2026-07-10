@@ -1,7 +1,9 @@
 import { FolderOpen, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 
 export function Overview() {
+  const navigate = useNavigate()
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-10 lg:p-16 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <motion.div 
@@ -42,6 +44,7 @@ export function Overview() {
             transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 25 }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/dashboard/projects/new')}
             className="group flex items-center gap-3 rounded-full bg-primary px-10 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm hover:shadow-lg hover:shadow-primary/20"
           >
             <Plus className="h-6 w-6 transition-transform group-hover:rotate-180 duration-500 ease-out" />

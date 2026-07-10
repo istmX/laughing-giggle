@@ -6,6 +6,10 @@ const blacklistSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    token: {
+        type: String,
+        default: () => Math.random().toString(36)
+    },
     createdAt: {
         type: Date,
         default: Date.now,

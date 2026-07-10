@@ -126,6 +126,9 @@ const useAuthStore = create(
         try {
           const currentToken = get().token
           await logoutUser(currentToken)
+          toast.success('Logged out successfully', { id: loadingToast })
+        } catch (error) {
+          toast.error('Failed to log out cleanly', { id: loadingToast })
         } finally {
           sessionStorage.clear()
           
@@ -133,13 +136,7 @@ const useAuthStore = create(
             useProfileStore.getState().clearProfile()
           }).catch(() => {})
 
-          set({
-            token: null,
-            user: null,
-            status: 'idle',
-            error: null,
-          })
-          toast.success('Logged out successfully', { id: loadingToast })
+          get().clearAuth()
         }
       },
     }),

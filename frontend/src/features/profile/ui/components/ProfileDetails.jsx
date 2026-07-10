@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { UserCircle, Mail, Calendar, Shield, FileText, Trash2, ChevronRight, KeyRound } from 'lucide-react'
+import { UserCircle, Mail, Calendar, Shield, FileText, Trash2, ChevronRight, KeyRound, ArrowRight } from 'lucide-react'
 
 export const ProfileDetails = ({ profile }) => {
   const [overrideAvatar, setOverrideAvatar] = useState(false)

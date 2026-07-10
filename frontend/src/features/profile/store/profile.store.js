@@ -8,7 +8,7 @@ export const useProfileStore = create((set) => ({
   clearProfile: () => set({ profile: null, status: 'idle', error: null }),
   fetchProfile: async (token) => {
     if (!token) return
-    set({ status: 'loading', error: null, profile: null })
+    set({ status: 'loading', error: null })
     try {
       const response = await getMe(token)
       set({ profile: response.user, status: 'success', error: null })

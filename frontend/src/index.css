@@ -237,6 +237,13 @@
 }
 
 .dark {
+  color-scheme: dark;
+  
+  & ::selection {
+    background: rgb(255 255 255 / 0.9);
+    color: black;
+  }
+
   --background: oklch(0.08 0 0);
   --foreground: oklch(0.98 0 0);
 

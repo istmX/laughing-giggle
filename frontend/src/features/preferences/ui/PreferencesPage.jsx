@@ -3,7 +3,8 @@ import { Monitor, Sun, Moon, Palette } from 'lucide-react'
 import { usePreferencesStore } from '../store/preferences.store'
 
 export const PreferencesPage = () => {
-  const { theme, setTheme } = usePreferencesStore()
+  const theme = usePreferencesStore((state) => state.theme)
+  const setTheme = usePreferencesStore((state) => state.setTheme)
 
   const themes = [
     { id: 'system', name: 'System', icon: Monitor, description: 'Matches your OS settings' },

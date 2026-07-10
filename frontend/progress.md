@@ -156,3 +156,6 @@ The home page now includes:
   - `Dashboard/Dashboard.jsx`: replaced `rounded-[1.5rem]` with `rounded-lg`; replaced `tracking-[-0.05em]` with `tracking-display-lg`
   - `perspective-grid.jsx`: replaced `duration-[1500ms]` with `duration-1000`
   - `reactbits/*.css`: replaced hardcoded border-radius, border, and background colors with CSS variables (`var(--radius-lg)`, `var(--hairline)`, `var(--surface-dark)`, `var(--surface-dark-foreground)`, `var(--tracking-body-lg)`, `var(--spacing-lg)`)
+
+
+

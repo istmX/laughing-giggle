@@ -15,7 +15,7 @@ const authFetch = async (path, options = {}) => {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {}),
       ...headers,
     },
   })

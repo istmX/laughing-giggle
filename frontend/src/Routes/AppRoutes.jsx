@@ -20,6 +20,7 @@ const AppRoutes = () => {
           <Route index element={<Overview />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings/preferences" element={<PreferencesPage />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Route>
 

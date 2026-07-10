@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import {
   FolderOpen, Plus, X, PanelLeftClose, PanelLeftOpen,
   UserCircle, PlaySquare, Library, LayoutTemplate,
@@ -122,6 +123,14 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
+            {/* Escape key listener */}
+            {useEffect(() => {
+              const handleEscape = (e) => {
+                if (e.key === 'Escape') setIsMobileMenuOpen(false)
+              }
+              window.addEventListener('keydown', handleEscape)
+              return () => window.removeEventListener('keydown', handleEscape)
+            }, [setIsMobileMenuOpen])}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -140,6 +149,7 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                 <span className="text-xl font-bold tracking-tight">ZENIX</span>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
+                  aria-label="Close mobile menu"
                   className="rounded-md p-2 hover:bg-surface-soft text-ink-muted hover:text-ink transition-colors"
                 >
                   <X className="h-5 w-5" />
@@ -151,14 +161,16 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
               <div className="p-4 border-t border-hairline/50 shrink-0">
                 <div className="flex items-center justify-between mb-4 px-2">
                   <Link to="/dashboard/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
-                    {user ? (
+                    {user?.avatar ? (
                       <img 
-                        src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                        src={user.avatar}
                         alt={user.name}
                         className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
                       />
                     ) : (
-                      <UserCircle className="h-8 w-8 text-ink-muted shrink-0" />
+                      <div className="h-8 w-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0">
+                        <span className="text-xs font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                      </div>
                     )}
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-ink">{user?.name || 'Profile'}</span>
@@ -224,14 +236,16 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
           {isSidebarOpen ? (
              <div className="flex flex-col gap-2">
                 <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
-                  {user ? (
+                  {user?.avatar ? (
                     <img 
-                      src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                      src={user.avatar}
                       alt={user.name}
                       className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
                     />
                   ) : (
-                    <UserCircle className="h-8 w-8 text-ink-muted shrink-0" />
+                    <div className="h-8 w-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0">
+                      <span className="text-xs font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                    </div>
                   )}
                   <div className="flex flex-col overflow-hidden">
                     <span className="text-sm font-medium truncate text-ink">{user?.name || 'Profile'}</span>
@@ -248,14 +262,16 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
           ) : (
             <div className="flex flex-col gap-4 items-center py-2">
               <Link to="/dashboard/profile" title="Profile" className="hover:opacity-80 transition-opacity">
-                {user ? (
+                {user?.avatar ? (
                   <img 
-                    src={user.avatar || `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(user.username || user.name || 'user')}`}
+                    src={user.avatar}
                     alt={user.name}
                     className="h-6 w-6 rounded-full bg-surface-soft object-cover border border-hairline"
                   />
                 ) : (
-                  <UserCircle className="h-6 w-6 text-ink-muted" />
+                  <div className="h-6 w-6 rounded-full bg-surface-soft border border-hairline flex items-center justify-center">
+                    <span className="text-[10px] font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                  </div>
                 )}
               </Link>
               <button

@@ -1,160 +1,192 @@
 import { ArrowRight, Sparkles } from 'lucide-react'
+import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { useHeroStageMotion } from '@/components/ui/use-hero-stage-motion'
 
-function ContextBadgeMark({ className = '' }) {
-  return (
-    <svg className={className} viewBox="0 0 120 120" fill="none" aria-hidden="true">
-      <path
-        d="M60 12.5c6.1 0 10.7 10.9 15.5 13.1 5 2.3 16.1-1.2 20 2.7 3.9 3.9.4 15 2.7 20 2.2 4.8 13.1 9.4 13.1 15.5s-10.9 10.7-13.1 15.5c-2.3 5 1.2 16.1-2.7 20-3.9 3.9-15-.4-20 2.7-4.8 2.2-9.4 13.1-15.5 13.1s-10.7-10.9-15.5-13.1c-5-2.3-16.1 1.2-20-2.7-3.9-3.9-.4-15-2.7-20C19.6 74.5 8.7 69.9 8.7 63.8s10.9-10.7 13.1-15.5c2.3-5-1.2-16.1 2.7-20 3.9-3.9 15 .4 20-2.7C49.3 23.4 53.9 12.5 60 12.5Z"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
-      <circle cx="60" cy="63.8" r="13.8" fill="currentColor" />
-    </svg>
-  )
-}
+const HERO_VIDEO_SRC =
+  'https://ik.imagekit.io/urb829e4h/VID_20260710_140339.mp4?tr=orig&updatedAt=1783672813679'
+
+const TRUSTED_LOGOS = ['Razorpay', 'Waiturn', 'BuildShip', 'Relevance AI', 'Attio', 'Peerlist']
+
+const EDGE_CUBES = [
+  'left-[-2.5rem] top-[13rem] h-24 w-24',
+  'right-[-1.25rem] top-[16rem] h-20 w-20',
+  'left-[2rem] bottom-[14rem] h-16 w-16',
+  'right-[3rem] bottom-[12rem] h-24 w-24',
+  'left-[12%] top-[4rem] h-14 w-14',
+  'right-[16%] bottom-[4rem] h-14 w-14',
+]
 
 export function HeroSection03() {
-  return (
-    <section className="relative overflow-hidden border-b border-hairline bg-background text-foreground">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--block-lilac)_0%,transparent_18%),radial-gradient(circle_at_82%_16%,var(--block-lime)_0%,transparent_15%),radial-gradient(circle_at_70%_84%,var(--block-cream)_0%,transparent_18%)] opacity-80" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,var(--shell-glow)_18%,transparent_82%)]" />
+  const sectionRef = useRef(null)
+  const navRef = useRef(null)
+  const badgeRef = useRef(null)
+  const summaryRef = useRef(null)
+  const ctasRef = useRef(null)
+  const stageTrackRef = useRef(null)
+  const stageShellRef = useRef(null)
+  const trustRef = useRef(null)
 
-      <header className="relative z-10 flex items-center justify-between px-6 pt-6 md:px-8">
-        <div className="text-2xl font-semibold tracking-tight">zenix*</div>
-        <nav className="hidden gap-8 text-sm text-ink-soft md:flex">
-          <a href="#product" className="font-medium text-foreground transition-opacity hover:opacity-60">
-            Product
-          </a>
-          <a href="#how-it-works" className="transition-opacity hover:opacity-60">
-            How it works
-          </a>
-          <a href="#use-with" className="transition-opacity hover:opacity-60">
-            Use with
-          </a>
-          <a href="#docs" className="transition-opacity hover:opacity-60">
-            Docs
-          </a>
+  useHeroStageMotion({
+    badgeRef,
+    ctasRef,
+    navRef,
+    sectionRef,
+    stageShellRef,
+    stageTrackRef,
+    summaryRef,
+    trustRef,
+  })
+
+  return (
+    <section ref={sectionRef} className="relative border-b border-hairline bg-background text-foreground">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgb(77_73_252/0.08),transparent_22%),radial-gradient(circle_at_12%_62%,rgb(106_92_255/0.07),transparent_18%),radial-gradient(circle_at_84%_64%,rgb(243_201_182/0.16),transparent_18%),radial-gradient(circle_at_50%_112%,rgb(77_73_252/0.05),transparent_28%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgb(77_73_252/0.12)_1px,transparent_1.2px)] bg-[length:26px_26px] opacity-[0.08]" />
+      <div className="absolute inset-x-0 bottom-0 h-[28rem] bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.56)_28%,rgba(255,255,255,0.92))]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-[8rem] h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.18)_18%,rgba(77,73,252,0.18)_82%,transparent)]" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {EDGE_CUBES.map((cube) => (
+          <span
+            key={cube}
+            data-hero-cube
+            className={`absolute ${cube} rounded-[26px] border border-[rgb(77_73_252/0.14)] bg-[linear-gradient(180deg,rgb(255_255_255/0.78),rgb(197_176_244/0.26))] shadow-[0_20px_80px_rgb(77_73_252/0.16),0_0_42px_rgb(77_73_252/0.28)] backdrop-blur-xl`}
+          />
+        ))}
+      </div>
+
+      <header
+        ref={navRef}
+        className="relative z-20 mx-auto flex max-w-[1360px] items-center justify-between px-6 pt-6 md:px-8"
+      >
+        <div className="text-[2.25rem] font-[540] tracking-[-0.06em]">
+          zenix<span className="align-top text-brand-indigo">*</span>
+        </div>
+        <nav className="hidden items-center gap-8 text-body-sm text-ink-muted lg:flex">
+          {['Product', 'How it works', 'Templates', 'Use cases', 'Pricing', 'Docs', 'Changelog'].map((item) => (
+            <a key={item} href="#product" className="transition-colors hover:text-foreground">
+              {item}
+            </a>
+          ))}
         </nav>
-        <Button className="h-11 rounded-2xl bg-primary px-5 text-primary-foreground hover:bg-primary/90">
-          Get started
-          <ArrowRight className="size-4" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline" className="h-11 rounded-full px-5 text-body-sm">
+            <Link to="/login">Log in</Link>
+          </Button>
+          <Button
+            asChild
+            className="h-11 rounded-full bg-brand-indigo px-5 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
+          >
+            <Link to="/signup">
+              Get started free
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-6 pb-20 pt-16 md:px-8 md:pt-20 lg:pb-24" id="product">
-        <div className="grid gap-12 lg:grid-cols-[1.06fr_0.94fr] lg:items-start">
-          <div className="pt-4 lg:pt-10">
-            <p className="text-caption uppercase tracking-caption text-ink-soft">Context first</p>
-            <h1 className="mt-5 max-w-[10ch] text-[clamp(3.6rem,7vw,5.9rem)] leading-display-xl tracking-display-xl text-balance">
-              Build software context that feels clear from the first glance.
-            </h1>
-            <p className="mt-6 max-w-[34ch] text-body-lg text-ink-muted">
-              Zenix turns rough product ideas into organized, implementation-ready context for AI coding agents.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Button className="h-12 rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90">
-                Get started
-                <ArrowRight className="size-4" />
-              </Button>
-              <a
-                href="#product"
-                className="inline-flex items-center gap-3 text-[1rem] font-medium text-foreground/72 transition-colors hover:text-foreground"
-              >
-                Explore the workflow
-                <span className="grid size-10 place-items-center rounded-full border border-hairline bg-background">
-                  <Sparkles className="size-4" />
-                </span>
-              </a>
-            </div>
-
-            <div className="mt-10 flex flex-wrap gap-3">
-              {['agents.md', 'architecture.md', 'build-plan.md'].map((label) => (
-                <span
-                  key={label}
-                  className="rounded-full border border-hairline bg-surface-soft px-4 py-2 text-caption uppercase tracking-caption text-ink-muted"
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
+      <main className="relative z-10 mx-auto max-w-[1360px] px-6 pb-24 pt-8 md:px-8 md:pb-32 md:pt-10" id="product">
+        <div className="mx-auto max-w-[58rem] text-center">
+          <div ref={badgeRef} className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white/80 px-4 py-2 text-body-sm text-ink-muted backdrop-blur-sm">
+            <span className="inline-flex size-2 rounded-full bg-brand-indigo" />
+            v1.0 is now live
+            <span className="text-foreground">Explore what&apos;s new</span>
+            <ArrowRight className="size-3.5" />
           </div>
 
-          <div className="relative">
-            <div className="absolute -left-4 top-8 h-24 w-24 rotate-[-8deg] rounded-xl bg-block-lime shadow-lg" />
-            <div className="absolute right-4 top-0 h-28 w-28 rotate-[10deg] rounded-xl bg-block-lilac shadow-lg" />
-            <div className="absolute bottom-10 left-8 h-20 w-32 rotate-[6deg] rounded-xl bg-block-cream shadow-md" />
+          <h1 className="mt-8 text-balance text-[clamp(3.5rem,8vw,6rem)] font-[540] leading-[0.94] tracking-[-0.03em]">
+            <span data-hero-line className="block">
+              Turn ideas into
+            </span>
+            <span data-hero-line className="mt-2 block">
+              implementation-ready
+            </span>
+            <span data-hero-line className="mt-2 flex flex-wrap items-center justify-center gap-4">
+              <span className="text-brand-indigo">context</span>
+              <span className="relative inline-flex h-16 w-28 overflow-hidden rounded-[18px] border border-[rgb(77_73_252/0.2)] shadow-[0_18px_40px_rgb(77_73_252/0.12)]">
+                <video
+                  className="h-full w-full object-cover"
+                  src={HERO_VIDEO_SRC}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-hidden="true"
+                />
+                <span className="absolute inset-0 bg-[linear-gradient(180deg,transparent,rgb(11_13_18/0.18))]" />
+              </span>
+              <span>for AI coding agents</span>
+            </span>
+          </h1>
 
-            <div className="relative grid gap-4 sm:grid-cols-2">
-              <article className="rounded-lg border border-hairline bg-surface-elevated p-5 shadow-lg">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-caption uppercase tracking-caption text-ink-soft">agents.md</p>
-                  <ContextBadgeMark className="size-10 text-foreground" />
-                </div>
-                <h2 className="mt-10 max-w-[9ch] text-headline leading-headline tracking-headline">
-                  AI agents with clear roles.
-                </h2>
-                <p className="mt-4 text-sm leading-6 text-ink-muted">
-                  Planner, architect, coder, tester, and documenter. Each step carries forward.
-                </p>
-              </article>
+          <p
+            ref={summaryRef}
+            className="mx-auto mt-8 max-w-[42rem] text-body-lg text-ink-muted"
+            data-hero-copy
+          >
+            Zenix understands your project, asks the right questions, and generates everything your AI agents need to build with clarity and consistency.
+          </p>
 
-              <article className="rounded-lg border border-hairline bg-block-cream p-5 shadow-lg">
-                <p className="text-caption uppercase tracking-caption text-ink-soft">architecture.md</p>
-                <div className="mt-8 grid grid-cols-2 gap-3">
-                  {['Web app', 'API', 'Auth', 'Storage'].map((item) => (
-                    <div key={item} className="rounded-lg border border-hairline bg-background px-3 py-4 text-sm">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-4 text-sm leading-6 text-ink-muted">
-                  A compact system map that keeps implementation decisions aligned.
-                </p>
-              </article>
-
-              <article className="rounded-lg border border-hairline bg-block-lilac p-5 shadow-lg sm:col-span-2">
-                <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
-                  <div>
-                    <p className="text-caption uppercase tracking-caption text-ink-soft">build-plan.md</p>
-                    <h2 className="mt-6 max-w-[12ch] text-headline leading-headline tracking-headline">
-                      A plan the team can actually execute.
-                    </h2>
-                    <p className="mt-4 max-w-xl text-sm leading-6 text-ink-muted">
-                      Milestones, sequencing, and checkpoints stay readable without turning into noise.
-                    </p>
-                  </div>
-                  <div className="rounded-lg border border-hairline bg-background px-5 py-4">
-                    <p className="text-caption uppercase tracking-caption text-ink-soft">Delivery</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-tight">24 tasks</p>
-                    <p className="mt-2 text-sm text-ink-muted">Structured, scoped, and ready for handoff.</p>
-                  </div>
-                </div>
-              </article>
-            </div>
+          <div ref={ctasRef} className="mt-8 flex flex-wrap items-center justify-center gap-4" data-hero-copy>
+            <Button
+              asChild
+              className="h-13 rounded-full bg-brand-indigo px-6 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
+            >
+              <Link to="/signup">
+                Get started for free
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+            <Button variant="outline" className="h-13 rounded-full px-6 text-body-sm">
+              See how it works
+              <span className="grid size-6 place-items-center rounded-full border border-hairline">
+                <Sparkles className="size-3.5" />
+              </span>
+            </Button>
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 lg:grid-cols-3">
-          <div className="rounded-lg border border-hairline bg-surface-soft p-5">
-            <p className="text-caption uppercase tracking-caption text-ink-soft">ui-rules.md</p>
-            <p className="mt-4 text-lg leading-7 tracking-body-lg">
-              UI tokens, spacing, and behavior rules stay in one place.
-            </p>
+        <div ref={stageTrackRef} className="relative z-20 mx-auto mt-14 h-[clamp(22rem,48vw,42rem)] w-full max-w-[1170px] will-change-transform lg:mt-18">
+          <div
+            ref={stageShellRef}
+            className="relative h-full overflow-hidden rounded-[2rem] border border-white/60 bg-[rgb(244_246_255)] shadow-[0_32px_120px_rgb(12_20_48/0.18)]"
+          >
+            <video
+              className="absolute inset-0 h-full w-full object-cover"
+              src={HERO_VIDEO_SRC}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_255_255/0.14),transparent_26%,transparent_74%,rgb(5_10_20/0.32))]" />
+            <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(255_255_255/0.2),transparent)]" />
           </div>
-          <div className="rounded-lg border border-hairline bg-surface-elevated p-5">
-            <p className="text-caption uppercase tracking-caption text-ink-soft">mission-01.md</p>
-            <p className="mt-4 text-lg leading-7 tracking-body-lg">
-              Implementation missions stay focused enough to start immediately.
-            </p>
+        </div>
+
+        <div ref={trustRef} className="mx-auto mt-10 max-w-[1180px] text-center" data-hero-copy>
+          <p className="text-caption uppercase tracking-caption text-ink-soft">Trusted by developers and teams at</p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-body-sm text-ink-muted">
+            {TRUSTED_LOGOS.map((logo) => (
+              <span key={logo}>{logo}</span>
+            ))}
           </div>
-          <div className="rounded-lg border border-hairline bg-block-mint p-5">
-            <p className="text-caption uppercase tracking-caption text-ink-soft">context.md</p>
-            <p className="mt-4 text-lg leading-7 tracking-body-lg">
-              The final bundle remains readable by every coding assistant.
-            </p>
+        </div>
+
+        <div className="pointer-events-none mx-auto mt-14 max-w-[1170px]">
+          <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.28)_18%,rgba(77,73,252,0.28)_82%,transparent)]" />
+          <div className="mt-8 grid grid-cols-3 gap-4 opacity-75 md:grid-cols-6">
+            {['Architecture', 'Schemas', 'Contracts', 'Rules', 'Plan', 'Ship'].map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.25rem] border border-hairline bg-[rgb(255_255_255/0.72)] px-4 py-5 text-left text-sm text-ink-muted shadow-[0_10px_30px_rgb(77_73_252/0.06)] backdrop-blur-sm"
+              >
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </main>

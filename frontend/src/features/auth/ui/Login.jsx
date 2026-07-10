@@ -87,14 +87,7 @@ const Login = () => {
             icon={LockKeyhole}
           />
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="flex items-center gap-3 text-body-sm text-ink-muted">
-              <input
-                type="checkbox"
-                className="size-4 rounded border-border bg-background accent-primary focus:ring-primary/30"
-              />
-              Remember me
-            </label>
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <button
               type="button"
               className="text-body-sm font-medium text-foreground transition-colors hover:text-ink-soft"
