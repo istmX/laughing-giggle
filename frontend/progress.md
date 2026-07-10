@@ -175,4 +175,7 @@ The home page now includes:
   - Automatically synced AI analysis results to the Project object using the `PATCH /projects/:projectId` endpoint.
   - Updated `PromptInput.jsx` UI with loading states and `react-hot-toast` notifications to handle the multi-step async flow seamlessly.
   - Wired up `POST /ai/questions/:ideaId` API to generate dynamic, intelligent clarification questions based on the user's specific idea prompt.
-  - Implemented a dummy "Brief Complete" screen that displays the polished prompt structure and the user's clarification answers after the question flow finishes.
+  - Implemented a backend refinement flow with a new `POST /ai/refine/:ideaId` API to synthesize original prompts and clarification answers into a final, powerful **Refined Project Specification**.
+  - Updated the Dummy "Brief Complete" screen to display the highly-detailed AI-generated Refined Project Specification instead of raw answers.
+  - Added robust caching prevention (`cache: 'no-cache'`) to `authFetch` to fix a stale state bug where users would mistakenly see the prompt input again after navigating back to a completed project.
+  - Enforced a strict "one idea per project" lock in the UI by fetching the project state on mount and checking if the idea has already been submitted and skipping the prompt wizard entirely if so.
