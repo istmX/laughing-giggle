@@ -1,57 +1,218 @@
-import { FolderOpen, Plus } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { EmptyProjects } from '@/features/project/ui/EmptyProjects'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import { createProject, getProjects, deleteProject, updateProject } from '@/features/project/api/projects.api'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Folder, ArrowRight, Trash2, Pencil } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { Modal } from '@/components/ui/Modal'
 
 export function Overview() {
   const navigate = useNavigate()
+  const { token } = useAuth()
+  const [projects, setProjects] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Modal states
+  const [projectToDelete, setProjectToDelete] = useState(null)
+  const [projectToEdit, setProjectToEdit] = useState(null)
+  const [editTitle, setEditTitle] = useState('')
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getProjects(token)
+        setProjects(res?.data || [])
+      } catch (err) {
+        console.error('Failed to fetch projects', err)
+        toast.error('Failed to load projects')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProjects()
+  }, [token])
+
+  const handleNewProject = async () => {
+    try {
+      const res = await createProject(token, { project_title: 'Untitled Project' })
+      if (res?.data?._id) {
+        toast.success('Project created')
+        navigate(`/projects/${res.data._id}`)
+      }
+    } catch (err) {
+      console.error('Failed to create project', err)
+      toast.error('Failed to create project')
+    }
+  }
+
+  const confirmDelete = async () => {
+    if (!projectToDelete) return
+    try {
+      await deleteProject(token, projectToDelete._id)
+      setProjects((prev) => prev.filter(p => p._id !== projectToDelete._id))
+      toast.success('Project deleted')
+      setProjectToDelete(null)
+    } catch (err) {
+      console.error('Failed to delete project', err)
+      toast.error('Failed to delete project')
+    }
+  }
+
+  const saveEdit = async () => {
+    if (!projectToEdit || !editTitle.trim()) return
+    try {
+      await updateProject(token, projectToEdit._id, { project_title: editTitle })
+      setProjects((prev) => prev.map(p => p._id === projectToEdit._id ? { ...p, project_title: editTitle } : p))
+      toast.success('Project updated')
+      setProjectToEdit(null)
+    } catch (err) {
+      console.error('Failed to update project', err)
+      toast.error('Failed to update project')
+    }
+  }
+
+  if (isLoading) {
+    return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 rounded-full border-2 border-ink border-t-transparent animate-spin" /></div>
+  }
+
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-10 lg:p-16 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      <motion.div 
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.25, 1, 0.5, 1] }}
-        className="mx-auto max-w-4xl space-y-12"
+    <div className="flex-1 flex flex-col h-full bg-surface-soft/30">
+      <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden p-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {projects.length === 0 ? (
+          <EmptyProjects onNewProject={handleNewProject} />
+        ) : (
+          <div className="w-full space-y-8">
+            <div className="flex items-center justify-between">
+              <h1 className="text-display-sm font-340 tracking-display-sm text-ink">Projects</h1>
+              <button
+                onClick={handleNewProject}
+                className="flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-540 text-canvas hover:opacity-90 transition-opacity"
+              >
+                New Project
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project, i) => (
+                <motion.div
+                  key={project._id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => navigate(`/projects/${project._id}`)}
+                  className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated hover:border-ink/20 hover:shadow-sm transition-all cursor-pointer"
+                >
+                  <div className="absolute top-4 right-4 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditTitle(project.project_title)
+                        setProjectToEdit(project)
+                      }} 
+                      className="p-2 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors" 
+                      title="Edit Title"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setProjectToDelete(project)
+                      }} 
+                      className="p-2 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors" 
+                      title="Delete Project"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors">
+                    <Folder className="h-5 w-5" />
+                  </div>
+
+                  <h3 className="text-body-lg font-480 text-ink mb-1 pr-16">{project.project_title}</h3>
+                  <p className="text-sm text-ink-muted line-clamp-2 mt-1">
+                    {project.project_description || 'No description provided'}
+                  </p>
+                  
+                  <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider">
+                    <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                    <span className="h-1 w-1 rounded-full bg-hairline" />
+                    <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
+                      Open <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Delete Modal */}
+      <Modal 
+        isOpen={!!projectToDelete} 
+        onClose={() => setProjectToDelete(null)}
+        title="Delete Project"
       >
-        <div className="flex flex-col gap-3">
-          <h1 className="text-4xl font-semibold tracking-tight text-ink">Welcome to Zenix</h1>
-          <p className="text-xl text-ink-muted max-w-2xl leading-relaxed font-light">
-            Select a project from the sidebar to pick up where you left off, or create a new workspace to get started.
-          </p>
+        <p className="text-ink-muted text-sm mb-6">
+          Are you sure you want to delete <span className="font-semibold text-ink">"{projectToDelete?.project_title}"</span>? This action cannot be undone.
+        </p>
+        <div className="flex items-center justify-end gap-3">
+          <button 
+            onClick={() => setProjectToDelete(null)}
+            className="px-4 py-2 text-sm font-medium text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={confirmDelete}
+            className="px-4 py-2 text-sm font-medium text-white bg-destructive hover:bg-destructive/90 rounded-lg transition-colors"
+          >
+            Delete
+          </button>
         </div>
+      </Modal>
 
-        <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 180, damping: 15 }}
-            className="mb-10 flex items-center justify-center p-12 rounded-[32px] border border-hairline bg-surface-soft shadow-sm rotate-3 hover:rotate-0 transition-transform duration-500 ease-out"
-          >
-            <FolderOpen className="h-20 w-20 text-primary -rotate-3 transition-transform duration-500" strokeWidth={1.5} />
-          </motion.div>
-          
-          <motion.h3 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 25 }}
-            className="text-2xl font-semibold text-ink mb-10 tracking-tight"
-          >
-            No projects yet
-          </motion.h3>
-
-          <motion.button 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 25 }}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/dashboard/projects/new')}
-            className="group flex items-center gap-3 rounded-full bg-primary px-10 py-4 text-lg font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm hover:shadow-lg hover:shadow-primary/20"
-          >
-            <Plus className="h-6 w-6 transition-transform group-hover:rotate-180 duration-500 ease-out" />
-            Create a project
-          </motion.button>
+      {/* Edit Modal */}
+      <Modal 
+        isOpen={!!projectToEdit} 
+        onClose={() => setProjectToEdit(null)}
+        title="Edit Project Name"
+      >
+        <div className="mb-6">
+          <label htmlFor="projectTitle" className="block text-sm font-medium text-ink mb-2">Project Title</label>
+          <input
+            id="projectTitle"
+            type="text"
+            autoFocus
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveEdit()
+            }}
+            className="w-full px-3 py-2 bg-background border border-hairline rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-ink/20 transition-all"
+            placeholder="Enter project name..."
+          />
         </div>
-      </motion.div>
+        <div className="flex items-center justify-end gap-3">
+          <button 
+            onClick={() => setProjectToEdit(null)}
+            className="px-4 py-2 text-sm font-medium text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={saveEdit}
+            disabled={!editTitle.trim() || editTitle === projectToEdit?.project_title}
+            className="px-4 py-2 text-sm font-medium text-canvas bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all"
+          >
+            Save Changes
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }
