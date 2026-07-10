@@ -22,6 +22,31 @@ export function NewProjectPage() {
   const [ideaId, setIdeaId] = useState(null)
   const [aiQuestions, setAiQuestions] = useState([])
 
+  const parseAIResponse = (res) => {
+    try {
+      // If it's already a parsed object with the fields we expect, return it
+      if (typeof res === 'object' && !res.content && (res.project_title || res.questions)) return res;
+      
+      let content = res.content || res.data?.content || res;
+      if (typeof content !== 'string') return content;
+      
+      // Strip markdown json blocks
+      content = content.replace(/```json/gi, '').replace(/```/g, '').trim();
+      
+      // Find the first '{' and last '}' in case there is conversational text
+      const start = content.indexOf('{');
+      const end = content.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        content = content.substring(start, end + 1);
+      }
+      
+      return JSON.parse(content);
+    } catch (e) {
+      console.error("Failed to parse AI response:", e, res);
+      return {};
+    }
+  }
+
   const handlePromptSubmit = async (val) => {
     setPrompt(val)
     setIsAnalyzing(true)
@@ -34,10 +59,11 @@ export function NewProjectPage() {
       
       // 2. Analyze the idea using AI
       const analyzeRes = await analyzeIdea(token, newIdeaId)
+      const parsedAnalysis = parseAIResponse(analyzeRes)
       
       // 3. Update the project with the generated title and description
-      const title = analyzeRes.project_title || analyzeRes.data?.project_title || 'Untitled Project'
-      const description = analyzeRes.project_description || analyzeRes.data?.project_description || val
+      const title = parsedAnalysis.project_title || 'Untitled Project'
+      const description = parsedAnalysis.project_description || val
 
       await updateProject(token, projectId, {
         project_title: title,
@@ -46,7 +72,8 @@ export function NewProjectPage() {
       
       // 4. Generate clarification questions
       const questionsRes = await generateQuestions(token, newIdeaId)
-      const fetchedQuestions = questionsRes.questions || questionsRes.data?.questions || []
+      const parsedQuestionsRes = parseAIResponse(questionsRes)
+      const fetchedQuestions = parsedQuestionsRes.questions || []
       setAiQuestions(fetchedQuestions)
       
       toast.success('Idea analyzed and questions generated!')
