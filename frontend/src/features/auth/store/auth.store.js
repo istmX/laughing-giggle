@@ -113,8 +113,10 @@ const useAuthStore = create(
 
       logout: async () => {
         try {
-          await logoutUser()
+          const currentToken = get().token
+          await logoutUser(currentToken)
         } finally {
+          sessionStorage.clear()
           set({
             token: null,
             user: null,

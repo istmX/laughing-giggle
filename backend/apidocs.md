@@ -40,6 +40,26 @@ Request:
 
 *Save `token` from response to use in header: `Authorization: Bearer JWT_TOKEN`*
 
+## Logout User
+
+POST `/auth/logout`
+
+Headers (Optional if using cookies):
+
+```http
+Authorization: Bearer JWT_TOKEN
+```
+
+Response:
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+*Clears the `token` cookie and blacklists the provided JWT to prevent reuse.*
+
 ---
 
 # IDEAS & BRIEFS

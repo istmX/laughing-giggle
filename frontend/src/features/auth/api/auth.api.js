@@ -58,9 +58,10 @@ const googleLogin = async ({ credential }) => {
   })
 }
 
-const logoutUser = async () => {
+const logoutUser = async (token) => {
   return authFetch('/auth/logout', {
     method: 'POST',
+    token: token,
   })
 }
 
