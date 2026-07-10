@@ -11,6 +11,7 @@ const getBaseUrl = () => {
 const authFetch = async (path, options = {}) => {
   const { token, headers, ...rest } = options
   const response = await fetch(`${getBaseUrl()}${path}`, {
+    cache: 'no-cache',
     ...rest,
     credentials: 'include',
     headers: {
