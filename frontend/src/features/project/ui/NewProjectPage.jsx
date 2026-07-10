@@ -6,7 +6,7 @@ import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
-import { analyzeIdea, generateQuestions } from '../api/ai.api'
+import { analyzeIdea, generateQuestions, generateRefinement } from '../api/ai.api'
 import { updateProject, getProject } from '../api/projects.api'
 import toast from 'react-hot-toast'
 
@@ -26,23 +26,36 @@ export function NewProjectPage() {
 
   // Fetch project on mount to check if idea is already submitted
   useEffect(() => {
+    let isMounted = true;
+    
     const checkProjectStatus = async () => {
       try {
         const res = await getProject(token, projectId)
         const project = res.data
-        if (project && project.project_title !== 'Untitled Project') {
-          setCompletedProjectData(project)
-          setStep(999) // Special step for already completed
+        if (project && (project.project_title !== 'Untitled Project' || project.project_description)) {
+          if (isMounted) {
+            setCompletedProjectData(project)
+            setStep(999) // Special step for already completed
+          }
         }
       } catch (err) {
         console.error('Failed to fetch project status', err)
       } finally {
-        setIsPageLoading(false)
+        if (isMounted) {
+          setIsPageLoading(false)
+        }
       }
     }
     
     if (token && projectId) {
       checkProjectStatus()
+    } else if (!token) {
+      // If token is null, wait for auth. If it never comes, we shouldn't get here because of ProtectedRoute, but just in case:
+      // We will let the effect re-run when token changes.
+    }
+    
+    return () => {
+      isMounted = false;
     }
   }, [token, projectId])
 
@@ -134,14 +147,31 @@ export function NewProjectPage() {
     }
   }
 
-  const handleQuestionSubmit = (answer) => {
-    setAnswers(prev => ({ ...prev, [step]: answer }))
+  const [isRefining, setIsRefining] = useState(false)
+  const [refinedSpec, setRefinedSpec] = useState('')
+
+  const handleQuestionSubmit = async (answer) => {
+    const newAnswers = { ...answers, [step]: answer }
+    setAnswers(newAnswers)
+    
     if (step < aiQuestions.length) {
       setStep(prev => prev + 1)
     } else {
-      // Finished flow - show the dummy screen
-      setStep(aiQuestions.length + 1)
-      console.log('Finished', { prompt, answers: { ...answers, [step]: answer } })
+      setIsRefining(true)
+      try {
+        const payload = { answers: newAnswers, questions: aiQuestions }
+        const res = await generateRefinement(token, ideaId, payload)
+        const content = res.content || res.data?.content || res;
+        // The refined spec might be just text or markdown.
+        setRefinedSpec(content)
+        setStep(aiQuestions.length + 1)
+        toast.success('Project specification refined successfully!')
+      } catch (err) {
+        console.error('Failed to refine specification:', err)
+        toast.error('Failed to generate refined spec.')
+      } finally {
+        setIsRefining(false)
+      }
     }
   }
 
@@ -208,7 +238,12 @@ export function NewProjectPage() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             >
-              {step <= aiQuestions.length && aiQuestions.length > 0 ? (
+              {isRefining ? (
+                <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                  <Loader2 className="h-8 w-8 text-ink animate-spin mb-4" />
+                  <p className="text-body text-ink-muted">Synthesizing your project context... This may take a moment.</p>
+                </div>
+              ) : step <= aiQuestions.length && aiQuestions.length > 0 ? (
                 <QuestionCard 
                   currentStep={step}
                   totalSteps={aiQuestions.length}
@@ -220,18 +255,16 @@ export function NewProjectPage() {
                   <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
                   <h2 className="text-[32px] font-340 tracking-tight text-ink mb-4">Brief Complete</h2>
                   <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
-                    We've gathered all the necessary context. Your polished prompt is ready.
+                    We've gathered all the necessary context. Your powerful prompt is ready.
                   </p>
-                  <div className="bg-canvas border border-hairline rounded-xl p-6 text-left max-h-[300px] overflow-y-auto">
-                    <p className="text-sm font-semibold text-ink mb-4">Original Prompt:</p>
-                    <p className="text-ink-muted text-sm whitespace-pre-wrap">{prompt}</p>
-                    
-                    <div className="h-px bg-hairline my-6" />
-                    
-                    <p className="text-sm font-semibold text-ink mb-4">Clarification Answers:</p>
-                    <pre className="text-ink-muted text-xs whitespace-pre font-mono overflow-x-auto">
-                      {JSON.stringify(answers, null, 2)}
-                    </pre>
+                  <div className="bg-canvas border border-hairline rounded-xl p-6 text-left max-h-[400px] overflow-y-auto">
+                    <p className="text-sm font-semibold text-ink mb-4">Refined Project Specification:</p>
+                    <p className="text-ink-muted text-sm whitespace-pre-wrap">{typeof refinedSpec === 'object' ? JSON.stringify(refinedSpec, null, 2) : refinedSpec}</p>
+                  </div>
+                  <div className="mt-8">
+                    <button className="bg-ink text-canvas hover:bg-ink/90 px-6 py-3 rounded-full text-body-sm font-340 transition-colors cursor-not-allowed opacity-50">
+                      Generate Context (Coming Soon)
+                    </button>
                   </div>
                 </div>
               )}
