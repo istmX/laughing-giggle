@@ -88,14 +88,17 @@ const Login = () => {
           />
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="flex items-center gap-3 text-[0.95rem] text-white/60">
+            <label className="flex items-center gap-3 text-body-sm text-ink-muted">
               <input
                 type="checkbox"
-                className="size-4 rounded border-white/20 bg-transparent text-white focus:ring-white/30"
+                className="size-4 rounded border-border bg-background accent-primary focus:ring-primary/30"
               />
               Remember me
             </label>
-            <button type="button" className="text-[0.95rem] font-medium text-white transition-colors hover:text-white/80">
+            <button
+              type="button"
+              className="text-body-sm font-medium text-foreground transition-colors hover:text-ink-soft"
+            >
               Forgot password?
             </button>
           </div>
@@ -104,7 +107,7 @@ const Login = () => {
             type="submit"
             disabled={status === 'loading'}
             size="lg"
-            className="h-14 w-full rounded-[18px] bg-white text-[15px] font-medium text-black hover:bg-white/92 disabled:translate-y-0"
+            className="h-14 w-full rounded-lg bg-primary text-body-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:translate-y-0"
           >
             {status === 'loading' ? 'Signing in...' : 'Sign in'}
             <ArrowRight className="ml-3 size-5" />
@@ -112,7 +115,7 @@ const Login = () => {
         </form>
 
         {formError || error || googleError ? (
-          <p className="text-sm text-[#ff7b7b]">{formError || error || googleError}</p>
+          <p className="text-sm text-destructive">{formError || error || googleError}</p>
         ) : null}
 
         <AuthSocialSection
@@ -122,9 +125,9 @@ const Login = () => {
           disabled={status === 'loading'}
         />
 
-        <p className="text-center text-[0.95rem] text-white/52">
+        <p className="text-center text-body-sm text-ink-muted">
           Don&apos;t have an account?{' '}
-          <Link to="/signup" className="font-medium text-white transition-colors hover:text-white/80">
+          <Link to="/signup" className="font-medium text-foreground transition-colors hover:text-ink-soft">
             Sign up
           </Link>
         </p>
