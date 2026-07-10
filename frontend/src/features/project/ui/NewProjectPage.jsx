@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PromptInput } from './components/PromptInput'
 import { QuestionCard } from './components/QuestionCard'
@@ -15,32 +15,78 @@ export function NewProjectPage() {
   const navigate = useNavigate()
   const { token } = useAuth()
   
-  const [step, setStep] = useState(0) // 0 = Prompt, 1 = Q1, etc.
-  const [prompt, setPrompt] = useState('')
-  const [answers, setAnswers] = useState({})
+  const [step, setStep] = useState(() => {
+    const saved = localStorage.getItem(`project_wizard_${projectId}`)
+    if (saved) return JSON.parse(saved).step || 0
+    return 0
+  })
+  const [prompt, setPrompt] = useState(() => {
+    const saved = localStorage.getItem(`project_wizard_${projectId}`)
+    if (saved) return JSON.parse(saved).prompt || ''
+    return ''
+  })
+  const [answers, setAnswers] = useState(() => {
+    const saved = localStorage.getItem(`project_wizard_${projectId}`)
+    if (saved) return JSON.parse(saved).answers || {}
+    return {}
+  })
+  const [aiQuestions, setAiQuestions] = useState(() => {
+    const saved = localStorage.getItem(`project_wizard_${projectId}`)
+    if (saved) return JSON.parse(saved).aiQuestions || []
+    return []
+  })
+  const [ideaId, setIdeaId] = useState(() => {
+    const saved = localStorage.getItem(`project_wizard_${projectId}`)
+    if (saved) return JSON.parse(saved).ideaId || null
+    return null
+  })
+  
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [ideaId, setIdeaId] = useState(null)
-  const [aiQuestions, setAiQuestions] = useState([])
+
+  // Persist state changes
+  useEffect(() => {
+    localStorage.setItem(`project_wizard_${projectId}`, JSON.stringify({
+      step, prompt, answers, aiQuestions, ideaId
+    }))
+  }, [step, prompt, answers, aiQuestions, ideaId, projectId])
 
   const parseAIResponse = (res) => {
     try {
-      // If it's already a parsed object with the fields we expect, return it
       if (typeof res === 'object' && !res.content && (res.project_title || res.questions)) return res;
       
       let content = res.content || res.data?.content || res;
       if (typeof content !== 'string') return content;
       
-      // Strip markdown json blocks
       content = content.replace(/```json/gi, '').replace(/```/g, '').trim();
       
-      // Find the first '{' and last '}' in case there is conversational text
-      const start = content.indexOf('{');
-      const end = content.lastIndexOf('}');
-      if (start !== -1 && end !== -1) {
+      // Find the first '{' or '[' and last '}' or ']'
+      const startObj = content.indexOf('{');
+      const startArr = content.indexOf('[');
+      const endObj = content.lastIndexOf('}');
+      const endArr = content.lastIndexOf(']');
+      
+      let start = -1;
+      let end = -1;
+      
+      if (startObj !== -1 && (startArr === -1 || startObj < startArr)) {
+        start = startObj;
+        end = endObj;
+      } else if (startArr !== -1) {
+        start = startArr;
+        end = endArr;
+      }
+      
+      if (start !== -1 && end !== -1 && end > start) {
         content = content.substring(start, end + 1);
       }
       
-      return JSON.parse(content);
+      const parsed = JSON.parse(content);
+      
+      // If the LLM returned an array directly instead of { questions: [...] }
+      if (Array.isArray(parsed)) {
+        return { questions: parsed };
+      }
+      return parsed;
     } catch (e) {
       console.error("Failed to parse AI response:", e, res);
       return {};
@@ -112,7 +158,7 @@ export function NewProjectPage() {
         </Link>
       </div>
 
-      <div className="w-full max-w-4xl mx-auto relative">
+      <div className="w-full max-w-6xl mx-auto relative px-4 sm:px-8">
         <AnimatePresence mode="wait">
           {step === 0 ? (
             <motion.div
@@ -153,7 +199,7 @@ export function NewProjectPage() {
                     <div className="h-px bg-hairline my-6" />
                     
                     <p className="text-sm font-semibold text-ink mb-4">Clarification Answers:</p>
-                    <pre className="text-ink-muted text-xs whitespace-pre-wrap font-mono">
+                    <pre className="text-ink-muted text-xs whitespace-pre font-mono overflow-x-auto">
                       {JSON.stringify(answers, null, 2)}
                     </pre>
                   </div>
