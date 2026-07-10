@@ -14,7 +14,7 @@ export function TextShimmerWave({
   rotateYDistance = 10,
   transition,
 }) {
-  const MotionComponent = motion(Component);
+  const MotionComponent = motion.create(Component);
 
   return (
     <MotionComponent

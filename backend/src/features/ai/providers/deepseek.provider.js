@@ -25,4 +25,8 @@ export class DeepSeekProvider extends BaseProvider {
   async generateTasks(prompt) { return await this._call(prompt); }
   async generateRefinedSpec(prompt) { return await this._call(prompt); }
   async generateDocumentation(prompt) { return await this._call(prompt); }
+
+  async processConversation(prompt) {
+    return await this._call(prompt)
+  }
 }

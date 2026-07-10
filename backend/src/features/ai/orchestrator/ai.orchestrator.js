@@ -56,12 +56,11 @@ class AiOrchestrator {
       case 'analyzeIdea':
       case 'generateQuestions':
       case 'generateRefinedSpec':
-        // Groq is primary here, others as fallback
+      case 'processConversation':
         return ['grok', 'gemini', 'deepseek', 'openrouter'];
       case 'generateContext':
       case 'generateTasks':
       case 'generateDocumentation':
-        // Gemini is primary here, Groq as final fallback
         return ['gemini', 'deepseek', 'openrouter', 'grok'];
       default:
         throw new Error(`Unknown task type: ${taskType}`);

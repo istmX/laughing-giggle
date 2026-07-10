@@ -58,4 +58,8 @@ export class GeminiProvider extends BaseProvider {
   async generateDocumentation(prompt) {
     return await this._call(prompt)
   }
+
+  async processConversation(prompt) {
+    return await this._call(prompt)
+  }
 }
