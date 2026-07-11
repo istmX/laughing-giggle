@@ -1,5 +1,42 @@
 ## Completed
 
+- **Project Cascade Deletion**:
+  - Configured `deleteProject` in the backend project service to automatically clean up all associated database resources (linked `Ideas`, `Briefs`, `Tasks`, `Contexts`, and `AIGenerations` tables) in a single request transaction when deleting a project.
+- **Developer Chat Sandbox and Message Scroller**:
+  - Implemented the `MessageScroller` UI primitive featuring turn-anchoring, scroll-following, smooth scrolling, and prepending-preservation.
+  - Set up a sandbox testing interface (`ProjectChatPage.jsx`) pre-filled with the AI-refined project specification, simulating live streaming responses when users send messages.
+  - Configured `NewProjectPage.jsx` to completely replace the static "Brief Already Completed" placeholder screens and directly mount the interactive `ProjectChatPage` component once the wizard concludes.
+  - Overhauled `QuestionCard.jsx` to support multi-select suggested options, avoid duplicate "Let Zenix decide" buttons, and add a quick-skip action button for filler wrap-up questions.
+  - Refined backend prompt logic (`conversational.prompt.js`) to ensure specific design overrides (like choosing "Let Zenix decide" for typography/colors) do not trigger premature global wizard termination.
+- **Context Feature Folder Structure**:
+  - Initialized `frontend/src/features/context/` directory with standardized subfolders (`api`, `hooks`, `store`, `ui`) and base files matching the project's architectural standards.
+- **Project Context Asset Sync**:
+  - Copied `AGENTS.md` (saved as `Agents.md`) and the entire `context/` folder from the `scribblebox/app` directory to the backend `src/features/ai/data` folder to support AI context engine features.
+- **Landing page light-theme expansion**:
+  - tightened the hero video takeover so the pinned stage hands off to the next section sooner, reducing the oversized dead space after the main video
+  - replaced the landing’s heavier hardcoded visual treatments with shared light-theme landing classes in `index.css`
+  - kept the landing fully in the light system, including the closing use-case section
+  - added missing post-hero sections on `/`:
+    - product flow / process section
+    - generated outputs section
+    - bento grid section
+    - use-case / closing section
+  - split the new landing work into dedicated feature files under `src/features/landing/`
+  - added a reusable GSAP section-reveal hook so each landing section animates independently with reduced-motion fallback
+
+- **Conversational questions options flow**:
+  - Overhauled `QuestionCard.jsx` to render AI-suggested options, a "Let Zenix decide" choice, and a "Write my own answer" flow.
+  - Added seamless transitions, custom inputs, focus-management, and a back-to-suggestions navigation trigger.
+  - Forwarded options from `NewProjectPage.jsx` parsed conversation responses to the UI card.
+  - Updated backend conversational prompt JSON schema to generate exactly 3 contextual, diverse suggestion options for the user.
+  - Replaced hardcoded limits with a dynamic questioning flow where the AI continues asking questions until it gathers sufficient context.
+  - Instructed the backend conversational prompt to immediately complete the specification if the user requests a bypass/skip, explicitly banned filler or generic questions (like "anything else to add?") without options, and enforced fallback options (such as "I have no other details, please generate the final spec") if a generic wrap-up question is asked.
+  - Instructed the AI to ask about preferred technology stacks, color palettes, and typography early (by question 2, 3, or 4), and enforce a single concrete technology choice, color scheme, and font selection (defaulting to Next.js/Node/Express/Supabase/MongoDB, professional color psychology from `color_theory.md`, and top typography selections from `sans_serif_fonts.md` if undecided). Mapped features to user stories leveraging principles from `storytelling.md`, designed design token layouts following the primitive/semantic/component token structure in `product_design.md`, and detailed motion transitions using the glossary from `animations.md`.
+  - Created `/backend/src/features/ai/data/ui/color_theory.md` containing 100 design-approved color combinations, `/backend/src/features/ai/data/ui/sans_serif_fonts.md` containing 25 standout sans-serif fonts, `/backend/src/features/ai/data/ui/storytelling.md` outlining UX storytelling guidelines, `/backend/src/features/ai/data/ui/product_design.md` detailing product design principles, and `/backend/src/features/ai/data/ui/animations.md` compiling motion vocabularies, as reference catalogs for the AI agent.
+  - Re-targeted the output specification formatting specifically to serve as context for downstream AI coding agents (rather than human-facing summaries), and enabled immediate skipping of the questions flow if the initial prompt is already highly detailed.
+  - Added a "Let Zenix decide all remaining questions" bypass button in `QuestionCard.jsx` starting at Question 10. When clicked, it signals the backend to finalize the specification using default architectural assumptions.
+  - Updated the frontend step counter to display current question steps dynamically without hardcoded bounds, and enabled real-time state updates so that navigating away and reopening the project instantly displays both the initial prompt and completed specification correctly.
+  - Enhanced the final summary screens (`Brief Complete` and `Brief Already Completed`) in `NewProjectPage.jsx` to display both the user's initial prompt and the final AI-refined project specification side by side.
 - **Auth pages redesigned** into a centered split-screen layout that matches the login reference more closely:
   - dark editorial left panel with centered hero copy
   - bordered right-side card with centered form heading
@@ -32,7 +69,7 @@
 
 Auth forms now use a shared dark shell, centered heading treatment, and input-level motion that matches the reference more closely.
 
-Landing page work is now underway on the `/` route.
+Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
 Latest hero pass:
 - replaced the old document-card hero with a video-led Zenix hero that matches the new reference direction more closely
@@ -44,41 +81,37 @@ Latest hero pass:
 - `$impeccable polish` follow-up 2: removed the fake control bar from the big video so the stage reads as a clean film surface
 - Added global Lenis smooth scrolling at the app shell and removed the duplicate Lenis instance from the hero hook.
 - Added the first post-hero comparison section with GSAP scroll reveal, Zenix context engine center node, and generated-output list.
+- `$impeccable polish` latest:
+  - shortened the GSAP pinned hero scroll distance so the large video no longer leaves as much empty follow-through before the next section
+  - converted the landing into a multi-section light-theme story with token-backed surfaces and softer section transitions
+  - added dedicated landing feature components plus section-scoped GSAP reveal motion
 
 The home page now includes:
-- the original `hero-03.jsx` hero structure with split text animation
+- the original `hero-03.jsx` hero structure with video-led GSAP motion
 - GSAP plugin setup plus Lenis smooth scrolling with reduced-motion fallback
-- a `LineWaves` ambient hero background
-- an AI agent marquee section
-- a storytelling flow section
-- a desktop pinned horizontal document showcase powered by `ScrollTrigger`
-- a generated-context section using `CardSwap` and `DecayCard`
-- a context assembly / workflow section using `LineWaves` and `BorderGlow`
-- a closing CTA band
+- a comparison section explaining the before/after Zenix workflow
+- a process / product flow section
+- a generated outputs section
+- a bento grid section
+- a closing use-case section
 
 ## Pending
 
 - **Landing page foundation**
-  - refine section spacing, pacing, and visual transitions after the first full-page pass
-  - continue reducing repeated section grammar where a React Bits visual can carry the moment better
+  - review the new section pacing in-browser and tune spacing if any transitions still feel loose
+  - decide whether the comparison section should stay as the first post-hero block or if another narrative order reads better visually
 
 - **Hero rebuild**
-  - polish the restored hero typography so it lands even closer to the provided reference image
-  - add richer CTA interaction details such as magnetic hover if it improves feel without becoming gimmicky
-  - tune the `LineWaves` background so it supports the hero without overpowering the text
+  - verify the shortened hero pin feels right on long desktop scroll sessions
+  - fine-tune the hero typography and CTA interactions after visual review
 
 - **Brand storytelling sections**
-  - replace the current icon-based AI tool marks with official monochrome SVG logos if exact brand SVGs are provided or approved
-  - make the story and assembly sections feel more bespoke with stronger line animation and relationship cues
-  - push the generated context section further now that `CardSwap` and `DecayCard` are in place
-
-- **Horizontal document experience**
-  - tune the pinned horizontal section for longer scroll sessions
-  - add more refined panel-specific motion and visual detail inside each document panel
+  - decide whether to reintroduce richer branded visuals or generated imagery for the landing sections
+  - make the generated outputs and bento section feel even closer to the intended final marketing composition if a tighter reference is provided
 
 - **Animation system requirements**
-  - continue aligning section motion with `Animations.md`, especially reveal, stagger, orchestration, and scroll-driven pacing
-  - extend reduced-motion handling to any new ambient effects added in later passes
+  - continue aligning section motion with `Animations.md`, especially if more bespoke reveals are added after review
+  - extend reduced-motion handling to any future decorative motion added to the landing
 
 - **Dependency gap**
   - resolved: `split-type` installed for split text animation
@@ -86,10 +119,9 @@ The home page now includes:
   - no additional package is currently required for `gsap`, `@gsap/react`, `ScrollTrigger`, or `lenis` because they are already present
 
 - **Verification**
-  - review the landing page in-browser on desktop and mobile breakpoints with the restored hero
-  - verify pinned horizontal scrolling behaves well on desktop and falls back cleanly on smaller screens
-  - confirm marquee, hero reveals, and smooth scrolling stay performant
-  - lint is currently blocked by an unrelated unused `React` import in `frontend/src/Dashboard/Dashboard.jsx`
+  - review the landing page in-browser on desktop and mobile breakpoints with the new sections in place
+  - confirm the hero handoff now feels tighter after the video stage
+  - lint is currently blocked by unrelated existing issues in `Sidebar.jsx`, `text-shimmer-wave.jsx`, `NewProjectPage.jsx`, `PromptInput.jsx`, and `QuestionCard.jsx`
 
 ## Next tasks
 

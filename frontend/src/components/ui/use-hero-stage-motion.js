@@ -75,7 +75,7 @@ export function useHeroStageMotion({
             scrollTrigger: {
               trigger: section,
               start: 'top top',
-              end: '+=230%',
+              end: '+=140%',
               scrub: 1.25,
               pin: true,
               anticipatePin: 1,

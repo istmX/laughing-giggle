@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +15,7 @@ export function TextShimmerWave({
   rotateYDistance = 10,
   transition,
 }) {
-  const MotionComponent = motion(Component);
+  const MotionComponent = useMemo(() => motion.create(Component), [Component]);
 
   return (
     <MotionComponent

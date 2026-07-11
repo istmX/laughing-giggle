@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PromptInput } from './components/PromptInput'
 import { QuestionCard } from './components/QuestionCard'
-import { ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
@@ -10,6 +10,7 @@ import { processConversation, analyzeIdea } from '../api/ai.api'
 import { updateProject, getProject } from '../api/projects.api'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 import toast from 'react-hot-toast'
+import { ProjectChatPage } from './ProjectChatPage'
 
 export function NewProjectPage() {
   const { projectId } = useParams()
@@ -94,7 +95,11 @@ export function NewProjectPage() {
           setRefinedSpec(parsed.refined_spec)
           setStep(999)
         } else {
-          const questionObj = { key: 'q1', question: parsed.next_question || 'What is the primary feature?' }
+          const questionObj = {
+            key: 'q1',
+            question: parsed.next_question || 'What is the primary feature?',
+            options: parsed.options || []
+          }
           setCurrentQuestion(questionObj)
           const newState = { ideaId, prompt, history: [], currentQuestion: questionObj, refinedSpec: null, isComplete: false }
           await syncStateToBackend(newState)
@@ -186,7 +191,11 @@ export function NewProjectPage() {
         setRefinedSpec(parsedConvo.refined_spec)
         setStep(999)
       } else {
-        const questionObj = { key: 'q1', question: parsedConvo.next_question || 'What is the primary feature?' }
+        const questionObj = {
+          key: 'q1',
+          question: parsedConvo.next_question || 'What is the primary feature?',
+          options: parsedConvo.options || []
+        }
         setCurrentQuestion(questionObj)
         const newState = { ideaId: newIdeaId, prompt: val, history: [], currentQuestion: questionObj, refinedSpec: null, isComplete: false }
         await syncStateToBackend(newState)
@@ -218,11 +227,20 @@ export function NewProjectPage() {
         
         setHistory(newHistory)
         setRefinedSpec(finalSpec)
+        setCompletedProjectData(prev => ({
+          ...prev,
+          project_description: prompt,
+          wizard_state: newState
+        }))
         setStep(999)
         toast.success('Project specification refined successfully!')
       } else {
         // Next question
-        const nextQ = { key: `q${newHistory.length + 1}`, question: parsed.next_question || 'Any other details?' }
+        const nextQ = {
+          key: `q${newHistory.length + 1}`,
+          question: parsed.next_question || 'Any other details?',
+          options: parsed.options || []
+        }
         const newState = { ideaId, prompt, history: newHistory, currentQuestion: nextQ, refinedSpec: null, isComplete: false }
         await syncStateToBackend(newState)
         
@@ -237,6 +255,8 @@ export function NewProjectPage() {
       setIsRefining(false)
     }
   }
+
+
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 selection:bg-ink selection:text-canvas overflow-hidden">
@@ -290,18 +310,35 @@ export function NewProjectPage() {
                 <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
                   You have already generated the idea and context for this project.
                 </p>
-                <div className="bg-canvas border border-hairline rounded-xl p-6 text-left">
-                  <p className="text-sm font-semibold text-ink mb-2">Project Title:</p>
-                  <p className="text-ink-muted text-sm mb-6">{completedProjectData?.project_title}</p>
-                  <p className="text-sm font-semibold text-ink mb-2">Project Idea:</p>
-                  <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData?.project_description}</p>
-                </div>
-                <div className="mt-8">
-                  {/* Context Gen API Button will go here in the future */}
-                  <button className="bg-ink text-canvas hover:bg-ink/90 px-6 py-3 rounded-full text-body-sm font-340 transition-colors cursor-not-allowed opacity-50">
-                    Generate Context (Coming Soon)
-                  </button>
-                </div>
+                <div className="bg-canvas border border-hairline rounded-xl p-6 text-left space-y-4 max-h-[400px] overflow-y-auto">
+                   <div>
+                     <p className="text-sm font-semibold text-ink mb-1">Project Title:</p>
+                     <p className="text-ink-muted text-sm">{completedProjectData?.project_title}</p>
+                   </div>
+                   <hr className="border-hairline" />
+                   <div>
+                     <p className="text-sm font-semibold text-ink mb-1">Initial Prompt / Idea:</p>
+                     <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData?.project_description}</p>
+                   </div>
+                   {completedProjectData?.wizard_state?.refinedSpec && (
+                     <>
+                       <hr className="border-hairline" />
+                       <div>
+                         <p className="text-sm font-semibold text-ink mb-1">Refined Project Specification:</p>
+                         <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData.wizard_state.refinedSpec}</p>
+                       </div>
+                     </>
+                   )}
+                 </div>
+                 <div className="mt-8 flex justify-center gap-4">
+                   <Link
+                     to={`/projects/${projectId}/chat`}
+                     className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-340 transition-opacity flex items-center gap-2"
+                   >
+                     <Sparkles className="h-4 w-4" />
+                     Open Developer Chat Sandbox
+                   </Link>
+                 </div>
               </div>
             </motion.div>
           ) : (
@@ -312,23 +349,13 @@ export function NewProjectPage() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             >
-              {isRefining ? (
-                <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                  <TextShimmerWave 
-                    className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
-                    duration={1.2}
-                    zDistance={2}
-                    yDistance={-2}
-                  >
-                    Synthesizing your project context...
-                  </TextShimmerWave>
-                </div>
-              ) : currentQuestion ? (
+              {currentQuestion ? (
                 <QuestionCard 
+                  key={currentQuestion?.key || step}
                   currentStep={step}
-                  totalSteps={5} // We don't know the exact total anymore, but we cap at 5
                   question={currentQuestion}
                   onSubmit={handleQuestionSubmit}
+                  isLoading={isRefining}
                 />
               ) : (
                 <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
@@ -337,15 +364,26 @@ export function NewProjectPage() {
                   <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
                     We've gathered all the necessary context. Your powerful prompt is ready.
                   </p>
-                  <div className="bg-canvas border border-hairline rounded-xl p-6 text-left max-h-[400px] overflow-y-auto">
-                    <p className="text-sm font-semibold text-ink mb-4">Refined Project Specification:</p>
-                    <p className="text-ink-muted text-sm whitespace-pre-wrap">{typeof refinedSpec === 'object' ? JSON.stringify(refinedSpec, null, 2) : refinedSpec}</p>
-                  </div>
-                  <div className="mt-8">
-                    <button className="bg-ink text-canvas hover:bg-ink/90 px-6 py-3 rounded-full text-body-sm font-340 transition-colors cursor-not-allowed opacity-50">
-                      Generate Context (Coming Soon)
-                    </button>
-                  </div>
+                  <div className="bg-canvas border border-hairline rounded-xl p-6 text-left space-y-4 max-h-[400px] overflow-y-auto">
+                     <div>
+                       <p className="text-sm font-semibold text-ink mb-1">Initial Prompt / Idea:</p>
+                       <p className="text-ink-muted text-sm whitespace-pre-wrap">{prompt}</p>
+                     </div>
+                     <hr className="border-hairline" />
+                     <div>
+                       <p className="text-sm font-semibold text-ink mb-1">Refined Project Specification:</p>
+                       <p className="text-ink-muted text-sm whitespace-pre-wrap">{typeof refinedSpec === 'object' ? JSON.stringify(refinedSpec, null, 2) : refinedSpec}</p>
+                     </div>
+                   </div>
+                   <div className="mt-8 flex justify-center gap-4">
+                     <Link
+                       to={`/projects/${projectId}/chat`}
+                       className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-340 transition-opacity flex items-center gap-2"
+                     >
+                       <Sparkles className="h-4 w-4" />
+                       Open Developer Chat Sandbox
+                     </Link>
+                   </div>
                 </div>
               )}
             </motion.div>
