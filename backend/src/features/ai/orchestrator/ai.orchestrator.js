@@ -11,7 +11,7 @@ class AiOrchestrator {
       openrouter: new OpenRouterProvider(),
       gemini: new GeminiProvider(),
     };
-    this.TIMEOUT_MS = 25000; 
+    this.TIMEOUT_MS = 180000; 
   }
 
   async execute(taskType, data) {

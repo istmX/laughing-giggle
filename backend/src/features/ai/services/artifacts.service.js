@@ -1,6 +1,8 @@
 import orchestrator from "../orchestrator/ai.orchestrator.js";
 import Project from "../../projects/project.model.js";
 import { artifactService } from "../../artifacts/artifact.service.js";
+import fs from "fs/promises";
+import path from "path";
 
 export const aiArtifactsService = {
   async generateArtifacts(ideaId, projectId, userId) {
@@ -9,8 +11,6 @@ export const aiArtifactsService = {
       throw new Error("Project not found or specification not finalized.");
     }
 
-    const fs = await import("fs/promises");
-    const path = await import("path");
     const dataDir = path.join(process.cwd(), "src/features/ai/data");
     const contextDir = path.join(dataDir, "context");
     
@@ -19,122 +19,99 @@ export const aiArtifactsService = {
       contextFiles = (await fs.readdir(contextDir)).filter(f => f.endsWith(".md"));
     } catch (e) {}
 
-    const readDirAsText = async (dirPath) => {
-      let content = "";
-      try {
-        const files = await fs.readdir(dirPath);
-        for (const file of files) {
-          if (file.endsWith(".md")) {
-            const fileContent = await fs.readFile(path.join(dirPath, file), "utf-8");
-            content += `\n--- Example: ${file} ---\n${fileContent}\n`;
-          }
-        }
-      } catch (e) {
-        // Directory might not exist or failed to read
-      }
-      return content;
-    };
-
-    const agentsTemplate = await fs.readFile(path.join(dataDir, "Agents.md"), "utf-8").catch(() => "");
-    const contextTemplates = await readDirAsText(contextDir);
-    const uiKnowledge = await readDirAsText(path.join(dataDir, "ui"));
-
-    // Dynamically build required files and schema to ensure everything is generated
     const requiredFilesList = [
-      `1. "AGENTS.md" (Instructions for AI agents on how to build this project)`
+      { path: "AGENTS.md" },
+      ...contextFiles.map(file => ({ path: `context/${file}` })),
+      { path: "TASKS.md" }
     ];
-    const schemaFiles = [
-      { path: "AGENTS.md", content: "# Agents\n..." }
-    ];
-    
-    contextFiles.forEach((file, index) => {
-      requiredFilesList.push(`${index + 2}. "context/${file}"`);
-      schemaFiles.push({ path: `context/${file}`, content: "..." });
-    });
-    
-    // Add TASKS.md as the final required file
-    requiredFilesList.push(`${contextFiles.length + 2}. "TASKS.md" (Actionable prompts for agents)`);
-    schemaFiles.push({ path: "TASKS.md", content: "# Tasks\n..." });
 
-    const requiredFilesText = requiredFilesList.join("\n");
-    const schemaText = JSON.stringify({ files: schemaFiles }, null, 2);
+    const savedArtifacts = [];
+    for (const file of requiredFilesList) {
+      const artifact = await artifactService.createOrUpdateArtifact(
+        projectId,
+        userId,
+        file.path,
+        "Pending generation...",
+        "markdown"
+      );
+      savedArtifacts.push(artifact);
+    }
 
-    // Construct the prompt describing the artifacts needed
+    return { success: true, artifacts: savedArtifacts };
+  },
+
+  async generateSingleArtifact(projectId, userId, filePath) {
+    const project = await Project.findOne({ _id: projectId, owner: userId });
+    if (!project || !project.wizard_state || !project.wizard_state.refinedSpec) {
+      throw new Error("Project not found or specification not finalized.");
+    }
+
+    const dataDir = path.join(process.cwd(), "src/features/ai/data");
+    let templatePath = "";
+    
+    if (filePath === "AGENTS.md") templatePath = path.join(dataDir, "Agents.md");
+    else if (filePath === "TASKS.md") templatePath = ""; // Add tasks template if available
+    else templatePath = path.join(dataDir, filePath); 
+
+    let templateContent = "";
+    try {
+      if (templatePath) templateContent = await fs.readFile(templatePath, "utf-8");
+    } catch (e) {}
+
+    const uiKnowledgeDir = path.join(dataDir, "ui");
+    let uiKnowledge = "";
+    try {
+      const files = await fs.readdir(uiKnowledgeDir);
+      for (const file of files) {
+        if (file.endsWith(".md")) {
+          const fileContent = await fs.readFile(path.join(uiKnowledgeDir, file), "utf-8");
+          uiKnowledge += `\n--- UI Knowledge: ${file} ---\n${fileContent}\n`;
+        }
+      }
+    } catch (e) {}
+
     const prompt = `
 You are an expert Software Architect and Developer.
 We are building an application based on the following finalized specification:
 
 ${project.wizard_state.refinedSpec}
 
-Please generate the following documentation files for this project. Format your response strictly as a JSON object containing a "files" array. Each object in the array must have "path" and "content".
+Your ONLY task is to generate the exact contents for the file: "${filePath}".
+You MUST NOT generate any other files. Do not wrap your response in JSON. Output raw markdown.
 
-Required files to generate:
-${requiredFilesText}
+CRITICAL INSTRUCTIONS:
+1. If the file is AGENTS.md, it MUST NOT be a generic task board. It MUST be a strict "Agent Instruction Manual" with hard UX rules and operational directives.
+2. If the user has already given specific color palettes and a theme, DO NOT change them. If they left it vague, use the UI knowledge below to make excellent design decisions.
+3. Your generated file MUST strictly follow the exact format, style, and opinionated tone of the reference template provided. Do not deviate from its structure.
 
-IMPORTANT INSTRUCTIONS:
-1. "AGENTS.md" MUST NOT be a generic task board or architecture summary. It MUST be a strict "Agent Instruction Manual".
-   - It MUST include a strong "What this IS vs What this is NOT" philosophy section.
-   - It MUST include specific emotional design guardrails ("The product should feel X").
-   - It MUST include strict operational rules (e.g., "Before making decisions, read X...", "Whenever work is completed, update Y...").
-   - It MUST include hard UX/UI rules (e.g., "Empty states must have X, Y, Z").
-   - It MUST include a numbered priority list (e.g., 1. UX, 2. Design, 3. Performance).
-   - If you do not include these specific behavioral guardrails, the agents will fail.
-2. If the user has already given specific color palettes and a theme, DO NOT change them.
-3. If the user said "AI decide" or left the theme vague, you MUST use the UI design knowledge provided below to make excellent, modern design decisions.
-4. CRITICAL: Your generated files MUST strictly follow the exact format, style, and opinionated tone of their respective examples.
-
---- REFERENCE UI KNOWLEDGE FOR GOOD DECISIONS ---
+--- REFERENCE UI KNOWLEDGE ---
 ${uiKnowledge}
 
---- EXAMPLES OF HIGH-QUALITY FILES ---
-Example of Agents.md (USE THIS AS A STRICT REFERENCE FOR YOUR AGENTS.md OUTPUT):
-${agentsTemplate}
-
-Examples of Context files (Match their tone and structure):
-${contextTemplates}
+--- REFERENCE TEMPLATE FOR ${filePath} ---
+${templateContent ? templateContent : "(No explicit template provided. Format as a professional technical markdown document suitable for AI coding agents to follow.)"}
 ------------------------------------------------
 
-Do not wrap the JSON in Markdown backticks. Return valid JSON only.
-
-Schema:
-${schemaText}
+Please generate the full, detailed markdown content for ${filePath} now:
 `;
 
-    const systemPrompt = "You are a JSON-generating expert architect agent. Only output valid JSON matching the schema.";
+    const aiResponse = await orchestrator.execute("generateArtifacts", prompt);
+    let content = aiResponse.response.content;
     
-    // Call the orchestrator
-    const aiResponse = await orchestrator.execute("generateArtifacts", `${prompt}\n\n${systemPrompt}`);
-    
-    let parsedResult;
-    try {
-      // The orchestrator returns { response: { content: "..." }, providerUsed: "..." }
-      const content = aiResponse.response.content;
-      // Strip markdown code blocks if the AI accidentally adds them around the JSON
-      const jsonString = content.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
-      parsedResult = JSON.parse(jsonString);
-    } catch (e) {
-      throw new Error("AI did not return valid JSON for artifacts.");
+    // Cleanup potential markdown codeblock wrapping around the whole response
+    if (content.startsWith("\`\`\`markdown") && content.endsWith("\`\`\`")) {
+      content = content.substring(13, content.length - 3).trim();
+    } else if (content.startsWith("\`\`\`") && content.endsWith("\`\`\`")) {
+      content = content.substring(3, content.length - 3).trim();
     }
 
-    if (!parsedResult.files || !Array.isArray(parsedResult.files)) {
-      throw new Error("AI did not return a valid 'files' array.");
-    }
+    const artifact = await artifactService.createOrUpdateArtifact(
+      projectId,
+      userId,
+      filePath,
+      content,
+      "markdown"
+    );
 
-    // Save each artifact to the database
-    const savedArtifacts = [];
-    for (const file of parsedResult.files) {
-      if (file.path && file.content) {
-        const artifact = await artifactService.createOrUpdateArtifact(
-          projectId,
-          userId,
-          file.path,
-          file.content,
-          "markdown"
-        );
-        savedArtifacts.push(artifact);
-      }
-    }
-
-    return { success: true, artifacts: savedArtifacts };
+    return { success: true, artifact };
   }
 };

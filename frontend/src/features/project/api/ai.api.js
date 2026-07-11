@@ -38,6 +38,14 @@ export const generateArtifacts = async (token, ideaId, payload) => {
   })
 }
 
+export const generateSingleArtifact = async (token, projectId, file_path) => {
+  return authFetch(`/ai/artifacts/${projectId}/generate`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify({ file_path })
+  })
+}
+
 export const developerChat = async (token, projectId, payload) => {
   return authFetch(`/ai/developer/${projectId}`, {
     method: 'POST',

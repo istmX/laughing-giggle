@@ -1,5 +1,13 @@
 ## Completed
 
+- **Artifact Generation Overhaul (Sequential Streaming)**:
+  - Re-architected the artifact generation flow to solve LLM output token limits (which previously caused the AI to lazily mash all 11 files into a single summarized file).
+  - The backend now instantly generates "Pending generation..." placeholders in the database for all 11 required files (AGENTS.md, TASKS.md, and all 9 context files) when the wizard completes.
+  - Built a new single-artifact generation API endpoint (`POST /api/ai/artifacts/:projectId/generate`) that executes a highly-focused AI prompt providing ONLY the specific reference template for that exact file, guaranteeing maximum depth and quality.
+  - Wired the React frontend (`ProjectWorkspace.jsx`) to sequentially loop through pending artifacts, ping the new backend endpoint, and live-update the UI state, allowing the user to watch the files populate one by one.
+- **AI Orchestrator Resilience**:
+  - Fixed a cascading timeout failure where fallback LLMs (Mistral, OpenRouter, Gemini) were being killed prematurely because they generate text slower than Groq (Llama 3.3).
+  - Increased the hardcoded `TIMEOUT_MS` limit in `ai.orchestrator.js` from 25 seconds to 180 seconds to allow slower providers enough time to stream massive architecture documents.
 - **Artifacts UI & File Switcher Polish**:
   - Replaced the buggy native `<select>` dropdown in the Artifacts sidebar with a custom, framer-motion animated menu to enforce strict `DESIGN.md` design tokens (`bg-canvas`, `text-ink`) and fix OS-level white-on-white text issues.
   - Fixed a missing property bug where artifacts rendered as empty strings in the dropdown by correctly mapping `activeArtifact.path` to the database schema's `activeArtifact.file_path`.

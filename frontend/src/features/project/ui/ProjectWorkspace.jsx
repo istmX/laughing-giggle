@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { getProject, updateProject } from '../api/projects.api'
 import { createIdea } from '../api/ideas.api'
-import { processConversation, analyzeIdea, generateArtifacts, developerChat } from '../api/ai.api'
+import { processConversation, analyzeIdea, generateArtifacts, generateSingleArtifact, developerChat } from '../api/ai.api'
 import { getProjectArtifacts, updateArtifact, downloadArtifactsZip } from '@/features/artifacts/api/artifacts.api'
 import {
   MessageScrollerProvider,
@@ -196,20 +196,29 @@ export function ProjectWorkspace() {
             } else if (res.data.wizard_state?.isComplete && res.data.wizard_state?.ideaId) {
               setIsGeneratingArtifacts(true)
               setIsArtifactsOpen(true)
-              generateArtifacts(token, res.data.wizard_state.ideaId, { projectId })
-                .then(() => getProjectArtifacts(token, projectId))
-                .then(newArtRes => {
-                  if (newArtRes && newArtRes.length > 0) {
-                    setArtifacts(newArtRes)
-                    setActiveArtifact(newArtRes[0])
+              
+              const newArtRes = await generateArtifacts(token, res.data.wizard_state.ideaId, { projectId })
+              let pendingArtifacts = await getProjectArtifacts(token, projectId);
+              
+              if (pendingArtifacts && pendingArtifacts.length > 0) {
+                setArtifacts(pendingArtifacts)
+                setActiveArtifact(pendingArtifacts[0])
+                
+                // Sequentially generate each pending artifact
+                for (let i = 0; i < pendingArtifacts.length; i++) {
+                  try {
+                    const singleRes = await generateSingleArtifact(token, projectId, pendingArtifacts[i].file_path);
+                    if (singleRes && singleRes.artifact) {
+                      setArtifacts(prev => prev.map(a => a._id === pendingArtifacts[i]._id ? { ...a, content: singleRes.artifact.content } : a));
+                      if (i === 0) setActiveArtifact(singleRes.artifact); // Update active if it's the first one
+                    }
+                  } catch (e) {
+                    console.error("Failed to generate file:", pendingArtifacts[i].file_path, e);
                   }
-                  toast.success("Project artifacts generated successfully!")
-                })
-                .catch(e => {
-                  console.error("Auto-generate failed", e)
-                  toast.error("Failed to generate artifacts.")
-                })
-                .finally(() => setIsGeneratingArtifacts(false))
+                }
+                toast.success("Project artifacts generated successfully!")
+              }
+              setIsGeneratingArtifacts(false)
             }
           } catch (e) {
             console.error("Failed to fetch artifacts", e)
@@ -240,10 +249,22 @@ export function ProjectWorkspace() {
     setIsArtifactsOpen(true) // Open it so user sees the loading state
     try {
       await generateArtifacts(token, currentIdeaId, { projectId })
-      const res = await getProjectArtifacts(token, projectId)
-      if (res && res.length > 0) {
-        setArtifacts(res)
-        setActiveArtifact(res[0])
+      const pendingArtifacts = await getProjectArtifacts(token, projectId)
+      if (pendingArtifacts && pendingArtifacts.length > 0) {
+        setArtifacts(pendingArtifacts)
+        setActiveArtifact(pendingArtifacts[0])
+        
+        for (let i = 0; i < pendingArtifacts.length; i++) {
+          try {
+            const singleRes = await generateSingleArtifact(token, projectId, pendingArtifacts[i].file_path);
+            if (singleRes && singleRes.artifact) {
+              setArtifacts(prev => prev.map(a => a._id === pendingArtifacts[i]._id ? { ...a, content: singleRes.artifact.content } : a));
+              if (i === 0) setActiveArtifact(singleRes.artifact);
+            }
+          } catch (e) {
+            console.error("Failed to generate file:", pendingArtifacts[i].file_path, e);
+          }
+        }
       }
       toast.success("Project artifacts generated successfully!")
     } catch (e) {

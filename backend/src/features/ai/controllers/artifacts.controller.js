@@ -17,3 +17,20 @@ export const generateArtifacts = async (req, res, next) => {
     next(error);
   }
 };
+
+export const generateSingleArtifact = async (req, res, next) => {
+  try {
+    const { projectId } = req.params;
+    const userId = req.user.id;
+    const { file_path } = req.body;
+
+    if (!file_path) {
+      return next(new AppError("file_path is required", 400));
+    }
+
+    const result = await aiArtifactsService.generateSingleArtifact(projectId, userId, file_path);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
