@@ -29,7 +29,7 @@ Product design is the practice of shaping how a product works, feels, and fits i
 ## Design Token Hierarchy
 Design tokens are named, reusable logic-based values that store design decisions. They connect static design files directly to production code.
 
-```
+```text
 [ Raw Value: #0D99FF ]
         ↓
 [ Primitive Tokens: blue-500 ] (Raw values, constants)

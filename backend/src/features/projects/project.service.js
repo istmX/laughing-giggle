@@ -6,6 +6,7 @@ import Brief from '../brief/brief.model.js';
 import AIGeneration from '../ai/ai.model.js';
 import { validateOwnership } from '../../utils/ownership.js';
 import AppError from '../../utils/AppError.js';
+import mongoose from 'mongoose';
 
 export const createProject = async (userId, projectData) => {
   const { project_title, project_description } = projectData;
@@ -43,26 +44,37 @@ export const updateProject = async (userId, projectId, updateData) => {
 
 export const deleteProject = async (userId, projectId) => {
   const project = await validateOwnership(Project, projectId, userId, 'Project');
-  
   const ideaId = project.wizard_state?.ideaId;
 
-  /* Cascade deletion of all resources linked to the project or its idea */
-  const deletePromises = [
-    Project.findByIdAndDelete(projectId),
-    Task.deleteMany({ project: projectId }),
-    Context.deleteMany({ project: projectId }),
-    AIGeneration.deleteMany({ project: projectId })
-  ];
-
   if (ideaId) {
-    deletePromises.push(
-      Idea.findByIdAndDelete(ideaId),
-      Brief.deleteMany({ idea: ideaId }),
-      AIGeneration.deleteMany({ idea: ideaId })
-    );
+    await validateOwnership(Idea, ideaId, userId, 'Idea');
   }
 
-  await Promise.all(deletePromises);
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const opts = { session };
+
+    /* Cascade deletion of all resources linked to the project or its idea */
+    await Project.deleteOne({ _id: projectId, owner: userId }, opts);
+    await Task.deleteMany({ project: projectId }, opts);
+    await Context.deleteMany({ project: projectId }, opts);
+    await AIGeneration.deleteMany({ project: projectId, owner: userId }, opts);
+
+    if (ideaId) {
+      await Idea.deleteOne({ _id: ideaId, owner: userId }, opts);
+      await Brief.deleteMany({ idea: ideaId, owner: userId }, opts);
+      await AIGeneration.deleteMany({ idea: ideaId, owner: userId }, opts);
+    }
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 
   return project;
 };

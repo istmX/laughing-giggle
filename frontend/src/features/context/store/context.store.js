@@ -12,6 +12,7 @@ export const useContextStore = create(
     }),
     {
       name: 'zenix-context-store',
+      partialize: (state) => ({ generatedFiles: state.generatedFiles }),
     }
   )
 )

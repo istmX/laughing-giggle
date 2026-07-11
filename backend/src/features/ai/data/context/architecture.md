@@ -15,27 +15,15 @@ Avoid unnecessary complexity.
 
 # System Overview
 
-Images
-
-↓
-
-Expo FileSystem
-
-↓
-
-Metadata
-
-↓
-
-AsyncStorage
-
-↓
-
-Zustand Store
-
-↓
-
-UI
+User Prompt / Input
+       ↓
+Web React Frontend Routes (Vite, React Router, Zustand)
+       ↓
+Backend AI Orchestrator / Prompt Generator (Node.js & Express)
+       ↓
+AI APIs (Groq / Mistral) & MongoDB Storage
+       ↓
+Project Chat Sandbox (MessageScroller) & Context Documents
 
 ---
 
@@ -269,24 +257,16 @@ Images must be lazy-loaded.
 
 ---
 
-# Offline First
+# Offline First and Authentication Boundaries
 
-The app must function:
-
-- without internet
-- without authentication
-- without cloud sync
-
-Internet should never be required to access memories.
+The app supports offline access for local screenshot and basic memory-curation features, but:
+- **Authenticated Generation**: Accessing conversational prompts, projects creation, and managing workspaces requires authentication (JWT tokens).
+- **Project-Chat & Context Sandbox**: Accessing the AI spec engine, context generation APIs, and ProjectChatPage sandbox requires an active network connection and valid session.
 
 ---
 
 # Future Expansion
 
-Future cloud sync must be optional.
-
-The local-first architecture remains the primary architecture forever.
-
-Cloud sync is an enhancement.
-
-Not a dependency.
+Future cloud sync features for local screenshot metadata must remain optional.
+The core repository supports a hybrid model: local-first tools enhanced by cloud-backed developer utilities.
+Cloud sync is an enhancement, not a blocker for local viewing, but a dependency for active AI context features.

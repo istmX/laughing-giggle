@@ -308,11 +308,10 @@ Anything else is optional.
 
 Not MVP:
 
-- AI
 - OCR
 - Cloud Sync
 - Sharing
 - Collaboration
 - Social Features
 
-Ignore these until requested.
+Ignore these until requested. AI orchestration, conversational prompts, project chat, and context generation are explicitly in-scope.

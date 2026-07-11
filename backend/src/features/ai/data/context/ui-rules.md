@@ -190,15 +190,14 @@ Do not add advanced filtering in MVP.
 
 ---
 
-# Settings Rules
+# Settings Rules (Public Screens Only)
 
-Settings should remain simple.
+Settings for public end-user screens should remain simple.
+- No developer settings.
+- No technical screens.
+- No debug menus.
 
-No developer settings.
-
-No technical screens.
-
-No debug menus.
+*Note: The Developer Chat Sandbox and AI-assisted context-generation interfaces are fully allowed on designated developer-facing workspaces.*
 
 ---
 
@@ -228,7 +227,7 @@ Never use low-contrast text.
 
 ---
 
-# Things To Avoid
+# Things To Avoid (On Public / End-User Surfaces)
 
 Glassmorphism
 
@@ -236,7 +235,7 @@ Neumorphism
 
 Material Design Defaults
 
-Corporate Dashboards
+Corporate Dashboards (except for developer workspace spec panels)
 
 Tiny Icons
 
@@ -244,7 +243,7 @@ Complex Navigation
 
 Overloaded Screens
 
-AI Features
+AI Features on core public gallery/timeline views (fully allowed in Developer Chat Sandbox)
 
 Premature Features
 

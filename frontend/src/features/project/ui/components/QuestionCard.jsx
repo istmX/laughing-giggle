@@ -27,17 +27,13 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
   const [selectedOption, setSelectedOption] = useState(null)
 
   useEffect(() => {
-    setAnswer('')
-    setSelectedOption(null)
-    setSelectedOptions([])
-    setShowCustomInput(!hasOptions)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
       if (!hasOptions) {
         textareaRef.current.focus()
       }
     }
-  }, [question, hasOptions])
+  }, [hasOptions])
 
   const handleInput = (e) => {
     setAnswer(e.target.value)
@@ -60,7 +56,11 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
   }
 
   const handleSelectOption = (optVal) => {
-    const isSpecial = optVal.toLowerCase().includes('zenix decide') || optVal.toLowerCase().includes('ai decide') || optVal.toLowerCase().includes('skip') || optVal.toLowerCase().includes('no other details')
+    const normalized = optVal.toLowerCase()
+    const isSpecial = normalized.includes('zenix decide') || 
+                      normalized.includes('ai decide') || 
+                      normalized.includes('no other details') || 
+                      normalized.includes('generate the final spec')
     
     if (isSpecial) {
       setSelectedOption(optVal)
@@ -70,12 +70,10 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
       onSubmit(optVal)
     } else {
       setSelectedOption(null)
-      setSelectedOptions((prev) => {
-        const isSelected = prev.includes(optVal)
-        const next = isSelected ? prev.filter((o) => o !== optVal) : [...prev, optVal]
-        setAnswer(next.join(', '))
-        return next
-      })
+      const isSelected = selectedOptions.includes(optVal)
+      const next = isSelected ? selectedOptions.filter((o) => o !== optVal) : [...selectedOptions, optVal]
+      setSelectedOptions(next)
+      setAnswer(next.join(', '))
     }
   }
 

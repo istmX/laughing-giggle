@@ -4,7 +4,7 @@ import { useContextStore } from '../store/context.store'
 import { generateProjectContext } from '../api/context.api'
 import toast from 'react-hot-toast'
 
-export function useContextFlow(projectId, ideaId) {
+export function useContextFlow(ideaId) {
   const { token } = useAuth()
   const { isGenerating, generatedFiles, setGenerating, setGeneratedFiles } = useContextStore()
   const [error, setError] = useState(null)
@@ -15,9 +15,9 @@ export function useContextFlow(projectId, ideaId) {
     setError(null)
     try {
       const res = await generateProjectContext(token, ideaId)
-      // Assume response returns generated files
-      if (res?.data?.files) {
-        setGeneratedFiles(res.data.files)
+      // Read generated files from the root JSON payload
+      if (res?.files) {
+        setGeneratedFiles(res.files)
         toast.success('Context files generated successfully!')
       } else {
         toast.success('Context generation initiated!')

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Send, Sparkles, User, Bot, Loader2, RefreshCw } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { ArrowLeft, Send, User, Bot, Loader2 } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { getProject } from '../api/projects.api'
 import {
@@ -16,8 +15,17 @@ import toast from 'react-hot-toast'
 
 export function ProjectChatPage() {
   const { projectId } = useParams()
-  const navigate = useNavigate()
   const { token } = useAuth()
+  const intervalRef = useRef(null)
+
+  // Clear interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [])
 
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -95,7 +103,7 @@ Your requirements have been cataloged. You can trigger the context engine to bui
     ])
 
     let index = 0
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setMessages((prev) => {
         return prev.map((m) => {
           if (m.id === assistantMessageId) {
@@ -107,7 +115,8 @@ Your requirements have been cataloged. You can trigger the context engine to bui
       })
       index += 3
       if (index >= fullReply.length) {
-        clearInterval(interval)
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
         setIsStreaming(false)
       }
     }, 15)

@@ -39,7 +39,7 @@ Purpose:
 
 Value:
 
-#6E56CF
+`#6E56CF`
 
 ---
 
@@ -53,7 +53,7 @@ Purpose:
 
 Value:
 
-#F2ECFF
+`#F2ECFF`
 
 ---
 
@@ -65,7 +65,7 @@ Purpose:
 
 Value:
 
-#FFE8D2
+`#FFE8D2`
 
 ---
 
@@ -77,7 +77,7 @@ Purpose:
 
 Value:
 
-#E6F5EA
+`#E6F5EA`
 
 ---
 
@@ -91,7 +91,7 @@ Purpose:
 
 Value:
 
-#FFF8EE
+`#FFF8EE`
 
 ---
 
@@ -103,7 +103,7 @@ Purpose:
 
 Value:
 
-#FFFFFF
+`#FFFFFF`
 
 ---
 
@@ -116,7 +116,7 @@ Purpose:
 
 Value:
 
-#FF6B57
+`#FF6B57`
 
 ---
 
@@ -128,7 +128,7 @@ Purpose:
 
 Value:
 
-#5CBF88
+`#5CBF88`
 
 ---
 
@@ -136,7 +136,7 @@ Value:
 
 Value:
 
-#1F1F1F
+`#1F1F1F`
 
 ---
 
@@ -144,7 +144,7 @@ Value:
 
 Value:
 
-#6B7280
+`#6B7280`
 
 ---
 
@@ -152,7 +152,7 @@ Value:
 
 Value:
 
-#E8E5F0
+`#E8E5F0`
 
 ---
 
@@ -300,23 +300,23 @@ FAB
 
 Primary Box
 
-#D8A15B
+`#D8A15B`
 
 Box Outline
 
-#6B4B2A
+`#6B4B2A`
 
 Purple Accent
 
-#6E56CF
+`#6E56CF`
 
 Mint Accent
 
-#5CBF88
+`#5CBF88`
 
 Coral Accent
 
-#FF8A3D
+`#FF8A3D`
 
 ---
 
@@ -340,7 +340,8 @@ Slow
 
 Use:
 
-Lucide React Native
+- `lucide-react` (Web Frontend)
+- `lucide-react-native` (Mobile Client)
 
 Avoid mixing icon libraries.
 

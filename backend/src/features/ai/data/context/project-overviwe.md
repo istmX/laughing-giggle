@@ -76,33 +76,31 @@ Secondary Users:
 
 ---
 
-# Core User Journey
+# Core User Journey (Project Creation & Refinement)
+
+User inputs project idea / prompt on Dashboard
+       ↓
+Enters conversational refinement wizard (interactive QuestionCard with options / "Let Zenix decide")
+       ↓
+Wizard completes (either step 10+ bypass or AI decides context is sufficient)
+       ↓
+Directly transitions to the Developer Chat Sandbox (MessageScroller interface)
+       ↓
+AI generates context files (Agents.md, build-plan.md, etc.) on request via backend APIs
+
+---
+
+# Legacy User Journey (Screenshot Journal)
 
 User opens app
-
-↓
-
+       ↓
 Imports screenshot
-
-↓
-
+       ↓
 Places screenshot into collection
-
-↓
-
+       ↓
 Adds memory note
-
-↓
-
-Screenshot becomes searchable
-
-↓
-
-Screenshot appears in timeline
-
-↓
-
-Screenshot can be pinned
+       ↓
+Screenshot becomes searchable / appears in timeline or pinned list
 
 ---
 

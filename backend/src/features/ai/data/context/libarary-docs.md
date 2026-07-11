@@ -218,27 +218,32 @@ https://zod.dev
 
 # Approved Libraries
 
-✓ Expo
+## Web Frontend
+- `react`, `react-dom` (Core Framework)
+- `react-router-dom` (Routing)
+- `zustand` (State Management)
+- `tailwindcss`, `tailwind-merge`, `clsx` (Styling & Class Utilities)
+- `lucide-react` (Icons)
+- `gsap`, `@gsap/react` (Animations & Timelines)
+- `framer-motion`, `motion-dom` (Transition Animations)
+- `lenis` (Smooth Scrolling)
 
-✓ Expo Router
+## Mobile Client (Legacy/Mobile)
+- `expo`, `expo-router` (Framework)
+- `nativewind` (Styling)
+- `zustand` (State)
+- `@tanstack/react-query` (Async Fetching)
+- `@react-native-async-storage/async-storage` (Local Storage)
+- `expo-file-system` (File Management)
+- `@clerk/clerk-expo` (Authentication)
+- `react-hook-form`, `zod` (Forms & Validation)
 
-✓ NativeWind
-
-✓ Zustand
-
-✓ TanStack Query
-
-✓ AsyncStorage
-
-✓ Expo FileSystem
-
-✓ Clerk
-
-✓ Lucide
-
-✓ React Hook Form
-
-✓ Zod
+## Backend
+- `express` (Server)
+- `mongoose` (MongoDB ORM)
+- `jsonwebtoken`, `bcryptjs` (Security)
+- `groq-sdk` (Groq AI integration)
+- `cors`, `dotenv` (System Utilities)
 
 ---
 

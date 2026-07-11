@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PromptInput } from './components/PromptInput'
 import { QuestionCard } from './components/QuestionCard'
-import { ArrowLeft, Loader2, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
@@ -256,9 +256,7 @@ export function NewProjectPage() {
     }
   }
 
-  if (step === 999) {
-    return <ProjectChatPage />
-  }
+
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 selection:bg-ink selection:text-canvas overflow-hidden">
@@ -353,6 +351,7 @@ export function NewProjectPage() {
             >
               {currentQuestion ? (
                 <QuestionCard 
+                  key={currentQuestion?.key || step}
                   currentStep={step}
                   question={currentQuestion}
                   onSubmit={handleQuestionSubmit}

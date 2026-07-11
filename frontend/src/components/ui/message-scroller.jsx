@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useRef, useState, useEffect, useLayoutEffect } from 'react'
-import { motion } from 'framer-motion'
+import { createContext, useContext, useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { ArrowDown } from 'lucide-react'
 
 // --- Contexts ---
@@ -85,12 +84,14 @@ export function MessageScrollerProvider({
     return true
   }
 
+  const observerRef = useRef(null)
+
   // Set up visibility observer
   useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
 
-    const observer = new IntersectionObserver(
+    observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const id = entry.target.getAttribute('data-message-id')
@@ -117,13 +118,27 @@ export function MessageScrollerProvider({
       }
     )
 
-    // Observe all registered items
-    itemsRef.current.forEach((el) => observer.observe(el))
-
     return () => {
-      observer.disconnect()
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
     }
-  }, [visibleMessageIds])
+  }, [])
+
+  const registerItem = (id, element) => {
+    if (element) {
+      itemsRef.current.set(id, element)
+      if (observerRef.current) {
+        observerRef.current.observe(element)
+      }
+    } else {
+      const prevEl = itemsRef.current.get(id)
+      if (prevEl && observerRef.current) {
+        observerRef.current.unobserve(prevEl)
+      }
+      itemsRef.current.delete(id)
+    }
+  }
 
   // Track prepended items (Preserve Scroll Position on Prepend)
   const prevCountRef = useRef(0)
@@ -185,14 +200,6 @@ export function MessageScrollerProvider({
     const timer = setTimeout(initPosition, 50)
     return () => clearTimeout(timer)
   }, [defaultScrollPosition])
-
-  const registerItem = (id, element) => {
-    if (element) {
-      itemsRef.current.set(id, element)
-    } else {
-      itemsRef.current.delete(id)
-    }
-  }
 
   return (
     <MessageScrollerContext.Provider

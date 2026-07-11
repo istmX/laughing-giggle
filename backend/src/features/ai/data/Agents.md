@@ -3,7 +3,7 @@
 
 You are working on ScribbleBox.
 
-Before making ANY implementation decisions, read every file inside the `/context` directory.
+Before making ANY implementation decisions, read every file inside the repository-relative `backend/src/features/ai/data/context` directory.
 
 The context files are the source of truth.
 
@@ -102,12 +102,12 @@ Never sacrifice UX for architecture complexity.
 
 Framework:
 
-- Expo
-- React Native
+- Web React (Vite, React Router)
+- Node.js & Express (Backend APIs)
 
 Styling:
 
-- NativeWind
+- Tailwind CSS
 
 State:
 
@@ -115,30 +115,30 @@ State:
 
 Async Data:
 
-- TanStack Query
+- Axios, authFetch, Fetch API
 
 Storage:
 
-- AsyncStorage
-- Expo FileSystem
+- MongoDB (Database)
+- LocalStorage / SessionStorage (Client token storage)
 
 Authentication:
 
-- Clerk
+- JWT / custom token auth
+
+AI / Chat:
+- Groq / Mistral APIs
+- MessageScroller chat sandbox
 
 ---
 
 # Storage Philosophy
 
-Images are stored locally.
+Images and project specifications are stored via the backend API in MongoDB.
 
-Metadata is stored locally.
+The app supports local memory curation features, but authenticated project-chat and context-generation require backend connectivity.
 
-The app must function completely offline.
-
-Cloud sync is not required for MVP.
-
-Do not introduce backend complexity unless explicitly requested.
+Do not introduce unrelated architectural layers unless explicitly requested.
 
 ---
 

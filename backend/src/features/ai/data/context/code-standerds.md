@@ -202,31 +202,21 @@ Avoid manual loading state management.
 
 ---
 
-# TypeScript Rules
+# TypeScript Rules (Scoped to TS Packages)
 
-Strict mode enabled.
+For packages using TypeScript:
+- Strict mode is enabled.
+- Avoid using `any`.
+- Never use `// @ts-ignore` unless absolutely necessary.
 
-Avoid:
-
-any
-
-Never use:
-
-// @ts-ignore
-
-unless absolutely necessary.
+*Note: For the web frontend and backend modules, standard JavaScript (ES Modules) is used.*
 
 ---
 
-# Styling Rules
+# Styling Rules (Package Bound)
 
-Use NativeWind.
-
-Prefer utility classes.
-
-Avoid large inline styles.
-
-Avoid giant StyleSheet files.
+- **Web Frontend**: Use standard Tailwind CSS utility classes and Vanilla CSS. Use components styled via className variables.
+- **Mobile Client**: Use NativeWind utility classes and avoid large inline styles or giant StyleSheet files.
 
 ---
 
