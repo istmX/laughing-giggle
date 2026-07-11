@@ -1,20 +1,60 @@
 import { buildBasePrompt } from "./base.prompt.js";
 
 export const buildConversationalPrompt = (data) => {
+  const history = data.history || [];
+  
+  // Check if user requested to skip remaining questions
+  const userRequestedSkip = history.some(item => 
+    typeof item.answer === 'string' && 
+    (
+      item.answer.toLowerCase().includes("let zenix decide all") || 
+      item.answer.toLowerCase().includes("let zenix decide for all") || 
+      item.answer.toLowerCase().includes("let ai decide for all") || 
+      item.answer.toLowerCase().includes("let ai decide all") || 
+      item.answer.toLowerCase().includes("no other details") ||
+      item.answer.toLowerCase().includes("generate the final spec")
+    )
+  );
+
   return `
 ${buildBasePrompt()}
 
 ### Task
-You are a senior software architect gathering requirements for a software project.
-Original Idea: ${data.idea}
-Q&A History (questions asked so far and user answers): ${JSON.stringify(data.history)}
+You are a senior software architect gathering product and high-level architectural requirements for:
+Original Idea: "${data.idea}"
 
+Q&A History (questions asked so far and user answers):
+${JSON.stringify(history, null, 2)}
+
+${userRequestedSkip ? `
+### CRITICAL INSTRUCTION
+The user has requested to finalize the specification. You MUST end the conversation now.
+Set "is_complete": true, "next_question": null, "options": null, and generate the final "refined_spec" based on the accumulated context, filling in any gaps with sensible engineering decisions.
+Do NOT ask another question.
+` : `
 ### Your Responsibilities
-1. Carefully read the Original Idea and the entire Q&A History.
-2. If there is still crucial information missing that would meaningfully improve the final specification — information that cannot be reasonably inferred — ask ONE single focused, specific question that uncovers it.
-3. Only mark the conversation as complete when you have enough information to write a truly comprehensive, implementation-ready engineering specification. You may ask as many questions as necessary. There is no question limit.
-4. Do NOT repeat a question that has already been answered in the Q&A History.
-5. Do NOT ask vague or generic questions. Each question must be targeted and concrete.
+1. **Analyze Initial Detail**: If the user's Original Idea is already extremely detailed (containing features, tech stack, and flows), do not ask questions. Immediately set "is_complete": true and generate the final prompt specification.
+    2. **Stay High-Level**: Focus strictly on product features, core user flows, and high-level requirements. DO NOT get bogged down in deep technical details (such as specific NLP algorithms, libraries, DB schemas, cloud hosting setups, or low-level implementation tech) unless requested.
+    3. **Ask About Tech Stack, Colors, and Fonts**: If not specified in the Original Idea or History, you **MUST** ask about the user's preferred tech stack, target color palette/theme, and typography/fonts during the Q&A loop (typically questions 2, 3, or 4). Provide clear, selectable suggested options (e.g. specific palettes, clean font pairs, and a "Let Zenix decide" option).
+    4. **Filler / Wrap-up Questions**: If you ask a generic wrap-up question (e.g. asking if the user has any other details to add, or if they are ready to finalize), you **MUST** provide these exact options:
+       ["I have no other details, please generate the final spec", "Let Zenix decide all remaining details", "Write my own details"]
+    5. **Exit Early**: If the idea is already clear enough, or you do not have a highly specific, high-value product or architectural question left, immediately set "is_complete": true. Do NOT ask generic, open-ended filler questions without options.
+    6. **Options Requirement (No Manual Typing)**: If you set "is_complete": false, you **MUST** provide exactly 3 specific, diverse suggested options/answers in the "options" array for the next_question. You are strictly forbidden from outputting an empty or null "options" array when asking a question. Every single question must be fully answerable by selecting one of the provided options; never force the user to type manually.
+    `}
+
+    ### Guidelines for Generating "refined_spec" (When is_complete is true)
+    When generating the final "refined_spec", you are writing a prompt/context file for a **coding AI agent** who will build this project. Follow these rules:
+    - **No Ambiguity / No Ors**: Specify **exactly one** concrete technology stack, exactly one specific color scheme, and exactly one concrete typography scale. Never use options like "React or Angular" or "MongoDB or PostgreSQL". 
+    - **Zenix Tech Defaults**: If the user did not specify a tech stack (or chose "Let Zenix decide"):
+      - For standard web apps: Use Next.js (Frontend), Node.js with Express (Backend), and Supabase or MongoDB (Database).
+      - For mobile apps: Use React Native.
+    - **Zenix Design Defaults (Colors & Fonts)**: If the user chose "Let Zenix decide" (or left it unspecified), select a specific, high-end color combination (inspired by the 100 pairs in 'color_theory.md', matching the app's vibe—e.g., "Stormy morning" for professional tools, "Blue eclipse" for sleek dark mode SaaS, "Fresh peach" or "Blooming romance" for lifestyle/social, etc.) and specific, modern font pairings drawing from the 25 best sans serif fonts in 'sans_serif_fonts.md' (e.g. Inter for clean app interfaces, DM Sans for modern websites, Cabin for friendly humanist brands, or Be Vietnam Pro for dashboards). Never output placeholder colors like "generic purple" or abstract values.
+- **Structure for AI Coding Agents**: Organize the specification in clear, structured markdown chapters tailored for an AI developer:
+  - **Project Overview & Objectives**
+  - **Concrete Tech Stack & Architecture** (exactly one set of tools, plus a concrete design token structure layout based on the primitive, semantic, and component token rules from 'product_design.md')
+  - **Feature Specifications & Core Flows** (mapped as a cohesive user journey/story utilizing the principles of progressive disclosure and welcoming entry design from 'storytelling.md')
+  - **API Endpoints & Integration Rules**
+  - **AI Agent Implementation Guidelines** (standards for building the codebase step-by-step, specifying precise UI transitions and state motion using standard names from 'animations.md' like staggers, morphs, pop-ins, layout animations, or shared element transitions)
 
 ### Output Structure
 Return a STRICT JSON object with EXACTLY this shape. Do not add any text outside the JSON:
@@ -22,7 +62,8 @@ Return a STRICT JSON object with EXACTLY this shape. Do not add any text outside
 {
   "is_complete": boolean,
   "next_question": "string (required if is_complete is false, null if is_complete is true)",
-  "refined_spec": "string (required if is_complete is true — write a comprehensive markdown specification document. null if is_complete is false)"
+  "options": ["string", "string", "string"], // Provide exactly 3 specific, diverse suggested answers for next_question if is_complete is false. null if is_complete is true.
+  "refined_spec": "string (required if is_complete is true — write the comprehensive specification document meant for AI agents. null if is_complete is false)"
 }
 `;
 };

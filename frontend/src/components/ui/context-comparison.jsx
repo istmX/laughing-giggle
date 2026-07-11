@@ -60,9 +60,9 @@ export function ContextComparison() {
 
   return (
     <section ref={sectionRef} className="relative overflow-hidden bg-background px-6 py-section md:px-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_24%,rgb(77_73_252/0.07),transparent_20%),radial-gradient(circle_at_78%_62%,rgb(197_176_244/0.16),transparent_20%)]" />
+      <div className="landing-section-ambient absolute inset-0" />
       <div className="relative mx-auto grid max-w-[1360px] gap-6 lg:grid-cols-[0.26fr_0.39fr_0.35fr]">
-        <aside data-compare-card className="rounded-lg bg-white p-8 shadow-sm">
+        <aside data-compare-card className="landing-panel">
           <p className="text-caption uppercase tracking-caption text-brand-indigo">Why Zenix</p>
           <h2 className="mt-5 text-[clamp(2.4rem,4vw,4rem)] font-[540] leading-[0.98] tracking-[-0.03em] text-balance">
             Stop repeating.
@@ -88,7 +88,7 @@ export function ContextComparison() {
           </a>
         </aside>
 
-        <div data-compare-card className="relative overflow-hidden rounded-lg border border-hairline bg-[linear-gradient(90deg,#fff,#f7f7fb)] p-8">
+        <div data-compare-card className="landing-panel relative overflow-hidden bg-surface-soft">
           <div className="grid h-full min-h-[30rem] grid-cols-[0.46fr_0.08fr_0.46fr] items-center gap-4">
             <div>
               <p className="text-body-sm font-[540]">Without Zenix</p>
@@ -103,7 +103,7 @@ export function ContextComparison() {
               </div>
             </div>
 
-            <div className="relative z-10 mx-auto grid size-12 place-items-center rounded-full border border-hairline bg-white text-brand-indigo shadow-sm">
+            <div className="relative z-10 mx-auto grid size-12 place-items-center rounded-full border border-hairline bg-white text-brand-indigo shadow-xs">
               vs
             </div>
 
@@ -111,17 +111,17 @@ export function ContextComparison() {
               <p className="text-body-sm font-[540] text-brand-indigo">With Zenix</p>
               <p className="mt-1 text-caption uppercase tracking-caption text-ink-soft">Clarity and consistency</p>
               <div className="relative mt-10 grid place-items-center">
-                <div data-compare-node className="relative z-10 grid size-36 place-items-center rounded-lg border border-[rgb(77_73_252/0.22)] bg-white text-center shadow-[0_20px_80px_rgb(77_73_252/0.18)]">
+                <div data-compare-node className="landing-engine-node relative z-10 grid size-36 place-items-center rounded-lg bg-white text-center">
                   <Sparkles className="mx-auto size-10 text-brand-indigo" />
                   <p className="mt-3 text-body-sm font-[540]">Zenix Context Engine</p>
                 </div>
-                <div className="absolute inset-0 bg-[radial-gradient(circle,rgb(77_73_252/0.18),transparent_58%)]" />
+                <div className="landing-engine-halo absolute inset-0" />
               </div>
             </div>
           </div>
         </div>
 
-        <aside data-compare-card className="rounded-lg border border-hairline bg-white p-8 shadow-sm">
+        <aside data-compare-card className="landing-panel">
           <p className="text-body-sm font-[540] text-brand-indigo">What Zenix creates</p>
           <p className="mt-2 text-caption uppercase tracking-caption text-ink-soft">Everything an AI agent needs</p>
           <div className="mt-8 space-y-3">

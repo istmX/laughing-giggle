@@ -42,16 +42,16 @@ export function HeroSection03() {
 
   return (
     <section ref={sectionRef} className="relative border-b border-hairline bg-background text-foreground">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_8%,rgb(77_73_252/0.08),transparent_22%),radial-gradient(circle_at_12%_62%,rgb(106_92_255/0.07),transparent_18%),radial-gradient(circle_at_84%_64%,rgb(243_201_182/0.16),transparent_18%),radial-gradient(circle_at_50%_112%,rgb(77_73_252/0.05),transparent_28%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgb(77_73_252/0.12)_1px,transparent_1.2px)] bg-[length:26px_26px] opacity-[0.08]" />
-      <div className="absolute inset-x-0 bottom-0 h-[28rem] bg-[linear-gradient(180deg,transparent,rgba(255,255,255,0.56)_28%,rgba(255,255,255,0.92))]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-[8rem] h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.18)_18%,rgba(77,73,252,0.18)_82%,transparent)]" />
+      <div className="landing-hero-ambient absolute inset-0" />
+      <div className="landing-hero-grid absolute inset-0" />
+      <div className="landing-hero-fade absolute inset-x-0 bottom-0 h-[28rem]" />
+      <div className="landing-hero-divider pointer-events-none absolute inset-x-0 bottom-[7rem] h-px" />
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {EDGE_CUBES.map((cube) => (
           <span
             key={cube}
             data-hero-cube
-            className={`absolute ${cube} rounded-[26px] border border-[rgb(77_73_252/0.14)] bg-[linear-gradient(180deg,rgb(255_255_255/0.78),rgb(197_176_244/0.26))] shadow-[0_20px_80px_rgb(77_73_252/0.16),0_0_42px_rgb(77_73_252/0.28)] backdrop-blur-xl`}
+            className={`landing-glow-cube absolute ${cube} rounded-xl`}
           />
         ))}
       </div>
@@ -86,9 +86,9 @@ export function HeroSection03() {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-[1360px] px-6 pb-24 pt-8 md:px-8 md:pb-32 md:pt-10" id="product">
+      <main className="relative z-10 mx-auto max-w-[1360px] px-6 pb-20 pt-8 md:px-8 md:pb-24 md:pt-10" id="product">
         <div className="mx-auto max-w-[58rem] text-center">
-          <div ref={badgeRef} className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white/80 px-4 py-2 text-body-sm text-ink-muted backdrop-blur-sm">
+          <div ref={badgeRef} className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white px-4 py-2 text-body-sm text-ink-muted shadow-xs">
             <span className="inline-flex size-2 rounded-full bg-brand-indigo" />
             v1.0 is now live
             <span className="text-foreground">Explore what&apos;s new</span>
@@ -104,7 +104,7 @@ export function HeroSection03() {
             </span>
             <span data-hero-line className="mt-2 flex flex-wrap items-center justify-center gap-4">
               <span className="text-brand-indigo">context</span>
-              <span className="relative inline-flex h-16 w-28 overflow-hidden rounded-[18px] border border-[rgb(77_73_252/0.2)] shadow-[0_18px_40px_rgb(77_73_252/0.12)]">
+              <span className="landing-inline-video relative inline-flex h-16 w-28 overflow-hidden rounded-md">
                 <video
                   className="h-full w-full object-cover"
                   src={HERO_VIDEO_SRC}
@@ -151,7 +151,7 @@ export function HeroSection03() {
         <div ref={stageTrackRef} className="relative z-20 mx-auto mt-14 h-[clamp(22rem,48vw,42rem)] w-full max-w-[1170px] will-change-transform lg:mt-18">
           <div
             ref={stageShellRef}
-            className="relative h-full overflow-hidden rounded-[2rem] border border-white/60 bg-[rgb(244_246_255)] shadow-[0_32px_120px_rgb(12_20_48/0.18)]"
+            className="landing-video-shell relative h-full overflow-hidden rounded-xl"
           >
             <video
               className="absolute inset-0 h-full w-full object-cover"
@@ -162,12 +162,12 @@ export function HeroSection03() {
               playsInline
               preload="metadata"
             />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_255_255/0.14),transparent_26%,transparent_74%,rgb(5_10_20/0.32))]" />
-            <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgb(255_255_255/0.2),transparent)]" />
+            <div className="landing-video-overlay absolute inset-0" />
+            <div className="landing-video-toplight absolute inset-x-0 top-0 h-28" />
           </div>
         </div>
 
-        <div ref={trustRef} className="mx-auto mt-10 max-w-[1180px] text-center" data-hero-copy>
+        <div ref={trustRef} className="mx-auto mt-8 max-w-[1180px] text-center" data-hero-copy>
           <p className="text-caption uppercase tracking-caption text-ink-soft">Trusted by developers and teams at</p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-body-sm text-ink-muted">
             {TRUSTED_LOGOS.map((logo) => (
@@ -176,13 +176,13 @@ export function HeroSection03() {
           </div>
         </div>
 
-        <div className="pointer-events-none mx-auto mt-14 max-w-[1170px]">
-          <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(77,73,252,0.28)_18%,rgba(77,73,252,0.28)_82%,transparent)]" />
-          <div className="mt-8 grid grid-cols-3 gap-4 opacity-75 md:grid-cols-6">
+        <div className="pointer-events-none mx-auto mt-10 max-w-[1170px]">
+          <div className="landing-hero-divider h-px" />
+          <div className="mt-6 grid grid-cols-3 gap-4 opacity-80 md:grid-cols-6">
             {['Architecture', 'Schemas', 'Contracts', 'Rules', 'Plan', 'Ship'].map((item) => (
               <div
                 key={item}
-                className="rounded-[1.25rem] border border-hairline bg-[rgb(255_255_255/0.72)] px-4 py-5 text-left text-sm text-ink-muted shadow-[0_10px_30px_rgb(77_73_252/0.06)] backdrop-blur-sm"
+                className="rounded-lg border border-hairline bg-white px-4 py-4 text-left text-sm text-ink-muted shadow-xs"
               >
                 {item}
               </div>
