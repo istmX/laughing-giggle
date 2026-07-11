@@ -8,7 +8,7 @@ export class MistralProvider extends BaseProvider {
       baseURL: "https://api.mistral.ai/v1",
       apiKey: process.env.MISTRAL_API_KEY || "dummy",
     });
-    this.model = "mistral-large-latest";
+    this.model = "mistral-small-2506";
   }
 
   async _call(prompt) {
