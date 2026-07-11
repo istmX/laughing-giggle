@@ -37,24 +37,24 @@ export function LandingArtifactsSection() {
 
   return (
     <section
-      id="generated"
+      id="proof"
       ref={sectionRef}
       className="px-6 py-section md:px-8"
     >
-      <div className="mx-auto max-w-[1360px] rounded-xl border border-hairline bg-surface-soft p-6 md:p-8">
+      <div className="mx-auto max-w-[1360px] rounded-xl border border-black bg-black p-6 text-white md:p-8">
         <div className="grid gap-6 lg:grid-cols-[0.32fr_0.68fr]">
           <div data-reveal-card className="flex flex-col justify-between gap-8">
             <div>
-              <p className="text-caption uppercase tracking-caption text-brand-indigo">
-                Generated outputs
+              <p className="text-caption uppercase tracking-caption text-white/50">
+                Proof of output
               </p>
-              <h2 className="mt-5 max-w-[11ch] text-balance text-[clamp(2.4rem,4vw,4.2rem)] font-[540] leading-[0.98] tracking-[-0.03em]">
-                Real project context.
-                <span className="block text-brand-indigo">Not loose prompts.</span>
+              <h2 className="mt-5 max-w-[12ch] text-balance text-[clamp(2.4rem,4vw,4.2rem)] font-[540] leading-[0.98] tracking-[-0.03em] text-white">
+                The output is the value.
+                <span className="block text-white/70">The files are the proof.</span>
               </h2>
-              <p className="mt-6 max-w-[28rem] text-body-sm text-ink-muted">
-                Instead of re-explaining the same project in fragments, Zenix builds the docs,
-                rules, and instructions the team actually needs to ship.
+              <p className="mt-6 max-w-[28rem] text-body-sm text-white/70">
+                Buyers care about clarity, speed, and fewer implementation mistakes. These
+                artifacts matter because they give every agent and teammate the same reliable brief.
               </p>
             </div>
             <div className="space-y-3">
@@ -63,9 +63,9 @@ export function LandingArtifactsSection() {
                   <div
                     key={item}
                     data-reveal-item
-                    className="flex items-center gap-3 text-body-sm text-ink-muted"
+                    className="flex items-center gap-3 text-body-sm text-white/76"
                   >
-                    <span className="grid size-5 place-items-center rounded-full bg-brand-indigo text-white">
+                    <span className="grid size-5 place-items-center rounded-full bg-white text-black">
                       <Check className="size-3" />
                     </span>
                     {item}
@@ -80,7 +80,7 @@ export function LandingArtifactsSection() {
               const Icon = artifact.icon
 
               return (
-                <article key={artifact.title} data-reveal-card className="landing-panel">
+                <article key={artifact.title} data-reveal-card className="rounded-xl bg-white p-3 text-black shadow-sm">
                   <div className={`rounded-lg ${artifact.tint} p-4`}>
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-body-sm font-[540]">{artifact.title}</p>

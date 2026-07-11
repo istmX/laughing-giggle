@@ -29,3 +29,11 @@ export const processConversation = async (token, ideaId, payload) => {
     body: JSON.stringify(payload)
   })
 }
+
+export const generateArtifacts = async (token, ideaId, payload) => {
+  return authFetch(`/ai/artifacts/${ideaId}`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload)
+  })
+}

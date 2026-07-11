@@ -1,5 +1,13 @@
 ## Completed
 
+- **Developer Chat and Artifacts UI**:
+  - Re-architected project flow to clearly separate the AI specification wizard (`NewProjectPage.jsx`) from the active developer workspace (`ProjectWorkspace.jsx`).
+  - Implemented automatic redirection from the wizard to the developer chat once the brief is fully generated.
+  - Updated conversational prompt logic to enforce asking at least 1-2 clarifying questions even for highly detailed prompts, preventing premature completion.
+  - Built an interactive Artifacts sidebar inside `ProjectWorkspace.jsx` that automatically calls the backend generation endpoint, displays a shimmering loading state, and renders the generated files in a scrollable tab list.
+  - Made artifacts editable in real-time with a debounced auto-save directly to the database.
+  - Fully wired the "Download ZIP" button to export all generated architecture files directly to the user's browser.
+  - Expanded the chat workspace's max width (`max-w-5xl`) for a better full-screen coding experience.
 - **Project Cascade Deletion**:
   - Configured `deleteProject` in the backend project service to automatically clean up all associated database resources (linked `Ideas`, `Briefs`, `Tasks`, `Contexts`, and `AIGenerations` tables) in a single request transaction when deleting a project.
 - **Developer Chat Sandbox and Message Scroller**:

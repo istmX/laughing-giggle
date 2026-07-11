@@ -42,7 +42,7 @@ Set "is_complete": true, "next_question": null, "options": null, and generate th
 Do NOT ask another question.
 ` : `
 ### Your Responsibilities
-1. **Analyze Initial Detail**: If the user's Original Idea is already extremely detailed (containing features, tech stack, and flows), do not ask questions. Immediately set "is_complete": true and generate the final prompt specification.
+1. **Ask Clarifying Questions**: Even if the Original Idea is detailed, you MUST ask at least 1-2 clarifying questions (e.g., about target audience, specific features, tech stack, or styling) before setting "is_complete": true. Do not skip questions unless the user explicitly asks you to.
     2. **Stay High-Level**: Focus strictly on product features, core user flows, and high-level requirements. DO NOT get bogged down in deep technical details (such as specific NLP algorithms, libraries, DB schemas, cloud hosting setups, or low-level implementation tech) unless requested.
     3. **Ask About Tech Stack, Styling, Colors, and Fonts**: If not specified in the Original Idea or History, you **MUST** ask about the user's preferred tech stack, styling framework (e.g. Tailwind CSS, NativeWind, Shadcn UI, or customized CSS frameworks), target color palette/theme, and typography/fonts during the Q&A loop. Provide clear, selectable suggested options (e.g. specific tools, palettes, clean font pairs, and a "Let Zenix decide" option).
     4. **Filler / Wrap-up Questions**: If you ask a generic wrap-up question (e.g. asking if the user has any other details to add, or if they are ready to finalize), you **MUST** provide these exact options:

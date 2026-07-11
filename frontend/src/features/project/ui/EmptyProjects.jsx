@@ -21,7 +21,7 @@ export function EmptyProjects({ onNewProject }) {
         </p>
         <button 
           onClick={onNewProject}
-          className="rounded-full bg-primary px-6 py-3 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+          className="rounded-lg bg-primary px-6 py-3 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity"
         >
           New Project
         </button>

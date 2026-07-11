@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { Folder, ArrowRight, Trash2, Pencil } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/Modal'
+import { Link } from 'react-router-dom'
 
 export function Overview() {
   const navigate = useNavigate()
@@ -88,7 +89,7 @@ export function Overview() {
               <h1 className="text-display-sm font-340 tracking-display-sm text-ink">Projects</h1>
               <button
                 onClick={handleNewProject}
-                className="flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-540 text-canvas hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-540 text-canvas hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
               >
                 New Project
               </button>
@@ -101,43 +102,50 @@ export function Overview() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  onClick={() => navigate(`/projects/${project._id}`)}
-                  className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated hover:border-ink/20 hover:shadow-sm transition-all cursor-pointer"
+                  className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/50"
                 >
-                  <div className="absolute top-4 right-4 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <Link 
+                    to={`/projects/${project._id}`} 
+                    className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2" 
+                    aria-label={`Open project ${project.project_title}`}
+                  />
+                  
+                  <div className="absolute top-4 right-4 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
                     <button 
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.preventDefault()
                         setEditTitle(project.project_title)
                         setProjectToEdit(project)
                       }} 
-                      className="p-2 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors" 
+                      className="p-2 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" 
                       title="Edit Title"
+                      aria-label="Edit project title"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button 
                       onClick={(e) => {
-                        e.stopPropagation()
+                        e.preventDefault()
                         setProjectToDelete(project)
                       }} 
-                      className="p-2 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors" 
+                      className="p-2 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" 
                       title="Delete Project"
+                      aria-label="Delete project"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
 
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors relative z-10 pointer-events-none">
                     <Folder className="h-5 w-5" />
                   </div>
 
-                  <h3 className="text-body-lg font-480 text-ink mb-1 pr-16">{project.project_title}</h3>
-                  <p className="text-sm text-ink-muted line-clamp-2 mt-1">
+                  <h3 className="text-body-lg font-480 text-ink mb-1 pr-16 relative z-10 pointer-events-none">{project.project_title}</h3>
+                  <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
                     {project.project_description || 'No description provided'}
                   </p>
                   
-                  <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider">
+                  <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider relative z-10 pointer-events-none">
                     <span>{new Date(project.createdAt).toLocaleDateString()}</span>
                     <span className="h-1 w-1 rounded-full bg-hairline" />
                     <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
@@ -163,13 +171,13 @@ export function Overview() {
         <div className="flex items-center justify-end gap-3">
           <button 
             onClick={() => setProjectToDelete(null)}
-            className="px-4 py-2 text-sm font-medium text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
           >
             Cancel
           </button>
           <button 
             onClick={confirmDelete}
-            className="px-4 py-2 text-sm font-medium text-white bg-destructive hover:bg-destructive/90 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-destructive-foreground bg-destructive hover:bg-destructive/90 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
           >
             Delete
           </button>

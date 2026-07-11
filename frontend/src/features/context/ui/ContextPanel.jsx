@@ -17,30 +17,6 @@ export function ContextPanel({ projectId, ideaId }) {
   // Track copied file keys for visual checkmarks
   const [copiedKey, setCopiedKey] = useState(null)
 
-  // Simulated progress steps during active generation
-  const [currentProgressIndex, setCurrentProgressIndex] = useState(0)
-  const progressSteps = [
-    "Analyzing idea prompts...",
-    "Defining software architecture...",
-    "Building phase-by-phase implementation plan...",
-    "Formulating design system rules and tokens...",
-    "Configuring AI developer instructions (Agents.md)...",
-    "Finalizing repository documentation & README..."
-  ]
-
-  React.useEffect(() => {
-    let interval
-    if (isGenerating) {
-      setCurrentProgressIndex(0)
-      interval = setInterval(() => {
-        setCurrentProgressIndex((prev) => (prev < progressSteps.length - 1 ? prev + 1 : prev))
-      }, 3500)
-    } else {
-      setCurrentProgressIndex(0)
-    }
-    return () => clearInterval(interval)
-  }, [isGenerating])
-
   const handleCopy = (file) => {
     navigator.clipboard.writeText(file.content)
     setCopiedKey(file.key)
@@ -69,30 +45,11 @@ export function ContextPanel({ projectId, ideaId }) {
             <button
               onClick={cancelContextGeneration}
               type="button"
-              className="flex items-center gap-1.5 text-body-xs font-medium text-destructive hover:opacity-80 transition-opacity border border-destructive/20 bg-destructive/5 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-body-xs font-medium text-destructive hover:opacity-80 transition-opacity border border-destructive/20 bg-destructive/5 px-3 py-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
             >
               <XCircle className="h-3.5 w-3.5" />
               Cancel
             </button>
-          </div>
-
-          {/* Progress list indicators */}
-          <div className="border border-hairline rounded-lg p-4 space-y-3 bg-canvas/30 text-body-xs">
-            <h5 className="font-semibold text-ink-muted uppercase tracking-wider text-[10px]">Generation Progress</h5>
-            <div className="space-y-2">
-              {progressSteps.map((step, idx) => {
-                const isCompleted = idx < currentProgressIndex
-                const isActive = idx === currentProgressIndex
-                return (
-                  <div key={idx} className="flex items-center gap-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${isCompleted ? 'bg-ink' : isActive ? 'bg-ink animate-pulse' : 'bg-hairline'}`} />
-                    <span className={isCompleted ? 'text-ink line-through opacity-50' : isActive ? 'text-ink font-medium' : 'text-ink-muted opacity-40'}>
-                      {step}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
           </div>
         </div>
       ) : (

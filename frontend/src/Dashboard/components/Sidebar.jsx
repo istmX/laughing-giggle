@@ -16,21 +16,15 @@ const navGroups = [
     label: 'Projects',
     items: [
       { name: 'All Projects', href: '/dashboard', icon: FolderOpen },
+      { name: 'Recent Projects', href: '/dashboard/recent', icon: Clock },
+      { name: 'Favorites', href: '/dashboard/favorites', icon: Star },
     ]
   },
   {
     label: 'Workspace',
     items: [
       { name: 'AI Playground', href: '/dashboard/playground', icon: PlaySquare },
-      { name: 'Context Library', href: '/dashboard/context', icon: Library },
       { name: 'Templates', href: '/dashboard/templates', icon: LayoutTemplate },
-    ]
-  },
-  {
-    label: 'History',
-    items: [
-      { name: 'Recent', href: '/dashboard/recent', icon: Clock },
-      { name: 'Favorites', href: '/dashboard/favorites', icon: Star },
     ]
   },
   {
@@ -45,8 +39,6 @@ const navGroups = [
     items: [
       { name: 'Account', href: '/dashboard/profile', icon: User },
       { name: 'Preferences', href: '/dashboard/settings/preferences', icon: Sliders },
-      { name: 'API Keys', href: '/dashboard/settings/keys', icon: Key },
-      { name: 'Billing', href: '/dashboard/settings/billing', icon: CreditCard },
     ]
   }
 ]
@@ -217,8 +209,12 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                   </Link>
                 </div>
                 <button
-                  onClick={() => logout()}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to sign out?')) {
+                      logout()
+                    }
+                  }}
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
                 >
                   <LogOut className="h-5 w-5" />
                   Sign out
@@ -258,8 +254,9 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
           </AnimatePresence>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center rounded-md p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink transition-colors"
+            className="flex items-center justify-center rounded-md p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isSidebarOpen ? (
               <PanelLeftClose className="h-5 w-5" />
@@ -291,8 +288,12 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                   </div>
                 </Link>
                 <button
-                  onClick={() => logout()}
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to sign out?')) {
+                      logout()
+                    }
+                  }}
+                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
                 >
                   <LogOut className="h-5 w-5 shrink-0" />
                   <span className="whitespace-nowrap">Sign out</span>
@@ -314,9 +315,14 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                 )}
               </Link>
               <button
-                onClick={() => logout()}
-                className="text-destructive hover:opacity-80 transition-opacity"
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to sign out?')) {
+                    logout()
+                  }
+                }}
+                className="text-destructive hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30 rounded-md p-1"
                 title="Sign out"
+                aria-label="Sign out"
               >
                 <LogOut className="h-5 w-5" />
               </button>

@@ -48,8 +48,7 @@ export function NewProjectPage() {
               setRefinedSpec(ws.refinedSpec || '')
               
               if (ws.isComplete) {
-                setCompletedProjectData(project)
-                setStep(999)
+                navigate(`/projects/${projectId}/chat`, { replace: true })
               } else if (ws.currentQuestion) {
                 // Resume to the question they left off on
                 setStep((ws.history?.length || 0) + 1)
@@ -93,7 +92,7 @@ export function NewProjectPage() {
           const newState = { ideaId, prompt, history: [], currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true }
           await syncStateToBackend(newState)
           setRefinedSpec(parsed.refined_spec)
-          setStep(999)
+          navigate(`/projects/${projectId}/chat`, { replace: true })
         } else {
           const questionObj = {
             key: 'q1',
@@ -227,13 +226,8 @@ export function NewProjectPage() {
         
         setHistory(newHistory)
         setRefinedSpec(finalSpec)
-        setCompletedProjectData(prev => ({
-          ...prev,
-          project_description: prompt,
-          wizard_state: newState
-        }))
-        setStep(999)
         toast.success('Project specification refined successfully!')
+        navigate(`/projects/${projectId}/chat`, { replace: true })
       } else {
         // Next question
         const nextQ = {

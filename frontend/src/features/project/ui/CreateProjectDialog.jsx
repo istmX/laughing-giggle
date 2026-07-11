@@ -93,14 +93,14 @@ export function CreateProjectDialog({ isOpen, onClose, onSubmit }) {
               <div className="flex items-center justify-end gap-3 border-t border-hairline px-6 py-4 bg-surface-soft/50">
                 <button
                   onClick={onClose}
-                  className="rounded-full bg-canvas px-4 py-2 text-button tracking-button font-medium text-ink border border-hairline hover:bg-surface-soft transition-colors"
+                  className="rounded-lg bg-canvas px-4 py-2 text-button tracking-button font-medium text-ink border border-hairline hover:bg-surface-soft transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => onSubmit(prompt)}
                   disabled={!prompt.trim()}
-                  className="rounded-full bg-primary px-5 py-2.5 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded-lg bg-primary px-5 py-2.5 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Generate Context
                 </button>

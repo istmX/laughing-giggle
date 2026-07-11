@@ -6,6 +6,7 @@ import { generateTasks } from '../controllers/task.controller.js';
 import { generateDocumentation } from '../controllers/documentation.controller.js';
 import { generateRefinement } from '../controllers/refinement.controller.js';
 import { processConversation } from '../controllers/conversational.controller.js';
+import { generateArtifacts } from '../controllers/artifacts.controller.js';
 import { authMiddleware } from '../../auth/auth.middleware.js';
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.post('/conversation/:ideaId', processConversation);
 router.post('/context/:ideaId', generateContext);
 router.post('/tasks/:ideaId', generateTasks);
 router.post('/documentation/:ideaId', generateDocumentation);
+router.post('/artifacts/:ideaId', generateArtifacts);
 
 export default router;

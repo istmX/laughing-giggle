@@ -269,7 +269,8 @@ export function MessageScrollerViewport({ children, className = '' }) {
       role="region"
       aria-label="Messages"
       tabIndex={0}
-      className={`w-full flex-1 overflow-y-auto outline-none scroll-smooth ${className}`}
+      data-lenis-prevent="true"
+      className={`w-full flex-1 overflow-y-auto outline-none scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${className}`}
     >
       {children}
     </div>

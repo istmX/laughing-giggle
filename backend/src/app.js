@@ -32,6 +32,8 @@ app.use(cookieParser());
     * Brief routes
     * AI routes
 **/
+import ArtifactRouter from './features/artifacts/artifact.routes.js';
+
 app.use('/api/auth',AuthRouter)
 app.use('/api/projects', ProjectRouter);
 app.use('/api/tasks', TaskRouter);
@@ -39,6 +41,7 @@ app.use('/api/ideas', IdeaRouter);
 app.use('/api/context', ContextRouter);
 app.use('/api/brief', BriefRouter);
 app.use('/api/ai', AIRouter)
+app.use('/api/artifacts', ArtifactRouter);
 
 // Handle undefined routes
 app.use((req, res, next) => {

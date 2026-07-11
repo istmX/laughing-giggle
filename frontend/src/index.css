@@ -437,25 +437,24 @@
 
 @layer components {
   .landing-panel {
-    @apply rounded-xl border border-hairline bg-white p-8 shadow-sm;
+    @apply rounded-xl border border-hairline bg-white p-8 shadow-xs;
   }
 
   .landing-panel-soft {
-    @apply rounded-xl border border-hairline bg-surface-soft p-8 shadow-sm;
+    @apply rounded-xl border border-hairline bg-surface-soft p-8 shadow-xs;
   }
 
   .landing-hero-ambient {
     background-image:
-      radial-gradient(circle at 50% 8%, color-mix(in oklch, var(--brand-indigo) 10%, transparent), transparent 22%),
-      radial-gradient(circle at 12% 62%, color-mix(in oklch, var(--block-lilac) 34%, transparent), transparent 18%),
-      radial-gradient(circle at 84% 64%, color-mix(in oklch, var(--block-coral) 56%, transparent), transparent 18%),
-      radial-gradient(circle at 50% 112%, color-mix(in oklch, var(--brand-indigo) 7%, transparent), transparent 28%);
+      radial-gradient(circle at 22% 16%, color-mix(in oklch, var(--block-lilac) 34%, transparent), transparent 22%),
+      radial-gradient(circle at 82% 24%, color-mix(in oklch, var(--block-lime) 32%, transparent), transparent 24%),
+      radial-gradient(circle at 76% 78%, color-mix(in oklch, var(--block-coral) 36%, transparent), transparent 24%);
   }
 
   .landing-section-ambient {
     background-image:
-      radial-gradient(circle at 20% 24%, color-mix(in oklch, var(--brand-indigo) 10%, transparent), transparent 20%),
-      radial-gradient(circle at 78% 62%, color-mix(in oklch, var(--block-lilac) 50%, transparent), transparent 20%);
+      radial-gradient(circle at 20% 24%, color-mix(in oklch, var(--brand-indigo) 6%, transparent), transparent 20%),
+      radial-gradient(circle at 78% 62%, color-mix(in oklch, var(--block-lilac) 28%, transparent), transparent 20%);
   }
 
   .landing-hero-grid {
@@ -531,7 +530,7 @@
 
   .landing-engine-node {
     border: 1px solid color-mix(in oklch, var(--brand-indigo) 22%, transparent);
-    box-shadow: 0 20px 80px color-mix(in oklch, var(--brand-indigo) 18%, transparent);
+    box-shadow: 0 14px 38px color-mix(in oklch, var(--brand-indigo) 10%, transparent);
   }
 
   .landing-engine-halo {

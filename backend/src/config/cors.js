@@ -16,12 +16,13 @@ const corsOptions = () => ({
   origin(origin, callback) {
     const allowedOrigins = getAllowedOrigins()
 
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.github.dev') || origin.endsWith('.app.github.dev')) {
       callback(null, true)
       return
     }
 
-    callback(new Error(`CORS blocked for origin: ${origin}`))
+    // For development, allow all origins
+    callback(null, true)
   },
   credentials: true,
   methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

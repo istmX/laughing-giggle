@@ -22,4 +22,8 @@ export default class BaseProvider {
   async generateDocumentation(data) {
     throw new Error("generateDocumentation() not implemented");
   }
+
+  async generateArtifacts(data) {
+    throw new Error("generateArtifacts() not implemented");
+  }
 }

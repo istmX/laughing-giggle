@@ -28,4 +28,8 @@ export class GroqProvider extends BaseProvider {
   async processConversation(prompt) {
     return await this._call(prompt)
   }
+
+  async generateArtifacts(prompt) {
+    return await this._call(prompt)
+  }
 }

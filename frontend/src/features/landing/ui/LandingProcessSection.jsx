@@ -32,49 +32,50 @@ export function LandingProcessSection() {
   useLandingSectionReveal(sectionRef)
 
   return (
-    <section ref={sectionRef} className="px-6 py-section md:px-8">
-      <div className="mx-auto grid max-w-[1360px] gap-6 lg:grid-cols-[0.34fr_0.66fr]">
-        <div data-reveal-card className="landing-panel flex flex-col justify-between gap-8">
+    <section id="how-it-works" ref={sectionRef} className="px-6 py-section md:px-8">
+      <div className="mx-auto grid max-w-[1360px] gap-8 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
+        <div data-reveal-card className="max-w-[32rem]">
           <div>
             <p className="text-caption uppercase tracking-caption text-brand-indigo">
-              Product flow
+              How it works
             </p>
             <h2 className="mt-5 max-w-[12ch] text-balance text-[clamp(2.5rem,4vw,4.5rem)] font-[540] leading-[0.98] tracking-[-0.03em]">
-              One explanation.
-              <span className="block text-brand-indigo">Four clear stages.</span>
+              Move from rough idea
+              <span className="block text-brand-indigo">to ready-to-build.</span>
             </h2>
             <p className="mt-6 max-w-[28rem] text-body-sm text-ink-muted">
-              The landing should explain the product with the same clarity the product promises:
-              one input, one system, one reusable context layer.
-            </p>
-          </div>
-          <div className="rounded-lg bg-block-lime px-6 py-5">
-            <p className="text-body-sm text-foreground">
-              Zenix is not another chat box. It is a structured workspace that converts intent
-              into build-ready context.
+              Each step reduces a real source of delivery risk: missing requirements, drifting
+              scope, inconsistent agent output, and weak handoffs across the team.
             </p>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {steps.map((step) => {
+        <div
+          data-reveal-card
+          className="rounded-xl border border-hairline bg-white px-6 py-8 shadow-sm"
+        >
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+            {steps.map((step, index) => {
             const Icon = step.icon
 
             return (
-              <article key={step.title} data-reveal-card className="landing-panel-soft">
+              <article key={step.title} data-reveal-item className="relative">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="grid size-12 place-items-center rounded-full bg-background text-brand-indigo shadow-xs">
+                  <div className="grid size-12 place-items-center rounded-full bg-surface-soft text-brand-indigo shadow-xs">
                     <Icon className="size-5" />
                   </div>
-                  <ArrowRight className="size-4 text-ink-soft" />
+                  {index < steps.length - 1 ? (
+                    <ArrowRight className="hidden size-4 text-ink-soft xl:block" />
+                  ) : null}
                 </div>
-                <h3 className="mt-10 max-w-[16ch] text-headline font-[540] tracking-headline text-balance">
+                <h3 className="mt-8 max-w-[16ch] text-headline font-[540] tracking-headline text-balance">
                   {step.title}
                 </h3>
                 <p className="mt-4 max-w-[28ch] text-body-sm text-ink-muted">{step.text}</p>
               </article>
             )
-          })}
+            })}
+          </div>
         </div>
       </div>
     </section>

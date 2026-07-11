@@ -29,17 +29,18 @@ export function LandingUseCasesSection() {
   useLandingSectionReveal(sectionRef)
 
   return (
-    <section ref={sectionRef} className="px-6 py-section md:px-8">
+    <section id="use-cases" ref={sectionRef} className="px-6 py-section md:px-8">
       <div className="mx-auto max-w-[1360px] rounded-xl border border-hairline bg-white p-6 shadow-sm md:p-8">
         <div className="grid gap-6 xl:grid-cols-[0.36fr_0.64fr]">
           <div data-reveal-card className="rounded-xl bg-block-coral px-6 py-8 text-foreground shadow-sm">
             <p className="text-caption uppercase tracking-caption text-ink-soft">Who it is for</p>
             <h2 className="mt-5 max-w-[10ch] text-balance text-[clamp(2.3rem,3.8vw,4rem)] font-[540] leading-[1] tracking-[-0.03em]">
-              Built for people shipping real software.
+              Built for teams shipping real software.
             </h2>
             <p className="mt-6 max-w-[28rem] text-body-sm text-ink-muted">
-              The marketing page stays light, but this closing moment can still carry weight. It
-              frames the product around practical use instead of vague AI claims.
+              Whether you are validating a first product, coordinating across several agents, or
+              handing off work between a studio and a client, the win is the same: less ambiguity
+              before code starts.
             </p>
             <Button
               asChild
