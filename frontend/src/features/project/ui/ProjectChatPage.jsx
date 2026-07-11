@@ -142,7 +142,7 @@ Your requirements have been cataloged. You can trigger the context engine to bui
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h1 className="text-body-sm font-540 text-ink tracking-tight">
+            <h1 className="text-body-sm font-semibold text-ink tracking-tight">
               {project?.project_title || 'Dating Site for Developers'}
             </h1>
             <p className="text-caption text-ink-muted">Developer Chat Sandbox</p>
@@ -182,7 +182,7 @@ Your requirements have been cataloged. You can trigger the context engine to bui
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-caption font-540 text-ink">
+                          <span className="text-caption font-semibold text-ink">
                             {msg.role === 'user' ? 'You' : 'Zenix Architect'}
                           </span>
                           <span className="text-[10px] text-ink-muted">{msg.timestamp}</span>

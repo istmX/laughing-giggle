@@ -31,10 +31,10 @@ export function PromptInput({ onSubmit, isLoading }) {
   return (
     <div className="w-full flex flex-col">
       <div className="mb-8">
-        <span className="inline-block mb-4 text-caption tracking-caption font-480 text-ink-muted uppercase">
+        <span className="inline-block mb-4 text-caption tracking-caption font-medium text-ink-muted uppercase">
           New Project
         </span>
-        <h1 className="text-[40px] leading-[1.1] font-340 tracking-tight text-ink mb-2">
+        <h1 className="text-[40px] leading-[1.1] font-semibold tracking-tight text-ink mb-2">
           Describe what you want to build.
         </h1>
       </div>
@@ -47,7 +47,7 @@ export function PromptInput({ onSubmit, isLoading }) {
           onKeyDown={handleKeyDown}
           disabled={isLoading}
           placeholder="I want to build..."
-          className="w-full min-h-[200px] resize-none rounded-xl border border-hairline bg-canvas p-6 text-body-lg tracking-body-lg font-320 text-ink placeholder:text-ink-faint focus:border-ink/30 focus:outline-none focus:ring-4 focus:ring-ink/5 transition-all shadow-sm disabled:opacity-50"
+          className="w-full min-h-[200px] resize-none rounded-xl border border-hairline bg-canvas p-6 text-body-lg tracking-body-lg font-normal text-ink placeholder:text-ink-faint focus:border-ink/30 focus:outline-none focus:ring-4 focus:ring-ink/5 transition-all shadow-sm disabled:opacity-50"
         />
       </div>
       
@@ -55,11 +55,11 @@ export function PromptInput({ onSubmit, isLoading }) {
         <button
           onClick={() => { if (val.trim() && !isLoading) onSubmit(val.trim()) }}
           disabled={!val.trim() || isLoading}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[140px] text-button font-480 text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[140px] text-button font-medium text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
         >
           {isLoading ? (
             <TextShimmerWave 
-              className="text-button font-480 [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
+              className="text-button font-medium [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
               duration={1}
               spread={1}
               zDistance={1}

@@ -50,8 +50,8 @@ export function CreateProjectDialog({ isOpen, onClose, onSubmit }) {
             >
               <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
                 <div>
-                  <h2 className="text-headline tracking-headline font-540 text-ink">New Project</h2>
-                  <p className="text-body-sm tracking-body-sm text-ink-muted mt-1 font-330">
+                  <h2 className="text-headline tracking-headline font-semibold text-ink">New Project</h2>
+                  <p className="text-body-sm tracking-body-sm text-ink-muted mt-1 font-normal">
                     Describe your software idea. We'll generate the initial architecture.
                   </p>
                 </div>
@@ -70,7 +70,7 @@ export function CreateProjectDialog({ isOpen, onClose, onSubmit }) {
                     value={prompt}
                     onChange={handleInput}
                     placeholder="Describe your software idea..."
-                    className="w-full min-h-[160px] resize-none rounded-md border border-hairline bg-canvas p-[14px] text-body tracking-body font-320 text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition-all"
+                    className="w-full min-h-[160px] resize-none rounded-md border border-hairline bg-canvas p-[14px] text-body tracking-body font-normal text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none focus:ring-1 focus:ring-ink transition-all"
                   />
                   <div className="absolute bottom-4 right-4 text-caption tracking-caption text-ink-faint">
                     {prompt.length} chars
@@ -82,7 +82,7 @@ export function CreateProjectDialog({ isOpen, onClose, onSubmit }) {
                     <button
                       key={ex}
                       onClick={() => setPrompt(ex)}
-                      className="rounded-sm border border-hairline-soft bg-surface-soft px-3 py-1.5 text-body-sm tracking-body-sm text-ink-muted font-330 hover:border-hairline hover:text-ink transition-colors"
+                      className="rounded-sm border border-hairline-soft bg-surface-soft px-3 py-1.5 text-body-sm tracking-body-sm text-ink-muted font-normal hover:border-hairline hover:text-ink transition-colors"
                     >
                       {ex}
                     </button>
@@ -93,14 +93,14 @@ export function CreateProjectDialog({ isOpen, onClose, onSubmit }) {
               <div className="flex items-center justify-end gap-3 border-t border-hairline px-6 py-4 bg-surface-soft/50">
                 <button
                   onClick={onClose}
-                  className="rounded-full bg-canvas px-4 py-2 text-button tracking-button font-480 text-ink border border-hairline hover:bg-surface-soft transition-colors"
+                  className="rounded-full bg-canvas px-4 py-2 text-button tracking-button font-medium text-ink border border-hairline hover:bg-surface-soft transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => onSubmit(prompt)}
                   disabled={!prompt.trim()}
-                  className="rounded-full bg-primary px-5 py-2.5 text-button tracking-button font-480 text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="rounded-full bg-primary px-5 py-2.5 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Generate Context
                 </button>

@@ -13,15 +13,15 @@ export function EmptyProjects({ onNewProject }) {
         <div className="mb-6 rounded-full bg-surface-soft p-5 border border-hairline">
           <FolderOpen className="h-10 w-10 text-ink-muted" strokeWidth={1.5} />
         </div>
-        <h2 className="text-headline tracking-headline font-540 text-ink mb-3">
+        <h2 className="text-headline tracking-headline font-semibold text-ink mb-3">
           No projects yet
         </h2>
-        <p className="text-body tracking-body text-ink-muted mb-8 font-330">
+        <p className="text-body tracking-body text-ink-muted mb-8 font-normal">
           Create your first project to start organizing context and generating architecture for your software ideas.
         </p>
         <button 
           onClick={onNewProject}
-          className="rounded-full bg-primary px-6 py-3 text-button tracking-button font-480 text-primary-foreground hover:opacity-90 transition-opacity"
+          className="rounded-full bg-primary px-6 py-3 text-button tracking-button font-medium text-primary-foreground hover:opacity-90 transition-opacity"
         >
           New Project
         </button>
