@@ -4,17 +4,26 @@ export const buildConversationalPrompt = (data) => {
   const history = data.history || [];
   
   // Check if user requested to skip remaining questions
-  const userRequestedSkip = history.some(item => 
-    typeof item.answer === 'string' && 
-    (
-      item.answer.toLowerCase().includes("let zenix decide all") || 
-      item.answer.toLowerCase().includes("let zenix decide for all") || 
-      item.answer.toLowerCase().includes("let ai decide for all") || 
-      item.answer.toLowerCase().includes("let ai decide all") || 
-      item.answer.toLowerCase().includes("no other details") ||
-      item.answer.toLowerCase().includes("generate the final spec")
-    )
-  );
+  const userRequestedSkip = history.some(item => {
+    if (typeof item.answer !== 'string') return false;
+    const ans = item.answer.toLowerCase().trim();
+    return (
+      ans === "no" ||
+      ans === "none" ||
+      ans === "nothing" ||
+      ans === "no other" ||
+      ans === "no other details" ||
+      ans === "nothing else" ||
+      ans === "no, thanks" ||
+      ans === "no, thank you" ||
+      ans.includes("let zenix decide all") || 
+      ans.includes("let zenix decide for all") || 
+      ans.includes("let ai decide for all") || 
+      ans.includes("let ai decide all") || 
+      ans.includes("no other details") ||
+      ans.includes("generate the final spec")
+    );
+  });
 
   return `
 ${buildBasePrompt()}
@@ -35,11 +44,11 @@ Do NOT ask another question.
 ### Your Responsibilities
 1. **Analyze Initial Detail**: If the user's Original Idea is already extremely detailed (containing features, tech stack, and flows), do not ask questions. Immediately set "is_complete": true and generate the final prompt specification.
     2. **Stay High-Level**: Focus strictly on product features, core user flows, and high-level requirements. DO NOT get bogged down in deep technical details (such as specific NLP algorithms, libraries, DB schemas, cloud hosting setups, or low-level implementation tech) unless requested.
-    3. **Ask About Tech Stack, Colors, and Fonts**: If not specified in the Original Idea or History, you **MUST** ask about the user's preferred tech stack, target color palette/theme, and typography/fonts during the Q&A loop (typically questions 2, 3, or 4). Provide clear, selectable suggested options (e.g. specific palettes, clean font pairs, and a "Let Zenix decide" option).
+    3. **Ask About Tech Stack, Styling, Colors, and Fonts**: If not specified in the Original Idea or History, you **MUST** ask about the user's preferred tech stack, styling framework (e.g. Tailwind CSS, NativeWind, Shadcn UI, or customized CSS frameworks), target color palette/theme, and typography/fonts during the Q&A loop. Provide clear, selectable suggested options (e.g. specific tools, palettes, clean font pairs, and a "Let Zenix decide" option).
     4. **Filler / Wrap-up Questions**: If you ask a generic wrap-up question (e.g. asking if the user has any other details to add, or if they are ready to finalize), you **MUST** provide these exact options:
        ["I have no other details, please generate the final spec", "Let Zenix decide all remaining details", "Write my own details"]
     5. **Exit Early**: If the idea is already clear enough, or you do not have a highly specific, high-value product or architectural question left, immediately set "is_complete": true. Do NOT ask generic, open-ended filler questions without options.
-    6. **Options Requirement (No Manual Typing)**: If you set "is_complete": false, you **MUST** provide exactly 3 specific, diverse suggested options/answers in the "options" array for the next_question. You are strictly forbidden from outputting an empty or null "options" array when asking a question. Every single question must be fully answerable by selecting one of the provided options; never force the user to type manually.
+    6. **Options Requirement (Mostly MCQs, No Manual Typing)**: If you set "is_complete": false, you **MUST** provide exactly 3 specific, diverse suggested options/answers in the "options" array for the next_question. Frame almost all questions as Multiple-Choice Questions (MCQs) where the user can pick one of the options. Avoid open-ended text questions that require manual typing.
     `}
 
     ### Guidelines for Generating "refined_spec" (When is_complete is true)
