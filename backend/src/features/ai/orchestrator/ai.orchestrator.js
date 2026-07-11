@@ -1,17 +1,17 @@
 import { GeminiProvider } from "../providers/gemini.provider.js";
 import { GroqProvider } from "../providers/groq.provider.js";
-import { DeepSeekProvider } from "../providers/deepseek.provider.js";
+import { MistralProvider } from "../providers/mistral.provider.js";
 import { OpenRouterProvider } from "../providers/openrouter.provider.js";
 
 class AiOrchestrator {
   constructor() {
     this.providers = {
-      gemini: new GeminiProvider(),
       grok: new GroqProvider(),
-      deepseek: new DeepSeekProvider(),
+      mistral: new MistralProvider(),
       openrouter: new OpenRouterProvider(),
+      gemini: new GeminiProvider(),
     };
-    this.TIMEOUT_MS = 30000; // 30s
+    this.TIMEOUT_MS = 25000; // 25s timeout for faster fallbacks
   }
 
   async execute(taskType, data) {
@@ -57,11 +57,11 @@ class AiOrchestrator {
       case 'generateQuestions':
       case 'generateRefinedSpec':
       case 'processConversation':
-        return ['grok', 'gemini', 'deepseek', 'openrouter'];
+        return ['grok', 'mistral', 'openrouter', 'gemini'];
       case 'generateContext':
       case 'generateTasks':
       case 'generateDocumentation':
-        return ['gemini', 'deepseek', 'openrouter', 'grok'];
+        return ['grok', 'mistral', 'openrouter', 'gemini'];
       default:
         throw new Error(`Unknown task type: ${taskType}`);
     }

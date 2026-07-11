@@ -1,17 +1,20 @@
 import OpenAI from "openai";
 import BaseProvider from "./base.provider.js";
 
-export class DeepSeekProvider extends BaseProvider {
+export class MistralProvider extends BaseProvider {
   constructor() {
     super();
     this.openai = new OpenAI({
-      baseURL: "https://api.deepseek.com",
-      apiKey: process.env.DEEPSEEK_API_KEY,
+      baseURL: "https://api.mistral.ai/v1",
+      apiKey: process.env.MISTRAL_API_KEY || "dummy",
     });
-    this.model = "deepseek-chat";
+    this.model = "mistral-large-latest";
   }
 
   async _call(prompt) {
+    if (!process.env.MISTRAL_API_KEY) {
+      throw new Error("MISTRAL_API_KEY is not defined");
+    }
     const completion = await this.openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: this.model,
