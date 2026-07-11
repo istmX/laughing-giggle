@@ -4,6 +4,7 @@ import Context from '../context/context.model.js';
 import Idea from '../ideas/idea.model.js';
 import Brief from '../brief/brief.model.js';
 import AIGeneration from '../ai/ai.model.js';
+import Artifact from '../artifacts/artifact.model.js';
 import { validateOwnership } from '../../utils/ownership.js';
 import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
@@ -60,6 +61,7 @@ export const deleteProject = async (userId, projectId) => {
     await Project.deleteOne({ _id: projectId, owner: userId }, opts);
     await Task.deleteMany({ project: projectId }, opts);
     await Context.deleteMany({ project: projectId }, opts);
+    await Artifact.deleteMany({ project: projectId }, opts);
     await AIGeneration.deleteMany({ project: projectId, owner: userId }, opts);
 
     if (ideaId) {

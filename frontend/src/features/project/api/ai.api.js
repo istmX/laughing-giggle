@@ -37,3 +37,11 @@ export const generateArtifacts = async (token, ideaId, payload) => {
     body: JSON.stringify(payload)
   })
 }
+
+export const developerChat = async (token, projectId, payload) => {
+  return authFetch(`/ai/developer/${projectId}`, {
+    method: 'POST',
+    token,
+    body: JSON.stringify(payload)
+  })
+}

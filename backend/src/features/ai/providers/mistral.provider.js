@@ -35,4 +35,7 @@ export class MistralProvider extends BaseProvider {
   async generateArtifacts(prompt) {
     return await this._call(prompt)
   }
+  async developerChat(prompt) {
+    return await this._call(prompt)
+  }
 }

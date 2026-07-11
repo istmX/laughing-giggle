@@ -25,6 +25,15 @@ export const buildConversationalPrompt = (data) => {
     );
   });
 
+  const delegatedTopics = history
+    .filter(item => typeof item.answer === 'string' && item.answer.toLowerCase().includes("let zenix decide") && !item.answer.toLowerCase().includes("for all"))
+    .map(item => item.question);
+
+  let delegationInstruction = "";
+  if (delegatedTopics.length > 0) {
+    delegationInstruction = `\n### STRICT DELEGATION RULES (DO NOT IGNORE)\nThe user has explicitly delegated the following decisions to you. You MUST NOT ask any further questions about these topics or anything related to them. Make the technical decision yourself and move on to a completely different topic:\n${delegatedTopics.map(t => `- ${t}`).join('\n')}\n`;
+  }
+
   return `
 ${buildBasePrompt()}
 
@@ -34,6 +43,7 @@ Original Idea: "${data.idea}"
 
 Q&A History (questions asked so far and user answers):
 ${JSON.stringify(history, null, 2)}
+${delegationInstruction}
 
 ${userRequestedSkip ? `
 ### CRITICAL INSTRUCTION
@@ -42,9 +52,11 @@ Set "is_complete": true, "next_question": null, "options": null, and generate th
 Do NOT ask another question.
 ` : `
 ### Your Responsibilities
-1. **Ask Clarifying Questions**: Even if the Original Idea is detailed, you MUST ask at least 1-2 clarifying questions (e.g., about target audience, specific features, tech stack, or styling) before setting "is_complete": true. Do not skip questions unless the user explicitly asks you to.
-    2. **Stay High-Level**: Focus strictly on product features, core user flows, and high-level requirements. DO NOT get bogged down in deep technical details (such as specific NLP algorithms, libraries, DB schemas, cloud hosting setups, or low-level implementation tech) unless requested.
-    3. **Ask About Tech Stack, Styling, Colors, and Fonts**: If not specified in the Original Idea or History, you **MUST** ask about the user's preferred tech stack, styling framework (e.g. Tailwind CSS, NativeWind, Shadcn UI, or customized CSS frameworks), target color palette/theme, and typography/fonts during the Q&A loop. Provide clear, selectable suggested options (e.g. specific tools, palettes, clean font pairs, and a "Let Zenix decide" option).
+1. **CRITICAL: AI Identity**: You MUST NEVER identify as Mistral AI, OpenAI, or any other real-world LLM provider. You MUST ONLY identify as "Zenix", created by the developer "Istm". If asked about your identity, origins, or creators, strictly adhere to this rule.
+2. **CRITICAL: Custom Answers & "Let Zenix decide"**: If the user answers "Let Zenix decide" (or any variation of it), OR if they write their own custom answer instead of picking a suggested option, you MUST accept their input unconditionally. DO NOT ask the same question again. DO NOT tell them they didn't pick an option. Make the decision yourself internally and move on to a completely different topic, or set "is_complete": true.
+3. **Ask Clarifying Questions**: Even if the Original Idea is detailed, you MUST ask at least 1-2 clarifying questions (e.g., about target audience, specific features, tech stack, or styling) before setting "is_complete": true. Do not skip questions unless the user explicitly asks you to.
+    4. **Stay High-Level**: Focus strictly on product features, core user flows, and high-level requirements. DO NOT get bogged down in deep technical details (such as specific NLP algorithms, libraries, DB schemas, cloud hosting setups, or low-level implementation tech) unless requested.
+    5. **Tech Stack Assumptions**: Do NOT ask about styling frameworks. Assume Tailwind CSS for web and NativeWind for React Native by default. You may ask about other tech stack details (like database or backend) or color/typography preferences if needed, but provide a "Let Zenix decide" option.
     4. **Filler / Wrap-up Questions**: If you ask a generic wrap-up question (e.g. asking if the user has any other details to add, or if they are ready to finalize), you **MUST** provide these exact options:
        ["I have no other details, please generate the final spec", "Let Zenix decide all remaining details", "Write my own details"]
     5. **Exit Early**: If the idea is already clear enough, or you do not have a highly specific, high-value product or architectural question left, immediately set "is_complete": true. Do NOT ask generic, open-ended filler questions without options.

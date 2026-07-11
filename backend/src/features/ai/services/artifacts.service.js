@@ -1,17 +1,24 @@
 import orchestrator from "../orchestrator/ai.orchestrator.js";
-import Brief from "../../brief/brief.model.js";
+import Project from "../../projects/project.model.js";
 import { artifactService } from "../../artifacts/artifact.service.js";
 
 export const aiArtifactsService = {
   async generateArtifacts(ideaId, projectId, userId) {
-    const brief = await Brief.findOne({ idea: ideaId, owner: userId });
-    if (!brief) throw new Error("Brief not found. Complete the conversation first.");
+    const project = await Project.findOne({ _id: projectId, owner: userId });
+    if (!project || !project.wizard_state || !project.wizard_state.refinedSpec) {
+      throw new Error("Project not found or specification not finalized.");
+    }
 
-    // Read reference files from data folder to use as examples
     const fs = await import("fs/promises");
     const path = await import("path");
     const dataDir = path.join(process.cwd(), "src/features/ai/data");
+    const contextDir = path.join(dataDir, "context");
     
+    let contextFiles = [];
+    try {
+      contextFiles = (await fs.readdir(contextDir)).filter(f => f.endsWith(".md"));
+    } catch (e) {}
+
     const readDirAsText = async (dirPath) => {
       let content = "";
       try {
@@ -29,67 +36,68 @@ export const aiArtifactsService = {
     };
 
     const agentsTemplate = await fs.readFile(path.join(dataDir, "Agents.md"), "utf-8").catch(() => "");
-    const contextTemplates = await readDirAsText(path.join(dataDir, "context"));
+    const contextTemplates = await readDirAsText(contextDir);
     const uiKnowledge = await readDirAsText(path.join(dataDir, "ui"));
+
+    // Dynamically build required files and schema to ensure everything is generated
+    const requiredFilesList = [
+      `1. "AGENTS.md" (Instructions for AI agents on how to build this project)`
+    ];
+    const schemaFiles = [
+      { path: "AGENTS.md", content: "# Agents\n..." }
+    ];
+    
+    contextFiles.forEach((file, index) => {
+      requiredFilesList.push(`${index + 2}. "context/${file}"`);
+      schemaFiles.push({ path: `context/${file}`, content: "..." });
+    });
+    
+    // Add TASKS.md as the final required file
+    requiredFilesList.push(`${contextFiles.length + 2}. "TASKS.md" (Actionable prompts for agents)`);
+    schemaFiles.push({ path: "TASKS.md", content: "# Tasks\n..." });
+
+    const requiredFilesText = requiredFilesList.join("\n");
+    const schemaText = JSON.stringify({ files: schemaFiles }, null, 2);
 
     // Construct the prompt describing the artifacts needed
     const prompt = `
 You are an expert Software Architect and Developer.
-We are building an application with the following context:
+We are building an application based on the following finalized specification:
 
-Platform: ${brief.platform}
-Frontend Stack: ${brief.frontend_stack}
-Backend Stack: ${brief.backend_stack}
-Database: ${brief.database}
-UI Style: ${brief.ui_style}
-Application Type: ${brief.application_type}
-Target Users: ${brief.target_users}
-
-Based on the conversation history:
-${JSON.stringify(brief.questions)}
+${project.wizard_state.refinedSpec}
 
 Please generate the following documentation files for this project. Format your response strictly as a JSON object containing a "files" array. Each object in the array must have "path" and "content".
 
 Required files to generate:
-1. "AGENTS.md" (Instructions for AI agents on how to build this project)
-2. "context/project-overview.md"
-3. "context/architecture.md"
-4. "context/ui-tokens.md" (Use the chosen UI style to pick beautiful, non-generic hex colors)
-5. "context/ui-rules.md"
-6. "context/ui-registry.md"
-7. "context/build-plan.md" (Detailed phase-by-step plan)
-8. "context/code-standards.md"
-9. "context/library-docs.md"
-10. "TASKS.md" (A list of actionable prompts for agents)
-11. "PROGRESS.md" (Should be created but left mostly empty with a skeleton structure)
+${requiredFilesText}
 
 IMPORTANT INSTRUCTIONS:
-- Generate files that are highly detailed, with the **same length and depth** of content as the ScribbleBox examples provided below.
-- If the user has already given specific color palettes and a theme, DO NOT change them.
-- If the user said "AI decide" or left the theme vague, you MUST use the UI design knowledge provided below to make excellent, modern design decisions instead of using generic themes like "purple".
+1. "AGENTS.md" MUST NOT be a generic task board or architecture summary. It MUST be a strict "Agent Instruction Manual".
+   - It MUST include a strong "What this IS vs What this is NOT" philosophy section.
+   - It MUST include specific emotional design guardrails ("The product should feel X").
+   - It MUST include strict operational rules (e.g., "Before making decisions, read X...", "Whenever work is completed, update Y...").
+   - It MUST include hard UX/UI rules (e.g., "Empty states must have X, Y, Z").
+   - It MUST include a numbered priority list (e.g., 1. UX, 2. Design, 3. Performance).
+   - If you do not include these specific behavioral guardrails, the agents will fail.
+2. If the user has already given specific color palettes and a theme, DO NOT change them.
+3. If the user said "AI decide" or left the theme vague, you MUST use the UI design knowledge provided below to make excellent, modern design decisions.
+4. CRITICAL: Your generated files MUST strictly follow the exact format, style, and opinionated tone of their respective examples.
 
 --- REFERENCE UI KNOWLEDGE FOR GOOD DECISIONS ---
 ${uiKnowledge}
 
---- EXAMPLES OF HIGH-QUALITY FILES (ScribbleBox Reference) ---
-Example of Agents.md:
+--- EXAMPLES OF HIGH-QUALITY FILES ---
+Example of Agents.md (USE THIS AS A STRICT REFERENCE FOR YOUR AGENTS.md OUTPUT):
 ${agentsTemplate}
 
-Examples of Context files:
+Examples of Context files (Match their tone and structure):
 ${contextTemplates}
 ------------------------------------------------
 
 Do not wrap the JSON in Markdown backticks. Return valid JSON only.
 
 Schema:
-{
-  "files": [
-    {
-      "path": "AGENTS.md",
-      "content": "# Agents\\n..."
-    }
-  ]
-}
+${schemaText}
 `;
 
     const systemPrompt = "You are a JSON-generating expert architect agent. Only output valid JSON matching the schema.";
@@ -99,8 +107,8 @@ Schema:
     
     let parsedResult;
     try {
-      // The orchestrator returns { content: "...", providerUsed: "..." }
-      const content = aiResponse.content;
+      // The orchestrator returns { response: { content: "..." }, providerUsed: "..." }
+      const content = aiResponse.response.content;
       // Strip markdown code blocks if the AI accidentally adds them around the JSON
       const jsonString = content.replace(/^```json\s*/, '').replace(/```\s*$/, '').trim();
       parsedResult = JSON.parse(jsonString);

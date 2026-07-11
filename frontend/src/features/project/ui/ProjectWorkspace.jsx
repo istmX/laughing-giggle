@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Send, User, Bot, Loader2, Sparkles, CheckCircle2, Menu, PanelRightClose, PanelRightOpen, X, FileCode2, Download } from 'lucide-react'
+import { ArrowLeft, Send, User, Bot, Loader2, Sparkles, CheckCircle2, Menu, PanelRightClose, PanelRightOpen, X, FileCode2, Download, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { getProject, updateProject } from '../api/projects.api'
 import { createIdea } from '../api/ideas.api'
-import { processConversation, analyzeIdea, generateArtifacts } from '../api/ai.api'
+import { processConversation, analyzeIdea, generateArtifacts, developerChat } from '../api/ai.api'
 import { getProjectArtifacts, updateArtifact, downloadArtifactsZip } from '@/features/artifacts/api/artifacts.api'
 import {
   MessageScrollerProvider,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/message-scroller'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 import { Sidebar } from '@/Dashboard/components/Sidebar'
-import toast from 'react-hot-toast'
+import { useChatStore } from '../store/useChatStore'
 
 export function ProjectWorkspace() {
   const { projectId } = useParams()
@@ -25,7 +25,7 @@ export function ProjectWorkspace() {
   
   const [project, setProject] = useState(null)
   const [ideaId, setIdeaId] = useState(null)
-  const [messages, setMessages] = useState([])
+  const { messages, setMessages, addMessage } = useChatStore()
   const [inputValue, setInputValue] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPageLoading, setIsPageLoading] = useState(true)
@@ -38,6 +38,35 @@ export function ProjectWorkspace() {
   const [isGeneratingArtifacts, setIsGeneratingArtifacts] = useState(false)
   const [isSavingArtifact, setIsSavingArtifact] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isFileMenuOpen, setIsFileMenuOpen] = useState(false)
+  
+  const [sidebarWidth, setSidebarWidth] = useState(400)
+  const isDragging = useRef(false)
+  const startX = useRef(0)
+  const startWidth = useRef(0)
+  
+  const handleMouseDown = (e) => {
+    isDragging.current = true
+    startX.current = e.clientX
+    startWidth.current = sidebarWidth
+    document.body.style.cursor = 'col-resize'
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }
+  
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return
+    const dx = startX.current - e.clientX
+    const newWidth = Math.min(Math.max(startWidth.current + dx, 320), 800)
+    setSidebarWidth(newWidth)
+  }
+  
+  const handleMouseUp = () => {
+    isDragging.current = false
+    document.body.style.cursor = ''
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
   
   const inputRef = useRef(null)
 
@@ -119,10 +148,10 @@ export function ProjectWorkspace() {
             }
             
             // 3. Current State
-            if (ws.isComplete && ws.refinedSpec) {
+            if (ws.refinedSpec) {
               reconstructed.push({
-                id: 'final-spec',
-                role: 'assistant',
+                id: 'refined-spec',
+                role: 'user',
                 isSpec: true,
                 content: ws.refinedSpec,
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -137,7 +166,25 @@ export function ProjectWorkspace() {
               })
             }
             
-            setMessages(reconstructed)
+            // 4. Dev Chat History
+            if (ws.devChatHistory && ws.devChatHistory.length > 0) {
+              ws.devChatHistory.forEach((h, i) => {
+                reconstructed.push({
+                  id: `dev-user-${i}`,
+                  role: 'user',
+                  content: h.question,
+                  timestamp: ''
+                })
+                reconstructed.push({
+                  id: `dev-ai-${i}`,
+                  role: 'assistant',
+                  content: h.answer,
+                  timestamp: ''
+                })
+              })
+            }
+            
+            useChatStore.getState().setMessages(reconstructed)
           }
           // Fetch artifacts
           try {
@@ -146,6 +193,23 @@ export function ProjectWorkspace() {
               setArtifacts(artifactRes)
               setActiveArtifact(artifactRes[0])
               setIsArtifactsOpen(true)
+            } else if (res.data.wizard_state?.isComplete && res.data.wizard_state?.ideaId) {
+              setIsGeneratingArtifacts(true)
+              setIsArtifactsOpen(true)
+              generateArtifacts(token, res.data.wizard_state.ideaId, { projectId })
+                .then(() => getProjectArtifacts(token, projectId))
+                .then(newArtRes => {
+                  if (newArtRes && newArtRes.length > 0) {
+                    setArtifacts(newArtRes)
+                    setActiveArtifact(newArtRes[0])
+                  }
+                  toast.success("Project artifacts generated successfully!")
+                })
+                .catch(e => {
+                  console.error("Auto-generate failed", e)
+                  toast.error("Failed to generate artifacts.")
+                })
+                .finally(() => setIsGeneratingArtifacts(false))
             }
           } catch (e) {
             console.error("Failed to fetch artifacts", e)
@@ -205,12 +269,12 @@ export function ProjectWorkspace() {
     }
 
     // Remove options from the last assistant message
-    setMessages(prev => {
-      const newMsgs = [...prev]
+    useChatStore.setState(prev => {
+      const newMsgs = [...prev.messages]
       if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].role === 'assistant') {
         newMsgs[newMsgs.length - 1].options = undefined
       }
-      return [...newMsgs, userMessage]
+      return { messages: [...newMsgs, userMessage] }
     })
 
     try {
@@ -234,12 +298,12 @@ export function ProjectWorkspace() {
         if (parsedConvo.is_complete) {
           const specMsg = {
             id: `spec-${Date.now()}`,
-            role: 'assistant',
+            role: 'user',
             isSpec: true,
             content: parsedConvo.refined_spec,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
-          setMessages(prev => [...prev, specMsg])
+          addMessage(specMsg)
           await syncStateToBackend(
             { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: null, refinedSpec: parsedConvo.refined_spec, isComplete: true },
             { project_title: title, project_description: description }
@@ -254,26 +318,68 @@ export function ProjectWorkspace() {
             options: opts,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
-          setMessages(prev => [...prev, qMsg])
+          addMessage(qMsg)
           await syncStateToBackend(
             { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false },
             { project_title: title, project_description: description }
           )
         }
+      } else if (project?.wizard_state?.isComplete) {
+        // Developer Chat
+        const hist = []
+        const currentMsgs = useChatStore.getState().messages;
+        for (let i = 0; i < currentMsgs.length - 1; i += 2) {
+          if (currentMsgs[i].role === 'user' && currentMsgs[i+1]?.role === 'assistant') {
+            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i+1].content })
+          }
+        }
+        
+        const res = await developerChat(token, projectId, { prompt: text, history: hist })
+        
+        const aiMessage = {
+          id: `dev-${Date.now()}`,
+          role: 'assistant',
+          content: res?.content || res?.data?.content || "No response received.",
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        addMessage(aiMessage)
+
+        // If the AI updated any artifacts in real-time, sync them to the UI
+        const updatedArtifacts = res?.updatedArtifacts || res?.data?.updatedArtifacts;
+        if (updatedArtifacts && Array.isArray(updatedArtifacts) && updatedArtifacts.length > 0) {
+          setArtifacts(prev => prev.map(a => {
+            const update = updatedArtifacts.find(u => u.file_path === a.file_path);
+            return update ? { ...a, content: update.content } : a;
+          }));
+          
+          if (activeArtifact) {
+            const activeUpdate = updatedArtifacts.find(u => u.file_path === activeArtifact.file_path);
+            if (activeUpdate) {
+              setActiveArtifact(prev => ({ ...prev, content: activeUpdate.content }));
+            }
+          }
+        }
+        
+        // Save developer chat history to wizard_state in DB
+        await syncStateToBackend({
+          ...project.wizard_state,
+          devChatHistory: [...(project.wizard_state.devChatHistory || []), { question: text, answer: aiMessage.content }]
+        })
       } else {
         // Continue conversation
         // Rebuild history from messages
         const hist = []
+        const currentMsgs = useChatStore.getState().messages;
         let currentPrompt = ''
-        if (messages.length > 0) currentPrompt = messages[0].content
+        if (currentMsgs.length > 0) currentPrompt = currentMsgs[0].content
         
-        for (let i = 1; i < messages.length - 1; i += 2) {
-          if (messages[i].role === 'assistant' && messages[i+1]?.role === 'user') {
-            hist.push({ question: messages[i].content, answer: messages[i+1].content })
+        for (let i = 1; i < currentMsgs.length - 1; i += 2) {
+          if (currentMsgs[i].role === 'assistant' && currentMsgs[i+1]?.role === 'user') {
+            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i+1].content })
           }
         }
         hist.push({ 
-          question: messages[messages.length - 1].content, 
+          question: currentMsgs[currentMsgs.length - 1].content, 
           answer: text 
         })
         
@@ -283,12 +389,12 @@ export function ProjectWorkspace() {
         if (parsed.is_complete) {
           const specMsg = {
             id: `spec-${Date.now()}`,
-            role: 'assistant',
+            role: 'user',
             isSpec: true,
             content: parsed.refined_spec,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
-          setMessages(prev => [...prev, specMsg])
+          addMessage(specMsg)
           await syncStateToBackend({ 
             ideaId, prompt: currentPrompt, history: hist, currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true 
           })
@@ -302,7 +408,7 @@ export function ProjectWorkspace() {
             options: opts,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
-          setMessages(prev => [...prev, qMsg])
+          addMessage(qMsg)
           await syncStateToBackend({ 
             ideaId, prompt: currentPrompt, history: hist, currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false 
           })
@@ -373,7 +479,7 @@ export function ProjectWorkspace() {
             className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${
               isArtifactsOpen 
                 ? 'bg-surface-soft text-ink' 
-                : 'text-ink-muted bg-surface hover:bg-surface-soft hover:text-ink border border-hairline'
+                : 'text-ink-muted bg-canvas hover:bg-surface-soft hover:text-ink border border-hairline'
             }`}
             aria-label="Toggle artifacts sidebar"
           >
@@ -409,7 +515,7 @@ export function ProjectWorkspace() {
                 <button
                   key={i}
                   onClick={() => setInputValue(suggestion)}
-                  className="text-left px-5 py-4 rounded-xl border border-hairline bg-surface hover:bg-surface-soft transition-colors text-sm text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                  className="text-left px-5 py-4 rounded-xl border border-hairline bg-canvas hover:bg-surface-soft transition-colors text-sm text-ink-muted hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                 >
                   {suggestion}
                 </button>
@@ -432,7 +538,7 @@ export function ProjectWorkspace() {
                         key={idx}
                         disabled={isProcessing}
                         onClick={() => handleSend(opt)}
-                        className="px-5 py-3 rounded-xl border border-hairline bg-surface hover:bg-surface-soft text-sm font-medium text-ink transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 w-full sm:w-auto"
+                        className="px-5 py-3 rounded-xl border border-hairline bg-canvas hover:bg-surface-soft text-sm font-medium text-ink transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 w-full sm:w-auto"
                       >
                         {opt}
                       </button>
@@ -552,14 +658,14 @@ export function ProjectWorkspace() {
 
       {/* Input Area */}
       <div className="px-4 py-4 bg-background shrink-0 pb-8 w-full max-w-5xl mx-auto">
-        <div className="relative flex items-end gap-2 bg-surface border border-hairline rounded-[24px] p-2 shadow-sm focus-within:border-ink/20 focus-within:shadow-md transition-all">
+        <div className="relative flex items-end gap-2 bg-canvas border border-hairline rounded-[24px] p-2 shadow-sm focus-within:border-ink/20 focus-within:shadow-md transition-all">
           <textarea
             ref={inputRef}
             value={inputValue}
             onChange={handleInput}
             onKeyDown={handleKeyDown}
             disabled={isProcessing}
-            placeholder="Message Zenix..."
+            placeholder={project?.wizard_state?.isComplete ? "Ask Zenix Developer..." : "Message Zenix..."}
             className="flex-1 bg-transparent resize-none border-none outline-none text-base text-ink placeholder:text-ink-muted/70 max-h-40 min-h-[24px] py-3 px-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] disabled:opacity-50 w-full focus:ring-0"
             rows={1}
             style={{ height: '48px' }}
@@ -574,7 +680,7 @@ export function ProjectWorkspace() {
           </button>
         </div>
         <div className="text-center mt-3">
-          <span className="text-[11px] text-ink-muted/70 font-medium">Zenix AI can make mistakes. Review the generated specification carefully.</span>
+          <span className="text-[11px] text-ink-muted/70 font-medium">Zenix AI can make mistakes. Review the generated output carefully.</span>
         </div>
       </div>
       </main>
@@ -587,10 +693,16 @@ export function ProjectWorkspace() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-            className="absolute inset-0 z-40 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-96 md:relative md:w-[400px] md:flex-shrink-0 border-l border-hairline/50 bg-background shadow-2xl md:shadow-none flex flex-col"
+            style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? sidebarWidth : '100%' }}
+            className="absolute inset-0 z-40 sm:inset-y-0 sm:right-0 sm:left-auto md:relative md:flex-shrink-0 border-l border-hairline/50 bg-background shadow-2xl md:shadow-none flex flex-col max-w-full"
           >
+            {/* Drag Handle (Desktop only) */}
+            <div 
+              className="absolute top-0 bottom-0 left-0 w-1.5 cursor-col-resize hover:bg-ink/20 active:bg-ink/30 transition-colors z-50 hidden md:block"
+              onMouseDown={handleMouseDown}
+            />
             {/* Artifacts Header */}
-            <header className="flex h-14 items-center justify-between border-b border-hairline/50 px-4 shrink-0 bg-surface/50 backdrop-blur-sm">
+            <header className="flex h-14 items-center justify-between border-b border-hairline/50 px-4 shrink-0 bg-canvas/50 backdrop-blur-sm">
               <div className="flex items-center gap-2 font-medium text-ink text-sm">
                 <FileCode2 className="h-4 w-4 text-ink-muted" />
                 Artifacts
@@ -638,7 +750,7 @@ export function ProjectWorkspace() {
                 </div>
               ) : artifacts.length === 0 ? (
                 <div className="flex-1 p-4 flex flex-col items-center justify-center text-center">
-                  <div className="h-12 w-12 rounded-2xl bg-surface border border-hairline flex items-center justify-center mb-4 text-ink-muted/50">
+                  <div className="h-12 w-12 rounded-2xl bg-canvas border border-hairline flex items-center justify-center mb-4 text-ink-muted/50">
                     <FileCode2 className="h-6 w-6" />
                   </div>
                   <h3 className="text-sm font-medium text-ink mb-1">No artifacts yet</h3>
@@ -648,25 +760,60 @@ export function ProjectWorkspace() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col">
-                  <div className="p-2 border-b border-hairline/50 overflow-x-auto whitespace-nowrap hide-scrollbar flex gap-1">
-                    {artifacts.map(a => (
+                  <div className="p-3 border-b border-hairline/50 bg-canvas">
+                    <div className="relative">
                       <button
-                        key={a._id}
-                        onClick={() => setActiveArtifact(a)}
-                        className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${activeArtifact?._id === a._id ? 'bg-ink text-canvas' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}
+                        onClick={() => setIsFileMenuOpen(!isFileMenuOpen)}
+                        className="w-full flex items-center justify-between bg-canvas border border-hairline rounded-lg py-2 pl-3 pr-3 text-sm font-medium text-ink hover:border-ink/30 focus:outline-none focus:ring-2 focus:ring-ink/20 focus:border-ink/30 transition-all shadow-sm"
                       >
-                        {a.path}
+                        <span className="truncate pr-4">{activeArtifact?.file_path || 'Select a file...'}</span>
+                        <ChevronDown className={`h-4 w-4 text-ink-muted transition-transform ${isFileMenuOpen ? 'rotate-180' : ''}`} />
                       </button>
-                    ))}
+                      
+                      <AnimatePresence>
+                        {isFileMenuOpen && (
+                          <>
+                            <div 
+                              className="fixed inset-0 z-40"
+                              onClick={() => setIsFileMenuOpen(false)}
+                            />
+                            <motion.div 
+                              initial={{ opacity: 0, y: -4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.15, ease: "easeOut" }}
+                              className="absolute top-full left-0 right-0 mt-1 z-50 bg-canvas border border-hairline rounded-lg shadow-lg max-h-64 overflow-y-auto py-1"
+                            >
+                              {artifacts.map(a => (
+                                <button
+                                  key={a._id}
+                                  onClick={() => {
+                                    setActiveArtifact(a);
+                                    setIsFileMenuOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                                    activeArtifact?._id === a._id 
+                                      ? 'bg-ink text-canvas font-medium' 
+                                      : 'text-ink hover:bg-surface-soft'
+                                  }`}
+                                >
+                                  <span className="block truncate">{a.file_path}</span>
+                                </button>
+                              ))}
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                   {activeArtifact && (
                     <div className="flex-1 p-4 relative flex flex-col">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-semibold text-ink-muted">Edit {activeArtifact.path}</span>
+                        <span className="text-xs font-semibold text-ink-muted">Edit {activeArtifact.file_path}</span>
                         {isSavingArtifact && <Loader2 className="h-3 w-3 animate-spin text-ink-muted" />}
                       </div>
                       <textarea
-                        className="w-full h-full flex-1 bg-surface-soft/50 rounded-lg p-3 resize-none border border-transparent focus:border-hairline outline-none text-[13px] text-ink font-mono focus:ring-0 transition-colors shadow-inner"
+                        className="w-full h-full flex-1 bg-canvas rounded-xl p-4 resize-none border border-hairline outline-none text-sm text-ink font-mono focus:border-ink/30 focus:ring-4 focus:ring-ink/5 transition-all shadow-sm leading-relaxed"
                         value={activeArtifact.content}
                         onChange={(e) => {
                           const newContent = e.target.value;

@@ -1,7 +1,26 @@
 ## Completed
 
+- **Artifacts UI & File Switcher Polish**:
+  - Replaced the buggy native `<select>` dropdown in the Artifacts sidebar with a custom, framer-motion animated menu to enforce strict `DESIGN.md` design tokens (`bg-canvas`, `text-ink`) and fix OS-level white-on-white text issues.
+  - Fixed a missing property bug where artifacts rendered as empty strings in the dropdown by correctly mapping `activeArtifact.path` to the database schema's `activeArtifact.file_path`.
+- **AI Agent Identity & Behavior Hardening**:
+  - Injected strict AI identity rules into both the Developer and PM Wizard agents to ensure they unconditionally identify as "Zenix" created by developer "Istm" (and never leak upstream LLM provider names).
+  - Fixed an infinite-loop bug in the PM Wizard (`conversational.prompt.js`) where the AI would aggressively repeat questions if the user typed a custom answer; the AI is now strictly instructed to unconditionally accept custom text and "Let Zenix decide" selections.
+  - Upgraded the `artifacts.service.js` generation prompt to violently enforce the inclusion of strong product philosophies, hard UX rules, and strict operational directives, transforming the output from a generic spec sheet into a true "Agent Instruction Manual".
+- **Real-Time Artifact Synchronization**:
+  - Re-architected the Developer Chat (`developer.service.js`) to output a structured JSON payload combining conversational messages and an `updates` array for real-time file editing.
+  - Fixed missing file updates by explicitly instructing the Developer Agent to always prepend the `context/` directory path to architecture files when pushing edits.
+  - Wired the React frontend (`ProjectWorkspace.jsx`) to seamlessly intercept these real-time JSON payloads and instantly sync the live artifact edits into the text editor UI without a page reload.
+- **Data Integrity**:
+  - Updated the project cascade deletion transaction in `project.service.js` to automatically clean up all associated `Artifacts` records alongside `Ideas`, `Briefs`, and `AIGenerations`, ensuring zero orphaned files remain in the database when a project is wiped.
 - **Developer Chat and Artifacts UI**:
   - Re-architected project flow to clearly separate the AI specification wizard (`NewProjectPage.jsx`) from the active developer workspace (`ProjectWorkspace.jsx`).
+  - Added Zustand store (`useChatStore`) for managing real-time chat messages inside the developer workspace.
+  - Implemented persistence for developer chat history by saving conversation turns to `wizard_state.devChatHistory` in the database.
+  - Overhauled AI artifact generation logic in `artifacts.service.js` to dynamically scan the backend `data/context` directory and strictly require the AI to generate the full suite of context files (AGENTS.md, all context files, and TASKS.md) directly into the UI.
+  - Improved AI artifact generation prompt to strictly enforce the output format based on project rules (e.g. `Agents.md`) rather than outputting generic task boards.
+  - Implemented a draggable resize handle for the Artifacts sidebar, allowing users to dynamically adjust the width between 320px and 800px on desktop screens.
+  - Upgraded the Artifacts text editor UI with elevated `bg-surface` styling, improved padding, subtle drop-shadows, and refined focus states for a premium code editor feel.
   - Implemented automatic redirection from the wizard to the developer chat once the brief is fully generated.
   - Updated conversational prompt logic to enforce asking at least 1-2 clarifying questions even for highly detailed prompts, preventing premature completion.
   - Built an interactive Artifacts sidebar inside `ProjectWorkspace.jsx` that automatically calls the backend generation endpoint, displays a shimmering loading state, and renders the generated files in a scrollable tab list.
@@ -15,7 +34,11 @@
   - Set up a sandbox testing interface (`ProjectChatPage.jsx`) pre-filled with the AI-refined project specification, simulating live streaming responses when users send messages.
   - Configured `NewProjectPage.jsx` to completely replace the static "Brief Already Completed" placeholder screens and directly mount the interactive `ProjectChatPage` component once the wizard concludes.
   - Overhauled `QuestionCard.jsx` to support multi-select suggested options, avoid duplicate "Let Zenix decide" buttons, and add a quick-skip action button for filler wrap-up questions.
-  - Refined backend prompt logic (`conversational.prompt.js`) to ensure specific design overrides (like choosing "Let Zenix decide" for typography/colors) do not trigger premature global wizard termination.
+  - Refined backend prompt logic (`conversational.prompt.js`) with dynamic history-checking to strictly enforce the "Let Zenix decide" instruction. The AI is now explicitly fed a list of delegated topics and banned from looping over them.
+  - Removed styling framework questions from the AI rules entirely, assuming Tailwind CSS (or NativeWind) by default to simplify the user flow.
+  - Fixed an AI Orchestrator bug where `generateArtifacts` was missing from `getStrategy`, causing silent 500 errors.
+  - Reduced the number of concurrently generated architecture files in `artifacts.service.js` from 11 to 4 (`AGENTS.md`, `project-overview.md`, `ui-tokens.md`, `TASKS.md`) to prevent the LLM from exceeding output token limits and crashing the JSON parser.
+  - Disabled the chat input area in `ProjectWorkspace.jsx` when the project is marked complete, displaying a polished "Project Specification Finalized" notice instead to prevent user confusion.
 - **Context Feature Folder Structure**:
   - Initialized `frontend/src/features/context/` directory with standardized subfolders (`api`, `hooks`, `store`, `ui`) and base files matching the project's architectural standards.
 - **Project Context Asset Sync**:

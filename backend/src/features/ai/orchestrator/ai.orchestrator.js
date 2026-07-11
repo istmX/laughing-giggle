@@ -21,16 +21,18 @@ class AiOrchestrator {
 
     for (let i = 0; i < strategy.length; i++) {
       const providerKey = strategy[i];
+      let timeoutId;
       try {
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`Timeout after ${this.TIMEOUT_MS}ms`)), this.TIMEOUT_MS)
-        );
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => reject(new Error(`Timeout after ${this.TIMEOUT_MS}ms`)), this.TIMEOUT_MS);
+        });
 
         const response = await Promise.race([
           this.providers[providerKey][taskType](data),
           timeoutPromise
         ]);
 
+        clearTimeout(timeoutId);
         return {
           response,
           providerUsed: providerKey,
@@ -38,6 +40,7 @@ class AiOrchestrator {
           fallbackProvider
         };
       } catch (error) {
+        clearTimeout(timeoutId);
         console.error(`[AI FALLBACK] Provider: ${providerKey} | Task: ${taskType} | Error: ${error.message}`);
 
         if (i < strategy.length - 1) {
@@ -61,6 +64,8 @@ class AiOrchestrator {
       case 'generateContext':
       case 'generateTasks':
       case 'generateDocumentation':
+      case 'generateArtifacts':
+      case 'developerChat':
         return ['grok', 'mistral', 'openrouter', 'gemini'];
       default:
         throw new Error(`Unknown task type: ${taskType}`);
