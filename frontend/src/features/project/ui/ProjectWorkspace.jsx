@@ -30,12 +30,12 @@ import { toast } from 'react-hot-toast'
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function getFileIcon(filePath = '') {
-  // Pastel blocks based on Figma DESIGN.md schema
-  if (filePath.includes('agents')) return { bg: 'bg-[#c5b0f4]/25 border-[#c5b0f4]/45', color: 'text-[#6d28d9]' } // Lilac
-  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return { bg: 'bg-[#dceeb1]/35 border-[#dceeb1]/55', color: 'text-[#4d7c0f]' } // Lime
-  if (filePath.includes('task') || filePath.includes('plan')) return { bg: 'bg-[#f3c9b6]/25 border-[#f3c9b6]/45', color: 'text-[#c2410c]' } // Coral
-  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return { bg: 'bg-[#efd4d4]/30 border-[#efd4d4]/50', color: 'text-[#b91c1c]' } // Pink
-  return { bg: 'bg-[#c8e6cd]/30 border-[#c8e6cd]/50', color: 'text-[#15803d]' } // Mint (default)
+  // Vibrant solid block backgrounds based on Figma DESIGN.md schema
+  if (filePath.includes('agents')) return { bg: 'bg-[#c5b0f4]', color: 'text-white' } // Lilac
+  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return { bg: 'bg-[#dceeb1]', color: 'text-white' } // Lime
+  if (filePath.includes('task') || filePath.includes('plan')) return { bg: 'bg-[#f3c9b6]', color: 'text-white' } // Coral
+  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return { bg: 'bg-[#efd4d4]', color: 'text-white' } // Pink
+  return { bg: 'bg-[#c8e6cd]', color: 'text-white' } // Mint (default)
 }
 
 function timeAgo(date) {
@@ -852,10 +852,10 @@ export function ProjectWorkspace() {
                           whileHover={{ x: 1 }}
                           whileTap={{ scale: 0.99 }}
                           onClick={() => setActiveArtifact(a)}
-                          className={`artifact-card w-full text-left cursor-pointer border ${bg} ${isActive ? 'active' : ''}`}
+                          className={`artifact-card w-full text-left cursor-pointer border ${isActive ? 'border-ink bg-surface-soft shadow-sm' : 'border-hairline bg-canvas'}`}
                         >
-                          <div className={`h-7 w-7 rounded-md bg-canvas/60 border border-hairline/20 flex items-center justify-center shrink-0`}>
-                            <FileText className={`h-3.5 w-3.5 ${color}`} />
+                          <div className={`h-8 w-8 rounded-lg ${bg.replace('bg-[', 'bg-').split(' ')[0]} flex items-center justify-center shrink-0 shadow-sm`}>
+                            <FileText className="h-4 w-4 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-[13px] font-medium text-ink truncate">
