@@ -196,29 +196,38 @@ export function ProjectWorkspace() {
             } else if (res.data.wizard_state?.isComplete && res.data.wizard_state?.ideaId) {
               setIsGeneratingArtifacts(true)
               setIsArtifactsOpen(true)
-              
-              const newArtRes = await generateArtifacts(token, res.data.wizard_state.ideaId, { projectId })
-              let pendingArtifacts = await getProjectArtifacts(token, projectId);
-              
-              if (pendingArtifacts && pendingArtifacts.length > 0) {
-                setArtifacts(pendingArtifacts)
-                setActiveArtifact(pendingArtifacts[0])
-                
-                // Sequentially generate each pending artifact
-                for (let i = 0; i < pendingArtifacts.length; i++) {
-                  try {
-                    const singleRes = await generateSingleArtifact(token, projectId, pendingArtifacts[i].file_path);
-                    if (singleRes && singleRes.artifact) {
-                      setArtifacts(prev => prev.map(a => a._id === pendingArtifacts[i]._id ? { ...a, content: singleRes.artifact.content } : a));
-                      if (i === 0) setActiveArtifact(singleRes.artifact); // Update active if it's the first one
+              // Run async without blocking the page load
+              ;(async () => {
+                try {
+                  const newArtRes = await generateArtifacts(token, res.data.wizard_state.ideaId, { projectId })
+                  let pendingArtifacts = await getProjectArtifacts(token, projectId);
+                  
+                  if (pendingArtifacts && pendingArtifacts.length > 0) {
+                    if (!isMounted) return;
+                    setArtifacts(pendingArtifacts)
+                    setActiveArtifact(pendingArtifacts[0])
+                    
+                    // Sequentially generate each pending artifact
+                    for (let i = 0; i < pendingArtifacts.length; i++) {
+                      if (!isMounted) return;
+                      try {
+                        const singleRes = await generateSingleArtifact(token, projectId, pendingArtifacts[i].file_path);
+                        if (singleRes && singleRes.artifact && isMounted) {
+                          setArtifacts(prev => prev.map(a => a._id === pendingArtifacts[i]._id ? { ...a, content: singleRes.artifact.content } : a));
+                          if (i === 0) setActiveArtifact(singleRes.artifact); // Update active if it's the first one
+                        }
+                      } catch (e) {
+                        console.error("Failed to generate file:", pendingArtifacts[i].file_path, e);
+                      }
                     }
-                  } catch (e) {
-                    console.error("Failed to generate file:", pendingArtifacts[i].file_path, e);
+                    if (isMounted) toast.success("Project artifacts generated successfully!")
                   }
+                } catch (err) {
+                  console.error("Failed during async generation", err)
+                } finally {
+                  if (isMounted) setIsGeneratingArtifacts(false)
                 }
-                toast.success("Project artifacts generated successfully!")
-              }
-              setIsGeneratingArtifacts(false)
+              })()
             }
           } catch (e) {
             console.error("Failed to fetch artifacts", e)
