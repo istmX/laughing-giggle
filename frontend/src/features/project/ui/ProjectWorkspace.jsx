@@ -1,42 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import {
-  ArrowLeft, ArrowUp, Square, RotateCcw, Bot, Loader2, Sparkles,
-  CheckCircle2, Menu, X, FileCode2, Download, FileText, Clock
-} from 'lucide-react'
+import { ArrowLeft, ArrowUp, Square, RotateCcw, Sparkles, Menu, FileText } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { getProject, updateProject } from '../api/projects.api'
-import { createIdea } from '../api/ideas.api'
-import { processConversation, analyzeIdea, generateArtifacts, generateSingleArtifact, developerChat } from '../api/ai.api'
-import { getProjectArtifacts, updateArtifact, downloadArtifactsZip } from '@/features/artifacts/api/artifacts.api'
-import {
-  MessageScrollerProvider,
-  MessageScroller,
-  MessageScrollerViewport,
-  MessageScrollerContent,
-  MessageScrollerItem,
-  MessageScrollerButton,
-} from '@/components/ui/message-scroller'
-import { Sidebar } from '@/Dashboard/components/Sidebar'
+import { getProjectArtifacts, downloadArtifactsZip, updateArtifact } from '@/features/artifacts/api/artifacts.api'
 import { useChatStore } from '../store/useChatStore'
+
+import { Sidebar } from '@/Dashboard/components/Sidebar'
+import { MessageScrollerProvider, MessageScroller, MessageScrollerViewport, MessageScrollerContent, MessageScrollerItem, MessageScrollerButton } from '@/components/ui/message-scroller'
+
 import { AiIcon } from './components/AiIcon'
 import { AiThinking } from './components/AiThinking'
 import { EmptyState } from './components/EmptyState'
 import { GenerationProgress } from './components/GenerationProgress'
 import { SpecReadyPanel } from './components/SpecReadyPanel'
-import { toast } from 'react-hot-toast'
+import { ArtifactsPanel } from './components/ArtifactsPanel'
 
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-function getFileIcon(filePath = '') {
-  // Vibrant solid block backgrounds based on Figma DESIGN.md schema
-  if (filePath.includes('agents')) return { bg: 'bg-[#c5b0f4]', color: 'text-white' } // Lilac
-  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return { bg: 'bg-[#dceeb1]', color: 'text-white' } // Lime
-  if (filePath.includes('task') || filePath.includes('plan')) return { bg: 'bg-[#f3c9b6]', color: 'text-white' } // Coral
-  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return { bg: 'bg-[#efd4d4]', color: 'text-white' } // Pink
-  return { bg: 'bg-[#c8e6cd]', color: 'text-white' } // Mint (default)
-}
+import { useProjectData } from '../hooks/useProjectData'
+import { useChatHandlers } from '../hooks/useChatHandlers'
 
 function timeAgo(date) {
   const diff = Date.now() - new Date(date).getTime()
@@ -48,45 +29,44 @@ function timeAgo(date) {
   return `${Math.floor(h / 24)}d ago`
 }
 
-// Strip options from all messages — called on every user send
-function clearAllOptions(messages) {
-  return messages.map(m => ({ ...m, options: undefined }))
-}
-
-// ── main component ────────────────────────────────────────────────────────────
-
 export function ProjectWorkspace() {
   const { projectId } = useParams()
   const { token } = useAuth()
 
-  const [project, setProject] = useState(null)
-  const [ideaId, setIdeaId] = useState(null)
-  const { messages, setMessages, addMessage } = useChatStore()
+  // State hooks isolated into useProjectData custom hook
+  const {
+    project,
+    setProject,
+    ideaId,
+    setIdeaId,
+    isPageLoading,
+    setIsPageLoading,
+    artifacts,
+    setArtifacts,
+    activeArtifact,
+    setActiveArtifact,
+    isGeneratingArtifacts,
+    setIsGeneratingArtifacts,
+    isArtifactsOpen,
+    setIsArtifactsOpen,
+    showSpecReady,
+    setShowSpecReady,
+    specContent,
+    setSpecContent,
+  } = useProjectData(token, projectId)
+
+  const { messages } = useChatStore()
   const [inputValue, setInputValue] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [isPageLoading, setIsPageLoading] = useState(true)
-
-  // UI state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isArtifactsOpen, setIsArtifactsOpen] = useState(false)
-  const [artifacts, setArtifacts] = useState([])
-  const [activeArtifact, setActiveArtifact] = useState(null)
-  const [isGeneratingArtifacts, setIsGeneratingArtifacts] = useState(false)
-  const [isSavingArtifact, setIsSavingArtifact] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
-
-  // spec-ready interstitial: shown after spec generates, before dev chat
-  const [showSpecReady, setShowSpecReady] = useState(false)
-  const [specContent, setSpecContent] = useState(null)
-
-  // retry: store last failed message so user can retry
   const [lastFailedMessage, setLastFailedMessage] = useState(null)
 
-  // abort controller for in-flight cancellation
-  const abortControllerRef = useRef(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // resizable artifacts panel
+  const abortControllerRef = useRef(null)
+  const inputRef = useRef(null)
+
+  // Resizable sidebar states
   const [sidebarWidth, setSidebarWidth] = useState(380)
   const isDragging = useRef(false)
   const startX = useRef(0)
@@ -112,168 +92,36 @@ export function ProjectWorkspace() {
     document.removeEventListener('mouseup', handleMouseUp)
   }
 
-  const inputRef = useRef(null)
-
-  // Auto-focus input once loaded
+  // Auto-focus input once page loads
   useEffect(() => {
     if (!isPageLoading && inputRef.current) inputRef.current.focus()
   }, [isPageLoading])
 
-  const parseAIResponse = (res) => {
-    try {
-      if (typeof res === 'object' && !res.content && (res.project_title || res.next_question || res.is_complete !== undefined)) return res
-      let content = res.content || res.data?.content || res
-      if (typeof content !== 'string') return content
-      content = content.replace(/```json/gi, '').replace(/```/g, '').trim()
-      const startObj = content.indexOf('{')
-      const startArr = content.indexOf('[')
-      const endObj = content.lastIndexOf('}')
-      const endArr = content.lastIndexOf(']')
-      let start = -1, end = -1
-      if (startObj !== -1 && (startArr === -1 || startObj < startArr)) { start = startObj; end = endObj }
-      else if (startArr !== -1) { start = startArr; end = endArr }
-      if (start !== -1 && end !== -1 && end > start) content = content.substring(start, end + 1)
-      return JSON.parse(content)
-    } catch (e) {
-      console.error('Failed to parse AI response:', e, res)
-      return {}
-    }
-  }
+  // Extract handlers logic to isolate business logic
+  const { handleSend } = useChatHandlers({
+    token,
+    projectId,
+    ideaId,
+    setIdeaId,
+    project,
+    setProject,
+    artifacts,
+    setArtifacts,
+    activeArtifact,
+    setActiveArtifact,
+    setIsGeneratingArtifacts,
+    setIsArtifactsOpen,
+    setShowSpecReady,
+    setSpecContent,
+    setIsProcessing,
+    setLastFailedMessage,
+    setInputValue,
+    inputValue,
+    isProcessing,
+    abortControllerRef,
+    inputRef,
+  })
 
-  // Load project + history + artifacts
-  useEffect(() => {
-    let isMounted = true
-    const loadProject = async () => {
-      try {
-        const res = await getProject(token, projectId)
-        if (res.data && isMounted) {
-          setProject(res.data)
-          const ws = res.data.wizard_state
-
-          if (ws?.ideaId) {
-            setIdeaId(ws.ideaId)
-            const reconstructed = []
-
-            if (ws.prompt) {
-              reconstructed.push({ id: 'prompt-user', role: 'user', content: ws.prompt, timestamp: new Date(res.data.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
-            }
-
-            if (ws.history?.length > 0) {
-              ws.history.forEach((h, i) => {
-                // Reconstruct interview history without options (already answered)
-                reconstructed.push({ id: `hist-ai-${i}`, role: 'assistant', content: h.question, options: undefined, timestamp: '' })
-                reconstructed.push({ id: `hist-user-${i}`, role: 'user', content: h.answer, timestamp: '' })
-              })
-            }
-
-            if (ws.isComplete && ws.refinedSpec) {
-              // Don't add spec as a message — show spec-ready panel instead if not in dev chat yet
-              if (!ws.devChatHistory?.length) {
-                setSpecContent(ws.refinedSpec)
-                setShowSpecReady(true)
-              } else {
-                // Already progressed to dev chat — just set spec as a hidden state
-                setSpecContent(ws.refinedSpec)
-              }
-            } else if (ws.currentQuestion) {
-              // Ongoing interview — show current question in thread
-              reconstructed.push({
-                id: 'current-q',
-                role: 'assistant',
-                content: ws.currentQuestion.question,
-                options: ws.currentQuestion.options || [],
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              })
-            }
-
-            if (ws.devChatHistory?.length > 0) {
-              ws.devChatHistory.forEach((h, i) => {
-                reconstructed.push({ id: `dev-user-${i}`, role: 'user', content: h.question, timestamp: '' })
-                reconstructed.push({ id: `dev-ai-${i}`, role: 'assistant', content: h.answer, timestamp: '' })
-              })
-            }
-
-            useChatStore.getState().setMessages(reconstructed)
-          }
-
-          // Fetch artifacts
-          try {
-            const artifactRes = await getProjectArtifacts(token, projectId)
-            if (artifactRes?.length > 0) {
-              setArtifacts(artifactRes)
-              setActiveArtifact(artifactRes[0])
-              setIsArtifactsOpen(true)
-            } else if (ws?.isComplete && ws?.ideaId) {
-              setIsGeneratingArtifacts(true)
-              setIsArtifactsOpen(true)
-              ;(async () => {
-                try {
-                  await generateArtifacts(token, ws.ideaId, { projectId })
-                  let pending = await getProjectArtifacts(token, projectId)
-                  if (pending?.length > 0 && isMounted) {
-                    setArtifacts(pending)
-                    setActiveArtifact(pending[0])
-                    for (let i = 0; i < pending.length; i++) {
-                      if (!isMounted) return
-                      try {
-                        const r = await generateSingleArtifact(token, projectId, pending[i].file_path)
-                        if (r?.artifact && isMounted) {
-                          setArtifacts(prev => prev.map(a => a._id === pending[i]._id ? { ...a, content: r.artifact.content } : a))
-                          if (i === 0) setActiveArtifact(r.artifact)
-                        }
-                      } catch (e) { console.error('Failed to generate file:', pending[i].file_path, e) }
-                    }
-                    if (isMounted) toast.success('Project artifacts generated!')
-                  }
-                } catch (err) { console.error('Async generation failed', err) }
-                finally { if (isMounted) setIsGeneratingArtifacts(false) }
-              })()
-            }
-          } catch (e) { console.error('Failed to fetch artifacts', e) }
-        }
-      } catch (err) {
-        console.error('Failed to load project', err)
-        toast.error('Could not load project')
-      } finally {
-        if (isMounted) setIsPageLoading(false)
-      }
-    }
-    if (token && projectId) loadProject()
-    return () => { isMounted = false }
-  }, [token, projectId])
-
-  const syncStateToBackend = async (newState, updates = {}) => {
-    try { await updateProject(token, projectId, { wizard_state: newState, ...updates }) }
-    catch (err) { console.error('Failed to sync state', err) }
-  }
-
-  const handleGenerateArtifacts = async (currentIdeaId) => {
-    setIsGeneratingArtifacts(true)
-    setIsArtifactsOpen(true)
-    try {
-      await generateArtifacts(token, currentIdeaId, { projectId })
-      const pending = await getProjectArtifacts(token, projectId)
-      if (pending?.length > 0) {
-        setArtifacts(pending)
-        setActiveArtifact(pending[0])
-        for (let i = 0; i < pending.length; i++) {
-          try {
-            const r = await generateSingleArtifact(token, projectId, pending[i].file_path)
-            if (r?.artifact) {
-              setArtifacts(prev => prev.map(a => a._id === pending[i]._id ? { ...a, content: r.artifact.content } : a))
-              if (i === 0) setActiveArtifact(r.artifact)
-            }
-          } catch (e) { console.error('Failed to generate file:', pending[i].file_path, e) }
-        }
-      }
-      toast.success('Project artifacts generated!')
-    } catch (e) {
-      console.error(e)
-      toast.error('Failed to generate artifacts.')
-    } finally { setIsGeneratingArtifacts(false) }
-  }
-
-  // Cancel in-flight request
   const handleCancel = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -283,182 +131,30 @@ export function ProjectWorkspace() {
     if (inputRef.current) inputRef.current.focus()
   }
 
-  const handleSend = async (overrideValue = null, isRetry = false) => {
-    const text = overrideValue !== null ? overrideValue : inputValue
-    if (!text.trim() || isProcessing) return
-
-    setLastFailedMessage(null)
-    setInputValue('')
-    if (inputRef.current) inputRef.current.style.height = 'auto'
-    setIsProcessing(true)
-
-    // Create a fresh AbortController for this request
-    const controller = new AbortController()
-    abortControllerRef.current = controller
-
-    const userMessage = {
-      id: `msg-${Date.now()}`,
-      role: 'user',
-      content: text,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-
-    // Add user message and strip ALL option chips from previous messages
-    useChatStore.setState(prev => ({
-      messages: [...clearAllOptions(prev.messages), userMessage]
-    }))
-
-    try {
-      if (!ideaId) {
-        // ── Step 1: Create idea + analyze
-        const ideaRes = await createIdea(token, { prompt: text })
-        const newIdeaId = ideaRes.data?._id || ideaRes._id
-        setIdeaId(newIdeaId)
-        const analyzeRes = await analyzeIdea(token, newIdeaId)
-        const parsedAnalysis = parseAIResponse(analyzeRes)
-        const title = parsedAnalysis.project_title || 'Untitled Project'
-        const description = parsedAnalysis.project_description || text
-        setProject(prev => ({ ...prev, project_title: title }))
-
-        // ── Step 2: Start conversation
-        const convoRes = await processConversation(token, newIdeaId, { history: [] })
-        const parsedConvo = parseAIResponse(convoRes)
-
-        if (parsedConvo.is_complete) {
-          // Interview done in one shot — show spec-ready panel
-          setSpecContent(parsedConvo.refined_spec)
-          setShowSpecReady(true)
-          await syncStateToBackend(
-            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: null, refinedSpec: parsedConvo.refined_spec, isComplete: true },
-            { project_title: title, project_description: description }
-          )
-          handleGenerateArtifacts(newIdeaId)
-        } else {
-          const opts = Array.isArray(parsedConvo.options) ? parsedConvo.options : []
-          const qMsg = {
-            id: `q-${Date.now()}`,
-            role: 'assistant',
-            content: parsedConvo.next_question || 'What is the primary feature?',
-            options: opts,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-          addMessage(qMsg)
-          await syncStateToBackend(
-            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false },
-            { project_title: title, project_description: description }
-          )
-        }
-
-      } else if (project?.wizard_state?.isComplete) {
-        // ── Developer chat mode
-        const hist = []
-        const currentMsgs = useChatStore.getState().messages
-        for (let i = 0; i < currentMsgs.length - 1; i += 2) {
-          if (currentMsgs[i].role === 'user' && currentMsgs[i + 1]?.role === 'assistant') {
-            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i + 1].content })
-          }
-        }
-        const res = await developerChat(token, projectId, { prompt: text, history: hist })
-        const aiMessage = {
-          id: `dev-${Date.now()}`,
-          role: 'assistant',
-          content: res?.content || res?.data?.content || 'No response received.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-        addMessage(aiMessage)
-
-        // Sync any artifact updates
-        const updatedArtifacts = res?.updatedArtifacts || res?.data?.updatedArtifacts
-        if (Array.isArray(updatedArtifacts) && updatedArtifacts.length > 0) {
-          setArtifacts(prev => prev.map(a => {
-            const u = updatedArtifacts.find(u => u.file_path === a.file_path)
-            return u ? { ...a, content: u.content } : a
-          }))
-          if (activeArtifact) {
-            const activeUpdate = updatedArtifacts.find(u => u.file_path === activeArtifact.file_path)
-            if (activeUpdate) setActiveArtifact(prev => ({ ...prev, content: activeUpdate.content }))
-          }
-        }
-        await syncStateToBackend({
-          ...project.wizard_state,
-          devChatHistory: [...(project.wizard_state.devChatHistory || []), { question: text, answer: aiMessage.content }]
-        })
-
-      } else {
-        // ── Continue interview conversation
-        const hist = []
-        const currentMsgs = useChatStore.getState().messages
-        let currentPrompt = currentMsgs[0]?.content || ''
-        for (let i = 1; i < currentMsgs.length - 1; i += 2) {
-          if (currentMsgs[i].role === 'assistant' && currentMsgs[i + 1]?.role === 'user') {
-            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i + 1].content })
-          }
-        }
-        hist.push({ question: currentMsgs[currentMsgs.length - 1]?.content || '', answer: text })
-
-        const res = await processConversation(token, ideaId, { history: hist })
-        const parsed = parseAIResponse(res)
-
-        if (parsed.is_complete) {
-          // Interview complete — show spec-ready panel
-          setSpecContent(parsed.refined_spec)
-          setShowSpecReady(true)
-          await syncStateToBackend({ ideaId, prompt: currentPrompt, history: hist, currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true })
-          handleGenerateArtifacts(ideaId)
-        } else {
-          const opts = Array.isArray(parsed.options) ? parsed.options : []
-          const qMsg = {
-            id: `q-${Date.now()}`,
-            role: 'assistant',
-            content: parsed.next_question || 'Any other details?',
-            options: opts,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-          addMessage(qMsg)
-          await syncStateToBackend({ ideaId, prompt: currentPrompt, history: hist, currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false })
-        }
-      }
-    } catch (err) {
-      // Don't show error for user-initiated cancellation
-      if (err?.name === 'AbortError' || controller.signal.aborted) {
-        return
-      }
-      console.error('Failed to process message:', err)
-      toast.error('Something went wrong. Try again.')
-      setLastFailedMessage(text)
-    } finally {
-      abortControllerRef.current = null
-      setIsProcessing(false)
-      if (inputRef.current) inputRef.current.focus()
-    }
-  }
-
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
   }
 
-  // Auto-grow textarea, clamped to max-h-[120px] so it never covers the chat
   const handleInput = (e) => {
     setInputValue(e.target.value)
     if (inputRef.current) {
       inputRef.current.style.height = 'auto'
-      // Clamp: 24px min, 120px max — keeps input from obscuring chat messages
       const clamped = Math.min(inputRef.current.scrollHeight, 120)
       inputRef.current.style.height = `${clamped}px`
     }
   }
 
-  // Determine chat state
   const hasMessages = messages.length > 0
-  const isInInterview = hasMessages && !project?.wizard_state?.isComplete && !showSpecReady
-  const isInDevChat = hasMessages && project?.wizard_state?.isComplete && !showSpecReady
 
   if (isPageLoading) {
     return (
       <div className="min-h-screen bg-canvas flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 rounded-lg ai-icon-gradient flex items-center justify-center ai-icon-thinking">
-            <Sparkles className="h-4 w-4 text-white" />
+          <div className="h-8 w-8 rounded-lg bg-ink flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-canvas" />
           </div>
           <span className="text-xs text-ink-muted font-mono">Loading workspace…</span>
         </div>
@@ -466,10 +162,8 @@ export function ProjectWorkspace() {
     )
   }
 
-  // ── render ────────────────────────────────────────────────────────────────────
   return (
     <div className="flex h-dvh w-full bg-background overflow-hidden text-foreground font-sans" data-lenis-prevent="true">
-      {/* ── Nav Sidebar ──────────────────────────────────────── */}
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -477,12 +171,9 @@ export function ProjectWorkspace() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
-      {/* ── Main area ────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-canvas relative">
-
         {/* Header */}
         <header className="flex h-12 items-center gap-3 border-b border-hairline/60 bg-canvas/95 backdrop-blur-sm px-4 shrink-0 z-10">
-          {/* Mobile menu */}
           <button
             type="button"
             className="md:hidden -ml-1 p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink rounded-md transition-colors cursor-pointer"
@@ -491,7 +182,6 @@ export function ProjectWorkspace() {
             <Menu className="h-4 w-4" />
           </button>
 
-          {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 flex-1 min-w-0 text-[13px]">
             <Link
               to="/dashboard"
@@ -504,7 +194,6 @@ export function ProjectWorkspace() {
             <span className="font-medium text-ink truncate">{project?.project_title || 'New Project'}</span>
           </div>
 
-          {/* Right meta */}
           <div className="flex items-center gap-3 shrink-0">
             {artifacts.length > 0 && (
               <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-ink-muted font-mono">
@@ -527,7 +216,7 @@ export function ProjectWorkspace() {
               }`}
               aria-label="Toggle context files"
             >
-              <FileCode2 className="h-3.5 w-3.5" />
+              <ArrowLeft className={`h-3.5 w-3.5 transition-transform duration-200 ${isArtifactsOpen ? 'rotate-180' : ''}`} />
               <span>Context</span>
               {artifacts.length > 0 && (
                 <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-ink text-canvas text-[10px] font-mono">
@@ -538,24 +227,18 @@ export function ProjectWorkspace() {
           </div>
         </header>
 
-        {/* ── Chat area ────────────────────────────────────────── */}
+        {/* Chat area */}
         <div className="flex-1 min-h-0 relative flex flex-col">
-
-          {/* ── UNIFIED CONVERSATION THREAD ── */}
-          {/* One MessageScrollerProvider for ALL states — no layout jumps */}
           <MessageScrollerProvider autoScroll={true} defaultScrollPosition="end">
             <MessageScroller className="h-full">
               <MessageScrollerViewport className="px-4 pt-6">
                 <MessageScrollerContent className="max-w-3xl mx-auto pb-44 w-full">
-
-                  {/* Empty state — overlaid inside the scroll area when no messages */}
                   {!hasMessages && (
                     <div className="min-h-[60vh] flex items-center justify-center">
                       <EmptyState onSuggestion={(s) => setInputValue(s)} />
                     </div>
                   )}
 
-                  {/* ── Message list ── */}
                   {messages.map((msg, i) => (
                     <motion.div
                       key={msg.id}
@@ -565,9 +248,7 @@ export function ProjectWorkspace() {
                       className="w-full"
                     >
                       <MessageScrollerItem messageId={msg.id} scrollAnchor={msg.role === 'user'} className="w-full">
-
                         {msg.role === 'user' ? (
-                          /* ── User message — right-aligned, font-normal (400) ── */
                           <div className="flex justify-end py-3">
                             <div className="max-w-[72%] text-right">
                               <p className="text-[15px] text-ink leading-[1.65] font-normal">
@@ -581,7 +262,6 @@ export function ProjectWorkspace() {
                             </div>
                           </div>
                         ) : (
-                          /* ── AI message — left-aligned with icon, font-light (300) ── */
                           <div className="flex items-start gap-3 py-4">
                             <div className="shrink-0 mt-0.5">
                               <AiIcon isAnimating={isProcessing && i === messages.length - 1} />
@@ -591,7 +271,6 @@ export function ProjectWorkspace() {
                                 {msg.content}
                               </p>
 
-                              {/* Option chips — only rendered if not yet answered */}
                               {msg.options?.length > 0 && (
                                 <motion.div
                                   initial="hidden"
@@ -632,7 +311,6 @@ export function ProjectWorkspace() {
                           </div>
                         )}
 
-                        {/* Divider between messages (not after the last one) */}
                         {i < messages.length - 1 && (
                           <hr className="border-hairline/60" />
                         )}
@@ -640,7 +318,6 @@ export function ProjectWorkspace() {
                     </motion.div>
                   ))}
 
-                  {/* AI thinking indicator */}
                   {isProcessing && (
                     <motion.div
                       initial={{ opacity: 0 }}
@@ -654,7 +331,6 @@ export function ProjectWorkspace() {
                     </motion.div>
                   )}
 
-                  {/* Artifact generation progress (inside chat thread) */}
                   {isGeneratingArtifacts && !isProcessing && (
                     <motion.div
                       initial={{ opacity: 0, y: 6 }}
@@ -667,14 +343,12 @@ export function ProjectWorkspace() {
                       </div>
                     </motion.div>
                   )}
-
                 </MessageScrollerContent>
               </MessageScrollerViewport>
               <MessageScrollerButton />
             </MessageScroller>
           </MessageScrollerProvider>
 
-          {/* ── Spec-ready panel — overlays the chat area ── */}
           <AnimatePresence>
             {showSpecReady && (
               <motion.div
@@ -693,12 +367,9 @@ export function ProjectWorkspace() {
             )}
           </AnimatePresence>
 
-          {/* ── Floating Input ────────────────────────────────── */}
-          {/* Hidden behind the spec-ready panel when it's showing */}
+          {/* Floating Input */}
           <div className={`absolute bottom-0 left-0 right-0 pb-6 px-4 z-10 pointer-events-none transition-opacity duration-200 ${showSpecReady ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <div className="max-w-3xl mx-auto pointer-events-auto">
-
-              {/* Retry bar — shown after a failed send */}
               <AnimatePresence>
                 {lastFailedMessage && !isProcessing && (
                   <motion.div
@@ -711,7 +382,7 @@ export function ProjectWorkspace() {
                       Failed: "{lastFailedMessage}"
                     </span>
                     <button
-                      onClick={() => handleSend(lastFailedMessage, true)}
+                      onClick={() => handleSend(lastFailedMessage)}
                       className="flex items-center gap-1.5 text-[12px] font-medium text-ink hover:opacity-70 transition-opacity cursor-pointer shrink-0 ml-3"
                     >
                       <RotateCcw className="h-3 w-3" />
@@ -721,7 +392,6 @@ export function ProjectWorkspace() {
                 )}
               </AnimatePresence>
 
-              {/* Input pill */}
               <div className="floating-input flex items-end gap-2 px-4 py-3">
                 <textarea
                   ref={inputRef}
@@ -739,13 +409,12 @@ export function ProjectWorkspace() {
                   style={{ height: '24px' }}
                 />
 
-                {/* Stop / Send button */}
                 {isProcessing ? (
                   <button
                     onClick={handleCancel}
                     aria-label="Stop generation"
                     title="Stop"
-                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-80 transition-all flex items-center justify-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-80 transition-all flex items-center justify-center shrink-0 cursor-pointer"
                   >
                     <Square className="h-3 w-3 fill-current" />
                   </button>
@@ -754,14 +423,13 @@ export function ProjectWorkspace() {
                     onClick={() => handleSend(null)}
                     disabled={!inputValue.trim()}
                     aria-label="Send message"
-                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer"
                   >
                     <ArrowUp className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Hint text */}
               <p className="text-center mt-2 text-[11px] text-ink-muted/45 font-mono">
                 Zenix AI can make mistakes. Review output carefully.
               </p>
@@ -770,7 +438,6 @@ export function ProjectWorkspace() {
         </div>
       </main>
 
-      {/* ── Artifacts Sidebar ─────────────────────────────────── */}
       <ArtifactsPanel
         isOpen={isArtifactsOpen}
         onClose={() => setIsArtifactsOpen(false)}
@@ -799,8 +466,8 @@ export function ProjectWorkspace() {
             setIsSavingArtifact(true)
             try {
               await updateArtifact(token, activeArtifact._id, { content: newContent })
-              setArtifacts(prev =>
-                prev.map(a => (a._id === activeArtifact._id ? { ...a, content: newContent } : a))
+              setArtifacts((prev) =>
+                prev.map((a) => (a._id === activeArtifact._id ? { ...a, content: newContent } : a))
               )
             } catch {
               toast.error('Failed to save artifact')
