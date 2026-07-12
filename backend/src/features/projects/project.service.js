@@ -27,6 +27,14 @@ export const getProjects = async (userId) => {
   return await Project.find({ owner: userId }).sort({ createdAt: -1 });
 };
 
+export const getRecentProjects = async (userId) => {
+  return await Project.find({ owner: userId }).sort({ last_opened_at: -1, createdAt: -1 }).limit(12);
+};
+
+export const getFavoriteProjects = async (userId) => {
+  return await Project.find({ owner: userId, is_favorite: true }).sort({ last_opened_at: -1, createdAt: -1 });
+};
+
 export const getProjectById = async (userId, projectId) => {
   return await validateOwnership(Project, projectId, userId, 'Project');
 };

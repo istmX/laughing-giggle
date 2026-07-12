@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createProject, getProjects, deleteProject, updateProject } from '@/features/project/api/projects.api'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Folder, ArrowRight, Trash2, Pencil, Star } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/Modal'
-import { Link } from 'react-router-dom'
+import { ProjectCard } from '@/features/project/ui/ProjectCard'
 
 export function Overview() {
   const navigate = useNavigate()
@@ -88,78 +86,20 @@ export function Overview() {
     }
   }
 
+  const handleEditInit = (e, project) => {
+    e.preventDefault()
+    setEditTitle(project.project_title)
+    setProjectToEdit(project)
+  }
+
+  const handleDeleteInit = (e, project) => {
+    e.preventDefault()
+    setProjectToDelete(project)
+  }
+
   if (isLoading) {
     return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 rounded-full border-2 border-ink border-t-transparent animate-spin" /></div>
   }
-
-  const favorites = projects.filter(p => p.is_favorite).sort((a, b) => new Date(b.last_opened_at || b.createdAt) - new Date(a.last_opened_at || a.createdAt))
-  const recent = projects.filter(p => !p.is_favorite).sort((a, b) => new Date(b.last_opened_at || b.createdAt) - new Date(a.last_opened_at || a.createdAt))
-
-  const ProjectCard = ({ project, i }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: i * 0.05 }}
-      className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/50"
-    >
-      <Link 
-        to={`/projects/${project._id}`} 
-        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2" 
-        aria-label={`Open project ${project.project_title}`}
-      />
-      
-      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
-        <button 
-          onClick={(e) => toggleFavorite(e, project)} 
-          className={`p-2 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-amber-500 hover:bg-amber-500/10' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}
-          title={project.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
-          aria-label="Toggle favorite"
-        >
-          <Star className="h-4 w-4" fill={project.is_favorite ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={(e) => {
-            e.preventDefault()
-            setEditTitle(project.project_title)
-            setProjectToEdit(project)
-          }} 
-          className="p-2 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" 
-          title="Edit Title"
-          aria-label="Edit project title"
-        >
-          <Pencil className="h-4 w-4" />
-        </button>
-        <button 
-          onClick={(e) => {
-            e.preventDefault()
-            setProjectToDelete(project)
-          }} 
-          className="p-2 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" 
-          title="Delete Project"
-          aria-label="Delete project"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors relative z-10 pointer-events-none">
-        <Folder className="h-5 w-5" />
-      </div>
-
-      <h3 className="text-body-lg font-480 text-ink mb-1 pr-24 relative z-10 pointer-events-none">{project.project_title}</h3>
-      <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
-        {project.project_description || 'No description provided'}
-      </p>
-      
-      <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider relative z-10 pointer-events-none">
-        <span>{new Date(project.last_opened_at || project.createdAt).toLocaleDateString()}</span>
-        <span className="h-1 w-1 rounded-full bg-hairline" />
-        <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
-          Open <ArrowRight className="h-3 w-3" />
-        </span>
-      </div>
-    </motion.div>
-  )
 
   return (
     <div className="flex-1 flex flex-col h-full bg-surface-soft/10">
@@ -169,7 +109,7 @@ export function Overview() {
         ) : (
           <div className="w-full space-y-12">
             <div className="flex items-center justify-between">
-              <h1 className="text-display-sm font-340 tracking-display-sm text-ink">Projects</h1>
+              <h1 className="text-display-sm font-340 tracking-display-sm text-ink">All Projects</h1>
               <button
                 onClick={handleNewProject}
                 className="flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-540 text-canvas hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
@@ -178,26 +118,17 @@ export function Overview() {
               </button>
             </div>
             
-            {favorites.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-body-lg font-540 tracking-body-lg text-ink">Favorites</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {favorites.map((project, i) => <ProjectCard key={project._id} project={project} i={i} />)}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <h2 className="text-body-lg font-540 tracking-body-lg text-ink">Recent Projects</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recent.length === 0 ? (
-                  <div className="col-span-full py-8 text-center text-ink-muted text-body-sm">
-                    No recent projects. Favorites will appear above.
-                  </div>
-                ) : (
-                  recent.map((project, i) => <ProjectCard key={project._id} project={project} i={i} />)
-                )}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project, i) => (
+                <ProjectCard 
+                  key={project._id} 
+                  project={project} 
+                  index={i} 
+                  onToggleFavorite={toggleFavorite}
+                  onEdit={handleEditInit}
+                  onDelete={handleDeleteInit}
+                />
+              ))}
             </div>
           </div>
         )}

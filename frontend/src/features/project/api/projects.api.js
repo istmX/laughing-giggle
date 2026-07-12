@@ -61,6 +61,20 @@ export const getProjects = async (token) => {
   })
 }
 
+export const getRecentProjects = async (token) => {
+  return authFetch(`/projects/recent`, {
+    method: 'GET',
+    token,
+  })
+}
+
+export const getFavoriteProjects = async (token) => {
+  return authFetch(`/projects/favorites`, {
+    method: 'GET',
+    token,
+  })
+}
+
 export const getProject = async (token, projectId) => {
   return authFetch(`/projects/${projectId}`, {
     method: 'GET',
