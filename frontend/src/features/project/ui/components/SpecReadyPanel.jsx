@@ -12,21 +12,21 @@ export function SpecReadyPanel({ specContent, onContinue, artifactCount = 0 }) {
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="flex-1 flex flex-col items-center justify-center px-6 pb-36 w-full"
     >
       <div className="w-full max-w-2xl">
-        {/* Success indicator */}
+        {/* Success indicator with Block Mint background section styling */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.35 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 28 }}
           className="flex items-center gap-2 mb-6"
         >
-          <div className="h-5 w-5 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+          <div className="h-5 w-5 rounded-full bg-emerald-100 flex items-center justify-center">
+            <CheckCircle2 className="h-3 w-3 text-emerald-800" />
           </div>
-          <span className="text-[12px] font-medium text-emerald-700">Spec ready</span>
+          <span className="text-[12px] font-medium text-emerald-800">Spec ready</span>
           {artifactCount > 0 && (
             <>
               <span className="text-hairline">·</span>
@@ -35,15 +35,15 @@ export function SpecReadyPanel({ specContent, onContinue, artifactCount = 0 }) {
           )}
         </motion.div>
 
-        {/* Spec content card */}
+        {/* Spec content card — Styled with figma block-mint background and ink border */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="rounded-xl border border-hairline bg-canvas shadow-sm mb-6 overflow-hidden"
+          transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.08 }}
+          className="rounded-[24px] border border-ink/10 bg-surface-soft shadow-sm mb-6 overflow-hidden"
         >
           {/* Card header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-hairline/60 bg-surface-soft/50">
+          <div className="flex items-center justify-between px-6 py-3.5 border-b border-hairline/60 bg-canvas/40">
             <div className="flex items-center gap-2">
               <FileText className="h-3.5 w-3.5 text-ink-muted" />
               <span className="text-[12px] font-[480] text-ink-muted">Project Specification</span>
@@ -51,7 +51,7 @@ export function SpecReadyPanel({ specContent, onContinue, artifactCount = 0 }) {
           </div>
 
           {/* Spec body */}
-          <div className="px-5 py-5 max-h-[340px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="px-6 py-5 max-h-[340px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <pre className="whitespace-pre-wrap text-[13.5px] leading-[1.7] font-sans text-ink font-light">
               {typeof specContent === 'object'
                 ? JSON.stringify(specContent, null, 2)
@@ -64,20 +64,21 @@ export function SpecReadyPanel({ specContent, onContinue, artifactCount = 0 }) {
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.2 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.15 }}
           className="flex flex-col items-center gap-3"
         >
           <p className="text-[13px] text-ink-muted text-center max-w-sm leading-relaxed">
             Your project context has been generated. You can now ask Zenix to help build, refine, and expand it.
           </p>
-          <button
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             onClick={onContinue}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink text-canvas text-[13px] font-medium hover:opacity-85 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-ink text-canvas text-[13px] font-medium hover:opacity-85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 shadow-sm cursor-pointer"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Open workspace
             <ArrowRight className="h-3.5 w-3.5" />
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     </motion.div>

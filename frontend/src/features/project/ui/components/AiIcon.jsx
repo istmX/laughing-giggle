@@ -19,11 +19,11 @@ export function AiIcon({ isAnimating = false }) {
 
   return (
     <motion.div
-      className="h-6 w-6 rounded-[6px] shrink-0 flex items-center justify-center bg-gradient-to-br from-violet-500 to-indigo-500 shadow-sm"
+      className="h-6 w-6 rounded-[6px] shrink-0 flex items-center justify-center bg-ink shadow-sm"
       animate={animateProps}
       transition={transitionProps}
     >
-      <Sparkles className="h-3 w-3 text-white" />
+      <Sparkles className="h-3 w-3 text-canvas" />
     </motion.div>
   )
 }
