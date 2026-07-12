@@ -1,5 +1,79 @@
 ## Completed
 
+- **Impeccable Chat Section Overhauls (Shape, Polish, Harden, Typeset)**:
+  - **Unified Chat Layout**: Standardized on a single conversation scroll thread. Removed mode switching layout jumps; the initial empty state and follow-up questions are inline messages.
+  - **Dedicated Spec-Ready Interstitial**: Replaced in-thread cream card specs with a full-panel overlay containing an optimized scrollable preview, progress details, and a clear action button ("Open workspace").
+  - **Archived Options Cleanup**: Added option cleaning to strip actionable option chips from previous messages in store and hydration state when new inputs are submitted.
+  - **Request Cancellation (Harden)**: Equipped the floating input with cancellation (AbortController) and turned the action button into a stop button (Square icon) during processing.
+  - **Failed Message Recovery**: Stored failed inputs on error to display a retry bar beneath the text area.
+  - **Typeset & Layout Limits**: Swapped layout properties and custom weights to standard `font-light` (300) and `font-normal` (400) options, raised timestamp text size to `text-[12px]`, and capped text area expansion to `max-h-[120px]` so inputs never obscure the conversation thread.
+
+- **Major UI Polish Overhaul (⭐⭐⭐⭐⭐ Priority items 1–8 implemented)**:
+  - **Removed dashboard feeling from ProjectWorkspace**: Conversation now occupies almost the full screen. The Artifacts panel slides in from the right as a separate layer — it no longer competes visually with the chat.
+  - **Claude-style chat redesign**: No more chat bubbles. User messages are right-aligned floating plain text. AI messages are left-aligned with a small 24×24 rounded-square icon (violet→indigo gradient with a Sparkles icon inside). Generous `space-y-1` + `py-3/4` padding between messages. Thin `border-hairline/30` dividers between each message. Max-width `max-w-3xl mx-auto` for better readability.
+  - **Animated AI icon**: A `<AiIcon>` component that gently rocks (`rotate: [0, 10, -10, 0]`) when the AI is generating. Uses a `from-violet-500 to-indigo-500` gradient instead of plain black circle.
+  - **Floating pill input bar**: The input bar is now a `floating-input` absolutely positioned at the bottom of the chat area. Style: `rounded-[28px] bg-canvas border border-hairline` with `box-shadow: 0 4px 24px`. Focus state deepens the shadow and adds a subtle ring. Button is a black circle with `ArrowUp` icon.
+  - **Artifact panel completely redesigned**: Replaced the buggy `<select>` dropdown with a proper file explorer. Each artifact is a `artifact-card` (file icon + name + status badge). Status badges: "Ready" = soft emerald (`bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]`), "Generating" = pulsing amber. The editor below morphs in with `opacity: 0→1, y: 6→0` animation when a file is clicked. Panel header shows "Context Files" + file count badge.
+  - **Beautiful empty state**: `<EmptyState>` component with a gradient violet→indigo rounded-square icon, "Start describing your idea." headline, descriptive subtitle, and 2×2 suggestion card grid with hover lift effect (`whileHover: { y: -2 }`).
+  - **Generation progress checklist**: `<GenerationProgress>` replaces the plain spinner. Shows staggered animated checklist items — done files get a green `<CheckCircle2>` + fade to 40% opacity, the active file gets a spinning loader + animated `…`, pending items show empty circles.
+  - **AI Thinking dots**: `<AiThinking>` component — three dots animating `opacity: 1 → 0.3 → 1` with staggered delays (0ms, 200ms, 400ms). Replaces the blinking cursor block.
+  - **Richer project header**: Now shows `← Projects / Title | [file count] · [time ago]` on the right side. Context toggle button shows artifact count badge.
+  - **Semantic color accents**: 95% monochrome. Accent colors only on status badges. Violet/indigo on AI icon. Emerald for "Ready", amber for "Generating".
+  - **Compact sidebar redesign**: Width reduced from 280px → 220px (collapsed: 56px). Section labels are `text-[10px] font-mono tracking-[0.12em] uppercase text-ink-muted/60`. Nav items use `rounded-lg` active state with `bg-surface-soft border border-hairline/80` (NOT full black). Spring animation `stiffness: 300 damping: 25`. Section label fade-in with x-offset on expand.
+  - **Dashboard project cards redesign**: Cards use `rounded-xl border border-hairline bg-canvas hover:border-ink/20 hover:shadow-md`. Colored file icon square (32×32 rounded-md). Title in `font-[540]`, metadata in `font-mono text-[12px]`. Arrow appears on hover with `opacity-0 group-hover:opacity-100`.
+  - **Dashboard empty state**: Gradient violet→indigo orb with Sparkles icon instead of generic folder. Better copy. Generous spacing.
+  - **New sub-components created**:
+    - `frontend/src/features/project/ui/components/AiIcon.jsx` — animated gradient AI icon
+    - `frontend/src/features/project/ui/components/AiThinking.jsx` — three staggered animated dots
+    - `frontend/src/features/project/ui/components/EmptyState.jsx` — beautiful workspace empty state
+    - `frontend/src/features/project/ui/components/GenerationProgress.jsx` — animated generation checklist
+  - **index.css workspace CSS layer**: Added `.notion-markdown` (Notion-like markdown with H1/H2/H3 hierarchy, colored code blocks, blockquote borders), `.floating-input`, `.artifact-card`, `.artifact-status-ready`, `.artifact-status-generating`, `.ai-icon-gradient`, `.ai-icon-thinking`, `.sidebar-nav-item`, `.chat-user-message`, `.chat-ai-message`, `.chat-divider`.
+
+
+
+- **Artifact Generation Overhaul (Sequential Streaming)**:
+  - Re-architected the artifact generation flow to solve LLM output token limits (which previously caused the AI to lazily mash all 11 files into a single summarized file).
+  - The backend now instantly generates "Pending generation..." placeholders in the database for all 11 required files (AGENTS.md, TASKS.md, and all 9 context files) when the wizard completes.
+  - Built a new single-artifact generation API endpoint (`POST /api/ai/artifacts/:projectId/generate`) that executes a highly-focused AI prompt providing ONLY the specific reference template for that exact file, guaranteeing maximum depth and quality.
+  - Wired the React frontend (`ProjectWorkspace.jsx`) to sequentially loop through pending artifacts, ping the new backend endpoint, and live-update the UI state, allowing the user to watch the files populate one by one.
+- **AI Orchestrator Resilience**:
+  - Fixed a cascading timeout failure where fallback LLMs (Mistral, OpenRouter, Gemini) were being killed prematurely because they generate text slower than Groq (Llama 3.3).
+  - Increased the hardcoded `TIMEOUT_MS` limit in `ai.orchestrator.js` from 25 seconds to 180 seconds to allow slower providers enough time to stream massive architecture documents.
+- **Artifacts UI & File Switcher Polish**:
+  - Replaced the buggy native `<select>` dropdown in the Artifacts sidebar with a custom, framer-motion animated menu to enforce strict `DESIGN.md` design tokens (`bg-canvas`, `text-ink`) and fix OS-level white-on-white text issues.
+  - Fixed a missing property bug where artifacts rendered as empty strings in the dropdown by correctly mapping `activeArtifact.path` to the database schema's `activeArtifact.file_path`.
+- **AI Agent Identity & Behavior Hardening**:
+  - Injected strict AI identity rules into both the Developer and PM Wizard agents to ensure they unconditionally identify as "Zenix" created by developer "Istm" (and never leak upstream LLM provider names).
+  - Fixed an infinite-loop bug in the PM Wizard (`conversational.prompt.js`) where the AI would aggressively repeat questions if the user typed a custom answer; the AI is now strictly instructed to unconditionally accept custom text and "Let Zenix decide" selections.
+  - Upgraded the `artifacts.service.js` generation prompt to violently enforce the inclusion of strong product philosophies, hard UX rules, and strict operational directives, transforming the output from a generic spec sheet into a true "Agent Instruction Manual".
+- **Real-Time Artifact Synchronization**:
+  - Re-architected the Developer Chat (`developer.service.js`) to output a structured JSON payload combining conversational messages and an `updates` array for real-time file editing.
+  - Fixed missing file updates by explicitly instructing the Developer Agent to always prepend the `context/` directory path to architecture files when pushing edits.
+  - Wired the React frontend (`ProjectWorkspace.jsx`) to seamlessly intercept these real-time JSON payloads and instantly sync the live artifact edits into the text editor UI without a page reload.
+- **Data Integrity**:
+  - Updated the project cascade deletion transaction in `project.service.js` to automatically clean up all associated `Artifacts` records alongside `Ideas`, `Briefs`, and `AIGenerations`, ensuring zero orphaned files remain in the database when a project is wiped.
+- **Developer Chat and Artifacts UI**:
+  - Re-architected project flow to clearly separate the AI specification wizard (`NewProjectPage.jsx`) from the active developer workspace (`ProjectWorkspace.jsx`).
+  - Added Zustand store (`useChatStore`) for managing real-time chat messages inside the developer workspace.
+  - Implemented persistence for developer chat history by saving conversation turns to `wizard_state.devChatHistory` in the database.
+  - Overhauled AI artifact generation logic in `artifacts.service.js` to dynamically scan the backend `data/context` directory and strictly require the AI to generate the full suite of context files (AGENTS.md, all context files, and TASKS.md) directly into the UI.
+  - Improved AI artifact generation prompt to strictly enforce the output format based on project rules (e.g. `Agents.md`) rather than outputting generic task boards.
+  - Implemented a draggable resize handle for the Artifacts sidebar, allowing users to dynamically adjust the width between 320px and 800px on desktop screens.
+  - Upgraded the Artifacts text editor UI with elevated `bg-surface` styling, improved padding, subtle drop-shadows, and refined focus states for a premium code editor feel.
+  - Implemented automatic redirection from the wizard to the developer chat once the brief is fully generated.
+  - Updated conversational prompt logic to enforce asking at least 1-2 clarifying questions even for highly detailed prompts, preventing premature completion.
+  - Built an interactive Artifacts sidebar inside `ProjectWorkspace.jsx` that automatically calls the backend generation endpoint, displays a shimmering loading state, and renders the generated files in a scrollable tab list.
+  - Made artifacts editable in real-time with a debounced auto-save directly to the database.
+  - Fully wired the "Download ZIP" button to export all generated architecture files directly to the user's browser.
+  - Expanded the chat workspace's max width (`max-w-5xl`) for a better full-screen coding experience.
+- **Dashboard & UI Modernization (Today's Updates)**:
+  - [x] Refactored `DashboardShell` to use feature-based routing with nested `<Outlet>` navigation.
+  - [x] Created `features/recent` and `features/favorites` directories with isolated API fetchers and UI components.
+  - [x] Replaced mock data on the dashboard with live API calls.
+  - [x] Implemented a cinematic full-page transition overlay with `AnimatePresence`.
+  - [x] Overlay utilizes a perfectly centered (50% 50%) `clip-path` Iris Wipe reveal on every route change, powered by GSAP.
+  - [x] Integrated GSAP's `SplitText` for the page transition text, animating individual characters from random offsets, rotations, and blurs into a cohesive title.
+  - [x] Bound overlay background colors to `bg-ink` and text to `text-canvas` for maximum contrast and premium feel.
 - **Project Cascade Deletion**:
   - Configured `deleteProject` in the backend project service to automatically clean up all associated database resources (linked `Ideas`, `Briefs`, `Tasks`, `Contexts`, and `AIGenerations` tables) in a single request transaction when deleting a project.
 - **Developer Chat Sandbox and Message Scroller**:
@@ -7,7 +81,11 @@
   - Set up a sandbox testing interface (`ProjectChatPage.jsx`) pre-filled with the AI-refined project specification, simulating live streaming responses when users send messages.
   - Configured `NewProjectPage.jsx` to completely replace the static "Brief Already Completed" placeholder screens and directly mount the interactive `ProjectChatPage` component once the wizard concludes.
   - Overhauled `QuestionCard.jsx` to support multi-select suggested options, avoid duplicate "Let Zenix decide" buttons, and add a quick-skip action button for filler wrap-up questions.
-  - Refined backend prompt logic (`conversational.prompt.js`) to ensure specific design overrides (like choosing "Let Zenix decide" for typography/colors) do not trigger premature global wizard termination.
+  - Refined backend prompt logic (`conversational.prompt.js`) with dynamic history-checking to strictly enforce the "Let Zenix decide" instruction. The AI is now explicitly fed a list of delegated topics and banned from looping over them.
+  - Removed styling framework questions from the AI rules entirely, assuming Tailwind CSS (or NativeWind) by default to simplify the user flow.
+  - Fixed an AI Orchestrator bug where `generateArtifacts` was missing from `getStrategy`, causing silent 500 errors.
+  - Reduced the number of concurrently generated architecture files in `artifacts.service.js` from 11 to 4 (`AGENTS.md`, `project-overview.md`, `ui-tokens.md`, `TASKS.md`) to prevent the LLM from exceeding output token limits and crashing the JSON parser.
+  - Disabled the chat input area in `ProjectWorkspace.jsx` when the project is marked complete, displaying a polished "Project Specification Finalized" notice instead to prevent user confusion.
 - **Context Feature Folder Structure**:
   - Initialized `frontend/src/features/context/` directory with standardized subfolders (`api`, `hooks`, `store`, `ui`) and base files matching the project's architectural standards.
 - **Project Context Asset Sync**:
@@ -162,6 +240,8 @@ The home page now includes:
 - `$impeccable polish`: Performed a final quality pass to ensure components are clean, spacing is mathematically consistent, mobile/desktop states align, and there are no stray console logs or layout regressions.
 - **Dashboard Empty State Polish**: Applied Figma design system (`DESIGN.md`) colors and typography, leaving only a magenta folder icon and CTA button with spring physics (`Animations.md`) for a minimalist, delightful experience.
 - **Logout API Flow**: Wired up the `POST /auth/logout` API, documented it in `apidocs.md`, securely blacklisted the JWT token on the backend, and properly cleared `sessionStorage` and the `useAuth` store on the frontend.
+- **Dashboard Background Polish**: Added a subtle radial-gradient dot pattern (`.dashboard-bg`) that dynamically adapts to all themes (Light, Dark, Midnight, Emerald) using `color-mix`.
+- **Favorites & Recent Projects**: Added `is_favorite` and `last_opened_at` to the `Project` schema. Refactored `Overview.jsx` to group projects into "Favorites" and "Recent" sections, sorted by last opened date. Implemented an interactive favorite toggle.
 
 ---
 
@@ -211,3 +291,20 @@ The home page now includes:
   - Updated the Dummy "Brief Complete" screen to display the highly-detailed AI-generated Refined Project Specification instead of raw answers.
   - Added robust caching prevention (`cache: 'no-cache'`) to `authFetch` to fix a stale state bug where users would mistakenly see the prompt input again after navigating back to a completed project.
   - Enforced a strict "one idea per project" lock in the UI by fetching the project state on mount and checking if the idea has already been submitted and skipping the prompt wizard entirely if so.
+- **Dashboard Polish & Flexbox Layout Stabilization**:
+  - Permanently fixed the CSS `-webkit-box` line-clamp bug across all project cards (`ProjectCard`, `ProjectRow`, `FeaturedProject`) by correctly combining `min-w-0`, block-level `w-full` wrappers, and `truncate`.
+  - Stopped text from aggressively breaking into 1 character per line in narrow flex columns.
+  - Re-anchored `line-clamp-2` inside a block-level wrapper so it calculates width correctly inside flex containers, preventing description truncation at 3-4 letters.
+  - Fixed the Editor workspace header so long project titles gracefully truncate with ellipses instead of blowing out the top navigation layout.
+
+- **Animated Flow Polish (Framer Motion)**:
+  - Added origin-aware FLIP expansion animation for the "New Project" modal from its trigger button using `layoutId`.
+  - Added a staggered document reveal in the Artifacts sidebar during generation.
+  - Injected an inline background loading message in the chat workspace while Zenix maps architecture.
+  - Added upward-fading animations to the Interview AI questions.
+  - Added staggered deal-in animations for project cards when navigating back to the dashboard.
+- **Framer Motion UX Polish (Dashboard & Chat)**:
+  - Fixed a critical UX blocking bug in `ProjectWorkspace.jsx` where the entire page load was halted while waiting for background AI artifacts to generate. Re-architected this to resolve instantly and generate artifacts asynchronously, unblocking the Chat UI instantly.
+  - Fixed the context-loss bug when users submitted new projects via the Dashboard modal by passing a `wizard_state: { autoStart: true, prompt }` payload, which `NewProjectPage` now intercepts to seamlessly bypass the redundant step 0 text box and begin AI processing automatically.
+  - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
+

@@ -48,8 +48,7 @@ export function NewProjectPage() {
               setRefinedSpec(ws.refinedSpec || '')
               
               if (ws.isComplete) {
-                setCompletedProjectData(project)
-                setStep(999)
+                navigate(`/projects/${projectId}/chat`, { replace: true })
               } else if (ws.currentQuestion) {
                 // Resume to the question they left off on
                 setStep((ws.history?.length || 0) + 1)
@@ -58,6 +57,12 @@ export function NewProjectPage() {
                 // Re-request first question silently
                 setStep('recovering')
               }
+            }
+          } else if (project.wizard_state && project.wizard_state.autoStart && project.wizard_state.prompt) {
+            if (isMounted) {
+              const ws = { ...project.wizard_state, autoStart: false };
+              await updateProject(token, projectId, { wizard_state: ws });
+              handlePromptSubmit(project.wizard_state.prompt);
             }
           }
           // If no wizard_state.ideaId, stay at step 0 (prompt input)
@@ -93,7 +98,7 @@ export function NewProjectPage() {
           const newState = { ideaId, prompt, history: [], currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true }
           await syncStateToBackend(newState)
           setRefinedSpec(parsed.refined_spec)
-          setStep(999)
+          navigate(`/projects/${projectId}/chat`, { replace: true })
         } else {
           const questionObj = {
             key: 'q1',
@@ -157,7 +162,7 @@ export function NewProjectPage() {
     }
   }
 
-  const handlePromptSubmit = async (val) => {
+  async function handlePromptSubmit(val) {
     setPrompt(val)
     setIsAnalyzing(true)
     
@@ -227,13 +232,8 @@ export function NewProjectPage() {
         
         setHistory(newHistory)
         setRefinedSpec(finalSpec)
-        setCompletedProjectData(prev => ({
-          ...prev,
-          project_description: prompt,
-          wizard_state: newState
-        }))
-        setStep(999)
         toast.success('Project specification refined successfully!')
+        navigate(`/projects/${projectId}/chat`, { replace: true })
       } else {
         // Next question
         const nextQ = {
@@ -261,7 +261,7 @@ export function NewProjectPage() {
   return (
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 selection:bg-ink selection:text-canvas overflow-hidden">
       <div className="absolute top-6 left-6">
-        <Link to="/dashboard" className="inline-flex items-center gap-2 text-ink-muted hover:text-ink text-body-sm tracking-body-sm font-330 transition-colors">
+        <Link to="/dashboard" className="inline-flex items-center gap-2 text-ink-muted hover:text-ink text-body-sm tracking-body-sm font-normal transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Dashboard
         </Link>
@@ -278,7 +278,7 @@ export function NewProjectPage() {
               className="flex flex-col items-center justify-center min-h-[50vh]"
             >
               <TextShimmerWave 
-                className="text-body-lg font-540 [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
+                className="text-body-lg font-semibold [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
                 duration={1.2}
                 zDistance={2}
                 yDistance={-2}
@@ -306,7 +306,7 @@ export function NewProjectPage() {
             >
               <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
                 <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
-                <h2 className="text-[32px] font-340 tracking-tight text-ink mb-4">Brief Already Completed</h2>
+                <h2 className="text-[32px] font-semibold tracking-tight text-ink mb-4">Brief Already Completed</h2>
                 <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
                   You have already generated the idea and context for this project.
                 </p>
@@ -333,7 +333,7 @@ export function NewProjectPage() {
                  <div className="mt-8 flex justify-center gap-4">
                    <Link
                      to={`/projects/${projectId}/chat`}
-                     className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-340 transition-opacity flex items-center gap-2"
+                     className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-medium transition-opacity flex items-center gap-2"
                    >
                      <Sparkles className="h-4 w-4" />
                      Open Developer Chat Sandbox
@@ -351,16 +351,16 @@ export function NewProjectPage() {
             >
               {currentQuestion ? (
                 <QuestionCard 
-                  key={currentQuestion?.key || step}
-                  currentStep={step}
-                  question={currentQuestion}
-                  onSubmit={handleQuestionSubmit}
-                  isLoading={isRefining}
+                   key={currentQuestion?.key || step}
+                   currentStep={step}
+                   question={currentQuestion}
+                   onSubmit={handleQuestionSubmit}
+                   isLoading={isRefining}
                 />
               ) : (
                 <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
                   <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
-                  <h2 className="text-[32px] font-340 tracking-tight text-ink mb-4">Brief Complete</h2>
+                  <h2 className="text-[32px] font-semibold tracking-tight text-ink mb-4">Brief Complete</h2>
                   <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
                     We've gathered all the necessary context. Your powerful prompt is ready.
                   </p>
@@ -378,7 +378,7 @@ export function NewProjectPage() {
                    <div className="mt-8 flex justify-center gap-4">
                      <Link
                        to={`/projects/${projectId}/chat`}
-                       className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-340 transition-opacity flex items-center gap-2"
+                       className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-medium transition-opacity flex items-center gap-2"
                      >
                        <Sparkles className="h-4 w-4" />
                        Open Developer Chat Sandbox

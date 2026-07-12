@@ -27,6 +27,34 @@ export const getProjects = async (req, res, next) => {
   }
 };
 
+export const getRecentProjects = async (req, res, next) => {
+  try {
+    const projects = await projectService.getRecentProjects(req.user._id);
+
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getFavoriteProjects = async (req, res, next) => {
+  try {
+    const projects = await projectService.getFavoriteProjects(req.user._id);
+
+    res.status(200).json({
+      success: true,
+      count: projects.length,
+      data: projects
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getProjectById = async (req, res, next) => {
   try {
     const project = await projectService.getProjectById(req.user._id, req.params.id);

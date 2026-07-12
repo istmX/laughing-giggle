@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ArrowRight, Sparkles, PenLine, ChevronLeft } from 'lucide-react'
 import { ProgressIndicator } from './ProgressIndicator'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
+import { motion } from 'framer-motion'
 
 /**
  * QuestionCard — works with conversational AI questions.
@@ -115,20 +116,25 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
       <button
         onClick={() => onSubmit("Let Zenix decide for all remaining")}
         disabled={isLoading}
-        className="w-full text-left rounded-xl border border-dashed border-brand-indigo/30 bg-brand-indigo/[0.01] px-6 py-4 text-body-sm font-330 text-brand-indigo hover:text-brand-indigo hover:bg-brand-indigo/[0.03] hover:border-brand-indigo/50 transition-all flex items-center gap-3 group disabled:opacity-50 mt-3 animate-fade-in"
+        className="w-full text-left rounded-xl border border-dashed border-brand-indigo/30 bg-brand-indigo/[0.01] px-6 py-4 text-body-sm font-normal text-brand-indigo hover:text-brand-indigo hover:bg-brand-indigo/[0.03] hover:border-brand-indigo/50 transition-all flex items-center gap-3 group disabled:opacity-50 mt-3 animate-fade-in"
       >
         <Sparkles className="h-4 w-4 shrink-0 text-brand-indigo animate-pulse" />
-        <span className="flex-1 font-480">Let Zenix decide all remaining questions</span>
+        <span className="flex-1 font-medium">Let Zenix decide all remaining questions</span>
         <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
       </button>
     )
   }
 
   return (
-    <div className="w-full flex flex-col">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full flex flex-col"
+    >
       <div className="mb-8">
         <ProgressIndicator current={currentStep} total={totalSteps} />
-        <h2 className="text-[40px] leading-[1.1] font-340 tracking-tight text-ink mt-6 mb-4">
+        <h2 className="text-[40px] leading-[1.1] font-semibold tracking-tight text-ink mt-6 mb-4">
           {questionText}
         </h2>
         <p className="text-body text-ink-muted">
@@ -147,9 +153,9 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
                 key={idx}
                 onClick={() => handleSelectOption(opt)}
                 disabled={isLoading}
-                className={`w-full text-left rounded-xl border px-6 py-4 text-body-sm font-330 transition-all flex items-center justify-between group disabled:opacity-50 ${
+                className={`w-full text-left rounded-xl border px-6 py-4 text-body-sm font-normal transition-all flex items-center justify-between group disabled:opacity-50 ${
                   isSelected
-                    ? 'border-ink bg-ink/[0.03] ring-4 ring-ink/5 text-ink font-480'
+                    ? 'border-ink bg-ink/[0.03] ring-4 ring-ink/5 text-ink font-medium'
                     : 'border-hairline bg-canvas text-ink-muted hover:text-ink hover:border-ink/20 hover:bg-ink/[0.01]'
                 }`}
               >
@@ -166,9 +172,9 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
             <button
               onClick={() => handleSelectOption("Let Zenix decide")}
               disabled={isLoading}
-              className={`w-full text-left rounded-xl border px-6 py-4 text-body-sm font-330 transition-all flex items-center gap-3 group disabled:opacity-50 ${
+              className={`w-full text-left rounded-xl border px-6 py-4 text-body-sm font-normal transition-all flex items-center gap-3 group disabled:opacity-50 ${
                 selectedOption === "Let Zenix decide"
-                  ? 'border-ink bg-ink/[0.03] ring-4 ring-ink/5 text-ink font-480'
+                  ? 'border-ink bg-ink/[0.03] ring-4 ring-ink/5 text-ink font-medium'
                   : 'border-hairline bg-canvas text-ink-muted hover:text-ink hover:border-ink/20 hover:bg-ink/[0.01]'
               }`}
             >
@@ -182,10 +188,10 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
             <button
               onClick={() => handleSelectOption("I have no other details, please generate the final spec")}
               disabled={isLoading}
-              className="w-full text-left rounded-xl border border-dashed border-ink-muted/30 bg-canvas px-6 py-4 text-body-sm font-330 text-ink hover:text-ink hover:bg-ink/[0.02] hover:border-ink/50 transition-all flex items-center gap-3 group disabled:opacity-50"
+              className="w-full text-left rounded-xl border border-dashed border-ink-muted/30 bg-canvas px-6 py-4 text-body-sm font-normal text-ink hover:text-ink hover:bg-ink/[0.02] hover:border-ink/50 transition-all flex items-center gap-3 group disabled:opacity-50"
             >
               <ArrowRight className="h-4 w-4 shrink-0 opacity-70 text-ink" />
-              <span className="flex-1 font-480">Skip and generate final spec now</span>
+              <span className="flex-1 font-medium">Skip and generate final spec now</span>
               <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
             </button>
           )}
@@ -193,7 +199,7 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
           <button
             onClick={handleWriteOwn}
             disabled={isLoading}
-            className="w-full text-left rounded-xl border border-hairline border-dashed bg-canvas px-6 py-4 text-body-sm font-330 text-ink-muted hover:text-ink hover:border-ink/20 hover:bg-ink/[0.01] transition-all flex items-center gap-3 group disabled:opacity-50"
+            className="w-full text-left rounded-xl border border-hairline border-dashed bg-canvas px-6 py-4 text-body-sm font-normal text-ink-muted hover:text-ink hover:border-ink/20 hover:bg-ink/[0.01] transition-all flex items-center gap-3 group disabled:opacity-50"
           >
             <PenLine className="h-4 w-4 shrink-0 opacity-70" />
             <span className="flex-1">Write my own answer</span>
@@ -212,14 +218,14 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
             disabled={isLoading}
             placeholder="Type your answer..."
             rows={3}
-            className="w-full resize-none rounded-xl border border-hairline bg-canvas p-6 text-body-lg tracking-body-lg font-320 text-ink placeholder:text-ink-faint focus:border-ink/30 focus:outline-none focus:ring-4 focus:ring-ink/5 transition-all shadow-sm disabled:opacity-50"
+            className="w-full resize-none rounded-xl border border-hairline bg-canvas p-6 text-body-lg tracking-body-lg font-normal text-ink placeholder:text-ink-faint focus:border-ink/30 focus:outline-none focus:ring-4 focus:ring-ink/5 transition-all shadow-sm disabled:opacity-50"
           />
 
           {hasOptions && (
             <button
               onClick={handleBackToOptions}
               disabled={isLoading}
-              className="mt-3 inline-flex items-center gap-1.5 text-caption tracking-caption font-480 text-ink-muted hover:text-ink transition-colors"
+              className="mt-3 inline-flex items-center gap-1.5 text-caption tracking-caption font-medium text-ink-muted hover:text-ink transition-colors"
             >
               <ChevronLeft className="h-3 w-3" />
               Back to suggested options
@@ -234,11 +240,11 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
         <button
           onClick={handleSubmit}
           disabled={isSubmitDisabled}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[160px] text-button font-480 text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-6 py-3 min-w-[160px] text-button font-medium text-canvas hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed group"
         >
           {isLoading ? (
             <TextShimmerWave
-              className="text-button font-480 [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
+              className="text-button font-medium [--base-color:rgba(255,255,255,0.4)] [--base-gradient-color:#ffffff]"
               duration={1}
               spread={1}
               zDistance={1}
@@ -254,6 +260,6 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
           )}
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }

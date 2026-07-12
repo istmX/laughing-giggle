@@ -4,6 +4,7 @@ import Context from '../context/context.model.js';
 import Idea from '../ideas/idea.model.js';
 import Brief from '../brief/brief.model.js';
 import AIGeneration from '../ai/ai.model.js';
+import Artifact from '../artifacts/artifact.model.js';
 import { validateOwnership } from '../../utils/ownership.js';
 import AppError from '../../utils/AppError.js';
 import mongoose from 'mongoose';
@@ -26,6 +27,14 @@ export const getProjects = async (userId) => {
   return await Project.find({ owner: userId }).sort({ createdAt: -1 });
 };
 
+export const getRecentProjects = async (userId) => {
+  return await Project.find({ owner: userId }).sort({ last_opened_at: -1, createdAt: -1 }).limit(12);
+};
+
+export const getFavoriteProjects = async (userId) => {
+  return await Project.find({ owner: userId, is_favorite: true }).sort({ last_opened_at: -1, createdAt: -1 });
+};
+
 export const getProjectById = async (userId, projectId) => {
   return await validateOwnership(Project, projectId, userId, 'Project');
 };
@@ -37,6 +46,8 @@ export const updateProject = async (userId, projectId, updateData) => {
   if (updateData.project_description) project.project_description = updateData.project_description;
   if (updateData.project_status) project.project_status = updateData.project_status;
   if (updateData.wizard_state !== undefined) project.wizard_state = updateData.wizard_state;
+  if (updateData.is_favorite !== undefined) project.is_favorite = updateData.is_favorite;
+  if (updateData.last_opened_at) project.last_opened_at = updateData.last_opened_at;
 
   await project.save();
   return project;
@@ -60,6 +71,7 @@ export const deleteProject = async (userId, projectId) => {
     await Project.deleteOne({ _id: projectId, owner: userId }, opts);
     await Task.deleteMany({ project: projectId }, opts);
     await Context.deleteMany({ project: projectId }, opts);
+    await Artifact.deleteMany({ project: projectId }, opts);
     await AIGeneration.deleteMany({ project: projectId, owner: userId }, opts);
 
     if (ideaId) {

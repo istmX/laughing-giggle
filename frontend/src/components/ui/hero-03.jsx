@@ -10,6 +10,13 @@ const HERO_VIDEO_SRC =
 
 const TRUSTED_LOGOS = ['Razorpay', 'Waiturn', 'BuildShip', 'Relevance AI', 'Attio', 'Peerlist']
 
+const NAV_ITEMS = [
+  { label: 'Product', href: '#product' },
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Proof', href: '#proof' },
+  { label: 'Use cases', href: '#use-cases' },
+]
+
 const EDGE_CUBES = [
   'left-[-2.5rem] top-[13rem] h-24 w-24',
   'right-[-1.25rem] top-[16rem] h-20 w-20',
@@ -41,7 +48,10 @@ export function HeroSection03() {
   })
 
   return (
-    <section ref={sectionRef} className="relative border-b border-hairline bg-background text-foreground">
+    <section
+      ref={sectionRef}
+      className="relative border-b border-hairline bg-background text-foreground"
+    >
       <div className="landing-hero-ambient absolute inset-0" />
       <div className="landing-hero-grid absolute inset-0" />
       <div className="landing-hero-fade absolute inset-x-0 bottom-0 h-[28rem]" />
@@ -64,19 +74,30 @@ export function HeroSection03() {
           zenix<span className="align-top text-brand-indigo">*</span>
         </div>
         <nav className="hidden items-center gap-8 text-body-sm text-ink-muted lg:flex">
-          {['Product', 'How it works', 'Templates', 'Use cases', 'Pricing', 'Docs', 'Changelog'].map((item) => (
-            <a key={item} href="#product" className="transition-colors hover:text-foreground">
-              {item}
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.label}
+              data-hero-nav-item
+              href={item.href}
+              className="transition-colors hover:text-foreground"
+            >
+              {item.label}
             </a>
           ))}
         </nav>
         <div className="flex items-center gap-3">
-          <Button asChild variant="outline" className="h-11 rounded-full px-5 text-body-sm">
+          <Button
+            asChild
+            variant="outline"
+            className="h-11 rounded-full px-5 text-body-sm"
+            data-hero-nav-item
+          >
             <Link to="/login">Log in</Link>
           </Button>
           <Button
             asChild
             className="h-11 rounded-full bg-brand-indigo px-5 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
+            data-hero-nav-item
           >
             <Link to="/signup">
               Get started free
@@ -86,9 +107,15 @@ export function HeroSection03() {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-[1360px] px-6 pb-20 pt-8 md:px-8 md:pb-24 md:pt-10" id="product">
+      <main
+        className="relative z-10 mx-auto max-w-[1360px] px-6 pb-20 pt-8 md:px-8 md:pb-24 md:pt-10"
+        id="product"
+      >
         <div className="mx-auto max-w-[58rem] text-center">
-          <div ref={badgeRef} className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white px-4 py-2 text-body-sm text-ink-muted shadow-xs">
+          <div
+            ref={badgeRef}
+            className="inline-flex items-center gap-3 rounded-full border border-hairline bg-white px-4 py-2 text-body-sm text-ink-muted shadow-xs"
+          >
             <span className="inline-flex size-2 rounded-full bg-brand-indigo" />
             v1.0 is now live
             <span className="text-foreground">Explore what&apos;s new</span>
@@ -96,13 +123,17 @@ export function HeroSection03() {
           </div>
 
           <h1 className="mt-8 text-balance text-[clamp(3.5rem,8vw,6rem)] font-[540] leading-[0.94] tracking-[-0.03em]">
-            <span data-hero-line className="block">
+            <span data-hero-line data-hero-line-direction="left" className="block">
               Turn ideas into
             </span>
-            <span data-hero-line className="mt-2 block">
+            <span data-hero-line data-hero-line-direction="right" className="mt-2 block">
               implementation-ready
             </span>
-            <span data-hero-line className="mt-2 flex flex-wrap items-center justify-center gap-4">
+            <span
+              data-hero-line
+              data-hero-line-direction="left"
+              className="mt-2 flex flex-wrap items-center justify-center gap-4"
+            >
               <span className="text-brand-indigo">context</span>
               <span className="landing-inline-video relative inline-flex h-16 w-28 overflow-hidden rounded-md">
                 <video
@@ -126,10 +157,15 @@ export function HeroSection03() {
             className="mx-auto mt-8 max-w-[42rem] text-body-lg text-ink-muted"
             data-hero-copy
           >
-            Zenix understands your project, asks the right questions, and generates everything your AI agents need to build with clarity and consistency.
+            Zenix understands your project, asks the right questions, and generates everything your
+            AI agents need to build with clarity and consistency.
           </p>
 
-          <div ref={ctasRef} className="mt-8 flex flex-wrap items-center justify-center gap-4" data-hero-copy>
+          <div
+            ref={ctasRef}
+            className="mt-8 flex flex-wrap items-center justify-center gap-4"
+            data-hero-copy
+          >
             <Button
               asChild
               className="h-13 rounded-full bg-brand-indigo px-6 text-body-sm text-white shadow-sm hover:bg-brand-indigo/90"
@@ -139,16 +175,21 @@ export function HeroSection03() {
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button variant="outline" className="h-13 rounded-full px-6 text-body-sm">
-              See how it works
-              <span className="grid size-6 place-items-center rounded-full border border-hairline">
-                <Sparkles className="size-3.5" />
-              </span>
+            <Button asChild variant="outline" className="h-13 rounded-full px-6 text-body-sm">
+              <a href="#how-it-works">
+                See how it works
+                <span className="grid size-6 place-items-center rounded-full border border-hairline">
+                  <Sparkles className="size-3.5" />
+                </span>
+              </a>
             </Button>
           </div>
         </div>
 
-        <div ref={stageTrackRef} className="relative z-20 mx-auto mt-14 h-[clamp(22rem,48vw,42rem)] w-full max-w-[1170px] will-change-transform lg:mt-18">
+        <div
+          ref={stageTrackRef}
+          className="relative z-20 mx-auto mt-14 h-[clamp(22rem,48vw,42rem)] w-full max-w-[1170px] will-change-transform lg:mt-18"
+        >
           <div
             ref={stageShellRef}
             className="landing-video-shell relative h-full overflow-hidden rounded-xl"
@@ -168,7 +209,9 @@ export function HeroSection03() {
         </div>
 
         <div ref={trustRef} className="mx-auto mt-8 max-w-[1180px] text-center" data-hero-copy>
-          <p className="text-caption uppercase tracking-caption text-ink-soft">Trusted by developers and teams at</p>
+          <p className="text-caption uppercase tracking-caption text-ink-soft">
+            Trusted by developers and teams at
+          </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-body-sm text-ink-muted">
             {TRUSTED_LOGOS.map((logo) => (
               <span key={logo}>{logo}</span>

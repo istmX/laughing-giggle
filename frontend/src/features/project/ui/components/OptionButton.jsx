@@ -15,19 +15,19 @@ export function OptionButton({ label, description, badge, isSelected, onClick })
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <span className={`text-body-lg font-330 transition-colors ${
-            isSelected ? 'text-ink font-480' : 'text-ink-muted group-hover:text-ink'
+          <span className={`text-body-lg font-normal transition-colors ${
+            isSelected ? 'text-ink font-medium' : 'text-ink-muted group-hover:text-ink'
           }`}>
             {label}
           </span>
           {badge && (
-            <span className="rounded-full bg-surface-elevated border border-hairline px-2 py-0.5 text-[10px] font-540 uppercase tracking-wider text-ink-muted">
+            <span className="rounded-full bg-surface-elevated border border-hairline px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
               {badge}
             </span>
           )}
         </div>
         {description && (
-          <span className="text-body-sm text-ink-muted font-320">
+          <span className="text-body-sm text-ink-muted font-normal">
             {description}
           </span>
         )}
