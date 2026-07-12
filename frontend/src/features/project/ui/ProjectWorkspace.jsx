@@ -30,11 +30,12 @@ import { toast } from 'react-hot-toast'
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function getFileIcon(filePath = '') {
-  if (filePath.includes('agents')) return { bg: 'bg-violet-100', color: 'text-violet-600' }
-  if (filePath.includes('ui') || filePath.includes('tokens')) return { bg: 'bg-pink-100', color: 'text-pink-600' }
-  if (filePath.includes('task') || filePath.includes('plan')) return { bg: 'bg-amber-100', color: 'text-amber-700' }
-  if (filePath.includes('arch') || filePath.includes('overview')) return { bg: 'bg-blue-100', color: 'text-blue-600' }
-  return { bg: 'bg-emerald-100', color: 'text-emerald-600' }
+  // Pastel blocks based on Figma DESIGN.md schema
+  if (filePath.includes('agents')) return { bg: 'bg-[#c5b0f4]/25 border-[#c5b0f4]/45', color: 'text-[#6d28d9]' } // Lilac
+  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return { bg: 'bg-[#dceeb1]/35 border-[#dceeb1]/55', color: 'text-[#4d7c0f]' } // Lime
+  if (filePath.includes('task') || filePath.includes('plan')) return { bg: 'bg-[#f3c9b6]/25 border-[#f3c9b6]/45', color: 'text-[#c2410c]' } // Coral
+  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return { bg: 'bg-[#efd4d4]/30 border-[#efd4d4]/50', color: 'text-[#b91c1c]' } // Pink
+  return { bg: 'bg-[#c8e6cd]/30 border-[#c8e6cd]/50', color: 'text-[#15803d]' } // Mint (default)
 }
 
 function timeAgo(date) {
@@ -849,10 +850,11 @@ export function ProjectWorkspace() {
                         <motion.button
                           key={a._id}
                           whileHover={{ x: 1 }}
+                          whileTap={{ scale: 0.99 }}
                           onClick={() => setActiveArtifact(a)}
-                          className={`artifact-card w-full text-left cursor-pointer ${isActive ? 'active' : ''}`}
+                          className={`artifact-card w-full text-left cursor-pointer border ${bg} ${isActive ? 'active' : ''}`}
                         >
-                          <div className={`h-7 w-7 rounded-md ${bg} flex items-center justify-center shrink-0`}>
+                          <div className={`h-7 w-7 rounded-md bg-canvas/60 border border-hairline/20 flex items-center justify-center shrink-0`}>
                             <FileText className={`h-3.5 w-3.5 ${color}`} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -863,7 +865,9 @@ export function ProjectWorkspace() {
                               {a.file_path?.includes('/') ? a.file_path.split('/').slice(0, -1).join('/') : ''}
                             </p>
                           </div>
-                          <div className="shrink-0">
+                          <div className="shrink-0 flex items-center gap-2">
+                            {/* Color-matching status dot indicator */}
+                            <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'}`} />
                             {isReady
                               ? <span className="artifact-status-ready">Ready</span>
                               : <span className="artifact-status-generating">Generating</span>

@@ -1,5 +1,10 @@
 ## Completed
 
+- **Artifacts Explorer Enhancements**:
+  - **Color-Coded File System**: Redesigned the file explorer to assign soft pastel background colors and borders to cards based on path matching (lilac for agents, lime for UI/tokens, coral for tasks, pink for architecture/overviews).
+  - **Dynamic Status Indicator**: Embedded a color-matching status dot inside each card that pulses for Ready states and pings during active generation loops.
+  - **Backend DESIGN_SYSTEM Integration**: Copied [`DESIGN_SYSTEM.md`](file:///workspaces/laughing-giggle/frontend/DESIGN_SYSTEM.md) into the backend UI knowledge store ([`design_system.md`](file:///workspaces/laughing-giggle/backend/src/features/ai/data/ui/design_system.md)) and expanded backend prompt templates to digest layout, spacing, corner radius, and animation duration tokens.
+
 - **Impeccable Chat Section Overhauls (Shape, Polish, Harden, Typeset)**:
   - **Unified Chat Layout**: Standardized on a single conversation scroll thread. Removed mode switching layout jumps; the initial empty state and follow-up questions are inline messages.
   - **Dedicated Spec-Ready Interstitial**: Replaced in-thread cream card specs with a full-panel overlay containing an optimized scrollable preview, progress details, and a clear action button ("Open workspace").

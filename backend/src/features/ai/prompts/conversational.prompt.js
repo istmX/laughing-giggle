@@ -69,13 +69,13 @@ Do NOT ask another question.
     - **Zenix Tech Defaults**: If the user did not specify a tech stack (or chose "Let Zenix decide"):
       - For standard web apps: Use Next.js (Frontend), Node.js with Express (Backend), and Supabase or MongoDB (Database).
       - For mobile apps: Use React Native.
-    - **Zenix Design Defaults (Colors & Fonts)**: If the user chose "Let Zenix decide" (or left it unspecified), select a specific, high-end color combination (inspired by the 100 pairs in 'color_theory.md', matching the app's vibe—e.g., "Stormy morning" for professional tools, "Blue eclipse" for sleek dark mode SaaS, "Fresh peach" or "Blooming romance" for lifestyle/social, etc.) and specific, modern font pairings drawing from the 25 best sans serif fonts in 'sans_serif_fonts.md' (e.g. Inter for clean app interfaces, DM Sans for modern websites, Cabin for friendly humanist brands, or Be Vietnam Pro for dashboards). Never output placeholder colors like "generic purple" or abstract values.
+    - **Zenix Design Defaults (Colors & Fonts)**: If the user chose "Let Zenix decide" (or left it unspecified), select a specific, high-end color combination (inspired by the 100 pairs in 'color_theory.md', matching the app's vibe—e.g., "Stormy morning" for professional tools, "Blue eclipse" for sleek dark mode SaaS, "Fresh peach" or "Blooming romance" for lifestyle/social, etc.), specific, modern font pairings drawing from the 25 best sans serif fonts in 'sans_serif_fonts.md' (e.g. Inter for clean app interfaces, DM Sans for modern websites, Cabin for friendly humanist brands, or Be Vietnam Pro for dashboards), and follow the core design principles, layout tokens, radius rules, and accessibility guidelines defined in 'design_system.md'. Never output placeholder colors like "generic purple" or abstract values.
 - **Structure for AI Coding Agents**: Organize the specification in clear, structured markdown chapters tailored for an AI developer:
   - **Project Overview & Objectives**
-  - **Concrete Tech Stack & Architecture** (exactly one set of tools, plus a concrete design token structure layout based on the primitive, semantic, and component token rules from 'product_design.md')
+  - **Concrete Tech Stack & Architecture** (exactly one set of tools, plus a concrete design token structure layout based on the primitive, semantic, and component token rules from 'product_design.md' and layout tokens from 'design_system.md')
   - **Feature Specifications & Core Flows** (mapped as a cohesive user journey/story utilizing the principles of progressive disclosure and welcoming entry design from 'storytelling.md')
   - **API Endpoints & Integration Rules**
-  - **AI Agent Implementation Guidelines** (standards for building the codebase step-by-step, specifying precise UI transitions and state motion using standard names from 'animations.md' like staggers, morphs, pop-ins, layout animations, or shared element transitions)
+  - **AI Agent Implementation Guidelines** (standards for building the codebase step-by-step, specifying precise UI transitions and state motion using standard names from 'animations.md' and durations/rules from 'design_system.md' like staggers, morphs, pop-ins, layout animations, or shared element transitions)
 
 ### Output Structure
 Return a STRICT JSON object with EXACTLY this shape. Do not add any text outside the JSON:
