@@ -679,7 +679,7 @@
     @apply text-ink;
   }
   .gen-step-done {
-    @apply text-ink-muted/50 line-through-none;
+    @apply text-ink-muted/50;
   }
 
   /* ─── Sidebar compact nav pill ─── */
