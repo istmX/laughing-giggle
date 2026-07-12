@@ -8,7 +8,7 @@ export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDe
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/50"
+      className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/50 w-full min-w-0 overflow-hidden"
     >
       <Link 
         to={`/projects/${project._id}`} 
@@ -43,14 +43,16 @@ export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDe
         </button>
       </div>
 
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors relative z-10 pointer-events-none">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors relative z-10 pointer-events-none shrink-0">
         <Folder className="h-5 w-5" />
       </div>
 
-      <h3 className="text-body-lg font-480 text-ink mb-1 pr-24 relative z-10 pointer-events-none">{project.project_title}</h3>
-      <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
-        {project.project_description || 'No description provided'}
-      </p>
+      <h3 className="text-body-lg font-480 text-ink mb-1 pr-12 md:pr-24 relative z-10 pointer-events-none truncate w-full">{project.project_title}</h3>
+      <div className="w-full">
+        <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
+          {project.project_description || 'No description provided'}
+        </p>
+      </div>
       
       <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider relative z-10 pointer-events-none">
         <span>{new Date(project.last_opened_at || project.createdAt).toLocaleDateString()}</span>

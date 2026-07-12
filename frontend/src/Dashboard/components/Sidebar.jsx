@@ -69,7 +69,7 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath, handleAc
                 {isActive && (
                   <motion.div
                     layoutId={mobile ? "mobile-active-nav" : "desktop-active-nav"}
-                    className="absolute inset-0 rounded-md bg-surface-soft"
+                    className="absolute inset-0 rounded-full bg-ink"
                     initial={false}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
@@ -91,8 +91,8 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath, handleAc
             )
 
             const className = cn(
-              "relative flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium transition-colors w-full text-left",
-              isActive ? "text-ink" : "text-ink-muted hover:text-ink",
+              "relative flex items-center gap-3 rounded-full px-4 py-[10px] text-[16px] font-[480] transition-colors w-full text-left",
+              isActive ? "text-canvas" : "text-ink-muted hover:bg-surface-soft hover:text-ink",
               (!isSidebarOpen && !mobile) && "justify-center px-2"
             )
 

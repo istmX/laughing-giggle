@@ -487,12 +487,12 @@ export function ProjectWorkspace() {
             <Menu className="h-5 w-5" />
           </button>
           
-          <div className="font-medium text-ink text-sm flex items-center gap-2 flex-1">
-            <Link to="/dashboard" className="text-ink-muted hover:text-ink transition-colors">
+          <div className="font-medium text-ink text-sm flex items-center gap-2 flex-1 min-w-0">
+            <Link to="/dashboard" className="text-ink-muted hover:text-ink transition-colors shrink-0">
               Projects
             </Link>
-            <span className="text-ink-muted/50">/</span>
-            <span>{project?.project_title || 'New Project'}</span>
+            <span className="text-ink-muted/50 shrink-0">/</span>
+            <span className="truncate">{project?.project_title || 'New Project'}</span>
           </div>
           
           <button

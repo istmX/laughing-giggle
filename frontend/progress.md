@@ -260,3 +260,8 @@ The home page now includes:
   - Updated the Dummy "Brief Complete" screen to display the highly-detailed AI-generated Refined Project Specification instead of raw answers.
   - Added robust caching prevention (`cache: 'no-cache'`) to `authFetch` to fix a stale state bug where users would mistakenly see the prompt input again after navigating back to a completed project.
   - Enforced a strict "one idea per project" lock in the UI by fetching the project state on mount and checking if the idea has already been submitted and skipping the prompt wizard entirely if so.
+- **Dashboard Polish & Flexbox Layout Stabilization**:
+  - Permanently fixed the CSS `-webkit-box` line-clamp bug across all project cards (`ProjectCard`, `ProjectRow`, `FeaturedProject`) by correctly combining `min-w-0`, block-level `w-full` wrappers, and `truncate`.
+  - Stopped text from aggressively breaking into 1 character per line in narrow flex columns.
+  - Re-anchored `line-clamp-2` inside a block-level wrapper so it calculates width correctly inside flex containers, preventing description truncation at 3-4 letters.
+  - Fixed the Editor workspace header so long project titles gracefully truncate with ellipses instead of blowing out the top navigation layout.
