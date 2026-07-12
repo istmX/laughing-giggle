@@ -771,173 +771,47 @@ export function ProjectWorkspace() {
       </main>
 
       {/* ── Artifacts Sidebar ─────────────────────────────────── */}
-      <AnimatePresence>
-        {isArtifactsOpen && (
-          <motion.aside
-            initial={{ x: '100%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '100%', opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-            style={{ width: typeof window !== 'undefined' && window.innerWidth >= 768 ? sidebarWidth : '100%' }}
-            className="absolute inset-0 z-40 sm:inset-y-0 sm:right-0 sm:left-auto md:relative md:flex-shrink-0 border-l border-hairline/60 bg-canvas shadow-xl md:shadow-none flex flex-col max-w-full"
-          >
-            {/* Drag handle */}
-            <div
-              className="absolute top-0 bottom-0 left-0 w-1.5 cursor-col-resize hover:bg-ink/10 active:bg-ink/20 transition-colors z-50 hidden md:block"
-              onMouseDown={handleMouseDown}
-            />
-
-            {/* Panel header */}
-            <header className="flex h-12 items-center justify-between border-b border-hairline/60 px-4 shrink-0 bg-canvas">
-              <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium text-ink">Context Files</span>
-                {artifacts.length > 0 && (
-                  <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-surface-soft border border-hairline text-ink-muted text-[10px] font-mono">
-                    {artifacts.length}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={async () => {
-                    setIsDownloading(true)
-                    try { await downloadArtifactsZip(token, projectId); toast.success('Downloaded!') }
-                    catch { toast.error('Failed to download ZIP') }
-                    finally { setIsDownloading(false) }
-                  }}
-                  disabled={isDownloading || artifacts.length === 0}
-                  className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors disabled:opacity-40 font-mono cursor-pointer"
-                  title="Download ZIP"
-                >
-                  {isDownloading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                  <span className="hidden sm:inline">ZIP</span>
-                </button>
-                <button
-                  onClick={() => setIsArtifactsOpen(false)}
-                  className="p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink rounded-md transition-colors md:hidden cursor-pointer"
-                  aria-label="Close artifacts"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </header>
-
-            {/* Panel content */}
-            <div className="flex-1 overflow-hidden flex flex-col">
-              {isGeneratingArtifacts ? (
-                <div className="flex-1 p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  <GenerationProgress artifacts={artifacts} />
-                </div>
-              ) : artifacts.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                  <div className="h-10 w-10 rounded-xl bg-surface-soft border border-hairline flex items-center justify-center mb-3">
-                    <FileCode2 className="h-5 w-5 text-ink-muted/50" />
-                  </div>
-                  <p className="text-[13px] font-medium text-ink mb-1">No context files yet</p>
-                  <p className="text-[12px] text-ink-muted max-w-[180px] leading-relaxed">
-                    Files will appear once the AI generates your project context.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col min-h-0">
-                  {/* File list */}
-                  <div className="shrink-0 p-3 space-y-1.5 border-b border-hairline/50 max-h-[45%] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {artifacts.map(a => {
-                      const { bg, color } = getFileIcon(a.file_path || '')
-                      const isReady = a.content && a.content !== 'Pending generation...'
-                      const isActive = activeArtifact?._id === a._id
-                      return (
-                        <motion.button
-                          key={a._id}
-                          whileHover={{ x: 1 }}
-                          whileTap={{ scale: 0.99 }}
-                          onClick={() => setActiveArtifact(a)}
-                          className={`artifact-card w-full text-left cursor-pointer border ${isActive ? 'border-ink bg-surface-soft shadow-sm' : 'border-hairline bg-canvas'}`}
-                        >
-                          <div className={`h-8 w-8 rounded-lg ${bg.replace('bg-[', 'bg-').split(' ')[0]} flex items-center justify-center shrink-0 shadow-sm`}>
-                            <FileText className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-medium text-ink truncate">
-                              {a.file_path?.split('/').pop() || 'file'}
-                            </p>
-                            <p className="text-[11px] text-ink-muted font-mono truncate">
-                              {a.file_path?.includes('/') ? a.file_path.split('/').slice(0, -1).join('/') : ''}
-                            </p>
-                          </div>
-                          <div className="shrink-0 flex items-center gap-2">
-                            {/* Color-matching status dot indicator */}
-                            <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'}`} />
-                            {isReady
-                              ? <span className="artifact-status-ready">Ready</span>
-                              : <span className="artifact-status-generating">Generating</span>
-                            }
-                          </div>
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-
-                  {/* Notion-style Figma Block Editor */}
-                  <AnimatePresence mode="wait">
-                    {activeArtifact && (
-                      <motion.div
-                        key={activeArtifact._id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex-1 flex flex-col min-h-0 p-4 border border-ink/10 bg-surface-soft rounded-[24px] m-3 shadow-sm select-none"
-                      >
-                        <div className="flex items-center justify-between mb-3 px-1">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-[#c8e6cd]" />
-                            <span className="text-[11px] font-mono font-medium text-ink-muted truncate max-w-[150px]">{activeArtifact.file_path}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {isSavingArtifact && (
-                              <span className="flex items-center gap-1 text-[11px] text-ink-muted">
-                                <Loader2 className="h-3 w-3 animate-spin text-ink-muted shrink-0" />
-                                Saving
-                              </span>
-                            )}
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(activeArtifact.content || '')
-                                toast.success('Copied file contents')
-                              }}
-                              className="px-2 py-1 text-[11px] font-medium border border-hairline rounded-md hover:bg-canvas hover:text-ink text-ink-muted transition-colors cursor-pointer"
-                            >
-                              Copy
-                            </button>
-                          </div>
-                        </div>
-                        <textarea
-                          className="flex-1 w-full bg-canvas rounded-xl p-4 resize-none border border-hairline outline-none text-[13px] text-ink font-mono focus:border-ink/25 focus:ring-2 focus:ring-ink/5 transition-all leading-relaxed [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                          value={activeArtifact.content || ''}
-                          onChange={(e) => {
-                            const newContent = e.target.value
-                            setActiveArtifact({ ...activeArtifact, content: newContent })
-                            if (window.saveTimeout) clearTimeout(window.saveTimeout)
-                            window.saveTimeout = setTimeout(async () => {
-                              setIsSavingArtifact(true)
-                              try {
-                                await updateArtifact(token, activeArtifact._id, { content: newContent })
-                                setArtifacts(prev => prev.map(a => a._id === activeArtifact._id ? { ...a, content: newContent } : a))
-                              } catch { toast.error('Failed to save artifact') }
-                              finally { setIsSavingArtifact(false) }
-                            }, 1000)
-                          }}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
+      <ArtifactsPanel
+        isOpen={isArtifactsOpen}
+        onClose={() => setIsArtifactsOpen(false)}
+        artifacts={artifacts}
+        activeArtifact={activeArtifact}
+        onSelectArtifact={(a) => setActiveArtifact(a)}
+        isGeneratingArtifacts={isGeneratingArtifacts}
+        isSavingArtifact={isSavingArtifact}
+        isDownloading={isDownloading}
+        onDownload={async () => {
+          setIsDownloading(true)
+          try {
+            await downloadArtifactsZip(token, projectId)
+            toast.success('Downloaded!')
+          } catch {
+            toast.error('Failed to download ZIP')
+          } finally {
+            setIsDownloading(false)
+          }
+        }}
+        onArtifactChange={(newContent) => {
+          if (!activeArtifact) return
+          setActiveArtifact({ ...activeArtifact, content: newContent })
+          if (window.saveTimeout) clearTimeout(window.saveTimeout)
+          window.saveTimeout = setTimeout(async () => {
+            setIsSavingArtifact(true)
+            try {
+              await updateArtifact(token, activeArtifact._id, { content: newContent })
+              setArtifacts(prev =>
+                prev.map(a => (a._id === activeArtifact._id ? { ...a, content: newContent } : a))
+              )
+            } catch {
+              toast.error('Failed to save artifact')
+            } finally {
+              setIsSavingArtifact(false)
+            }
+          }, 1000)
+        }}
+        sidebarWidth={sidebarWidth}
+        handleMouseDown={handleMouseDown}
+      />
     </div>
   )
 }
