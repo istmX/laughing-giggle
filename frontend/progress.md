@@ -1,5 +1,28 @@
 ## Completed
 
+- **Major UI Polish Overhaul (⭐⭐⭐⭐⭐ Priority items 1–8 implemented)**:
+  - **Removed dashboard feeling from ProjectWorkspace**: Conversation now occupies almost the full screen. The Artifacts panel slides in from the right as a separate layer — it no longer competes visually with the chat.
+  - **Claude-style chat redesign**: No more chat bubbles. User messages are right-aligned floating plain text. AI messages are left-aligned with a small 24×24 rounded-square icon (violet→indigo gradient with a Sparkles icon inside). Generous `space-y-1` + `py-3/4` padding between messages. Thin `border-hairline/30` dividers between each message. Max-width `max-w-3xl mx-auto` for better readability.
+  - **Animated AI icon**: A `<AiIcon>` component that gently rocks (`rotate: [0, 10, -10, 0]`) when the AI is generating. Uses a `from-violet-500 to-indigo-500` gradient instead of plain black circle.
+  - **Floating pill input bar**: The input bar is now a `floating-input` absolutely positioned at the bottom of the chat area. Style: `rounded-[28px] bg-canvas border border-hairline` with `box-shadow: 0 4px 24px`. Focus state deepens the shadow and adds a subtle ring. Button is a black circle with `ArrowUp` icon.
+  - **Artifact panel completely redesigned**: Replaced the buggy `<select>` dropdown with a proper file explorer. Each artifact is a `artifact-card` (file icon + name + status badge). Status badges: "Ready" = soft emerald (`bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]`), "Generating" = pulsing amber. The editor below morphs in with `opacity: 0→1, y: 6→0` animation when a file is clicked. Panel header shows "Context Files" + file count badge.
+  - **Beautiful empty state**: `<EmptyState>` component with a gradient violet→indigo rounded-square icon, "Start describing your idea." headline, descriptive subtitle, and 2×2 suggestion card grid with hover lift effect (`whileHover: { y: -2 }`).
+  - **Generation progress checklist**: `<GenerationProgress>` replaces the plain spinner. Shows staggered animated checklist items — done files get a green `<CheckCircle2>` + fade to 40% opacity, the active file gets a spinning loader + animated `…`, pending items show empty circles.
+  - **AI Thinking dots**: `<AiThinking>` component — three dots animating `opacity: 1 → 0.3 → 1` with staggered delays (0ms, 200ms, 400ms). Replaces the blinking cursor block.
+  - **Richer project header**: Now shows `← Projects / Title | [file count] · [time ago]` on the right side. Context toggle button shows artifact count badge.
+  - **Semantic color accents**: 95% monochrome. Accent colors only on status badges. Violet/indigo on AI icon. Emerald for "Ready", amber for "Generating".
+  - **Compact sidebar redesign**: Width reduced from 280px → 220px (collapsed: 56px). Section labels are `text-[10px] font-mono tracking-[0.12em] uppercase text-ink-muted/60`. Nav items use `rounded-lg` active state with `bg-surface-soft border border-hairline/80` (NOT full black). Spring animation `stiffness: 300 damping: 25`. Section label fade-in with x-offset on expand.
+  - **Dashboard project cards redesign**: Cards use `rounded-xl border border-hairline bg-canvas hover:border-ink/20 hover:shadow-md`. Colored file icon square (32×32 rounded-md). Title in `font-[540]`, metadata in `font-mono text-[12px]`. Arrow appears on hover with `opacity-0 group-hover:opacity-100`.
+  - **Dashboard empty state**: Gradient violet→indigo orb with Sparkles icon instead of generic folder. Better copy. Generous spacing.
+  - **New sub-components created**:
+    - `frontend/src/features/project/ui/components/AiIcon.jsx` — animated gradient AI icon
+    - `frontend/src/features/project/ui/components/AiThinking.jsx` — three staggered animated dots
+    - `frontend/src/features/project/ui/components/EmptyState.jsx` — beautiful workspace empty state
+    - `frontend/src/features/project/ui/components/GenerationProgress.jsx` — animated generation checklist
+  - **index.css workspace CSS layer**: Added `.notion-markdown` (Notion-like markdown with H1/H2/H3 hierarchy, colored code blocks, blockquote borders), `.floating-input`, `.artifact-card`, `.artifact-status-ready`, `.artifact-status-generating`, `.ai-icon-gradient`, `.ai-icon-thinking`, `.sidebar-nav-item`, `.chat-user-message`, `.chat-ai-message`, `.chat-divider`.
+
+
+
 - **Artifact Generation Overhaul (Sequential Streaming)**:
   - Re-architected the artifact generation flow to solve LLM output token limits (which previously caused the AI to lazily mash all 11 files into a single summarized file).
   - The backend now instantly generates "Pending generation..." placeholders in the database for all 11 required files (AGENTS.md, TASKS.md, and all 9 context files) when the wizard completes.
@@ -272,4 +295,8 @@ The home page now includes:
   - Injected an inline background loading message in the chat workspace while Zenix maps architecture.
   - Added upward-fading animations to the Interview AI questions.
   - Added staggered deal-in animations for project cards when navigating back to the dashboard.
+- **Framer Motion UX Polish (Dashboard & Chat)**:
+  - Fixed a critical UX blocking bug in `ProjectWorkspace.jsx` where the entire page load was halted while waiting for background AI artifacts to generate. Re-architected this to resolve instantly and generate artifacts asynchronously, unblocking the Chat UI instantly.
+  - Fixed the context-loss bug when users submitted new projects via the Dashboard modal by passing a `wizard_state: { autoStart: true, prompt }` payload, which `NewProjectPage` now intercepts to seamlessly bypass the redundant step 0 text box and begin AI processing automatically.
+  - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
 

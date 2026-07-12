@@ -1,4 +1,3 @@
-import { EmptyProjects } from '@/features/project/ui/EmptyProjects'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createProject, getProjects, deleteProject, updateProject } from '@/features/project/api/projects.api'
@@ -7,7 +6,7 @@ import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/Modal'
 import { motion } from 'framer-motion'
-import { Folder, ArrowRight, Trash2, Pencil, Star, ArrowUpRight, Plus } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Trash2, Pencil, Star, Plus, Sparkles } from 'lucide-react'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -16,26 +15,93 @@ function getGreeting() {
   return 'Good evening'
 }
 
-function FeaturedProject({ project, onToggleFavorite, onEdit, onDelete }) {
+// Color palette for project icons (cycles by index)
+const PROJECT_COLORS = [
+  { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-600 dark:text-violet-400', dot: 'bg-violet-400' },
+  { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-600 dark:text-indigo-400', dot: 'bg-indigo-400' },
+  { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-400' },
+  { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-600 dark:text-amber-400', dot: 'bg-amber-400' },
+  { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-600 dark:text-rose-400', dot: 'bg-rose-400' },
+  { bg: 'bg-sky-100 dark:bg-sky-900/40', text: 'text-sky-600 dark:text-sky-400', dot: 'bg-sky-400' },
+  { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-600 dark:text-teal-400', dot: 'bg-teal-400' },
+  { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-400' },
+]
+
+function getProjectColor(index) {
+  return PROJECT_COLORS[index % PROJECT_COLORS.length]
+}
+
+function formatRelativeDate(dateStr) {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now - date
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays}d ago`
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+// ─── Gradient Orb Empty Icon ──────────────────────────────────────────────────
+function GradientOrb() {
   return (
-    <motion.div 
+    <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/25">
+      <Sparkles className="h-4 w-4 text-white" strokeWidth={1.75} />
+    </div>
+  )
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+function EmptyState({ onNewProject }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col items-center justify-center text-center py-24 px-6"
+    >
+      <div className="mb-5">
+        <GradientOrb />
+      </div>
+      <h3 className="text-[16px] font-[540] text-ink mb-2">No projects yet</h3>
+      <p className="text-[13.5px] text-ink-muted leading-relaxed max-w-[260px] mb-7">
+        Describe an idea. Zenix will architect,<br />design, and organize everything for you.
+      </p>
+      <button
+        onClick={() => onNewProject()}
+        className="flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[13.5px] font-[480] text-canvas hover:opacity-90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        New Project
+      </button>
+    </motion.div>
+  )
+}
+
+// ─── Featured Project Card ────────────────────────────────────────────────────
+function FeaturedProject({ project, index, onToggleFavorite, onEdit, onDelete }) {
+  const color = getProjectColor(index)
+  return (
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-      className="group relative flex flex-col md:flex-row items-start md:items-center justify-between p-8 rounded-3xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/40 overflow-hidden gap-6"
+      className="group relative flex flex-col md:flex-row items-start md:items-center justify-between p-8 rounded-3xl border border-hairline bg-surface-elevated transition-all hover:border-ink/20 hover:shadow-md hover:shadow-black/5 overflow-hidden gap-6"
     >
-      <Link 
-        to={`/projects/${project._id}`} 
-        className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2" 
+      <Link
+        to={`/projects/${project._id}`}
+        className="absolute inset-0 z-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
         aria-label={`Open project ${project.project_title}`}
       />
-      
+
       <div className="relative z-10 flex flex-col pointer-events-none flex-1 min-w-0">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted mb-3 flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-ink animate-pulse shrink-0" />
+          <span className={`h-1.5 w-1.5 rounded-full ${color.dot} animate-pulse shrink-0`} />
           Continue working
         </span>
-        <h3 className="text-[32px] md:text-[40px] leading-[1.1] font-[480] text-ink tracking-[-0.04em] mb-3 truncate w-full">{project.project_title}</h3>
+        <h3 className="text-[32px] md:text-[40px] leading-[1.1] font-[480] text-ink tracking-[-0.04em] mb-3 truncate w-full">
+          {project.project_title}
+        </h3>
         <div className="w-full max-w-xl">
           <p className="text-[16px] text-ink-muted leading-relaxed line-clamp-2">
             {project.project_description || 'Start building your next big idea here.'}
@@ -44,7 +110,7 @@ function FeaturedProject({ project, onToggleFavorite, onEdit, onDelete }) {
       </div>
 
       <div className="relative z-10 flex items-center gap-4 mt-8 md:mt-0 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 shrink-0">
-         <div className="flex items-center gap-1 mr-2 md:mr-6">
+        <div className="flex items-center gap-1 mr-2 md:mr-6">
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(e, project) }} className={`p-3 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-amber-500 bg-amber-500/10' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}>
             <Star className="h-4 w-4" fill={project.is_favorite ? 'currentColor' : 'none'} />
           </button>
@@ -54,57 +120,84 @@ function FeaturedProject({ project, onToggleFavorite, onEdit, onDelete }) {
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e, project) }} className="p-3 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30">
             <Trash2 className="h-4 w-4" />
           </button>
-         </div>
-         <div className="h-14 w-14 rounded-full bg-ink text-canvas flex items-center justify-center pointer-events-none transform md:group-hover:scale-105 transition-transform duration-500 ease-[0.16,1,0.3,1] shrink-0">
-           <ArrowRight className="h-6 w-6 transform md:group-hover:translate-x-1.5 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
-         </div>
+        </div>
+        <div className="h-14 w-14 rounded-full bg-ink text-canvas flex items-center justify-center pointer-events-none transform md:group-hover:scale-105 transition-transform duration-500 ease-[0.16,1,0.3,1] shrink-0">
+          <ArrowRight className="h-6 w-6 transform md:group-hover:translate-x-1.5 transition-transform duration-500 ease-[0.16,1,0.3,1]" />
+        </div>
       </div>
     </motion.div>
   )
 }
 
-function ProjectRow({ project, index, onToggleFavorite, onEdit, onDelete }) {
+// ─── Project Card (grid) ──────────────────────────────────────────────────────
+function ProjectCard({ project, index, onToggleFavorite, onEdit, onDelete }) {
+  const color = getProjectColor(index)
+  const docCount = project.doc_count ?? project.documents?.length ?? 0
+  const dateLabel = formatRelativeDate(project.last_opened_at || project.createdAt)
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 + (index * 0.05) }}
-      className="group relative flex items-center justify-between py-5 border-b border-hairline/50 hover:bg-surface-soft/40 transition-colors px-4 -mx-4 rounded-xl gap-4"
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.05 * index }}
+      className="group relative rounded-xl border border-hairline bg-canvas hover:border-ink/20 hover:shadow-md hover:shadow-black/5 transition-all p-4 cursor-pointer"
     >
-       <Link 
-        to={`/projects/${project._id}`} 
-        className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" 
+      <Link
+        to={`/projects/${project._id}`}
+        className="absolute inset-0 z-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        aria-label={`Open ${project.project_title}`}
       />
-      <div className="relative z-10 flex items-center gap-5 pointer-events-none flex-1 min-w-0">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-soft text-ink border border-hairline transition-colors group-hover:bg-background shrink-0">
-          <Folder className="h-5 w-5" />
+
+      <div className="relative z-10 flex items-start justify-between gap-3">
+        {/* Icon */}
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${color.bg} ${color.text}`}>
+          <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor" opacity="0.9" />
+            <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity="0.6" />
+            <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity="0.6" />
+            <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity="0.3" />
+          </svg>
         </div>
-        <div className="flex flex-col flex-1 min-w-0">
-          <h4 className="text-[18px] font-[480] text-ink tracking-tight truncate">{project.project_title}</h4>
-          <span className="text-[14px] font-[320] text-ink-muted mt-0.5 truncate">Opened {new Date(project.last_opened_at || project.createdAt).toLocaleDateString()}</span>
+
+        {/* Arrow — appears on hover */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+          <ArrowUpRight className="h-3.5 w-3.5 text-ink-muted" />
         </div>
       </div>
 
-      <div className="relative z-10 flex items-center gap-4 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 shrink-0">
-        <div className="flex items-center gap-1">
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(e, project) }} className={`p-2.5 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-amber-500 bg-amber-500/10' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}>
-            <Star className="h-4 w-4" fill={project.is_favorite ? 'currentColor' : 'none'} />
-          </button>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(e, project) }} className="p-2.5 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30">
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e, project) }} className="p-2.5 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30">
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-surface-soft/0 group-hover:bg-surface-soft transition-colors pointer-events-none shrink-0">
-          <ArrowUpRight className="h-5 w-5 text-ink-muted group-hover:text-ink transform md:group-hover:translate-x-0.5 md:group-hover:-translate-y-0.5 transition-all duration-300 ease-out" />
-        </div>
+      <div className="relative z-10 mt-3">
+        <h4 className="text-[14px] font-[540] text-ink leading-snug truncate">{project.project_title}</h4>
+        <p className="text-[12px] text-ink-muted font-mono mt-0.5">
+          {docCount > 0 ? `${docCount} doc${docCount !== 1 ? 's' : ''} · ` : ''}{dateLabel}
+        </p>
+      </div>
+
+      {/* Action buttons – appear on hover */}
+      <div className="relative z-10 flex items-center gap-0.5 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleFavorite(e, project) }}
+          className={`p-1.5 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-amber-500 bg-amber-500/10' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}
+        >
+          <Star className="h-3 w-3" fill={project.is_favorite ? 'currentColor' : 'none'} />
+        </button>
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(e, project) }}
+          className="p-1.5 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        >
+          <Pencil className="h-3 w-3" />
+        </button>
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(e, project) }}
+          className="p-1.5 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
       </div>
     </motion.div>
   )
 }
 
+// ─── Main Overview ────────────────────────────────────────────────────────────
 export function Overview() {
   const navigate = useNavigate()
   const { token, user } = useAuth()
@@ -122,7 +215,7 @@ export function Overview() {
       try {
         const res = await getProjects(token)
         // Sort by last opened for consistency
-        const sorted = (res?.data || []).sort((a, b) => 
+        const sorted = (res?.data || []).sort((a, b) =>
           new Date(b.last_opened_at || b.createdAt) - new Date(a.last_opened_at || a.createdAt)
         )
         setProjects(sorted)
@@ -138,8 +231,8 @@ export function Overview() {
 
   const handleNewProject = async (promptText) => {
     try {
-      const res = await createProject(token, { 
-        project_title: 'Untitled Project', 
+      const res = await createProject(token, {
+        project_title: 'Untitled Project',
         wizard_state: promptText ? { prompt: promptText, autoStart: true } : {}
       })
       if (res?.data?._id) {
@@ -200,7 +293,11 @@ export function Overview() {
   }
 
   if (isLoading) {
-    return <div className="flex-1 flex items-center justify-center"><div className="h-6 w-6 rounded-full border-2 border-ink border-t-transparent animate-spin" /></div>
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="h-5 w-5 rounded-full border-2 border-ink border-t-transparent animate-spin" />
+      </div>
+    )
   }
 
   const featuredProject = projects[0]
@@ -211,12 +308,12 @@ export function Overview() {
     <div className="flex-1 flex flex-col h-full bg-background relative overflow-hidden">
       <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden p-6 md:p-12 lg:px-16 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {projects.length === 0 ? (
-          <EmptyProjects onNewProject={handleNewProject} />
+          <EmptyState onNewProject={() => setIsCreateModalOpen(true)} />
         ) : (
           <div className="w-full max-w-6xl mx-auto pb-24">
-            
-            {/* The Welcome Narrative */}
-            <motion.div 
+
+            {/* Welcome header */}
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
@@ -224,28 +321,30 @@ export function Overview() {
             >
               <div>
                 <h1 className="text-[48px] md:text-[64px] font-[480] tracking-[-0.04em] leading-[1.1] text-ink">
-                  {getGreeting()},<br/><span className="text-ink-muted">{firstName}.</span>
+                  {getGreeting()},<br /><span className="text-ink-muted">{firstName}.</span>
                 </h1>
               </div>
               <motion.button
                 layoutId="new-project-surface"
                 onClick={() => setIsCreateModalOpen(true)}
-                className="flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[16px] font-[480] text-canvas hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 whitespace-nowrap self-start md:self-auto"
+                className="flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[14px] font-[480] text-canvas hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 whitespace-nowrap self-start md:self-auto"
               >
+                <Plus className="h-3.5 w-3.5" />
                 New Project
               </motion.button>
             </motion.div>
-            
-            {/* The Rhythm Break: Featured Canvas */}
+
+            {/* Featured / most-recent project */}
             {featuredProject && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
                 className="mb-12"
               >
-                <FeaturedProject 
-                  project={featuredProject} 
+                <FeaturedProject
+                  project={featuredProject}
+                  index={0}
                   onToggleFavorite={toggleFavorite}
                   onEdit={handleEditInit}
                   onDelete={handleDeleteInit}
@@ -253,18 +352,33 @@ export function Overview() {
               </motion.div>
             )}
 
-            {/* The Density: List View */}
+            {/* Recent Projects grid */}
             {listProjects.length > 0 && (
               <div className="mt-8">
-                <motion.h2 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2, duration: 0.6 }}
-                  className="text-[14px] font-[540] uppercase tracking-wider text-ink-muted mb-4 px-2"
-                >
-                  All Projects
-                </motion.h2>
-                <motion.div 
+                {/* Section header */}
+                <div className="flex items-center justify-between mb-4 px-0.5">
+                  <motion.h2
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className="text-[11px] font-mono tracking-[0.12em] uppercase text-ink-muted/70"
+                  >
+                    Recent Projects
+                  </motion.h2>
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.25, duration: 0.5 }}
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[12px] font-[480] text-ink-muted hover:text-ink hover:bg-surface-soft border border-transparent hover:border-hairline transition-all"
+                  >
+                    <Plus className="h-3 w-3" />
+                    New
+                  </motion.button>
+                </div>
+
+                {/* Card grid */}
+                <motion.div
                   initial="hidden"
                   animate="visible"
                   variants={{
@@ -274,19 +388,19 @@ export function Overview() {
                       transition: { staggerChildren: 0.05, delayChildren: 0.2 }
                     }
                   }}
-                  className="flex flex-col"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
                 >
                   {listProjects.map((project, i) => (
                     <motion.div
                       key={project._id}
                       variants={{
-                        hidden: { opacity: 0, y: 15 },
-                        visible: { opacity: 1, y: 0, transition: { ease: "easeOut", duration: 0.5 } }
+                        hidden: { opacity: 0, y: 12 },
+                        visible: { opacity: 1, y: 0, transition: { ease: 'easeOut', duration: 0.45 } }
                       }}
                     >
-                      <ProjectRow 
-                        project={project} 
-                        index={i} 
+                      <ProjectCard
+                        project={project}
+                        index={i + 1}
                         onToggleFavorite={toggleFavorite}
                         onEdit={handleEditInit}
                         onDelete={handleDeleteInit}
@@ -300,18 +414,18 @@ export function Overview() {
         )}
       </div>
 
-      <CreateProjectDialog 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+      <CreateProjectDialog
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         onSubmit={(prompt) => {
           setIsCreateModalOpen(false)
           handleNewProject(prompt)
-        }} 
+        }}
       />
 
       {/* Delete Modal */}
-      <Modal 
-        isOpen={!!projectToDelete} 
+      <Modal
+        isOpen={!!projectToDelete}
         onClose={() => setProjectToDelete(null)}
         title="Delete Project"
       >
@@ -319,13 +433,13 @@ export function Overview() {
           Are you sure you want to delete <span className="font-[480] text-ink">"{projectToDelete?.project_title}"</span>? This action cannot be undone and will permanently remove all data associated with it.
         </p>
         <div className="flex items-center justify-end gap-3">
-          <button 
+          <button
             onClick={() => setProjectToDelete(null)}
             className="px-5 py-2.5 text-[15px] font-[480] text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={confirmDelete}
             className="px-5 py-2.5 text-[15px] font-[480] text-canvas bg-destructive hover:bg-destructive/90 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30 shadow-sm"
           >
@@ -335,8 +449,8 @@ export function Overview() {
       </Modal>
 
       {/* Edit Modal */}
-      <Modal 
-        isOpen={!!projectToEdit} 
+      <Modal
+        isOpen={!!projectToEdit}
         onClose={() => setProjectToEdit(null)}
         title="Edit Project"
       >
@@ -356,13 +470,13 @@ export function Overview() {
           />
         </div>
         <div className="flex items-center justify-end gap-3">
-          <button 
+          <button
             onClick={() => setProjectToEdit(null)}
             className="px-5 py-2.5 text-[15px] font-[480] text-ink bg-surface hover:bg-surface-soft border border-hairline rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={saveEdit}
             disabled={!editTitle.trim() || editTitle === projectToEdit?.project_title}
             className="px-5 py-2.5 text-[15px] font-[480] text-canvas bg-ink hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 shadow-sm"
@@ -374,4 +488,3 @@ export function Overview() {
     </div>
   )
 }
-

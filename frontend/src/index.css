@@ -2,13 +2,13 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@import "@fontsource-variable/geist";
+@import "@fontsource/inter";
 @import "@fontsource-variable/jetbrains-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: "Geist Variable", sans-serif;
+  --font-sans: "Inter", sans-serif;
   --font-display: var(--font-sans);
   --font-mono: "Geist Mono", monospace;
   --font-heading: var(--font-sans);
@@ -549,10 +549,158 @@
     );
     background-size: 24px 24px;
   }
+
+  /* ─── Workspace: Notion-style markdown viewer ─── */
+  .notion-markdown {
+    @apply text-ink leading-relaxed;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .notion-markdown h1 {
+    @apply text-[28px] font-[700] text-ink tracking-tight mt-10 mb-4 leading-tight;
+  }
+  .notion-markdown h2 {
+    @apply text-[20px] font-[600] text-ink tracking-tight mt-8 mb-3 leading-snug;
+  }
+  .notion-markdown h3 {
+    @apply text-[16px] font-[600] text-ink mt-6 mb-2;
+  }
+  .notion-markdown p {
+    @apply text-ink mb-4;
+  }
+  .notion-markdown code {
+    @apply bg-surface-soft text-[#1a7f37] rounded px-1.5 py-0.5 text-[13px] font-mono;
+  }
+  .notion-markdown pre {
+    @apply bg-[#f6f8fa] border border-hairline rounded-lg p-4 my-4 overflow-x-auto;
+  }
+  .notion-markdown pre code {
+    @apply bg-transparent text-ink p-0;
+  }
+  .notion-markdown blockquote {
+    @apply border-l-[3px] border-ink/20 pl-4 text-ink-muted italic my-4;
+  }
+  .notion-markdown a {
+    @apply text-[#0969da] underline underline-offset-2 hover:text-blue-800 transition-colors;
+  }
+  .notion-markdown ul {
+    @apply list-disc pl-5 mb-4 space-y-1;
+  }
+  .notion-markdown ol {
+    @apply list-decimal pl-5 mb-4 space-y-1;
+  }
+  .notion-markdown table {
+    @apply w-full border-collapse border border-hairline rounded-lg my-4 text-sm overflow-hidden;
+  }
+  .notion-markdown th {
+    @apply bg-surface-soft px-3 py-2 text-left font-[540] text-ink border-b border-hairline;
+  }
+  .notion-markdown td {
+    @apply px-3 py-2 border-b border-hairline/50 text-ink;
+  }
+  .notion-markdown tr:last-child td {
+    @apply border-b-0;
+  }
+  .notion-markdown hr {
+    @apply border-hairline my-6;
+  }
+  /* Task list items */
+  .notion-markdown input[type="checkbox"] {
+    @apply mr-2 rounded;
+  }
+
+  /* ─── Workspace: AI icon gradient ─── */
+  .ai-icon-gradient {
+    background: linear-gradient(135deg, #7C3AED, #6366F1);
+  }
+  .ai-icon-thinking {
+    animation: ai-pulse 2s ease-in-out infinite;
+  }
+  @keyframes ai-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ─── Workspace: Floating input bar ─── */
+  .floating-input {
+    @apply rounded-[28px] bg-canvas border border-hairline shadow-lg transition-all duration-200;
+    box-shadow: 0 4px 24px rgb(0 0 0 / 0.06), 0 1px 4px rgb(0 0 0 / 0.04);
+  }
+  .floating-input:focus-within {
+    box-shadow: 0 4px 32px rgb(0 0 0 / 0.1), 0 0 0 2px rgb(0 0 0 / 0.06);
+    @apply border-ink/20;
+  }
+
+  /* ─── Workspace: Artifact file card ─── */
+  .artifact-card {
+    @apply rounded-lg border border-hairline bg-canvas hover:bg-surface-soft cursor-pointer transition-all duration-150 p-3 flex items-center gap-3;
+  }
+  .artifact-card:hover {
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.06);
+  }
+  .artifact-card.active {
+    @apply border-ink/25 bg-surface-soft;
+    box-shadow: 0 1px 8px rgb(0 0 0 / 0.08);
+  }
+  .artifact-status-ready {
+    @apply text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full;
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+  }
+  .artifact-status-generating {
+    @apply text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full;
+    background: #fef9c3;
+    color: #a16207;
+    border: 1px solid #fef08a;
+    animation: generating-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes generating-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* ─── Workspace: Chat message styles ─── */
+  .chat-user-message {
+    @apply text-[15px] text-ink leading-[1.65] text-right;
+  }
+  .chat-ai-message {
+    @apply text-[15px] text-ink leading-[1.65];
+  }
+  .chat-divider {
+    @apply border-hairline/40 my-6;
+  }
+
+  /* ─── Generation progress checklist ─── */
+  .gen-step-pending {
+    @apply text-ink-muted/60;
+  }
+  .gen-step-active {
+    @apply text-ink;
+  }
+  .gen-step-done {
+    @apply text-ink-muted/50 line-through-none;
+  }
+
+  /* ─── Sidebar compact nav pill ─── */
+  .sidebar-nav-item {
+    @apply flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13.5px] font-[480] transition-all duration-150 cursor-pointer w-full relative;
+  }
+  .sidebar-nav-item:hover {
+    @apply bg-surface-soft text-ink;
+  }
+  .sidebar-nav-item.active {
+    @apply text-ink bg-surface-soft;
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .ai-icon-thinking,
+  .artifact-status-generating {
+    animation: none;
   }
 }

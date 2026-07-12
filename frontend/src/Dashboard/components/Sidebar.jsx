@@ -1,10 +1,10 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   FolderOpen, Plus, X, PanelLeftClose, PanelLeftOpen,
-  PlaySquare, Library, LayoutTemplate,
+  PlaySquare, LayoutTemplate,
   Clock, Star, FileText, History, User, Sliders,
-  Key, CreditCard, LogOut
+  LogOut, ChevronDown
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -16,14 +16,14 @@ const navGroups = [
     label: 'Projects',
     items: [
       { name: 'All Projects', href: '/dashboard', icon: FolderOpen },
-      { name: 'Recent Projects', href: '/dashboard/recent', icon: Clock },
+      { name: 'Recent', href: '/dashboard/recent', icon: Clock },
       { name: 'Favorites', href: '/dashboard/favorites', icon: Star },
     ]
   },
   {
     label: 'Workspace',
     items: [
-      { name: 'AI Playground', href: '/dashboard/playground', icon: PlaySquare },
+      { name: 'Playground', href: '/dashboard/playground', icon: PlaySquare },
       { name: 'Templates', href: '/dashboard/templates', icon: LayoutTemplate },
     ]
   },
@@ -43,82 +43,137 @@ const navGroups = [
   }
 ]
 
-function renderNavContent({ mobile = false, isSidebarOpen, currentPath, handleAction, closeMobileMenu }) {
+// ─── User Popover ────────────────────────────────────────────────────────────
+function UserPopover({ user, logout, onClose }) {
+  const popoverRef = useRef(null)
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        onClose()
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [onClose])
+
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      {navGroups.map((group) => (
-        <div key={group.label} className="flex flex-col space-y-1">
-      
+    <motion.div
+      ref={popoverRef}
+      initial={{ opacity: 0, y: 6, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 6, scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+      className="absolute bottom-full left-0 mb-2 w-48 rounded-xl border border-hairline bg-canvas shadow-lg shadow-black/10 overflow-hidden z-50"
+    >
+      <div className="px-3 py-2.5 border-b border-hairline/60">
+        <p className="text-[12px] font-[540] text-ink truncate">{user?.name || 'Account'}</p>
+        <p className="text-[11px] text-ink-muted truncate mt-0.5">{user?.email || ''}</p>
+      </div>
+      <Link
+        to="/dashboard/profile"
+        onClick={onClose}
+        className="flex items-center gap-2 px-3 py-2 text-[12.5px] text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
+      >
+        <User className="h-[13px] w-[13px]" />
+        Profile
+      </Link>
+      <button
+        onClick={() => {
+          onClose()
+          if (window.confirm('Are you sure you want to sign out?')) logout()
+        }}
+        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] text-destructive hover:bg-destructive/10 transition-colors"
+      >
+        <LogOut className="h-[13px] w-[13px]" />
+        Sign out
+      </button>
+    </motion.div>
+  )
+}
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+function Avatar({ user, size = 'sm' }) {
+  const dim = size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-7 w-7 text-[11px]'
+  return user?.avatar ? (
+    <img
+      src={user.avatar}
+      alt={user.name}
+      className={cn(dim, 'rounded-full object-cover border border-hairline shrink-0')}
+    />
+  ) : (
+    <div className={cn(dim, 'rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0')}>
+      <span className="font-[540] text-ink-muted">
+        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+      </span>
+    </div>
+  )
+}
+
+// ─── Nav Content (shared desktop + mobile) ────────────────────────────────────
+function NavContent({ mobile = false, isSidebarOpen, currentPath, onNavClick, layoutId }) {
+  return (
+    <div className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {navGroups.map((group, gi) => (
+        <div key={group.label} className={cn('flex flex-col', gi > 0 && 'mt-5')}>
+          {/* Section label */}
           {(isSidebarOpen || mobile) && (
             <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="px-3 text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1"
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -4 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="px-3 mb-1 text-[10px] font-mono tracking-[0.12em] text-ink-muted/60 uppercase"
             >
               {group.label}
             </motion.span>
           )}
 
-          {/* Links */}
+          {/* Nav items */}
           {group.items.map((item) => {
             const isActive = currentPath === item.href
-            
-            const ItemContent = (
-              <>
-                {isActive && (
-                  <motion.div
-                    layoutId={mobile ? "mobile-active-nav" : "desktop-active-nav"}
-                    className="absolute inset-0 rounded-full bg-ink"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                
-                <item.icon className="relative z-10 h-5 w-5 shrink-0" />
-                
-                {(isSidebarOpen || mobile) && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="relative z-10 whitespace-nowrap"
-                  >
-                    {item.name}
-                  </motion.span>
-                )}
-              </>
-            )
 
-            const className = cn(
-              "relative flex items-center gap-3 rounded-full px-4 py-[10px] text-[16px] font-[480] transition-colors w-full text-left",
-              isActive ? "text-canvas" : "text-ink-muted hover:bg-surface-soft hover:text-ink",
-              (!isSidebarOpen && !mobile) && "justify-center px-2"
+            const itemCls = cn(
+              'relative flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13.5px] font-[480] transition-all w-full text-left select-none',
+              isActive
+                ? 'bg-surface-soft border border-hairline/80 text-ink'
+                : 'text-ink-muted hover:bg-surface-soft hover:text-ink border border-transparent',
+              (!isSidebarOpen && !mobile) && 'justify-center px-0'
             )
-
-            if (item.actionId) {
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => handleAction(item.actionId)}
-                  title={(!isSidebarOpen && !mobile) ? item.name : undefined}
-                  className={className}
-                >
-                  {ItemContent}
-                </button>
-              )
-            }
 
             return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={closeMobileMenu}
-                title={(!isSidebarOpen && !mobile) ? item.name : undefined}
-                className={className}
-              >
-                {ItemContent}
-              </Link>
+              <motion.div key={item.name} whileTap={{ scale: 0.99 }}>
+                <Link
+                  to={item.href}
+                  onClick={onNavClick}
+                  title={(!isSidebarOpen && !mobile) ? item.name : undefined}
+                  className={itemCls}
+                >
+                  {/* Pill highlight */}
+                  {isActive && (
+                    <motion.div
+                      layoutId={layoutId}
+                      className="absolute inset-0 rounded-lg bg-surface-soft border border-hairline/80"
+                      initial={false}
+                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    />
+                  )}
+
+                  <item.icon className="relative z-10 h-[15px] w-[15px] shrink-0" />
+
+                  {(isSidebarOpen || mobile) && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="relative z-10 whitespace-nowrap"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </Link>
+              </motion.div>
             )
           })}
         </div>
@@ -127,23 +182,23 @@ function renderNavContent({ mobile = false, isSidebarOpen, currentPath, handleAc
   )
 }
 
+// ─── Main Sidebar ─────────────────────────────────────────────────────────────
 export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { logout, user, token } = useAuth()
   const currentPath = location.pathname
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
-  const handleAction = async (actionId) => {
-    if (actionId === 'new_project') {
-      try {
-        const res = await createProject(token, { project_title: 'Untitled Project' })
-        if (res?.data?._id) {
-          navigate(`/projects/${res.data._id}`)
-          if (isMobileMenuOpen) setIsMobileMenuOpen(false)
-        }
-      } catch (err) {
-        console.error('Failed to create project', err)
+  const handleNewProject = async () => {
+    try {
+      const res = await createProject(token, { project_title: 'Untitled Project' })
+      if (res?.data?._id) {
+        navigate(`/projects/${res.data._id}`)
+        if (isMobileMenuOpen) setIsMobileMenuOpen(false)
       }
+    } catch (err) {
+      console.error('Failed to create project', err)
     }
   }
 
@@ -159,6 +214,7 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
 
   return (
     <>
+      {/* ── Mobile Drawer ─────────────────────────────────────── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -173,51 +229,54 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="fixed inset-y-0 left-0 z-50 w-72 border-r border-hairline bg-background flex flex-col shadow-xl md:hidden"
+              transition={{ type: 'spring', stiffness: 300, damping: 25, bounce: 0 }}
+              className="fixed inset-y-0 left-0 z-50 w-[220px] border-r border-hairline bg-canvas flex flex-col shadow-xl md:hidden"
             >
-              <div className="flex items-center justify-between h-16 px-4 border-b border-hairline/50 shrink-0">
-                <span className="text-xl font-bold tracking-tight">ZENIX</span>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  aria-label="Close mobile menu"
-                  className="rounded-md p-2 hover:bg-surface-soft text-ink-muted hover:text-ink transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              
-              {renderNavContent({ mobile: true, isSidebarOpen, currentPath, handleAction, closeMobileMenu: () => setIsMobileMenuOpen(false) })}
-              
-              <div className="p-4 border-t border-hairline/50 shrink-0">
-                <div className="flex items-center justify-between mb-4 px-2">
-                  <Link to="/dashboard/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
-                    {user?.avatar ? (
-                      <img 
-                        src={user.avatar}
-                        alt={user.name}
-                        className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0">
-                        <span className="text-xs font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                      </div>
-                    )}
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-ink">{user?.name || 'Profile'}</span>
-                    </div>
-                  </Link>
+              {/* Mobile header */}
+              <div className="flex items-center justify-between h-14 px-3 border-b border-hairline/50 shrink-0">
+                <span className="text-[15px] font-[700] tracking-tight font-mono">ZENIX</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleNewProject}
+                    title="New project"
+                    className="flex items-center justify-center h-6 w-6 rounded-md text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
+                  >
+                    <Plus className="h-[14px] w-[14px]" />
+                  </button>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    aria-label="Close mobile menu"
+                    className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-surface-soft text-ink-muted hover:text-ink transition-colors"
+                  >
+                    <X className="h-[14px] w-[14px]" />
+                  </button>
                 </div>
+              </div>
+
+              <NavContent
+                mobile
+                isSidebarOpen
+                currentPath={currentPath}
+                onNavClick={() => setIsMobileMenuOpen(false)}
+                layoutId="mobile-active-nav"
+              />
+
+              {/* Mobile user */}
+              <div className="relative px-2 py-2 border-t border-hairline/50 shrink-0">
+                <AnimatePresence>
+                  {isPopoverOpen && (
+                    <UserPopover user={user} logout={logout} onClose={() => setIsPopoverOpen(false)} />
+                  )}
+                </AnimatePresence>
                 <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to sign out?')) {
-                      logout()
-                    }
-                  }}
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
+                  onClick={() => setIsPopoverOpen((v) => !v)}
+                  className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg hover:bg-surface-soft transition-colors"
                 >
-                  <LogOut className="h-5 w-5" />
-                  Sign out
+                  <Avatar user={user} size="sm" />
+                  <span className="text-[12.5px] font-[480] text-ink truncate flex-1 text-left">
+                    {user?.name || 'Account'}
+                  </span>
+                  <ChevronDown className="h-[12px] w-[12px] text-ink-muted shrink-0" />
                 </button>
               </div>
             </motion.div>
@@ -225,106 +284,118 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
         )}
       </AnimatePresence>
 
+      {/* ── Desktop Sidebar ────────────────────────────────────── */}
       <motion.aside
         initial={false}
-        animate={{ width: isSidebarOpen ? 280 : 72 }}
-        className="hidden md:flex flex-col border-r border-hairline bg-background h-full"
+        animate={{ width: isSidebarOpen ? 220 : 56 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        className="hidden md:flex flex-col border-r border-hairline bg-canvas h-full overflow-hidden"
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-hairline/50 shrink-0">
+        {/* Header */}
+        <div className="flex items-center justify-between h-14 px-3 border-b border-hairline/50 shrink-0">
           <AnimatePresence mode="wait">
             {isSidebarOpen ? (
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
+              <motion.div
+                key="logo-full"
+                initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                className="text-xl font-bold tracking-tight overflow-hidden whitespace-nowrap"
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                className="flex items-center gap-2 overflow-hidden"
               >
-                ZENIX
-              </motion.span>
+                <span className="text-[15px] font-[700] tracking-tight font-mono whitespace-nowrap">ZENIX</span>
+              </motion.div>
             ) : (
               <motion.div
+                key="logo-icon"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full flex justify-center"
+                transition={{ duration: 0.15 }}
+                className="flex justify-center w-full"
               >
-                <div className="h-6 w-6 rounded bg-ink" />
+                <div className="h-6 w-6 rounded-sm bg-ink text-canvas flex items-center justify-center shrink-0">
+                  <span className="text-[11px] font-[700] font-mono">Z</span>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center justify-center rounded-md p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
-            title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-          >
-            {isSidebarOpen ? (
-              <PanelLeftClose className="h-5 w-5" />
-            ) : (
-              <PanelLeftOpen className="h-5 w-5" />
-            )}
-          </button>
+
+          {isSidebarOpen && (
+            <div className="flex items-center gap-1 shrink-0">
+              {/* New project button */}
+              <button
+                onClick={handleNewProject}
+                title="New project"
+                className="flex items-center justify-center h-6 w-6 rounded-md text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
+              >
+                <Plus className="h-[14px] w-[14px]" />
+              </button>
+              {/* Collapse button */}
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center justify-center h-6 w-6 rounded-md text-ink-muted hover:bg-surface-soft hover:text-ink transition-colors"
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+              >
+                <PanelLeftClose className="h-[14px] w-[14px]" />
+              </button>
+            </div>
+          )}
         </div>
 
-        {renderNavContent({ mobile: false, isSidebarOpen, currentPath, handleAction })}
+        {/* Collapsed: expand toggle */}
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="shrink-0 flex items-center justify-center h-8 w-full text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+          >
+            <PanelLeftOpen className="h-[14px] w-[14px]" />
+          </button>
+        )}
 
-        <div className="p-3 border-t border-hairline/50 shrink-0">
+        <NavContent
+          mobile={false}
+          isSidebarOpen={isSidebarOpen}
+          currentPath={currentPath}
+          onNavClick={null}
+          layoutId="desktop-active-nav"
+        />
+
+        {/* Bottom user section */}
+        <div className="relative px-2 py-2 border-t border-hairline/50 shrink-0">
+          <AnimatePresence>
+            {isPopoverOpen && isSidebarOpen && (
+              <UserPopover user={user} logout={logout} onClose={() => setIsPopoverOpen(false)} />
+            )}
+          </AnimatePresence>
+
           {isSidebarOpen ? (
-             <div className="flex flex-col gap-2">
-                <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-soft transition-colors cursor-pointer">
-                  {user?.avatar ? (
-                    <img 
-                      src={user.avatar}
-                      alt={user.name}
-                      className="h-8 w-8 rounded-full bg-surface-soft object-cover border border-hairline shrink-0"
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-surface-soft border border-hairline flex items-center justify-center shrink-0">
-                      <span className="text-xs font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                    </div>
-                  )}
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-medium truncate text-ink">{user?.name || 'Profile'}</span>
-                  </div>
-                </Link>
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to sign out?')) {
-                      logout()
-                    }
-                  }}
-                  className="flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30"
-                >
-                  <LogOut className="h-5 w-5 shrink-0" />
-                  <span className="whitespace-nowrap">Sign out</span>
-                </button>
-             </div>
+            <button
+              onClick={() => setIsPopoverOpen((v) => !v)}
+              className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg hover:bg-surface-soft transition-colors"
+            >
+              <Avatar user={user} size="sm" />
+              <span className="text-[12.5px] font-[480] text-ink truncate flex-1 text-left">
+                {user?.name || 'Account'}
+              </span>
+              <ChevronDown className="h-[12px] w-[12px] text-ink-muted shrink-0" />
+            </button>
           ) : (
-            <div className="flex flex-col gap-4 items-center py-2">
-              <Link to="/dashboard/profile" title="Profile" className="hover:opacity-80 transition-opacity">
-                {user?.avatar ? (
-                  <img 
-                    src={user.avatar}
-                    alt={user.name}
-                    className="h-6 w-6 rounded-full bg-surface-soft object-cover border border-hairline"
-                  />
-                ) : (
-                  <div className="h-6 w-6 rounded-full bg-surface-soft border border-hairline flex items-center justify-center">
-                    <span className="text-[10px] font-medium text-ink-muted">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
-                  </div>
+            <div className="relative flex justify-center">
+              <AnimatePresence>
+                {isPopoverOpen && (
+                  <UserPopover user={user} logout={logout} onClose={() => setIsPopoverOpen(false)} />
                 )}
-              </Link>
+              </AnimatePresence>
               <button
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to sign out?')) {
-                    logout()
-                  }
-                }}
-                className="text-destructive hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30 rounded-md p-1"
-                title="Sign out"
-                aria-label="Sign out"
+                onClick={() => setIsPopoverOpen((v) => !v)}
+                title={user?.name || 'Account'}
+                className="hover:opacity-80 transition-opacity"
               >
-                <LogOut className="h-5 w-5" />
+                <Avatar user={user} size="sm" />
               </button>
             </div>
           )}
