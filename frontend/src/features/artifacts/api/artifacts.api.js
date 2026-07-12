@@ -1,4 +1,4 @@
-import { authFetch } from '@/features/auth/api/auth.api'
+import { authFetch, getBaseUrl } from '@/features/auth/api/auth.api'
 
 export const getProjectArtifacts = async (token, projectId) => {
   return authFetch(`/artifacts/project/${projectId}`, {
@@ -16,11 +16,7 @@ export const updateArtifact = async (token, artifactId, payload) => {
 }
 
 export const getArtifactsZipUrl = (projectId) => {
-  // Since this is a direct download link, we return the URL.
-  // Note: For authenticated download via browser, we either need to send token via query param
-  // or use a service worker. For now, assuming cookie or simple URL.
-  // We can also fetch the blob via fetch API and trigger download.
-  return `${import.meta.env.VITE_API_URL}/api/artifacts/project/${projectId}/export`;
+  return `${getBaseUrl()}/artifacts/project/${projectId}/export`;
 }
 
 export const downloadArtifactsZip = async (token, projectId) => {

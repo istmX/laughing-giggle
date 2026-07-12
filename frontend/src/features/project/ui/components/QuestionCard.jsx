@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ArrowRight, Sparkles, PenLine, ChevronLeft } from 'lucide-react'
 import { ProgressIndicator } from './ProgressIndicator'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
+import { motion } from 'framer-motion'
 
 /**
  * QuestionCard — works with conversational AI questions.
@@ -125,7 +126,12 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
   }
 
   return (
-    <div className="w-full flex flex-col">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full flex flex-col"
+    >
       <div className="mb-8">
         <ProgressIndicator current={currentStep} total={totalSteps} />
         <h2 className="text-[40px] leading-[1.1] font-semibold tracking-tight text-ink mt-6 mb-4">

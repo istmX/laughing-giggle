@@ -265,3 +265,11 @@ The home page now includes:
   - Stopped text from aggressively breaking into 1 character per line in narrow flex columns.
   - Re-anchored `line-clamp-2` inside a block-level wrapper so it calculates width correctly inside flex containers, preventing description truncation at 3-4 letters.
   - Fixed the Editor workspace header so long project titles gracefully truncate with ellipses instead of blowing out the top navigation layout.
+
+- **Animated Flow Polish (Framer Motion)**:
+  - Added origin-aware FLIP expansion animation for the "New Project" modal from its trigger button using `layoutId`.
+  - Added a staggered document reveal in the Artifacts sidebar during generation.
+  - Injected an inline background loading message in the chat workspace while Zenix maps architecture.
+  - Added upward-fading animations to the Interview AI questions.
+  - Added staggered deal-in animations for project cards when navigating back to the dashboard.
+

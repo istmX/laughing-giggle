@@ -1,0 +1,54 @@
+--- frontend/src/Dashboard/components/Overview.jsx
++++ frontend/src/Dashboard/components/Overview.jsx
+@@ -8,6 +8,7 @@
+ import { updateProject, deleteProject, getProjects, createProject } from '@/features/project/api/projects.api'
+ import { EmptyProjects } from '@/features/project/ui/EmptyProjects'
++import { CreateProjectDialog } from '@/features/project/ui/CreateProjectDialog'
+ import toast from 'react-hot-toast'
+ 
+@@ -115,6 +116,7 @@
+   const [projectToDelete, setProjectToDelete] = useState(null)
+   const [projectToEdit, setProjectToEdit] = useState(null)
+   const [editTitle, setEditTitle] = useState('')
++  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+ 
+   useEffect(() => {
+     const fetchProjects = async () => {
+@@ -137,8 +139,8 @@
+   }, [token])
+ 
+-  const handleNewProject = async () => {
++  const handleNewProject = async (promptText) => {
+     try {
+-      const res = await createProject(token, { project_title: 'Untitled Project' })
++      const res = await createProject(token, { project_title: 'Untitled Project', initial_prompt: promptText })
+       if (res?.data?._id) {
+         toast.success('Project created')
+         navigate(`/projects/${res.data._id}`)
+@@ -226,11 +228,12 @@
+                 </h1>
+               </div>
+-              <button
+-                onClick={handleNewProject}
++              <motion.button
++                layoutId="new-project-surface"
++                onClick={() => setIsCreateModalOpen(true)}
+                 className="flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[16px] font-[480] text-canvas hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 whitespace-nowrap self-start md:self-auto"
+               >
+                 New Project
+-              </button>
++              </motion.button>
+             </motion.div>
+             
+@@ -321,6 +324,12 @@
+           </div>
+         )}
+       </div>
++
++      <CreateProjectDialog 
++        isOpen={isCreateModalOpen} 
++        onClose={() => setIsCreateModalOpen(false)} 
++        onSubmit={handleNewProject} 
++      />
+       
+       <AnimatePresence>

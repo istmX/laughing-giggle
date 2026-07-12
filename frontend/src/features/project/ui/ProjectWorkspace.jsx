@@ -669,6 +669,19 @@ export function ProjectWorkspace() {
                       </div>
                     </div>
                   )}
+
+                  {isGeneratingArtifacts && (
+                    <div className="flex items-start gap-4">
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-ink text-canvas mt-1">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                      <div className="text-ink text-base leading-relaxed py-2">
+                        <TextShimmerWave className="text-sm font-medium" duration={1.2}>
+                          Zenix is finalizing your architecture and mapping context. This is heavy lifting and takes a minute...
+                        </TextShimmerWave>
+                      </div>
+                    </div>
+                  )}
                 </MessageScrollerContent>
               </MessageScrollerViewport>
               <MessageScrollerButton />
@@ -762,12 +775,44 @@ export function ProjectWorkspace() {
             {/* Artifacts Content */}
             <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex flex-col">
               {isGeneratingArtifacts ? (
-                <div className="flex-1 p-4 flex flex-col items-center justify-center text-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-ink-muted mb-4" />
-                  <h3 className="text-sm font-medium text-ink mb-1">Generating Architecture</h3>
-                  <p className="text-xs text-ink-muted max-w-[200px]">
-                    Zenix is writing your agents and context files based on the specification...
-                  </p>
+                <div className="flex-1 p-6 flex flex-col">
+                  <div className="flex items-center gap-3 mb-6">
+                    <Loader2 className="h-5 w-5 animate-spin text-ink-muted" />
+                    <div>
+                      <h3 className="text-sm font-medium text-ink">Generating Architecture</h3>
+                      <p className="text-xs text-ink-muted">Mapping context and writing files...</p>
+                    </div>
+                  </div>
+                  <motion.div 
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: { staggerChildren: 0.1 }
+                      }
+                    }}
+                    className="flex flex-col gap-2"
+                  >
+                    {artifacts.map((a, i) => (
+                      <motion.div
+                        key={a._id || i}
+                        variants={{
+                          hidden: { opacity: 0, x: 20 },
+                          visible: { opacity: 1, x: 0, transition: { ease: "easeOut" } }
+                        }}
+                        className="flex items-center justify-between p-3 rounded-lg border border-hairline bg-surface-soft"
+                      >
+                        <span className="text-sm font-medium text-ink">{a.file_path || 'Pending...'}</span>
+                        {a.content === 'Pending generation...' ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-ink-muted" />
+                        ) : (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-emerald-500" />
+                        )}
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </div>
               ) : artifacts.length === 0 ? (
                 <div className="flex-1 p-4 flex flex-col items-center justify-center text-center">

@@ -2,11 +2,12 @@ import { EmptyProjects } from '@/features/project/ui/EmptyProjects'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createProject, getProjects, deleteProject, updateProject } from '@/features/project/api/projects.api'
+import { CreateProjectDialog } from '@/features/project/ui/CreateProjectDialog'
 import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/Modal'
 import { motion } from 'framer-motion'
-import { Folder, ArrowRight, Trash2, Pencil, Star, ArrowUpRight } from 'lucide-react'
+import { Folder, ArrowRight, Trash2, Pencil, Star, ArrowUpRight, Plus } from 'lucide-react'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -114,6 +115,7 @@ export function Overview() {
   const [projectToDelete, setProjectToDelete] = useState(null)
   const [projectToEdit, setProjectToEdit] = useState(null)
   const [editTitle, setEditTitle] = useState('')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -134,9 +136,9 @@ export function Overview() {
     fetchProjects()
   }, [token])
 
-  const handleNewProject = async () => {
+  const handleNewProject = async (promptText) => {
     try {
-      const res = await createProject(token, { project_title: 'Untitled Project' })
+      const res = await createProject(token, { project_title: 'Untitled Project', initial_prompt: promptText })
       if (res?.data?._id) {
         toast.success('Project created')
         navigate(`/projects/${res.data._id}`)
@@ -222,24 +224,30 @@ export function Overview() {
                   {getGreeting()},<br/><span className="text-ink-muted">{firstName}.</span>
                 </h1>
               </div>
-              <button
-                onClick={handleNewProject}
+              <motion.button
+                layoutId="new-project-surface"
+                onClick={() => setIsCreateModalOpen(true)}
                 className="flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-[16px] font-[480] text-canvas hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2 whitespace-nowrap self-start md:self-auto"
               >
                 New Project
-              </button>
+              </motion.button>
             </motion.div>
             
             {/* The Rhythm Break: Featured Canvas */}
             {featuredProject && (
-              <div className="mb-12">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                className="mb-12"
+              >
                 <FeaturedProject 
                   project={featuredProject} 
                   onToggleFavorite={toggleFavorite}
                   onEdit={handleEditInit}
                   onDelete={handleDeleteInit}
                 />
-              </div>
+              </motion.div>
             )}
 
             {/* The Density: List View */}
@@ -253,23 +261,50 @@ export function Overview() {
                 >
                   All Projects
                 </motion.h2>
-                <div className="flex flex-col">
+                <motion.div 
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.05, delayChildren: 0.2 }
+                    }
+                  }}
+                  className="flex flex-col"
+                >
                   {listProjects.map((project, i) => (
-                    <ProjectRow 
-                      key={project._id} 
-                      project={project} 
-                      index={i} 
-                      onToggleFavorite={toggleFavorite}
-                      onEdit={handleEditInit}
-                      onDelete={handleDeleteInit}
-                    />
+                    <motion.div
+                      key={project._id}
+                      variants={{
+                        hidden: { opacity: 0, y: 15 },
+                        visible: { opacity: 1, y: 0, transition: { ease: "easeOut", duration: 0.5 } }
+                      }}
+                    >
+                      <ProjectRow 
+                        project={project} 
+                        index={i} 
+                        onToggleFavorite={toggleFavorite}
+                        onEdit={handleEditInit}
+                        onDelete={handleDeleteInit}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </div>
             )}
           </div>
         )}
       </div>
+
+      <CreateProjectDialog 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onSubmit={(prompt) => {
+          setIsCreateModalOpen(false)
+          handleNewProject(prompt)
+        }} 
+      />
 
       {/* Delete Modal */}
       <Modal 
