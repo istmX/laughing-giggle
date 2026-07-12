@@ -260,6 +260,6 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
           )}
         </button>
       </div>
-    </div>
+    </motion.div>
   )
 }
