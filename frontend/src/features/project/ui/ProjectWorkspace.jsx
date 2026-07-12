@@ -634,7 +634,7 @@ export function ProjectWorkspace() {
 
                         {/* Divider between messages (not after the last one) */}
                         {i < messages.length - 1 && (
-                          <hr className="border-hairline/25" />
+                          <hr className="border-hairline/60" />
                         )}
                       </MessageScrollerItem>
                     </motion.div>
@@ -878,7 +878,7 @@ export function ProjectWorkspace() {
                     })}
                   </div>
 
-                  {/* Editor */}
+                  {/* Notion-style Figma Block Editor */}
                   <AnimatePresence mode="wait">
                     {activeArtifact && (
                       <motion.div
@@ -887,11 +887,30 @@ export function ProjectWorkspace() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.2 }}
-                        className="flex-1 flex flex-col min-h-0 p-3"
+                        className="flex-1 flex flex-col min-h-0 p-4 border border-ink/10 bg-surface-soft rounded-[24px] m-3 shadow-sm select-none"
                       >
-                        <div className="flex items-center justify-between mb-2 px-1">
-                          <span className="text-[11px] font-mono text-ink-muted truncate">{activeArtifact.file_path}</span>
-                          {isSavingArtifact && <Loader2 className="h-3 w-3 animate-spin text-ink-muted shrink-0" />}
+                        <div className="flex items-center justify-between mb-3 px-1">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-[#c8e6cd]" />
+                            <span className="text-[11px] font-mono font-medium text-ink-muted truncate max-w-[150px]">{activeArtifact.file_path}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isSavingArtifact && (
+                              <span className="flex items-center gap-1 text-[11px] text-ink-muted">
+                                <Loader2 className="h-3 w-3 animate-spin text-ink-muted shrink-0" />
+                                Saving
+                              </span>
+                            )}
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(activeArtifact.content || '')
+                                toast.success('Copied file contents')
+                              }}
+                              className="px-2 py-1 text-[11px] font-medium border border-hairline rounded-md hover:bg-canvas hover:text-ink text-ink-muted transition-colors cursor-pointer"
+                            >
+                              Copy
+                            </button>
+                          </div>
                         </div>
                         <textarea
                           className="flex-1 w-full bg-canvas rounded-xl p-4 resize-none border border-hairline outline-none text-[13px] text-ink font-mono focus:border-ink/25 focus:ring-2 focus:ring-ink/5 transition-all leading-relaxed [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
