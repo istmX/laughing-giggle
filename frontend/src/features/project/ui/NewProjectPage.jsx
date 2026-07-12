@@ -58,6 +58,12 @@ export function NewProjectPage() {
                 setStep('recovering')
               }
             }
+          } else if (project.wizard_state && project.wizard_state.autoStart && project.wizard_state.prompt) {
+            if (isMounted) {
+              const ws = { ...project.wizard_state, autoStart: false };
+              await updateProject(token, projectId, { wizard_state: ws });
+              handlePromptSubmit(project.wizard_state.prompt);
+            }
           }
           // If no wizard_state.ideaId, stay at step 0 (prompt input)
         }
@@ -156,7 +162,7 @@ export function NewProjectPage() {
     }
   }
 
-  const handlePromptSubmit = async (val) => {
+  async function handlePromptSubmit(val) {
     setPrompt(val)
     setIsAnalyzing(true)
     

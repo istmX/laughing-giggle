@@ -138,7 +138,10 @@ export function Overview() {
 
   const handleNewProject = async (promptText) => {
     try {
-      const res = await createProject(token, { project_title: 'Untitled Project', initial_prompt: promptText })
+      const res = await createProject(token, { 
+        project_title: 'Untitled Project', 
+        wizard_state: promptText ? { prompt: promptText, autoStart: true } : {}
+      })
       if (res?.data?._id) {
         toast.success('Project created')
         navigate(`/projects/${res.data._id}`)
