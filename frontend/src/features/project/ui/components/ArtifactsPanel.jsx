@@ -2,14 +2,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Download, X, FileCode2, Loader2 } from 'lucide-react'
 import { GenerationProgress } from './GenerationProgress'
 
-/** Derive a color class from file extension */
+/** Derive a color class from file extension and type based on DESIGN.md */
 function fileIconColor(filePath = '') {
-  if (filePath.endsWith('.md')) return 'bg-emerald-500'
-  if (filePath.endsWith('.json')) return 'bg-blue-500'
-  if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) return 'bg-amber-500'
-  if (filePath.endsWith('.ts') || filePath.endsWith('.tsx')) return 'bg-sky-500'
-  if (filePath.endsWith('.js') || filePath.endsWith('.jsx')) return 'bg-yellow-500'
-  return 'bg-ink-muted'
+  if (filePath.includes('agents')) return 'bg-[#c5b0f4]' // Lilac
+  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return 'bg-[#dceeb1]' // Lime
+  if (filePath.includes('task') || filePath.includes('plan')) return 'bg-[#f3c9b6]' // Coral
+  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return 'bg-[#efd4d4]' // Pink
+  return 'bg-[#c8e6cd]' // Mint (default)
 }
 
 function basename(fp = '') {
@@ -19,18 +18,20 @@ function basename(fp = '') {
 function StatusBadge({ isGenerating }) {
   if (isGenerating) {
     return (
-      <motion.span
-        animate={{ opacity: [1, 0.6, 1] }}
-        transition={{ duration: 1.2, repeat: Infinity }}
-        className="text-[10px] font-medium px-1.5 py-0.5 rounded border bg-amber-50 text-amber-600 border-amber-200"
-      >
-        Generating…
-      </motion.span>
+      <span className="shrink-0 flex items-center gap-1.5">
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-[#fef9c3] text-[#a16207] border-[#fef08a] animate-pulse">
+          Generating
+        </span>
+      </span>
     )
   }
   return (
-    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200">
-      Ready
+    <span className="shrink-0 flex items-center gap-1.5">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]">
+        Ready
+      </span>
     </span>
   )
 }
@@ -119,32 +120,35 @@ export function ArtifactsPanel({
             ) : (
               <div className="flex flex-col">
                 {/* File list */}
-                <div className="p-3 flex flex-col gap-1.5 border-b border-hairline">
+                <div className="p-3 flex flex-col gap-1.5 border-b border-hairline/50">
                   {artifacts.map((a) => {
                     const isPending = !a.content || a.content === 'Pending generation...'
                     const isActive = activeArtifact?._id === a._id
+                    const cardBg = fileIconColor(a.file_path)
                     return (
-                      <button
+                      <motion.button
                         key={a._id}
+                        whileHover={{ x: 1 }}
+                        whileTap={{ scale: 0.99 }}
                         onClick={() => onSelectArtifact(a)}
-                        className={`rounded-lg border p-3 flex items-center gap-3 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 ${
+                        className={`rounded-lg border p-3 flex items-center gap-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 ${
                           isActive
-                            ? 'border-ink/25 bg-surface-soft shadow-sm'
-                            : 'border-hairline bg-canvas hover:bg-surface-soft cursor-pointer'
+                            ? 'border-ink bg-surface-soft shadow-sm'
+                            : 'border-hairline bg-canvas'
                         }`}
                       >
-                        {/* File type color square */}
-                        <div className={`h-7 w-7 rounded-md shrink-0 flex items-center justify-center ${fileIconColor(a.file_path)}`}>
-                          <span className="text-[9px] font-mono text-white font-bold uppercase">
+                        {/* File type color square — Vibrant solid block */}
+                        <div className={`h-8 w-8 rounded-lg shrink-0 flex items-center justify-center ${cardBg} shadow-sm`}>
+                          <span className="text-[10px] font-mono text-white font-bold uppercase">
                             {(a.file_path || '').split('.').pop()?.slice(0, 2) || 'F'}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-ink truncate">{basename(a.file_path)}</p>
-                          <p className="text-[11px] text-ink-muted truncate">{a.file_path}</p>
+                          <p className="text-[11px] text-ink-muted font-mono truncate">{a.file_path}</p>
                         </div>
                         <StatusBadge isGenerating={isPending} />
-                      </button>
+                      </motion.button>
                     )
                   })}
                 </div>
