@@ -12,6 +12,7 @@ export function useProjectData(token, projectId) {
   const [artifacts, setArtifacts] = useState([])
   const [activeArtifact, setActiveArtifact] = useState(null)
   const [isGeneratingArtifacts, setIsGeneratingArtifacts] = useState(false)
+  const [isSavingArtifact, setIsSavingArtifact] = useState(false)
   const [isArtifactsOpen, setIsArtifactsOpen] = useState(false)
   const [showSpecReady, setShowSpecReady] = useState(false)
   const [specContent, setSpecContent] = useState(null)
@@ -142,6 +143,8 @@ export function useProjectData(token, projectId) {
     setActiveArtifact,
     isGeneratingArtifacts,
     setIsGeneratingArtifacts,
+    isSavingArtifact,
+    setIsSavingArtifact,
     isArtifactsOpen,
     setIsArtifactsOpen,
     showSpecReady,

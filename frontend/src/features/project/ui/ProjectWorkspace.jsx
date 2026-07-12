@@ -47,6 +47,8 @@ export function ProjectWorkspace() {
     setActiveArtifact,
     isGeneratingArtifacts,
     setIsGeneratingArtifacts,
+    isSavingArtifact,
+    setIsSavingArtifact,
     isArtifactsOpen,
     setIsArtifactsOpen,
     showSpecReady,
