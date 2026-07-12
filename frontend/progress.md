@@ -1,5 +1,13 @@
 ## Completed
 
+- **Impeccable Chat Section Overhauls (Shape, Polish, Harden, Typeset)**:
+  - **Unified Chat Layout**: Standardized on a single conversation scroll thread. Removed mode switching layout jumps; the initial empty state and follow-up questions are inline messages.
+  - **Dedicated Spec-Ready Interstitial**: Replaced in-thread cream card specs with a full-panel overlay containing an optimized scrollable preview, progress details, and a clear action button ("Open workspace").
+  - **Archived Options Cleanup**: Added option cleaning to strip actionable option chips from previous messages in store and hydration state when new inputs are submitted.
+  - **Request Cancellation (Harden)**: Equipped the floating input with cancellation (AbortController) and turned the action button into a stop button (Square icon) during processing.
+  - **Failed Message Recovery**: Stored failed inputs on error to display a retry bar beneath the text area.
+  - **Typeset & Layout Limits**: Swapped layout properties and custom weights to standard `font-light` (300) and `font-normal` (400) options, raised timestamp text size to `text-[12px]`, and capped text area expansion to `max-h-[120px]` so inputs never obscure the conversation thread.
+
 - **Major UI Polish Overhaul (⭐⭐⭐⭐⭐ Priority items 1–8 implemented)**:
   - **Removed dashboard feeling from ProjectWorkspace**: Conversation now occupies almost the full screen. The Artifacts panel slides in from the right as a separate layer — it no longer competes visually with the chat.
   - **Claude-style chat redesign**: No more chat bubbles. User messages are right-aligned floating plain text. AI messages are left-aligned with a small 24×24 rounded-square icon (violet→indigo gradient with a Sparkles icon inside). Generous `space-y-1` + `py-3/4` padding between messages. Thin `border-hairline/30` dividers between each message. Max-width `max-w-3xl mx-auto` for better readability.
