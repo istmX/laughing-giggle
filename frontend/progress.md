@@ -35,6 +35,14 @@
   - Made artifacts editable in real-time with a debounced auto-save directly to the database.
   - Fully wired the "Download ZIP" button to export all generated architecture files directly to the user's browser.
   - Expanded the chat workspace's max width (`max-w-5xl`) for a better full-screen coding experience.
+- **Dashboard & UI Modernization (Today's Updates)**:
+  - [x] Refactored `DashboardShell` to use feature-based routing with nested `<Outlet>` navigation.
+  - [x] Created `features/recent` and `features/favorites` directories with isolated API fetchers and UI components.
+  - [x] Replaced mock data on the dashboard with live API calls.
+  - [x] Implemented a cinematic full-page transition overlay with `AnimatePresence`.
+  - [x] Overlay utilizes a perfectly centered (50% 50%) `clip-path` Iris Wipe reveal on every route change, powered by GSAP.
+  - [x] Integrated GSAP's `SplitText` for the page transition text, animating individual characters from random offsets, rotations, and blurs into a cohesive title.
+  - [x] Bound overlay background colors to `bg-ink` and text to `text-canvas` for maximum contrast and premium feel.
 - **Project Cascade Deletion**:
   - Configured `deleteProject` in the backend project service to automatically clean up all associated database resources (linked `Ideas`, `Briefs`, `Tasks`, `Contexts`, and `AIGenerations` tables) in a single request transaction when deleting a project.
 - **Developer Chat Sandbox and Message Scroller**:

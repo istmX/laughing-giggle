@@ -19,14 +19,7 @@ const getPageName = (pathname) => {
   return 'Loading...'
 }
 
-const EDGES = [
-  { x: 0, y: '-100vh' },
-  { x: 0, y: '100vh' },
-  { x: '-100vw', y: 0 },
-  { x: '100vw', y: 0 },
-]
-
-function PageOverlay({ pageName, edge }) {
+function PageOverlay({ pageName }) {
   const textRef = useRef(null)
 
   useGSAP(() => {
@@ -51,7 +44,7 @@ function PageOverlay({ pageName, edge }) {
       )
     })
 
-    // Fade and blur out all characters before the overlay slides away
+    // Fade and blur out all characters before the overlay iris wipes away
     tl.to(chars, { 
       opacity: 0, 
       scale: 1.1, 
@@ -64,17 +57,18 @@ function PageOverlay({ pageName, edge }) {
     return () => split.revert()
   }, [pageName])
 
+  // A circle of radius 150% guarantees covering the entire screen even from corners.
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-ink pointer-events-none"
-      initial={{ x: 0, y: 0 }}
+      initial={{ clipPath: `circle(150% at 50% 50%)` }}
       animate={{ 
-        ...edge, 
-        transition: { delay: 1.4, duration: 0.6, ease: [0.76, 0, 0.24, 1] } 
+        clipPath: `circle(0% at 50% 50%)`,
+        transition: { delay: 1.4, duration: 0.8, ease: [0.76, 0, 0.24, 1] } 
       }}
       exit={{ 
-        x: 0, y: 0, 
-        transition: { delay: 0, duration: 0.4, ease: [0.76, 0, 0.24, 1] } 
+        clipPath: `circle(150% at 50% 50%)`,
+        transition: { delay: 0, duration: 0.5, ease: [0.76, 0, 0.24, 1] } 
       }}
     >
       <motion.div 
@@ -94,8 +88,6 @@ export default function DashboardShell() {
   const element = useOutlet()
 
   const pageName = getPageName(location.pathname)
-  // Pick a random edge for this specific mount
-  const edge = useMemo(() => EDGES[Math.floor(Math.random() * EDGES.length)], [location.pathname])
 
   return (
     <div className="flex h-dvh w-full bg-background dashboard-bg overflow-hidden text-foreground font-sans" data-lenis-prevent="true">
@@ -114,7 +106,7 @@ export default function DashboardShell() {
             key={location.pathname}
             className="flex-1 flex flex-col h-full overflow-hidden relative"
           >
-            <PageOverlay pageName={pageName} edge={edge} />
+            <PageOverlay pageName={pageName} />
 
             <motion.main
               className="flex-1 flex flex-col h-full overflow-hidden"
@@ -122,7 +114,7 @@ export default function DashboardShell() {
               animate={{ 
                 opacity: 1, 
                 scale: 1, 
-                transition: { delay: 1.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
+                transition: { delay: 1.5, duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
               }}
               exit={{ 
                 opacity: 0, 
