@@ -540,6 +540,15 @@
       transparent 58%
     );
   }
+
+  .dashboard-bg {
+    background-image: radial-gradient(
+      circle at center,
+      color-mix(in oklch, var(--foreground) 10%, transparent) 1px,
+      transparent 1.2px
+    );
+    background-size: 24px 24px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

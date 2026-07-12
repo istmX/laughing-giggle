@@ -28,6 +28,16 @@ const projectSchema = new mongoose.Schema(
       default: "active"
     },
 
+    is_favorite: {
+      type: Boolean,
+      default: false
+    },
+
+    last_opened_at: {
+      type: Date,
+      default: Date.now
+    },
+
     wizard_state: {
       type: mongoose.Schema.Types.Mixed,
       default: {}

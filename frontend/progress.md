@@ -201,6 +201,8 @@ The home page now includes:
 - `$impeccable polish`: Performed a final quality pass to ensure components are clean, spacing is mathematically consistent, mobile/desktop states align, and there are no stray console logs or layout regressions.
 - **Dashboard Empty State Polish**: Applied Figma design system (`DESIGN.md`) colors and typography, leaving only a magenta folder icon and CTA button with spring physics (`Animations.md`) for a minimalist, delightful experience.
 - **Logout API Flow**: Wired up the `POST /auth/logout` API, documented it in `apidocs.md`, securely blacklisted the JWT token on the backend, and properly cleared `sessionStorage` and the `useAuth` store on the frontend.
+- **Dashboard Background Polish**: Added a subtle radial-gradient dot pattern (`.dashboard-bg`) that dynamically adapts to all themes (Light, Dark, Midnight, Emerald) using `color-mix`.
+- **Favorites & Recent Projects**: Added `is_favorite` and `last_opened_at` to the `Project` schema. Refactored `Overview.jsx` to group projects into "Favorites" and "Recent" sections, sorted by last opened date. Implemented an interactive favorite toggle.
 
 ---
 

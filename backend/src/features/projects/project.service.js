@@ -38,6 +38,8 @@ export const updateProject = async (userId, projectId, updateData) => {
   if (updateData.project_description) project.project_description = updateData.project_description;
   if (updateData.project_status) project.project_status = updateData.project_status;
   if (updateData.wizard_state !== undefined) project.wizard_state = updateData.wizard_state;
+  if (updateData.is_favorite !== undefined) project.is_favorite = updateData.is_favorite;
+  if (updateData.last_opened_at) project.last_opened_at = updateData.last_opened_at;
 
   await project.save();
   return project;
