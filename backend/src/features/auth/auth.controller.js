@@ -4,7 +4,7 @@ import User from './auth.model.js';
 import Blacklist from './blacklist.model.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import {verifyGoogleToken} from './auth.service.js'
+import { verifyFirebaseToken } from './auth.service.js';
 
 const buildUserResponse = (user) => ({
   id: user._id,
@@ -13,8 +13,9 @@ const buildUserResponse = (user) => ({
   email: user.email,
   provider: user.provider,
   avatar: user.avatar,
-  joinedAt: user.createdAt
-})
+  pfpUrl: user.pfpUrl,
+  joinedAt: user.createdAt,
+});
 
 
 
@@ -199,35 +200,23 @@ export const googleLogin = async (req, res) => {
 
     if (!credential) {
       return res.status(400).json({
-        message: "Google credential is required",
+        message: 'Google credential is required',
       });
     }
 
-    const payload = await verifyGoogleToken(credential);
+    const payload = await verifyFirebaseToken(credential);
 
-    const {
-      sub: googleId,
-      email,
-      name,
-      picture,
-    } = payload;
+    const { googleId, email, name, picture } = payload;
 
     let user = await User.findOne({
-      $or: [
-        { email },
-        { googleId }
-      ]
+      $or: [{ email }, { googleId }],
     });
 
     if (!user) {
-      const baseUsername = email.split("@")[0];
-
+      const baseUsername = email.split('@')[0];
       let username = baseUsername;
 
-      const existingUsername = await User.findOne({
-        username,
-      });
-
+      const existingUsername = await User.findOne({ username });
       if (existingUsername) {
         username = `${baseUsername}_${Date.now()}`;
       }
@@ -237,41 +226,35 @@ export const googleLogin = async (req, res) => {
         username,
         email,
         googleId,
-        provider: "google",
+        provider: 'google',
         avatar: picture,
+        pfpUrl: picture,
       });
     }
 
     const token = jwt.sign(
-      {
-        email: user.email,
-        id: user._id,
-      },
+      { email: user.email, id: user._id },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: '7d' }
     );
 
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({
-      message: "Google login successful",
+      message: 'Google login successful',
       userId: user._id,
       token: `Bearer ${token}`,
       user: buildUserResponse(user),
     });
-
   } catch (error) {
-    console.error("Google login error:", error);
-
+    console.error('Google login error:', error);
     return res.status(500).json({
-      message: "Google authentication failed",
+      message: 'Google authentication failed',
     });
   }
 };
