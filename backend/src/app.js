@@ -21,6 +21,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+import { globalRateLimiter } from './middleware/rateLimit.middleware.js';
 
 /**
     * Routes
@@ -36,7 +37,9 @@ import ArtifactRouter from './features/artifacts/artifact.routes.js';
 import ProfileRouter from './features/profile/profile.routes.js';
 import PlaygroundRouter from './features/playground/playground.routes.js';
 import AdminRouter from './features/admin/admin.routes.js';
+import ExploreRouter from './features/explore/explore.routes.js';
 
+app.use('/api', globalRateLimiter);
 app.use('/api/auth',AuthRouter)
 app.use('/api/projects', ProjectRouter);
 app.use('/api/tasks', TaskRouter);
@@ -48,6 +51,7 @@ app.use('/api/artifacts', ArtifactRouter);
 app.use('/api/profile', ProfileRouter);
 app.use('/api/playground', PlaygroundRouter);
 app.use('/api/admin', AdminRouter);
+app.use('/api/explore', ExploreRouter);
 
 // Handle undefined routes
 app.use((req, res, next) => {

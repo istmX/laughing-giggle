@@ -1,15 +1,9 @@
 import mongoose from "mongoose";
 import AiGeneration from "../ai.model.js";
-import { deepseekProvider } from "../providers/deepseek.provider.js";
-import { GroqProvider } from "../providers/groq.provider.js";
-import { geminiProvider } from "../providers/gemini.provider.js";
-import { GroqService } from "../services/groq.service.js";
+import { executeWithFallback } from "../graphs/fallback_chain.js";
 
 export class AiController {
   constructor() {
-    this.deepseek = new deepseekProvider();
-    this.groq = new GroqProvider();
-    this.gemini = new geminiProvider();
   }
 
   analyzeIdea = async (req, res) => {
@@ -20,16 +14,14 @@ export class AiController {
         }
         
        if (idea){
-        const groqResult = await this.groq.analyze(idea);
-        
-        const groqAnalysis = await GroqService.analyzeIdeaWithGroq(idea);
+        const prompt = `Analyze this idea: ${idea}`;
+        const analysis = await executeWithFallback(prompt);
         return res.status(200).json({ success: true, message: "Idea analyzed successfully", data: {
-            groq: groqAnalysis,
+            groq: analysis.response,
         }
            
         });
        }
-
 
         }
     

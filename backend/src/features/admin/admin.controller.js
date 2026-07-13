@@ -36,3 +36,30 @@ export const getStats = async (req, res, next) => {
     next(new AppError(error.message, 500));
   }
 };
+
+export const createUser = async (req, res, next) => {
+  try {
+    const user = await adminService.createUser(req.body);
+    res.status(201).json({ message: 'User created successfully', user });
+  } catch (error) {
+    next(new AppError(error.message, 400));
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    await adminService.deleteUser(req.params.userId);
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    next(new AppError(error.message, 500));
+  }
+};
+
+export const deleteProject = async (req, res, next) => {
+  try {
+    await adminService.deleteProject(req.params.projectId);
+    res.status(200).json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    next(new AppError(error.message, 500));
+  }
+};

@@ -6,13 +6,13 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 export const executeWithFallback = async (promptText) => {
     const groq = new ChatGroq({
         apiKey: process.env.GROQ_API_KEY,
-        modelName: "llama3-70b-8192", // Or appropriate model
+        modelName: "llama3-70b-8192", 
         temperature: 0.2
     });
 
     const gemini = new ChatGoogleGenerativeAI({
         apiKey: process.env.GEMINI_API_KEY,
-        modelName: "gemini-1.5-pro",
+        model: "gemini-2.5-flash",
         temperature: 0.2
     });
 
@@ -26,7 +26,7 @@ export const executeWithFallback = async (promptText) => {
 
     const result = await chain.invoke(promptText);
 
-    // We parse the result here assuming it's JSON since the old orchestrator parsed JSON
+    
     try {
         const cleaned = result.replace(/```json/g, '').replace(/```/g, '').trim();
         return { response: JSON.parse(cleaned), providerUsed: "langchain-fallback", fallbackUsed: true, fallbackProvider: "unknown" };

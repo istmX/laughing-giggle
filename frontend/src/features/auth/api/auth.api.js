@@ -11,10 +11,29 @@ const getBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL
 }
 
+const getStoredToken = () => {
+  try {
+    const stored = localStorage.getItem('zenix-auth')
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      return parsed?.state?.token || null
+    }
+  } catch (e) {
+    return null
+  }
+  return null
+}
+
 const authFetch = async (path, options = {}) => {
   const { headers, ...rest } = options
 
-  const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+  await auth.authStateReady();
+  let token = null;
+  if (auth.currentUser) {
+    token = await auth.currentUser.getIdToken();
+  } else {
+    token = getStoredToken();
+  }
 
   const response = await fetch(`${getBaseUrl()}${path}`, {
     cache: 'no-cache',

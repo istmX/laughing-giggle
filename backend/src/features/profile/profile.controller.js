@@ -43,3 +43,24 @@ export const deleteAccount = async (req, res, next) => {
     next(new AppError(error.message, 500));
   }
 };
+
+export const getPublicProfile = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const data = await profileService.getPublicProfile(username);
+    res.status(200).json(data);
+  } catch (error) {
+    const status = error.message === 'This profile is private' ? 403 : 404;
+    next(new AppError(error.message, status));
+  }
+};
+
+export const toggleFollow = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const result = await profileService.toggleFollow(req.user.id, username);
+    res.status(200).json(result);
+  } catch (error) {
+    next(new AppError(error.message, 400));
+  }
+};

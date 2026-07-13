@@ -9,8 +9,10 @@ const buildUserResponse = (user) => ({
   email: user.email,
   provider: user.provider,
   avatar: user.avatar,
-  pfpUrl: user.pfpUrl,
   joinedAt: user.createdAt,
+  isAdmin: user.isAdmin,
+  isVerified: user.isVerified,
+  loyaltyBadges: user.loyaltyBadges,
 });
 
 export const registerUser = async (req,res)=> {
@@ -159,7 +161,6 @@ export const googleLogin = async (req, res) => {
         googleId,
         provider: 'google',
         avatar: picture,
-        pfpUrl: picture,
       });
     }
 

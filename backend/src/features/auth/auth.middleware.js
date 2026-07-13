@@ -34,6 +34,13 @@ export const authMiddleware = async (req, res, next) => {
         }
 
         req.user = user;
+        
+        // Asynchronously update last active status if it's been more than 5 minutes to avoid DB spam
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (!user.lastActiveAt || user.lastActiveAt < fiveMinutesAgo) {
+            User.updateOne({ _id: user._id }, { $set: { lastActiveAt: new Date() } }).exec().catch(err => console.error('Failed to update lastActiveAt', err));
+        }
+
         next();
     } catch (error) {
         console.error('Auth middleware error:', error);
@@ -45,6 +52,14 @@ export const isLoggedIn = async (req, res, next) => {
     try {
         const user = await verifyTokenAndGetUser(req);
         req.user = user; /* Will be null if not logged in */
+        
+        if (user) {
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+            if (!user.lastActiveAt || user.lastActiveAt < fiveMinutesAgo) {
+                User.updateOne({ _id: user._id }, { $set: { lastActiveAt: new Date() } }).exec().catch(err => console.error('Failed to update lastActiveAt', err));
+            }
+        }
+        
         next();
     } catch (error) {
         console.error('isLoggedIn middleware error:', error);

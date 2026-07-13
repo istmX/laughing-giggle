@@ -1,4 +1,4 @@
-import orchestrator from "../orchestrator/ai.orchestrator.js";
+import { executeWithFallback } from "../graphs/fallback_chain.js";
 import Project from "../../projects/project.model.js";
 import { artifactService } from "../../artifacts/artifact.service.js";
 
@@ -33,17 +33,17 @@ DO NOT output raw markdown outside of the JSON. Only return valid JSON.`;
     const chatLog = history.map(h => `User: ${h.question}\nZenix: ${h.answer}`).join("\n");
     const fullPrompt = `${systemPrompt}\n\nChat History:\n${chatLog}\n\nUser: ${userMessage}\nZenix:`;
 
-    const aiResponse = await orchestrator.execute("developerChat", fullPrompt);
+    const aiResponse = await executeWithFallback(fullPrompt);
     
     let parsedResult;
     try {
-      const content = aiResponse.response.content;
+      const content = aiResponse.response;
       const jsonString = content.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
       parsedResult = JSON.parse(jsonString);
     } catch (e) {
       // Fallback if AI fails to output JSON
       parsedResult = {
-        message: aiResponse.response.content,
+        message: typeof aiResponse.response === "string" ? aiResponse.response : JSON.stringify(aiResponse.response),
         updates: []
       };
     }

@@ -45,11 +45,6 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    pfpUrl: {
-      type: String,
-      default: null,
-    },
-
     isVerified: {
       type: Boolean,
       default: false,
@@ -60,6 +55,34 @@ const userSchema = new mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false,
+    },
+    
+    isPublic: {
+      type: Boolean,
+      default: true,
+    },
+
+    bio: {
+      type: String,
+      default: "",
+    },
+
+    location: {
+      type: String,
+      default: "",
+    },
+
+    personalLink: {
+      type: String,
+      default: "",
+    },
+
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    
+    lastActiveAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   {
