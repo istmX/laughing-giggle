@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, ArrowUp, Square, RotateCcw, Sparkles, Menu, FileText } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { getProjectArtifacts, downloadArtifactsZip, updateArtifact } from '@/features/artifacts/api/artifacts.api'
+import { downloadArtifactsZip, updateArtifact } from '@/features/artifacts/api/artifacts.api'
 import { useChatStore } from '../store/useChatStore'
+import { toast } from 'react-hot-toast'
 
 import { Sidebar } from '@/Dashboard/components/Sidebar'
 import { MessageScrollerProvider, MessageScroller, MessageScrollerViewport, MessageScrollerContent, MessageScrollerItem, MessageScrollerButton } from '@/components/ui/message-scroller'
@@ -64,6 +65,7 @@ export function ProjectWorkspace() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const abortControllerRef = useRef(null)
   const inputRef = useRef(null)
@@ -94,12 +96,12 @@ export function ProjectWorkspace() {
     document.removeEventListener('mouseup', handleMouseUp)
   }
 
-  // Auto-focus input once page loads
+
   useEffect(() => {
     if (!isPageLoading && inputRef.current) inputRef.current.focus()
   }, [isPageLoading])
 
-  // Extract handlers logic to isolate business logic
+  
   const { handleSend } = useChatHandlers({
     token,
     projectId,

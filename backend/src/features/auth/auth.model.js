@@ -44,6 +44,23 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    pfpUrl: {
+      type: String,
+      default: null,
+    },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    loyaltyBadges: [{ type: String }],
+
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
