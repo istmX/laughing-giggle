@@ -348,3 +348,4 @@ The home page now includes:
   - Fixed the context-loss bug when users submitted new projects via the Dashboard modal by passing a `wizard_state: { autoStart: true, prompt }` payload, which `NewProjectPage` now intercepts to seamlessly bypass the redundant step 0 text box and begin AI processing automatically.
   - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
 
+- **Firebase Auth Migration (Full)**: Replaced custom JWT auth with Firebase Email/Password Auth across both frontend (`auth.api.js`, `useAuth.js`, `Login.jsx`, `Signup.jsx`) and backend (`auth.controller.js`, `auth.middleware.js`), removing bcrypt/jwt dependencies and switching to `verifyFirebaseToken`.
