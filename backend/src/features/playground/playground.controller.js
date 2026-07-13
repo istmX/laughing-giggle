@@ -1,5 +1,6 @@
 import { playgroundService } from './playground.service.js';
 import AppError from '../../utils/AppError.js';
+import { playgroundGraph } from '../ai/graphs/playground.graph.js';
 
 export const createSession = async (req, res, next) => {
   try {
@@ -50,5 +51,40 @@ export const updateSessionTitle = async (req, res, next) => {
     res.status(200).json({ session });
   } catch (error) {
     next(new AppError(error.message, 404));
+  }
+};
+
+export const addMessage = async (req, res, next) => {
+  try {
+    const { message } = req.body;
+    if (!message) return next(new AppError('Message is required', 400));
+
+    const sessionWithUserMessage = await playgroundService.addMessage(
+      req.params.sessionId,
+      req.user.id,
+      'user',
+      message
+    );
+
+    const messages = sessionWithUserMessage.chatHistory.map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const finalState = await playgroundGraph.invoke({
+      messages,
+      designTokens: sessionWithUserMessage.tokens || {},
+    });
+
+    const session = await playgroundService.updatePreview(
+      req.params.sessionId,
+      req.user.id,
+      finalState.previewHtml,
+      finalState.designTokens
+    );
+
+    res.status(200).json({ session });
+  } catch (error) {
+    next(new AppError(error.message, 500));
   }
 };
