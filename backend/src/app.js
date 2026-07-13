@@ -34,6 +34,7 @@ app.use(cookieParser());
 **/
 import ArtifactRouter from './features/artifacts/artifact.routes.js';
 import ProfileRouter from './features/profile/profile.routes.js';
+import PlaygroundRouter from './features/playground/playground.routes.js';
 
 app.use('/api/auth',AuthRouter)
 app.use('/api/projects', ProjectRouter);
@@ -44,6 +45,7 @@ app.use('/api/brief', BriefRouter);
 app.use('/api/ai', AIRouter)
 app.use('/api/artifacts', ArtifactRouter);
 app.use('/api/profile', ProfileRouter);
+app.use('/api/playground', PlaygroundRouter);
 
 // Handle undefined routes
 app.use((req, res, next) => {
