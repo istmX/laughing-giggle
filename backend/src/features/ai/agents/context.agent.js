@@ -1,4 +1,4 @@
-import orchestrator from "../orchestrator/ai.orchestrator.js";
+import { executeWithFallback } from "../graphs/fallback_chain.js";
 import { buildContextPrompt } from "../prompts/context.prompt.js";
 
 export const contextAgent = {
@@ -7,6 +7,6 @@ export const contextAgent = {
       throw new Error('Invalid input: data.idea must be a non-empty string');
     }
     const prompt = buildContextPrompt(data);
-    return await orchestrator.execute("generateContext", prompt);
+    return await executeWithFallback(prompt);
   }
 };
