@@ -2,19 +2,47 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Calendar, Shield, FileText, Trash2, ChevronRight, KeyRound, ArrowRight } from 'lucide-react'
 
-export const ProfileDetails = ({ profile }) => {
+export const ProfileDetails = ({ profile, updatePfp, deleteAccount }) => {
   const [overrideAvatar, setOverrideAvatar] = useState(false)
   const [seedSuffix, setSeedSuffix] = useState('')
+  const [isUpdatingPfp, setIsUpdatingPfp] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   if (!profile) return null
 
-  const displayAvatar = (profile.avatar && !overrideAvatar)
-    ? profile.avatar
-    : `https://api.dicebear.com/10.x/pixel-art/svg?seed=${encodeURIComponent(profile.username + seedSuffix)}`
+  // Backend model uses pfpUrl. If it's missing, fallback to avatar (Google). 
+  // If no avatar, generate from dicebear.
+  const baseAvatar = profile.pfpUrl || profile.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.username)}`
+  const displayAvatar = overrideAvatar 
+    ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.username + seedSuffix)}`
+    : baseAvatar
 
-  const handleRandomizeAvatar = () => {
-    setOverrideAvatar(true)
-    setSeedSuffix(Math.random().toString(36).substring(7))
+  const handleRandomizeAvatar = async () => {
+    setIsUpdatingPfp(true)
+    try {
+      const newSeed = Math.random().toString(36).substring(7)
+      const newUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile.username + newSeed)}`
+      await updatePfp(newUrl)
+      setOverrideAvatar(true)
+      setSeedSuffix(newSeed)
+    } catch (err) {
+      console.error('Failed to update PFP', err)
+    } finally {
+      setIsUpdatingPfp(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+      setIsDeleting(true)
+      try {
+        await deleteAccount()
+        window.location.href = '/' // redirect to home/login
+      } catch (err) {
+        console.error('Failed to delete account', err)
+        setIsDeleting(false)
+      }
+    }
   }
 
   return (
@@ -46,9 +74,10 @@ export const ProfileDetails = ({ profile }) => {
             </button>
             <button 
               onClick={handleRandomizeAvatar}
-              className="bg-background text-foreground text-button font-480 px-6 py-3 rounded-full hover:scale-105 transition-transform shadow-sm"
+              disabled={isUpdatingPfp}
+              className="bg-background text-foreground text-button font-480 px-6 py-3 rounded-full hover:scale-105 transition-transform shadow-sm disabled:opacity-50"
             >
-              Change avatar
+              {isUpdatingPfp ? 'Updating...' : 'Change avatar'}
             </button>
           </div>
         </div>
@@ -135,11 +164,15 @@ export const ProfileDetails = ({ profile }) => {
             {/* Danger Zone Block (Pink) */}
             <div className="pt-8 mt-8 border-t border-hairline">
               <h2 className="text-body font-540 tracking-body text-destructive mb-4">Danger Zone</h2>
-              <button className="w-full flex items-center justify-between p-6 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors group border border-destructive/20">
+              <button 
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="w-full flex items-center justify-between p-6 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors group border border-destructive/20 disabled:opacity-50"
+              >
                 <div className="flex items-center gap-4">
                   <Trash2 className="h-6 w-6 text-destructive" strokeWidth={1.5} />
                   <div className="text-left">
-                    <span className="block text-body-lg font-480 text-destructive">Delete Account</span>
+                    <span className="block text-body-lg font-480 text-destructive">{isDeleting ? 'Deleting...' : 'Delete Account'}</span>
                     <span className="block text-body-sm font-320 text-destructive/80 mt-1">Permanently remove your data</span>
                   </div>
                 </div>

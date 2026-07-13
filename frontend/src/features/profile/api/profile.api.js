@@ -6,3 +6,25 @@ export const getMe = async (token) => {
     token,
   })
 }
+
+export const getProfile = async () => {
+  return authFetch('/profile', { method: 'GET' });
+};
+
+export const updateProfile = async (data) => {
+  return authFetch('/profile', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const updatePfp = async (pfpUrl) => {
+  return authFetch('/profile/pfp', {
+    method: 'PUT',
+    body: JSON.stringify({ pfpUrl }),
+  });
+};
+
+export const deleteAccount = async () => {
+  return authFetch('/profile', { method: 'DELETE' });
+};
