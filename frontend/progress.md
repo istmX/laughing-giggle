@@ -1,3 +1,21 @@
+## Backend Phase Implementation (Latest)
+
+- **User Model Extended**: Added `pfpUrl`, `isVerified`, `loyaltyBadges`, `isAdmin` fields to User schema.
+- **Firebase Auth Migration**: Replaced google-auth-library with firebase-admin SDK for Google login token verification. Google sign-in PFP is now saved to both `avatar` and `pfpUrl` fields.
+- **Profile Feature**: New backend domain `src/features/profile/` with endpoints:
+  - `GET /api/profile` — Fetch current user profile
+  - `PUT /api/profile` — Update name/username with uniqueness validation
+  - `PUT /api/profile/pfp` — Save a DiceBear or Google avatar URL to the user record
+  - `DELETE /api/profile` — Cascade delete account, projects, and artifacts
+- **Playground Feature**: New backend domain `src/features/playground/` with full session CRUD:
+  - `POST /api/playground` — Create new design session
+  - `GET /api/playground` — List all user sessions
+  - `GET /api/playground/:sessionId` — Load session with full chat history
+  - `PUT /api/playground/:sessionId/title` — Rename a session
+  - `DELETE /api/playground/:sessionId` — Delete session
+  - Session model stores: title, chatHistory, token state, and compiled previewHtml
+- **LangGraph Graph Stubs**: Created `src/features/ai/graphs/` with placeholder files for `pm_wizard.graph.js`, `context_engine.graph.js`, and `playground.graph.js`. Ready for full implementation after `@langchain/langgraph` installation.
+
 ## Completed
 
 - **Artifacts Explorer & Panel Enhancements**:
