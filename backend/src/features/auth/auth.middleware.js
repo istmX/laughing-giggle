@@ -1,11 +1,9 @@
-import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
-import Blacklist from './blacklist.model.js';
 import User from './auth.model.js';
+import { verifyFirebaseToken } from './auth.service.js';
 
 /* Helper to extract and verify token and get user */
 const verifyTokenAndGetUser = async (req) => {
-    let token = req.cookies.token;
+    let token;
 
     if (req.headers.authorization) {
         const match = req.headers.authorization.match(/^Bearer\s+(.+)$/i);
@@ -16,17 +14,15 @@ const verifyTokenAndGetUser = async (req) => {
 
     if (!token) return null;
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    try {
+        const { email } = await verifyFirebaseToken(token);
+        const user = await User.findOne({ email }).select('-password');
+        if (!user) return null;
 
-    /* Check if token is blacklisted (using hash) */
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const isBlacklisted = await Blacklist.findOne({ tokenHash });
-    if (isBlacklisted) return null;
-    
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user) return null;
-
-    return user;
+        return user;
+    } catch (error) {
+        return null;
+    }
 };
 
 export const authMiddleware = async (req, res, next) => {

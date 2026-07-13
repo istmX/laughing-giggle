@@ -18,7 +18,7 @@ const state = {
 
 const llm = new ChatGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
-  modelName: "gemini-1.5-pro",
+  modelName: "gemini-2.5-flash",
 });
 
 const generateContext = async (state) => {
@@ -34,7 +34,7 @@ const generateArtifact = async (state) => {
 };
 
 const validateArtifact = async (state) => {
-  // Dummy validation node
+
   return { ...state };
 };
 

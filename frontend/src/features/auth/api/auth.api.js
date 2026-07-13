@@ -1,3 +1,6 @@
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+
 const DEFAULT_BASE_URL = 'http://localhost:3000/api'
 
 const getGoogleClientId = () => {
@@ -9,14 +12,17 @@ const getBaseUrl = () => {
 }
 
 const authFetch = async (path, options = {}) => {
-  const { token, headers, ...rest } = options
+  const { headers, ...rest } = options
+
+  const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
   const response = await fetch(`${getBaseUrl()}${path}`, {
     cache: 'no-cache',
     ...rest,
-    credentials: 'include',
+    credentials: 'omit',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
   })
@@ -39,30 +45,37 @@ const authFetch = async (path, options = {}) => {
 }
 
 const loginUser = async ({ email, password }) => {
-  return authFetch('/auth/login', {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const token = await userCredential.user.getIdToken();
+  const res = await authFetch('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
-  })
+    body: JSON.stringify({ token }),
+  });
+  return { ...res, token };
 }
 
 const registerUser = async ({ name, username, email, password }) => {
-  return authFetch('/auth/register', {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const token = await userCredential.user.getIdToken();
+  const res = await authFetch('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ name, username, email, password }),
-  })
+    body: JSON.stringify({ token, name, username }),
+  });
+  return { ...res, token };
 }
 
 const googleLogin = async ({ credential }) => {
-  return authFetch('/auth/google-login', {
+  const res = await authFetch('/auth/google-login', {
     method: 'POST',
     body: JSON.stringify({ credential }),
-  })
+  });
+  return { ...res, token: credential };
 }
 
-const logoutUser = async (token) => {
+const logoutUser = async () => {
+  await auth.signOut();
   return authFetch('/auth/logout', {
     method: 'POST',
-    token: token,
   })
 }
 

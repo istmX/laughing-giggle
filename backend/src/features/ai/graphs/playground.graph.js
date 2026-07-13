@@ -18,7 +18,7 @@ const state = {
 
 const llm = new ChatGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_II,
-  modelName: "gemini-1.5-pro",
+  modelName: "gemini-2.5-flash",
 });
 
 const processFeedback = async (state) => {
