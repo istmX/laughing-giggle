@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto';
 import User from './auth.model.js';
-import Blacklist from './blacklist.model.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import {verifyGoogleToken} from './auth.service.js'
+import { verifyFirebaseToken } from './auth.service.js';
 
 const buildUserResponse = (user) => ({
   id: user._id,
@@ -13,22 +9,21 @@ const buildUserResponse = (user) => ({
   email: user.email,
   provider: user.provider,
   avatar: user.avatar,
-  joinedAt: user.createdAt
-})
-
-
+  joinedAt: user.createdAt,
+  isAdmin: user.isAdmin,
+  isVerified: user.isVerified,
+  loyaltyBadges: user.loyaltyBadges,
+});
 
 export const registerUser = async (req,res)=> {
  try {
-    const {name ,username,email,password} =req.body;
+    const {token, name ,username} =req.body;
 
-    if(!name || !username || !email || !password){
+    if(!token || !name || !username){
         return res.status(400).json({message:"All fields are required"});
     }
-     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({message:"Invalid email format"});
-    }
+
+    const { email, googleId } = await verifyFirebaseToken(token);
 
     const existingUser = await User.findOne({email})
     if (existingUser) {
@@ -40,37 +35,23 @@ export const registerUser = async (req,res)=> {
     }
     const existingUsername = await User.findOne({username})
 
-
     if(existingUsername){
         return res.status(400).json({message:"Username already taken"});
     }
 
-
-    const hashedPassword = await bcrypt.hash(password,12);
-  
     const newUser = new User({
         name,
         username,
         email,
-        password:hashedPassword
+        googleId,
+        provider: 'local'
     })
     await newUser.save();
-
-
-    const token = jwt.sign({email, id: newUser._id},process.env.JWT_SECRET,{expiresIn:'7d'})
-
-    res.cookie('token',token,{
-        httpOnly:true,
-        secure:process.env.NODE_ENV === 'production',
-        sameSite:'strict',
-        maxAge:7*24*60*60*1000
-    })
 
     res.status(201).json({
         message:"User registered successfully",
         userId:newUser._id,
-      token: `Bearer ${token}`,
-      user: buildUserResponse(newUser)
+        user: buildUserResponse(newUser)
     });
  }
     catch (error) {
@@ -90,43 +71,26 @@ export const registerUser = async (req,res)=> {
     }
 }
 
-
-
 export const loginUser = async (req,res)=>{
     try {
-        const {email,password} = req.body;
+        const {token} = req.body;
         
-        if (!email || !password) {
-            return res.status(400).json({message:"Email and password are required"});
+        if (!token) {
+            return res.status(400).json({message:"Token is required"});
         }
+
+        const { email } = await verifyFirebaseToken(token);
 
         const user = await User.findOne({email});
 
         if(!user) {
-            return res.status(400).json({message:"Invalid email or password"});
+            return res.status(400).json({message:"User not found"});
         }
-
-        const isPasswordValid = await bcrypt.compare(password,user.password);
-
-        if(!isPasswordValid){
-            return res.status(400).json({message:"Invalid email or password"});
-        }
-
-
-        const token = jwt.sign({email, id: user._id},process.env.JWT_SECRET,{expiresIn:'7d'})
-
-        res.cookie('token',token,{
-            httpOnly:true,
-            secure:process.env.NODE_ENV === 'production',
-            sameSite:'strict',
-            maxAge:7*24*60*60*1000
-        })
 
         res.status(200).json({
             message:"Login successful",
             userId:user._id,
-          token: `Bearer ${token}`,
-          user: buildUserResponse(user)
+            user: buildUserResponse(user)
         });
 
     }
@@ -136,33 +100,8 @@ export const loginUser = async (req,res)=>{
     }
 }
 
-
-
 export const logoutUser = async (req,res)=>{
     try {
-        let token = req.cookies.token;
-
-        if (req.headers.authorization) {
-            const match = req.headers.authorization.match(/^Bearer\s+(.+)$/i);
-            if (match) {
-                token = match[1];
-            }
-        }
-
-        if (token) {
-            const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-            await Blacklist.findOneAndUpdate(
-                { tokenHash },
-                { tokenHash },
-                { upsert: true, returnDocument: 'after' }
-            );
-        }
-
-        res.clearCookie('token',{
-            httpOnly:true,
-            secure:process.env.NODE_ENV === 'production',
-            sameSite:'strict',
-        })
         res.status(200).json({message:"Logout successful"});
     }
     catch (error) {
@@ -170,10 +109,6 @@ export const logoutUser = async (req,res)=>{
         res.status(500).json({message:"Server error"});
     }
 }
-
-
-
-
 
 export const getMe = async (req, res) => {
     try {
@@ -192,42 +127,29 @@ export const getMe = async (req, res) => {
     }
 };
 
-
 export const googleLogin = async (req, res) => {
   try {
     const { credential } = req.body;
 
     if (!credential) {
       return res.status(400).json({
-        message: "Google credential is required",
+        message: 'Google credential is required',
       });
     }
 
-    const payload = await verifyGoogleToken(credential);
+    const payload = await verifyFirebaseToken(credential);
 
-    const {
-      sub: googleId,
-      email,
-      name,
-      picture,
-    } = payload;
+    const { googleId, email, name, picture } = payload;
 
     let user = await User.findOne({
-      $or: [
-        { email },
-        { googleId }
-      ]
+      $or: [{ email }, { googleId }],
     });
 
     if (!user) {
-      const baseUsername = email.split("@")[0];
-
+      const baseUsername = email.split('@')[0];
       let username = baseUsername;
 
-      const existingUsername = await User.findOne({
-        username,
-      });
-
+      const existingUsername = await User.findOne({ username });
       if (existingUsername) {
         username = `${baseUsername}_${Date.now()}`;
       }
@@ -237,41 +159,20 @@ export const googleLogin = async (req, res) => {
         username,
         email,
         googleId,
-        provider: "google",
+        provider: 'google',
         avatar: picture,
       });
     }
 
-    const token = jwt.sign(
-      {
-        email: user.email,
-        id: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return res.status(200).json({
-      message: "Google login successful",
+      message: 'Google login successful',
       userId: user._id,
-      token: `Bearer ${token}`,
       user: buildUserResponse(user),
     });
-
   } catch (error) {
-    console.error("Google login error:", error);
-
+    console.error('Google login error:', error);
     return res.status(500).json({
-      message: "Google authentication failed",
+      message: 'Google authentication failed',
     });
   }
 };

@@ -1,4 +1,77 @@
+## Backend LangGraph Phase
+
+- **LangGraph Integration**: Implemented `context_engine.graph.js` and `playground.graph.js` using `@langchain/langgraph` and `@langchain/google-genai`.
+- **Playground API Logic**: Hooked the Playground controller (`addMessage`) into the LangGraph state machine to process design feedback and compile HTML previews.
+- **Upstash Redis Rate Limiting**: Added rate-limiting middleware for the playground endpoints to restrict queries.
+## Frontend Phase Implementation
+
+- **Firebase Auth Migration**: Replaced `gsi/client` with `firebase` SDK in `useGoogleAuth.js`.
+- **Profile UI**: Implemented `ProfilePage` (Dashboard) and `PublicProfilePage` (Public Route) with DESIGN.md tokens.
+  - Built inline editing mode for Name and Username with live backend synchronization, upgraded to a dedicated `ProfileEditModal` for a premium UX.
+  - Implemented dynamic avatar randomization and picker using `@dicebear/core` API inside `AvatarPickerModal`.
+  - Built token-compliant `isPublic` privacy toggle with Framer Motion spring physics.
+  - Added "Templates Grid" showcase for both the private dashboard and public `/u/:username` route with embedded HTML iframe previews.
+  - Added "Share Profile" button to user's dashboard profile view.
+  - Enforced strict color contrast and multi-theme adaptability for Badges and UI blocks.
+## Backend Phase Implementation (Latest)
+
+- **User Model Extended**: Added `pfpUrl`, `isVerified`, `loyaltyBadges`, `isAdmin` fields to User schema.
+- **Firebase Auth Migration**: Replaced google-auth-library with firebase-admin SDK for Google login token verification. Google sign-in PFP is now saved to both `avatar` and `pfpUrl` fields.
+- **Profile Feature**: New backend domain `src/features/profile/` with endpoints:
+  - `GET /api/profile` — Fetch current user profile
+  - `PUT /api/profile` — Update name/username/isPublic with uniqueness validation
+  - `PUT /api/profile/pfp` — Save a DiceBear or Google avatar URL to the user record
+  - `DELETE /api/profile` — Cascade delete account, projects, and artifacts
+  - `GET /api/profile/u/:username` — Public route to fetch public profiles securely
+- **Explore Feature**: New backend domain `src/features/explore/` with endpoints:
+  - `GET /api/explore/users` — Paginated list of public profiles
+  - `GET /api/explore/users/search?q=` — Regex search across names and usernames
+  - `GET /api/explore/users/top` — Leaderboard fetch for top public creators
+- **Playground Feature**: New backend domain `src/features/playground/` with full session CRUD:
+  - `POST /api/playground` — Create new design session
+  - `GET /api/playground` — List all user sessions
+  - `GET /api/playground/:sessionId` — Load session with full chat history
+  - `PUT /api/playground/:sessionId/title` — Rename a session
+  - `DELETE /api/playground/:sessionId` — Delete session
+  - Session model stores: title, chatHistory, token state, and compiled previewHtml
+- **LangGraph Graph Stubs**: Created `src/features/ai/graphs/` with placeholder files for `pm_wizard.graph.js`, `context_engine.graph.js`, and `playground.graph.js`. Ready for full implementation after `@langchain/langgraph` installation.
+
 ## Completed
+
+- **Community Search & Hashmaps Integration**:
+  - Implemented the `CommunityPage.jsx` component adhering strictly to `DESIGN.md` monochrome + accent block styling.
+  - Wired an in-memory `UserSearchIndex` (Trie + Hashmap) into `backend/src/features/explore/explore.service.js` for instant, regex-free user lookups.
+  - Added an active status indicator (`lastActiveAt`) to user cards, tracked via asynchronous backend middleware inside `auth.middleware.js`.
+  - Fixed Community Search to properly handle search URLs and filter out the currently logged-in user from the results.
+  - Fixed Community Page layout to allow natural vertical scrolling and prevented the empty state text from crunching on smaller screens.
+  - Added the `explore.api.js` client in `frontend/src/features/explore/api/` and hooked up the UI for `/dashboard/community`.
+  - Replaced native alerts and confirm boxes with non-blocking toast models.
+
+- **Profile Network Modals**:
+  - Upgraded the public profile followers/following modals to fetch and render actual populated lists.
+  - Populated `followers` and `following` arrays in the `getPublicProfile` backend controller to map real user objects (names, avatars, active status) instead of just returning count integers.
+
+- **AI Playground Frontend UI**:
+  - Implemented the AI Playground frontend features in `src/features/playground`.
+  - Added `api/playground.api.js` for API communications using `authFetch`.
+  - Added `store/playground.store.js` utilizing Zustand for robust session state management.
+  - Implemented `hooks/usePlayground.js` to manage UI hooks.
+  - Built `ui/Playground.jsx` which hosts a split-pane layout with session sidebar, chat history interface, and HTML preview block.
+  - Registered `/playground` in `AppRoutes.jsx` and updated the Dashboard Sidebar to link to it.
+
+- **Admin Dashboard Implementation**:
+  - Built the global admin panel at `/ary/8776/admin` protected route.
+  - Implemented `frontend/src/features/admin/ui/AdminDashboard.jsx` using `DESIGN.md` tokens (monochrome UI with signature lime color-block section for metrics).
+  - Wired `admin.api.js` to the backend `/admin/stats`, `/admin/users`, and `/admin/projects` endpoints for real-time monitoring.
+  - Resolved `users.slice` array unwrap bug on admin API response.
+  - Completely detached the Admin Dashboard from the user database `isAdmin` flag, migrating it to a strictly decoupled environment variable check (`ADMIN_USERNAME` and `ADMIN_PASSWORD` in the backend `.env`).
+  - Set up standard Basic Auth headers in `admin.api.js` to securely transmit admin credentials without clashing with the main Firebase session.
+  - Integrated the Admin login gate directly with the `AuthShell` and `AuthField` components to seamlessly mirror the premium split-screen design of the main app.
+
+- **Artifacts Explorer & Panel Enhancements**:
+  - **Color-Coded File System**: Redesigned both the inline file explorer cards and the sidebar [`ArtifactsPanel.jsx`](file:///workspaces/laughing-giggle/frontend/src/features/project/ui/components/ArtifactsPanel.jsx) to assign solid brand background colors based on path matching (lilac for agents, lime for UI/tokens, coral for tasks, pink for architecture/overviews) with high-contrast white text overlays.
+  - **Dynamic Status Indicator**: Embedded a color-matching status dot inside cards in both panels that pulses for Ready states and pings during active generation loops.
+  - **Backend DESIGN_SYSTEM Integration**: Copied [`DESIGN_SYSTEM.md`](file:///workspaces/laughing-giggle/frontend/DESIGN_SYSTEM.md) into the backend UI knowledge store ([`design_system.md`](file:///workspaces/laughing-giggle/backend/src/features/ai/data/ui/design_system.md)) and expanded backend prompt templates to digest layout, spacing, corner radius, and animation duration tokens.
 
 - **Impeccable Chat Section Overhauls (Shape, Polish, Harden, Typeset)**:
   - **Unified Chat Layout**: Standardized on a single conversation scroll thread. Removed mode switching layout jumps; the initial empty state and follow-up questions are inline messages.
@@ -308,3 +381,4 @@ The home page now includes:
   - Fixed the context-loss bug when users submitted new projects via the Dashboard modal by passing a `wizard_state: { autoStart: true, prompt }` payload, which `NewProjectPage` now intercepts to seamlessly bypass the redundant step 0 text box and begin AI processing automatically.
   - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
 
+- **Firebase Auth Migration (Full)**: Replaced custom JWT auth with Firebase Email/Password Auth across both frontend (`auth.api.js`, `useAuth.js`, `Login.jsx`, `Signup.jsx`) and backend (`auth.controller.js`, `auth.middleware.js`), removing bcrypt/jwt dependencies and switching to `verifyFirebaseToken`.

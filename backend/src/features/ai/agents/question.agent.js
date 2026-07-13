@@ -1,4 +1,4 @@
-import orchestrator from "../orchestrator/ai.orchestrator.js";
+import { executeWithFallback } from "../graphs/fallback_chain.js";
 import { buildQuestionPrompt } from "../prompts/question.prompt.js";
 
 export const questionAgent = {
@@ -7,6 +7,6 @@ export const questionAgent = {
       throw new Error('Invalid input: data.idea must be a non-empty string');
     }
     const prompt = buildQuestionPrompt(data);
-    return await orchestrator.execute("generateQuestions", prompt);
+    return await executeWithFallback(prompt);
   }
 };

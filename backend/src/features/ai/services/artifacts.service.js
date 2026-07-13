@@ -1,4 +1,4 @@
-import orchestrator from "../orchestrator/ai.orchestrator.js";
+import { executeWithFallback } from "../graphs/fallback_chain.js";
 import Project from "../../projects/project.model.js";
 import { artifactService } from "../../artifacts/artifact.service.js";
 import fs from "fs/promises";
@@ -94,8 +94,8 @@ ${templateContent ? templateContent : "(No explicit template provided. Format as
 Please generate the full, detailed markdown content for ${filePath} now:
 `;
 
-    const aiResponse = await orchestrator.execute("generateArtifacts", prompt);
-    let content = aiResponse.response.content;
+    const aiResponse = await executeWithFallback(prompt);
+    let content = aiResponse.response;
     
     // Cleanup potential markdown codeblock wrapping around the whole response
     if (content.startsWith("\`\`\`markdown") && content.endsWith("\`\`\`")) {

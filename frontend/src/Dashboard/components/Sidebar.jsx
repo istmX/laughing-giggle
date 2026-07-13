@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { useEffect, useRef, useState } from 'react'
 import {
   FolderOpen, Plus, X, PanelLeftClose, PanelLeftOpen,
   PlaySquare, LayoutTemplate,
   Clock, Star, FileText, History, User, Sliders,
-  LogOut, ChevronDown
+  LogOut, ChevronDown, Users
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -18,12 +19,13 @@ const navGroups = [
       { name: 'All Projects', href: '/dashboard', icon: FolderOpen },
       { name: 'Recent', href: '/dashboard/recent', icon: Clock },
       { name: 'Favorites', href: '/dashboard/favorites', icon: Star },
+      { name: 'Community', href: '/dashboard/community', icon: Users },
     ]
   },
   {
     label: 'Workspace',
     items: [
-      { name: 'Playground', href: '/dashboard/playground', icon: PlaySquare },
+      { name: 'Playground', href: '/playground', icon: PlaySquare },
       { name: 'Templates', href: '/dashboard/templates', icon: LayoutTemplate },
     ]
   },
@@ -78,13 +80,30 @@ function UserPopover({ user, logout, onClose }) {
         <User className="h-[13px] w-[13px]" />
         Profile
       </Link>
-      <button
-        onClick={() => {
-          onClose()
-          if (window.confirm('Are you sure you want to sign out?')) logout()
-        }}
-        className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] text-destructive hover:bg-destructive/10 transition-colors"
-      >
+        <button
+          onClick={() => {
+            toast((t) => (
+              <div className="flex flex-col gap-3">
+                <p className="text-body-sm font-500 text-ink">Are you sure you want to sign out?</p>
+                <div className="flex justify-end gap-2">
+                  <button 
+                    onClick={() => toast.dismiss(t.id)}
+                    className="px-3 py-1.5 text-button font-480 text-ink-muted hover:text-ink transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => { toast.dismiss(t.id); logout(); }}
+                    className="px-3 py-1.5 bg-red-500 text-white text-button font-480 rounded-md hover:bg-red-600 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ), { duration: Infinity, style: { minWidth: '300px' } });
+          }}
+          className="flex w-full items-center gap-2 px-3 py-2 text-[12.5px] text-destructive hover:bg-destructive/10 transition-colors"
+        >
         <LogOut className="h-[13px] w-[13px]" />
         Sign out
       </button>

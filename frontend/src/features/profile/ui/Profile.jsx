@@ -3,7 +3,7 @@ import { ProfileDetails } from './components/ProfileDetails'
 import { Loader2 } from 'lucide-react'
 
 export const Profile = () => {
-  const { profile, status, error } = useProfile()
+  const { profile, status, error, updateProfile, updatePfp, deleteAccount } = useProfile()
 
   if (status === 'loading' || status === 'idle') {
     return (
@@ -21,5 +21,5 @@ export const Profile = () => {
     )
   }
 
-  return <ProfileDetails profile={profile} />
+  return <ProfileDetails profile={profile} updatePfp={updatePfp} deleteAccount={deleteAccount} updateProfile={updateProfile} />
 }

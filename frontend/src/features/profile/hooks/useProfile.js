@@ -4,13 +4,13 @@ import { useProfileStore } from '../store/profile.store'
 
 export const useProfile = () => {
   const { token } = useAuth()
-  const { profile, status, error, fetchProfile } = useProfileStore()
+  const { profile, status, error, fetchProfile, updateProfile, updatePfp, deleteAccount } = useProfileStore()
 
   useEffect(() => {
     if (token && !profile && status === 'idle') {
-      fetchProfile(token)
+      fetchProfile()
     }
   }, [token, profile, status, fetchProfile])
 
-  return { profile, status, error, fetchProfile }
+  return { profile, status, error, fetchProfile, updateProfile, updatePfp, deleteAccount }
 }

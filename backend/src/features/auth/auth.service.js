@@ -1,12 +1,15 @@
-import { OAuth2Client } from "google-auth-library";
+import admin from '../../config/firebase.js';
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-export const verifyGoogleToken = async (credential) => {
-  const ticket = await client.verifyIdToken({
-    idToken: credential,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
-
-  return ticket.getPayload();
+/**
+ * Verifies a Firebase ID token and returns a normalized user payload.
+ * Replaces the previous google-auth-library verifyGoogleToken.
+ */
+export const verifyFirebaseToken = async (idToken) => {
+  const decoded = await admin.auth().verifyIdToken(idToken);
+  return {
+    googleId: decoded.uid,
+    email: decoded.email,
+    name: decoded.name || decoded.email.split('@')[0],
+    picture: decoded.picture || null,
+  };
 };

@@ -42,13 +42,17 @@ export const artifactService = {
     });
 
     archive.on("error", (err) => {
-      throw err;
+      console.error("ZIP archiver error:", err);
+      if (!res.headersSent) {
+        res.status(500).send({ error: "Failed to generate ZIP archive" });
+      }
     });
 
     archive.pipe(res);
 
     for (const artifact of artifacts) {
-      archive.append(artifact.content, { name: artifact.file_path });
+      // Fallback to empty string if content is undefined/null to prevent archiver throw
+      archive.append(artifact.content || "", { name: artifact.file_path });
     }
 
     await archive.finalize();
