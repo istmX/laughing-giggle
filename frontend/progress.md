@@ -27,6 +27,14 @@
 
 ## Completed
 
+- **AI Playground Frontend UI**:
+  - Implemented the AI Playground frontend features in `src/features/playground`.
+  - Added `api/playground.api.js` for API communications using `authFetch`.
+  - Added `store/playground.store.js` utilizing Zustand for robust session state management.
+  - Implemented `hooks/usePlayground.js` to manage UI hooks.
+  - Built `ui/Playground.jsx` which hosts a split-pane layout with session sidebar, chat history interface, and HTML preview block.
+  - Registered `/playground` in `AppRoutes.jsx` and updated the Dashboard Sidebar to link to it.
+
 - **Artifacts Explorer & Panel Enhancements**:
   - **Color-Coded File System**: Redesigned both the inline file explorer cards and the sidebar [`ArtifactsPanel.jsx`](file:///workspaces/laughing-giggle/frontend/src/features/project/ui/components/ArtifactsPanel.jsx) to assign solid brand background colors based on path matching (lilac for agents, lime for UI/tokens, coral for tasks, pink for architecture/overviews) with high-contrast white text overlays.
   - **Dynamic Status Indicator**: Embedded a color-matching status dot inside cards in both panels that pulses for Ready states and pings during active generation loops.
