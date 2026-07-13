@@ -1,3 +1,8 @@
+## Backend LangGraph Phase
+
+- **LangGraph Integration**: Implemented `context_engine.graph.js` and `playground.graph.js` using `@langchain/langgraph` and `@langchain/google-genai`.
+- **Playground API Logic**: Hooked the Playground controller (`addMessage`) into the LangGraph state machine to process design feedback and compile HTML previews.
+- **Upstash Redis Rate Limiting**: Added rate-limiting middleware for the playground endpoints to restrict queries.
 ## Frontend Phase Implementation
 
 - **Firebase Auth Migration**: Replaced `gsi/client` with `firebase` SDK in `useGoogleAuth.js`.
