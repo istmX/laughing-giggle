@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Calendar, Shield, FileText, Trash2, ChevronRight, KeyRound, ArrowRight } from 'lucide-react'
+import { Mail, Calendar, Shield, FileText, Trash2, ChevronRight, KeyRound, ArrowRight, BadgeCheck } from 'lucide-react'
 
 export const ProfileDetails = ({ profile, updatePfp, deleteAccount }) => {
   const [overrideAvatar, setOverrideAvatar] = useState(false)
@@ -62,12 +62,26 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount }) => {
           />
         </div>
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-display-lg font-340 tracking-display-lg text-ink mb-2">
+          <h1 className="text-display-lg font-340 tracking-display-lg text-ink mb-2 flex items-center justify-center md:justify-start gap-3">
             {profile.name}
+            {profile.isVerified && (
+              <BadgeCheck className="w-8 h-8 text-blue-500 fill-blue-500/10" strokeWidth={1.5} />
+            )}
           </h1>
-          <p className="text-subhead font-340 text-ink/80 tracking-subhead mb-10">
+          <p className={`text-subhead font-340 text-ink/80 tracking-subhead ${profile.loyaltyBadges?.length ? 'mb-4' : 'mb-10'}`}>
             @{profile.username}
           </p>
+          
+          {profile.loyaltyBadges && profile.loyaltyBadges.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-10">
+              {profile.loyaltyBadges.map((badge, idx) => (
+                <span key={idx} className="px-4 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-sm font-500 rounded-full border border-primary/20 shadow-sm">
+                  {badge}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
             <button className="bg-primary text-primary-foreground text-button font-480 px-6 py-3 rounded-full hover:scale-105 transition-transform">
               Edit profile
