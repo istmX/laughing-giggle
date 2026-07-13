@@ -1,3 +1,7 @@
+## Frontend Phase Implementation
+
+- **Firebase Auth Migration**: Replaced `gsi/client` with `firebase` SDK in `useGoogleAuth.js`.
+- **Profile UI**: Implemented Profile generation using DiceBear API and Account deletion flow with backend integration.
 ## Backend Phase Implementation (Latest)
 
 - **User Model Extended**: Added `pfpUrl`, `isVerified`, `loyaltyBadges`, `isAdmin` fields to User schema.
