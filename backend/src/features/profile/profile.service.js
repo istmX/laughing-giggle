@@ -51,7 +51,10 @@ export const profileService = {
   },
 
   async getPublicProfile(username) {
-    const user = await User.findOne({ username }).select('-password -email -googleId -provider');
+    const user = await User.findOne({ username })
+      .select('-password -email -googleId -provider')
+      .populate('followers', 'username name avatar lastActiveAt bio')
+      .populate('following', 'username name avatar lastActiveAt bio');
     if (!user) throw new Error('User not found');
     if (!user.isPublic) throw new Error('This profile is private');
     

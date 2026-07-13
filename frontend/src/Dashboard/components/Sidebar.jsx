@@ -5,7 +5,7 @@ import {
   FolderOpen, Plus, X, PanelLeftClose, PanelLeftOpen,
   PlaySquare, LayoutTemplate,
   Clock, Star, FileText, History, User, Sliders,
-  LogOut, ChevronDown
+  LogOut, ChevronDown, Users
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'

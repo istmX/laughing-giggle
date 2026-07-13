@@ -42,8 +42,14 @@
   - Implemented the `CommunityPage.jsx` component adhering strictly to `DESIGN.md` monochrome + accent block styling.
   - Wired an in-memory `UserSearchIndex` (Trie + Hashmap) into `backend/src/features/explore/explore.service.js` for instant, regex-free user lookups.
   - Added an active status indicator (`lastActiveAt`) to user cards, tracked via asynchronous backend middleware inside `auth.middleware.js`.
+  - Fixed Community Search to properly handle search URLs and filter out the currently logged-in user from the results.
+  - Fixed Community Page layout to allow natural vertical scrolling and prevented the empty state text from crunching on smaller screens.
   - Added the `explore.api.js` client in `frontend/src/features/explore/api/` and hooked up the UI for `/dashboard/community`.
   - Replaced native alerts and confirm boxes with non-blocking toast models.
+
+- **Profile Network Modals**:
+  - Upgraded the public profile followers/following modals to fetch and render actual populated lists.
+  - Populated `followers` and `following` arrays in the `getPublicProfile` backend controller to map real user objects (names, avatars, active status) instead of just returning count integers.
 
 - **AI Playground Frontend UI**:
   - Implemented the AI Playground frontend features in `src/features/playground`.

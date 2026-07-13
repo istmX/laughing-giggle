@@ -4,6 +4,8 @@ import { Search, Users, Star, LayoutTemplate, MapPin, Loader2 } from 'lucide-rea
 import { Link } from 'react-router-dom'
 import { exploreApi } from '../api/explore.api'
 
+import { useAuth } from '@/features/auth/hooks/useAuth'
+
 // Simple debouncer
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -17,6 +19,7 @@ function useDebounce(value, delay) {
 }
 
 export function CommunityPage() {
+  const { user: currentUser } = useAuth()
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 300)
   
@@ -64,7 +67,7 @@ export function CommunityPage() {
   }
 
   return (
-    <div className="w-full h-full flex flex-col p-8 max-w-7xl mx-auto">
+    <div className="w-full min-h-full p-4 md:p-8 max-w-7xl mx-auto pb-24">
       <div className="mb-12 text-center max-w-2xl mx-auto">
         <h1 className="text-display-lg font-340 tracking-display-lg text-ink mb-4">Community</h1>
         <p className="text-subhead font-340 text-ink-muted">Discover top creators and templates in the Zenix ecosystem.</p>
@@ -99,13 +102,13 @@ export function CommunityPage() {
         {!isLoading && users.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center p-16 text-center border border-hairline rounded-lg bg-surface-soft"
+            className="flex flex-col items-center justify-center p-12 text-center border border-hairline rounded-lg bg-surface-soft w-full mx-auto max-w-2xl mt-12"
           >
             <div className="w-16 h-16 rounded-full bg-canvas border border-hairline flex items-center justify-center mb-4">
               <Search className="w-8 h-8 text-ink-muted" />
             </div>
             <h3 className="text-card-title font-700 text-ink mb-2">No creators found</h3>
-            <p className="text-body-sm text-ink-muted max-w-sm">
+            <p className="text-body-sm text-ink-muted w-full max-w-md mx-auto whitespace-normal">
               We couldn't find anyone matching "{query}". Try checking for typos or searching another name.
             </p>
           </motion.div>
@@ -113,7 +116,7 @@ export function CommunityPage() {
 
         <div className="grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           <AnimatePresence mode="popLayout">
-            {users.map((user, i) => (
+            {users.filter(u => u._id !== currentUser?._id).map((user, i) => (
               <motion.div
                 key={user._id}
                 layout

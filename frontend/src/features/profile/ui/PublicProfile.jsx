@@ -416,17 +416,46 @@ export const PublicProfile = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-full bg-surface-soft border border-hairline flex items-center justify-center mb-4">
-                <UserPlus className="w-8 h-8 text-ink-muted" />
+            {(!user[followModal.type] || user[followModal.type].length === 0) ? (
+              <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 rounded-full bg-surface-soft border border-hairline flex items-center justify-center mb-4">
+                  <UserPlus className="w-8 h-8 text-ink-muted" />
+                </div>
+                <h3 className="text-body-lg font-540 text-ink mb-2">No {followModal.type} yet</h3>
+                <p className="text-body-sm font-320 text-ink-muted max-w-[250px] mx-auto">
+                  {followModal.type === 'followers' 
+                    ? `When people start following ${user.name}, they will appear here.`
+                    : `${user.name} isn't following anyone yet.`}
+                </p>
               </div>
-              <h3 className="text-body-lg font-540 text-ink mb-2">No {followModal.type} yet</h3>
-              <p className="text-body-sm font-320 text-ink-muted max-w-[250px] mx-auto">
-                {followModal.type === 'followers' 
-                  ? `When people start following ${user.name}, they will appear here.`
-                  : `${user.name} isn't following anyone yet.`}
-              </p>
-            </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+                {user[followModal.type].map(member => (
+                  <a 
+                    key={member._id} 
+                    href={`/u/${member.username}`}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-soft transition-colors border border-transparent hover:border-hairline"
+                  >
+                    <div className="relative">
+                      {member.avatar ? (
+                        <img src={member.avatar} alt={member.name} className="w-10 h-10 rounded-full border border-hairline object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full border border-hairline bg-surface-soft flex items-center justify-center">
+                          <UserPlus className="w-4 h-4 text-ink-muted" />
+                        </div>
+                      )}
+                      {member.lastActiveAt && (Date.now() - new Date(member.lastActiveAt).getTime() < 5 * 60 * 1000) && (
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-semantic-success border-2 border-canvas rounded-full" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col text-left">
+                      <span className="text-body-sm font-540 text-ink truncate">{member.name}</span>
+                      <span className="text-caption font-480 text-ink-muted truncate">@{member.username}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       )}
