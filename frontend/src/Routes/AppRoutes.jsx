@@ -9,6 +9,7 @@ import PreferencesPage from '@/Pages/Preferences'
 import NotFound from '@/Pages/NotFound'
 import { Overview } from '@/Dashboard/components/Overview'
 import { PlaygroundPage } from '@/Dashboard/components/PlaygroundPage'
+import { Playground } from '@/features/playground/ui/Playground'
 import { NewProjectPage } from '@/features/project/ui/NewProjectPage'
 import { ProjectWorkspace } from '@/features/project/ui/ProjectWorkspace'
 import { FavoriteProjects } from '@/features/favorites/ui/FavoriteProjects'
@@ -23,6 +24,7 @@ const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         <Route path="/projects/:projectId" element={<NewProjectPage />} />
         <Route path="/projects/:projectId/chat" element={<ProjectWorkspace />} />
+        <Route path="/playground" element={<Playground />} />
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Overview />} />
           <Route path="favorites" element={<FavoriteProjects />} />

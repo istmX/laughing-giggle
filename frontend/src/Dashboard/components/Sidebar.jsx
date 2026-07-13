@@ -23,7 +23,7 @@ const navGroups = [
   {
     label: 'Workspace',
     items: [
-      { name: 'Playground', href: '/dashboard/playground', icon: PlaySquare },
+      { name: 'Playground', href: '/playground', icon: PlaySquare },
       { name: 'Templates', href: '/dashboard/templates', icon: LayoutTemplate },
     ]
   },
