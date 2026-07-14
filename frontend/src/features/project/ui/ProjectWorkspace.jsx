@@ -6,6 +6,10 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import { downloadArtifactsZip, updateArtifact } from '@/features/artifacts/api/artifacts.api'
 import { useChatStore } from '../store/useChatStore'
 import { toast } from 'react-hot-toast'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 import { Sidebar } from '@/Dashboard/components/Sidebar'
 import { MessageScrollerProvider, MessageScroller, MessageScrollerViewport, MessageScrollerContent, MessageScrollerItem, MessageScrollerButton } from '@/components/ui/message-scroller'
@@ -28,6 +32,19 @@ function timeAgo(date) {
   const h = Math.floor(m / 60)
   if (h < 24) return `${h}h ago`
   return `${Math.floor(h / 24)}d ago`
+}
+
+function cleanMessageContent(rawContent = '') {
+  let text = rawContent.replace(/```json\n[\s\S]*?\n```/g, '').trim()
+  try {
+    const parsed = JSON.parse(text)
+    if (parsed && typeof parsed === 'object' && parsed.message) {
+      return parsed.message
+    }
+  } catch (e) {
+    // Not JSON, leave as is
+  }
+  return text
 }
 
 export function ProjectWorkspace() {
@@ -266,14 +283,72 @@ export function ProjectWorkspace() {
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-start gap-3 py-4">
-                            <div className="shrink-0 mt-0.5">
+                          <div className="flex items-start gap-4 py-5">
+                            <div className="shrink-0 mt-1">
                               <AiIcon isAnimating={isProcessing && i === messages.length - 1} />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[15px] text-ink leading-[1.65] font-light">
-                                {msg.content}
-                              </p>
+                            <div className="flex-1 min-w-0 max-w-2xl">
+                              {cleanMessageContent(msg.content) && (
+                                <div className="notion-markdown">
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      code({node, inline, className, children, ...props}) {
+                                        const match = /language-(\w+)/.exec(className || '')
+                                        return !inline && match ? (
+                                          <SyntaxHighlighter
+                                            style={oneLight}
+                                            language={match[1]}
+                                            PreTag="div"
+                                            className="rounded-xl border border-hairline my-6 text-[13px] !bg-surface-soft"
+                                            {...props}
+                                          >
+                                            {String(children).replace(/\n$/, '')}
+                                          </SyntaxHighlighter>
+                                        ) : (
+                                          <code className={className} {...props}>
+                                            {children}
+                                          </code>
+                                        )
+                                      }
+                                    }}
+                                  >
+                                    {cleanMessageContent(msg.content)}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
+                              
+                              {msg.affectedFiles?.length > 0 && (
+                                <div className="mt-6">
+                                  <div className="flex items-center gap-3 mb-4 opacity-70">
+                                    <div className="h-px bg-ink-muted/30 flex-1"></div>
+                                    <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-widest">Generated Context</span>
+                                    <div className="h-px bg-ink-muted/30 flex-1"></div>
+                                  </div>
+                                  <div className="flex flex-col gap-2 pl-3 border-l-[2px] border-hairline/80 ml-[5px]">
+                                    {msg.affectedFiles.map((file, idx) => (
+                                      <button 
+                                        key={idx}
+                                        onClick={() => {
+                                          setIsArtifactsOpen(true)
+                                          const artifact = artifacts.find(a => a.file_path === file)
+                                          if (artifact) setActiveArtifact(artifact)
+                                        }}
+                                        className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-surface-soft/40 border border-transparent hover:border-hairline hover:bg-surface-soft text-left transition-all cursor-pointer group w-fit"
+                                      >
+                                        <span className="flex items-center justify-center h-4 w-4 rounded-full bg-doc-green/10 text-doc-green group-hover:bg-doc-green/20 group-hover:scale-110 transition-all">
+                                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M1 4.5L3.5 7L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                          </svg>
+                                        </span>
+                                        <span className="text-[13.5px] font-medium text-ink">
+                                          {file} <span className="text-ink-muted font-normal ml-1">updated</span>
+                                        </span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
 
                               {msg.options?.length > 0 && (
                                 <motion.div
@@ -396,7 +471,7 @@ export function ProjectWorkspace() {
                 )}
               </AnimatePresence>
 
-              <div className="floating-input flex items-end gap-2 px-4 py-3">
+              <div className="floating-input flex items-end gap-3 px-5 py-3.5">
                 <textarea
                   ref={inputRef}
                   value={inputValue}
@@ -405,12 +480,12 @@ export function ProjectWorkspace() {
                   disabled={isProcessing}
                   placeholder={
                     project?.wizard_state?.isComplete
-                      ? 'Ask Zenix Developer… (Enter to send, Shift+Enter for newline)'
-                      : 'What would you like to build? (Enter to send, Shift+Enter for newline)'
+                      ? 'Refine this workspace, update architecture, or ask a question...'
+                      : 'Describe the software you want to build...'
                   }
-                  className="flex-1 bg-transparent resize-none border-none outline-none text-[15px] text-ink placeholder:text-ink-muted/55 max-h-[120px] min-h-[24px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] disabled:opacity-50 w-full focus:ring-0 leading-relaxed"
+                  className="flex-1 bg-transparent resize-none border-none outline-none text-[15px] text-ink placeholder:text-ink-muted/50 max-h-[200px] min-h-[26px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] disabled:opacity-50 w-full focus:ring-0 leading-relaxed py-0.5"
                   rows={1}
-                  style={{ height: '24px' }}
+                  style={{ height: '26px' }}
                 />
 
                 {isProcessing ? (
@@ -418,16 +493,16 @@ export function ProjectWorkspace() {
                     onClick={handleCancel}
                     aria-label="Stop generation"
                     title="Stop"
-                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-80 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+                    className="h-8 w-8 rounded-full bg-ink/10 text-ink hover:bg-ink/20 transition-all flex items-center justify-center shrink-0 cursor-pointer"
                   >
-                    <Square className="h-3 w-3 fill-current" />
+                    <Square className="h-3.5 w-3.5 fill-current" />
                   </button>
                 ) : (
                   <button
                     onClick={() => handleSend(null)}
                     disabled={!inputValue.trim()}
                     aria-label="Send message"
-                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer"
+                    className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
                   >
                     <ArrowUp className="h-3.5 w-3.5" />
                   </button>

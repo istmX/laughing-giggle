@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PromptInput } from './components/PromptInput'
 import { QuestionCard } from './components/QuestionCard'
-import { ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkles, Check, MessageSquare, ArrowRight } from 'lucide-react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { createIdea } from '../api/ideas.api'
@@ -10,7 +10,6 @@ import { processConversation, analyzeIdea } from '../api/ai.api'
 import { updateProject, getProject } from '../api/projects.api'
 import { TextShimmerWave } from '@/components/ui/text-shimmer-wave'
 import toast from 'react-hot-toast'
-import { ProjectChatPage } from './ProjectChatPage'
 
 export function NewProjectPage() {
   const { projectId } = useParams()
@@ -27,7 +26,6 @@ export function NewProjectPage() {
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [isRefining, setIsRefining] = useState(false)
   const [refinedSpec, setRefinedSpec] = useState('')
-  const [completedProjectData, setCompletedProjectData] = useState(null)
 
   // Fetch project on mount to check if idea is already submitted
   useEffect(() => {
@@ -83,7 +81,7 @@ export function NewProjectPage() {
     return () => {
       isMounted = false;
     }
-  }, [token, projectId])
+  }, [token, projectId, navigate])
 
   // Recovery: ideaId is set but no currentQuestion. Re-request first AI question silently.
   useEffect(() => {
@@ -119,7 +117,7 @@ export function NewProjectPage() {
     }
     recover()
     return () => { cancelled = true }
-  }, [step, ideaId, token])
+  }, [step, ideaId, token, prompt, projectId, navigate])
 
   const parseAIResponse = (res) => {
     try {
@@ -256,139 +254,124 @@ export function NewProjectPage() {
     }
   }
 
+  const endOfFlowRef = useRef(null)
 
+  useEffect(() => {
+    if (endOfFlowRef.current) {
+      endOfFlowRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [step, history, currentQuestion])
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-6 selection:bg-ink selection:text-canvas overflow-hidden">
-      <div className="absolute top-6 left-6">
-        <Link to="/dashboard" className="inline-flex items-center gap-2 text-ink-muted hover:text-ink text-body-sm tracking-body-sm font-normal transition-colors">
-          <ArrowLeft className="h-4 w-4" />
+    <div className="min-h-[100dvh] bg-canvas flex flex-col items-center p-6 selection:bg-ink selection:text-canvas overflow-y-auto relative">
+      {/* Decorative gradient for the creation page */}
+      <div className="absolute top-0 inset-x-0 h-[400px] pointer-events-none opacity-40" style={{
+        background: 'radial-gradient(ellipse at 50% -20%, color-mix(in oklch, var(--brand-indigo) 12%, transparent), transparent 70%)'
+      }} />
+
+      <div className="fixed top-8 left-8 z-50">
+        <Link to="/dashboard" className="inline-flex items-center gap-2 text-ink-muted hover:text-ink text-[14px] font-[540] transition-colors bg-canvas/80 backdrop-blur-md py-2.5 px-5 rounded-full border border-hairline shadow-sm">
+          <ArrowLeft className="h-[14px] w-[14px]" />
           Dashboard
         </Link>
       </div>
 
-      <div className="w-full max-w-6xl mx-auto relative px-4 sm:px-8">
-        <AnimatePresence mode="wait">
-          {(step === 'recovering' || isPageLoading) ? (
-            <motion.div
-              key="recovering"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center min-h-[50vh]"
+      {/* The main container uses a wider max-width to allow the PromptInput 2-column layout to shine,
+          but restricts the chat flow to a readable width once the prompt is submitted. */}
+      <div className={`w-full ${step === 0 ? 'max-w-[1200px]' : 'max-w-[760px]'} mx-auto relative px-4 sm:px-0 pt-28 pb-40 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]`}>
+        {(step === 'recovering' || isPageLoading) ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <TextShimmerWave 
+              className="text-[20px] font-[540] [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
+              duration={1.2}
+              zDistance={2}
+              yDistance={-2}
             >
-              <TextShimmerWave 
-                className="text-body-lg font-semibold [--base-color:var(--color-ink-muted)] [--base-gradient-color:var(--color-ink)]"
-                duration={1.2}
-                zDistance={2}
-                yDistance={-2}
-              >
-                Resuming your session...
-              </TextShimmerWave>
-            </motion.div>
-          ) : step === 0 ? (
-            <motion.div
-              key="prompt"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-            >
-              <PromptInput onSubmit={handlePromptSubmit} isLoading={isAnalyzing} />
-            </motion.div>
-          ) : step === 999 ? (
-            <motion.div
-              key="completed"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-            >
-              <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
-                <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
-                <h2 className="text-[32px] font-semibold tracking-tight text-ink mb-4">Brief Already Completed</h2>
-                <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
-                  You have already generated the idea and context for this project.
-                </p>
-                <div className="bg-canvas border border-hairline rounded-xl p-6 text-left space-y-4 max-h-[400px] overflow-y-auto">
-                   <div>
-                     <p className="text-sm font-semibold text-ink mb-1">Project Title:</p>
-                     <p className="text-ink-muted text-sm">{completedProjectData?.project_title}</p>
-                   </div>
-                   <hr className="border-hairline" />
-                   <div>
-                     <p className="text-sm font-semibold text-ink mb-1">Initial Prompt / Idea:</p>
-                     <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData?.project_description}</p>
-                   </div>
-                   {completedProjectData?.wizard_state?.refinedSpec && (
-                     <>
-                       <hr className="border-hairline" />
-                       <div>
-                         <p className="text-sm font-semibold text-ink mb-1">Refined Project Specification:</p>
-                         <p className="text-ink-muted text-sm whitespace-pre-wrap">{completedProjectData.wizard_state.refinedSpec}</p>
-                       </div>
-                     </>
-                   )}
-                 </div>
-                 <div className="mt-8 flex justify-center gap-4">
-                   <Link
-                     to={`/projects/${projectId}/chat`}
-                     className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-medium transition-opacity flex items-center gap-2"
-                   >
-                     <Sparkles className="h-4 w-4" />
-                     Open Developer Chat Sandbox
-                   </Link>
-                 </div>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key={`q-${step}`}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-            >
-              {currentQuestion ? (
-                <QuestionCard 
-                   key={currentQuestion?.key || step}
-                   currentStep={step}
-                   question={currentQuestion}
-                   onSubmit={handleQuestionSubmit}
-                   isLoading={isRefining}
-                />
-              ) : (
-                <div className="text-center bg-surface p-12 rounded-3xl border border-hairline shadow-sm w-full mx-auto relative z-10">
-                  <CheckCircle2 className="h-12 w-12 text-ink mx-auto mb-6 opacity-80" />
-                  <h2 className="text-[32px] font-semibold tracking-tight text-ink mb-4">Brief Complete</h2>
-                  <p className="text-body-lg text-ink-muted mb-8 max-w-lg mx-auto">
-                    We've gathered all the necessary context. Your powerful prompt is ready.
-                  </p>
-                  <div className="bg-canvas border border-hairline rounded-xl p-6 text-left space-y-4 max-h-[400px] overflow-y-auto">
-                     <div>
-                       <p className="text-sm font-semibold text-ink mb-1">Initial Prompt / Idea:</p>
-                       <p className="text-ink-muted text-sm whitespace-pre-wrap">{prompt}</p>
-                     </div>
-                     <hr className="border-hairline" />
-                     <div>
-                       <p className="text-sm font-semibold text-ink mb-1">Refined Project Specification:</p>
-                       <p className="text-ink-muted text-sm whitespace-pre-wrap">{typeof refinedSpec === 'object' ? JSON.stringify(refinedSpec, null, 2) : refinedSpec}</p>
-                     </div>
-                   </div>
-                   <div className="mt-8 flex justify-center gap-4">
-                     <Link
-                       to={`/projects/${projectId}/chat`}
-                       className="bg-ink text-canvas hover:opacity-90 px-6 py-3 rounded-full text-body-sm font-medium transition-opacity flex items-center gap-2"
-                     >
-                       <Sparkles className="h-4 w-4" />
-                       Open Developer Chat Sandbox
-                     </Link>
-                   </div>
+              Resuming your session...
+            </TextShimmerWave>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            
+            {/* Step 0: Initial Prompt or Summary */}
+            {step === 0 ? (
+              <PromptInput onSubmit={handlePromptSubmit} isLoading={isAnalyzing} initialValue={prompt} />
+            ) : (
+              <div className="bg-surface-elevated rounded-[24px] border border-hairline p-8 sm:p-10 animate-fade-in shadow-sm">
+                <div className="flex items-center gap-4 mb-5">
+                  <div className="h-8 w-8 rounded-full bg-ink flex items-center justify-center shrink-0">
+                    <Check className="h-4 w-4 text-canvas" />
+                  </div>
+                  <h3 className="text-[17px] font-[540] text-ink tracking-tight">Project foundation</h3>
                 </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <p className="text-[16px] text-ink-muted whitespace-pre-wrap ml-12 leading-[1.65] font-[480]">{prompt}</p>
+              </div>
+            )}
+
+            {/* History of Q&A */}
+            {history.map((item, idx) => (
+              <div key={idx} className="bg-surface-elevated rounded-[24px] border border-hairline p-8 sm:p-10 animate-fade-in shadow-sm">
+                <div className="flex flex-col gap-8">
+                  <div className="flex items-start gap-4">
+                    <div className="h-8 w-8 rounded-full bg-brand-indigo/10 flex items-center justify-center shrink-0 mt-1">
+                      <MessageSquare className="h-4 w-4 text-brand-indigo" />
+                    </div>
+                    <div>
+                      <h4 className="text-[14px] font-[600] tracking-wider uppercase text-ink mb-2 font-mono">Zenix</h4>
+                      <p className="text-[17px] font-[480] text-ink-muted leading-[1.6]">{item.question}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-4 ml-[48px]">
+                    <div className="h-8 w-8 rounded-full bg-ink flex items-center justify-center shrink-0 mt-1">
+                      <span className="text-[11px] font-[700] font-mono text-canvas">U</span>
+                    </div>
+                    <div className="bg-canvas border border-hairline rounded-[20px] p-6 flex-1 shadow-sm">
+                      <p className="text-[16px] font-[480] text-ink whitespace-pre-wrap leading-[1.65]">{item.answer}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Current Question */}
+            {step > 0 && step !== 999 && currentQuestion && (
+              <div className="bg-canvas rounded-[24px] border-2 border-brand-indigo/20 p-8 sm:p-10 animate-fade-in shadow-md relative overflow-hidden mt-2">
+                <div className="absolute top-0 left-0 w-[4px] h-full bg-brand-indigo rounded-l-[24px]"></div>
+                <QuestionCard 
+                  key={currentQuestion?.key || step}
+                  currentStep={step}
+                  question={currentQuestion}
+                  onSubmit={handleQuestionSubmit}
+                  isLoading={isRefining}
+                />
+              </div>
+            )}
+
+            {/* Completion */}
+            {(step === 999 || (!currentQuestion && step > 0 && step !== 'recovering')) && (
+              <div className="bg-brand-indigo/5 rounded-[32px] border border-brand-indigo/20 p-10 sm:p-16 text-center animate-fade-in relative overflow-hidden mt-6 shadow-sm">
+                <Sparkles className="h-14 w-14 text-brand-indigo mx-auto mb-6 opacity-80" />
+                <h2 className="text-[36px] font-[340] tracking-tight text-ink mb-4">Context is ready</h2>
+                <p className="text-[18px] text-ink-muted mb-10 max-w-lg mx-auto font-[480]">
+                  We've gathered all the necessary details. Your project is ready to be built.
+                </p>
+                
+                <div className="mt-6 flex justify-center">
+                  <Link
+                    to={`/projects/${projectId}/chat`}
+                    className="bg-ink text-canvas hover:opacity-90 px-10 py-[18px] rounded-[40px] text-[17px] font-[540] tracking-tight transition-all flex items-center gap-3 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95"
+                  >
+                    Open Developer Sandbox
+                    <ArrowRight className="h-[18px] w-[18px]" strokeWidth={2.5} />
+                  </Link>
+                </div>
+              </div>
+            )}
+            
+            <div ref={endOfFlowRef} className="h-20" />
+          </div>
+        )}
       </div>
     </div>
   )

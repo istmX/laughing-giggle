@@ -1,3 +1,11 @@
+## Python RAG Service Migration
+
+- **Foundation**: Set up `app/rag` with Qdrant vectorstore and Markdown chunker.
+- **LLM Fallback & Models**: Configured `app/core/llm.py` with `get_fallback_llm()` and `get_fallback_llm_ii()` sequencing Groq -> Mistral -> Gemini. Protected core limits by using `_II` keys for Playground and Developer Sandbox.
+- **External Prompts**: Migrated all JavaScript prompts in `app/prompts` to Python, replacing hardcoded strings across all LangGraph engines.
+- **LangGraph Engines**: Implemented `context_engine`, `pm_wizard`, `refinement_wizard`, `playground`, `developer`, `task_engine`, and `documentation_engine` in `app/langgraph`.
+- **API & SSE Streaming**: Added new endpoints `/idea`, `/artifact`, `/refine`, `/playground`, `/developer`, `/tasks`, and `/documentation` in `app/api/routes.py`. Refactored `/artifact` to use `StreamingResponse` for Server-Sent Events during the 3-iteration self-correction loop.
+
 ## Backend LangGraph Phase
 
 - **LangGraph Integration**: Implemented `context_engine.graph.js` and `playground.graph.js` using `@langchain/langgraph` and `@langchain/google-genai`.
@@ -215,6 +223,11 @@
   - reduced repeated boxed-card grammar in the marquee, story flow, generated context, workflow, and CTA sections
   - added a desktop-only pinned horizontal scroll behavior with stacked fallback on smaller screens
   - replaced AI tool initials with icon-based monochrome marks
+- **New Project Flow Redesign**:
+  - Re-architected `NewProjectPage.jsx` into a continuous conversational document flow, eliminating page-swapping and preserving user context across steps.
+  - Replaced generic placeholders in `PromptInput.jsx` with subtle, inline guidance and interactive project starters (SaaS, E-commerce, Admin) that pre-fill high-quality prompts.
+  - Improved typographic hierarchy and layout balance by replacing large empty areas with an auto-scrolling feed of the AI interview history.
+  - Reduced cognitive load by keeping the user's original idea visible alongside subsequent follow-up questions, preventing duplicate data entry.
 
 ## Current status
 

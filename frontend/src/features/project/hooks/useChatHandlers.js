@@ -166,6 +166,7 @@ export function useChatHandlers({
 
         const updatedArtifacts = res?.updatedArtifacts || res?.data?.updatedArtifacts
         if (Array.isArray(updatedArtifacts) && updatedArtifacts.length > 0) {
+          aiMessage.affectedFiles = updatedArtifacts.map(a => a.file_path)
           setArtifacts(prev => prev.map(a => {
             const u = updatedArtifacts.find(u => u.file_path === a.file_path)
             return u ? { ...a, content: u.content } : a

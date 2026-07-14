@@ -1,4 +1,4 @@
 export * from './EmptyProjects'
-export * from './CreateProjectDialog'
 export * from './ProjectCard'
 export * from './ProjectWorkspace'
+export * from './NewProjectPage'
