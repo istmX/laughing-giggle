@@ -1,6 +1,6 @@
 import os
 from qdrant_client import QdrantClient
-from langchain_community.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore
 from app.rag.embeddings.free_embeddings import ZenixEmbeddings
 from loguru import logger
 
@@ -24,14 +24,14 @@ class QdrantStore:
             
         self.embeddings = ZenixEmbeddings().get_embeddings_model()
 
-    def get_vector_store(self) -> Qdrant:
+    def get_vector_store(self) -> QdrantVectorStore:
         """
         Returns a LangChain-compatible Qdrant vector store instance.
         """
-        return Qdrant(
+        return QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
-            embeddings=self.embeddings
+            embedding=self.embeddings
         )
 
     def initialize_collection(self):

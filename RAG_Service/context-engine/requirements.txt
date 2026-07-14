@@ -20,3 +20,4 @@ black
 langchain-groq
 langchain-mistralai
 langchain-google-genai
+langchain-qdrant

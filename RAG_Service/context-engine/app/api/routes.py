@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import json
 from pydantic import BaseModel
-from typing import List
+from typing import List, Dict
 from loguru import logger
 from app.rag.retriever.retriever import ZenixRetriever
 from app.langgraph.pm_wizard import pm_wizard_graph

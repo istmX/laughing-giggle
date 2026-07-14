@@ -14,6 +14,8 @@ class ZenixRetriever:
         """
         self.k = k
         self.qdrant_store = QdrantStore()
+        # Ensure collection exists before getting the vector store
+        self.qdrant_store.initialize_collection()
         # Initialize the LangChain retriever interface
         self.retriever = self.qdrant_store.get_vector_store().as_retriever(
             search_type="similarity",

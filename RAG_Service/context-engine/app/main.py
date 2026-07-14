@@ -5,11 +5,21 @@ from loguru import logger
 
 from app.api.routes import router as orchestrate_router
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="Zenix RAG Service",
     description="Retrieval-Augmented Generation context engine for Zenix",
     version="1.0.0",
     default_response_class=ORJSONResponse
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(orchestrate_router)
