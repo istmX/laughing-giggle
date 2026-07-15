@@ -44,6 +44,8 @@
   - `POST /api/playground` — Create new design session
   - `GET /api/playground` — List all user sessions
   - `GET /api/playground/:sessionId` — Load session with full chat history
+  - **Playground Fixes:** Debugged layout flexbox blowouts causing broken scrolling on the Chat and Live Sandbox areas (implemented `fixed inset-0` and strict `min-h-0` flex bounds).
+  - **Backend Failsafes:** Intercepted raw JSON responses from the python context-engine before they are piped into the chat thread as raw strings. Added an auto-title generation hook that dynamically renames 'New Session' to a snippet of the user's first prompt.
   - `PUT /api/playground/:sessionId/title` — Rename a session
   - `DELETE /api/playground/:sessionId` — Delete session
   - Session model stores: title, chatHistory, token state, and compiled previewHtml
@@ -201,20 +203,13 @@
   - Added a "Let Zenix decide all remaining questions" bypass button in `QuestionCard.jsx` starting at Question 10. When clicked, it signals the backend to finalize the specification using default architectural assumptions.
   - Updated the frontend step counter to display current question steps dynamically without hardcoded bounds, and enabled real-time state updates so that navigating away and reopening the project instantly displays both the initial prompt and completed specification correctly.
   - Enhanced the final summary screens (`Brief Complete` and `Brief Already Completed`) in `NewProjectPage.jsx` to display both the user's initial prompt and the final AI-refined project specification side by side.
-- **Auth pages redesigned** into a centered split-screen layout that matches the login reference more closely:
-  - dark editorial left panel with centered hero copy
-  - bordered right-side card with centered form heading
-  - mobile brand header so the shell still reads well on small screens
-- **Shared auth field component added** for login and signup:
-  - typing pulse animation on `onChange`
-  - password visibility toggle
-  - consistent icon + label layout
-- **Shared social auth section added** for the Google sign-in row and divider
-- **Login and signup forms cleaned up**:
-  - removed the legacy decorative AnimatedForm block
-  - kept auth logic intact
-  - navigation now only happens after a successful auth response
-- **Password toggle logic fixed** so the eye icon now actually reveals and hides the password value
+- **Auth pages fully redesigned** (third pass — final polish):
+  - Layout: 40%/60% split (was 55/45), wider auth card `max-w-[28rem]`
+  - `AuthShell.jsx` — dot-grid background pattern (`radial-gradient` 20px grid), connected workflow with SVG lines, improved hero copy ("Turn ideas into implementation-ready context."), 8 credibility badges (Multi-Agent, Cursor, Claude, Markdown, Architecture Aware, RAG Ready, Template Driven, OpenRouter), sequential motion
+  - `ProductStory.jsx` — 6 realistic markdown preview cards (`architecture.md`, `agents.md`, `ui-tokens.md`, `build-plan.md`, `code-standards.md`, `project-overview.md`) with fake syntax coloring, window titlebar dots, overlapping layers, blur depth, float animation with random timing
+  - `AuthField.jsx` — focus glow (`shadow-[0_0_0_4px_rgba(0,0,0,0.06)]`), hover border transition, label color shift on focus
+  - `AuthSubmitButton.jsx` — loading spinner (`Loader2 animate-spin`), hover `-translate-y-[1px]` lift, `focus-visible` ring, shine gradient, animated arrow
+  - All files under 150 lines (max 131)
 - **Landing page hero corrected** so the live `/` route uses the original `hero-03.jsx` structure again:
   - added `split-type` powered GSAP character reveal to the existing hero text
   - kept the original headline structure, side copy, metadata row, media strip, and vertical "Context First" marker
@@ -236,7 +231,9 @@
 
 ## Current status
 
-Auth forms now use a shared dark shell, centered heading treatment, and input-level motion that matches the reference more closely.
+Auth pages fully redesigned (third pass) with 40%/60% layout, realistic markdown preview cards, dot-grid background, connected workflow, wider auth card (28rem), focus glow on inputs, loading spinner button, hover lift, 8 credibility badges, sequential motion.
+
+Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
 Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
@@ -400,3 +397,15 @@ The home page now includes:
   - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
 
 - **Firebase Auth Migration (Full)**: Replaced custom JWT auth with Firebase Email/Password Auth across both frontend (`auth.api.js`, `useAuth.js`, `Login.jsx`, `Signup.jsx`) and backend (`auth.controller.js`, `auth.middleware.js`), removing bcrypt/jwt dependencies and switching to `verifyFirebaseToken`.
+
+  - Debugged and fixed an `Uncaught SyntaxError` caused by `react-resizable-panels` missing exports.
+  - Cleared corrupted Vite cache to ensure fresh dependency resolution.
+  - Mapped `PanelGroup` and `PanelResizeHandle` to the updated `Group` and `Separator` exports introduced in `react-resizable-panels@4.12.2`.
+  - Replaced the deprecated `direction` prop with `orientation="horizontal"` in `Playground.jsx` to match the latest typing specification.
+  - Fixed an infinite loop (`Maximum update depth exceeded`) in `usePlayground.js` by detaching the Zustand store from the `useCallback` dependency array.
+  - Fixed a `TypeError: sessions.map is not a function` crash by properly plucking `res.data.sessions` and enforcing `Array.isArray()` in the store.
+  - Fixed a 400 Bad Request error on `POST /api/playground/.../message` by formatting the payload as `{ message: content }` to match the backend controller's expectation.
+  - Implemented a collapsible sidebar in `Playground.jsx` using `lucide-react` toggle icons (`PanelLeftClose` and `PanelLeftOpen`), giving users more workspace area.
+  - Updated the Playground UI loading text to a conversational `Thinking...`.
+  - Fixed an internal 500 server error in the Python `RAG_Service` where `ChatGroq` crashed due to a missing API key; resolved by explicitly pointing `dotenv` to load the `.env` file from the parent directory in `app/core/llm.py`.
+  - Hardened the `playground.py` AI prompt, turning the agent into an opinionated senior designer that critiques poor design choices instead of blindly agreeing with the user.

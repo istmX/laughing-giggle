@@ -71,7 +71,7 @@ export function PromptInput({ onSubmit, isLoading, initialValue = '' }) {
           <h1 className="text-display-lg tracking-display-lg font-[340] text-ink mb-4 leading-tight">
             What are you building?
           </h1>
-          <p className="text-body-lg tracking-body-lg text-ink-muted font-[400] max-w-[600px] leading-relaxed">
+          <p className="text-body-lg tracking-body-lg text-ink-muted font-[400] max-w-[600px] leading-relaxed w-full max-w-[60ch] block">
             Describe your project in detail. Zenix will structure the architecture and clarify any missing requirements.
           </p>
         </div>
@@ -127,25 +127,25 @@ export function PromptInput({ onSubmit, isLoading, initialValue = '' }) {
               <div className="space-y-5">
                 <div className="flex gap-3.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-indigo/40 mt-2 shrink-0" />
-                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6]">
+                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6] w-full max-w-[60ch] block">
                     <span className="text-ink font-[540]">Who is it for?</span> Defines your target audience and user roles.
                   </p>
                 </div>
                 <div className="flex gap-3.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-indigo/40 mt-2 shrink-0" />
-                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6]">
+                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6] w-full max-w-[60ch] block">
                     <span className="text-ink font-[540]">Core problem?</span> Explains the main value proposition of the app.
                   </p>
                 </div>
                 <div className="flex gap-3.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-indigo/40 mt-2 shrink-0" />
-                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6]">
+                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6] w-full max-w-[60ch] block">
                     <span className="text-ink font-[540]">Key features?</span> The essential functional requirements.
                   </p>
                 </div>
                 <div className="flex gap-3.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand-indigo/40 mt-2 shrink-0" />
-                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6]">
+                  <p className="text-[14.5px] font-[480] text-ink-muted leading-[1.6] w-full max-w-[60ch] block">
                     <span className="text-ink font-[540]">Tech stack?</span> Preferred frameworks, database, and libraries.
                   </p>
                 </div>

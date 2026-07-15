@@ -49,7 +49,7 @@ export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDe
 
       <h3 className="text-body-lg font-480 text-ink mb-1 pr-12 md:pr-24 relative z-10 pointer-events-none truncate w-full">{project.project_title}</h3>
       <div className="w-full">
-        <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
+        <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none w-full max-w-[60ch] block">
           {project.project_description || 'No description provided'}
         </p>
       </div>

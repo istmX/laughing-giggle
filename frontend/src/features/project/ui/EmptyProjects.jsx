@@ -16,7 +16,7 @@ export function EmptyProjects({ onNewProject }) {
         <h2 className="text-headline tracking-headline font-semibold text-ink mb-3">
           No projects yet
         </h2>
-        <p className="text-body tracking-body text-ink-muted mb-8 font-normal">
+        <p className="text-body tracking-body text-ink-muted mb-8 font-normal w-full max-w-[60ch] block">
           Create your first project to start organizing context and generating architecture for your software ideas.
         </p>
         <button 

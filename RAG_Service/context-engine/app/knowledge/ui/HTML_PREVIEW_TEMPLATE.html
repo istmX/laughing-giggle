@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Figma Marketing — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@320;330;340;400;480;540;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#000000',
+          canvas: '#ffffff',
+          'inverse-canvas': '#000000',
+          'inverse-ink': '#ffffff',
+          hairline: '#e6e6e6',
+          'hairline-soft': '#f1f1f1',
+          'surface-soft': '#f7f7f5',
+          'block-lime': '#dceeb1',
+          'block-lilac': '#c5b0f4',
+          'block-cream': '#f4ecd6',
+          'block-pink': '#efd4d4',
+          'block-mint': '#c8e6cd',
+          'block-coral': '#f3c9b6',
+          'block-navy': '#1f1d3d',
+          'accent-magenta': '#ff3d8b',
+          success: '#1ea64a',
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'SF Mono', 'menlo', 'monospace'],
+        },
+        borderRadius: {
+          xs: '2px', sm: '6px', md: '8px', lg: '24px', xl: '32px', pill: '50px',
+        },
+        spacing: {
+          hair: '1px', xxs: '4px', xs2: '8px', sm2: '12px', md2: '16px',
+          lg2: '24px', xl2: '32px', xxl: '48px', section: '96px',
+        },
+        letterSpacing: {
+          displayxl: '-1.72px', displaylg: '-0.96px', head: '-0.26px',
+          body: '-0.26px', bodylg: '-0.14px', eyebrow: '0.54px', caption: '0.60px',
+        },
+      },
+    },
+  };
+</script>
+<style>
+  body { font-feature-settings: "kern"; }
+  .display-xl { font-size: 86px; font-weight: 340; line-height: 1.00; letter-spacing: -1.72px; }
+  .display-lg { font-size: 64px; font-weight: 340; line-height: 1.10; letter-spacing: -0.96px; }
+  .headline    { font-size: 26px; font-weight: 540; line-height: 1.35; letter-spacing: -0.26px; }
+  .subhead     { font-size: 26px; font-weight: 340; line-height: 1.35; letter-spacing: -0.26px; }
+  .card-title  { font-size: 24px; font-weight: 700; line-height: 1.45; letter-spacing: 0; }
+  .body-lg     { font-size: 20px; font-weight: 330; line-height: 1.40; letter-spacing: -0.14px; }
+  .body        { font-size: 18px; font-weight: 320; line-height: 1.45; letter-spacing: -0.26px; }
+  .body-sm     { font-size: 16px; font-weight: 330; line-height: 1.45; letter-spacing: -0.14px; }
+  .link, .btn-type { font-size: 20px; font-weight: 480; line-height: 1.40; letter-spacing: -0.10px; }
+  .eyebrow     { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 400; line-height: 1.30; letter-spacing: 0.54px; text-transform: uppercase; }
+  .caption     { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 400; line-height: 1.00; letter-spacing: 0.60px; text-transform: uppercase; }
+
+  @media (max-width: 560px) {
+    .display-xl { font-size: 48px; letter-spacing: -0.9px; }
+  }
+
+  .swatch { transition: transform .2s cubic-bezier(.22,1,.36,1); }
+  .swatch:hover { transform: translateY(-3px); }
+
+  /* Press / hover feedback on pills — ease-out, transform+opacity only */
+  .pill-btn { transition: transform .15s cubic-bezier(.22,1,.36,1), opacity .15s ease-out, box-shadow .2s ease-out; will-change: transform; }
+  .pill-btn:hover { transform: translateY(-1px); opacity: .92; }
+  .pill-btn:active { transform: scale(0.96); transition-duration: .08s; }
+
+  /* Icon buttons: subtle press + idle float on the primary CTA accent dot */
+  .icon-btn { transition: transform .15s cubic-bezier(.22,1,.36,1), background-color .15s ease-out; }
+  .icon-btn:hover { transform: scale(1.06); }
+  .icon-btn:active { transform: scale(0.92); }
+
+  /* Card hover lift — continuity-style, transform only (GPU-composited) */
+  .lift-card { transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease-out; will-change: transform; }
+  .lift-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+
+  /* Color-block entrance: scale-in + fade, orchestrated on scroll */
+  .reveal { opacity: 0; transform: translateY(28px) scale(0.98); transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+  .reveal.in-view { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* Stagger children — delay set inline via style="--d: Nms" */
+  .stagger-item { opacity: 0; transform: translateY(16px); transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1); transition-delay: var(--d, 0ms); }
+  .stagger-item.in-view { opacity: 1; transform: translateY(0); }
+
+  /* Hero: orchestrated pop-in sequence on load */
+  @keyframes popIn {
+    0%   { opacity: 0; transform: translateY(22px) scale(0.96); }
+    70%  { opacity: 1; transform: translateY(-2px) scale(1.005); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .hero-pop { opacity: 0; animation: popIn .8s cubic-bezier(.2,1.3,.3,1) forwards; }
+
+  /* Marquee: true infinite scroll-driven loop, linear (correct use case) */
+  .marquee-track { display: flex; width: max-content; animation: marqueeScroll 22s linear infinite; }
+  @keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Pricing tab: layout-animated sliding indicator (shared-element style) */
+  #tab-group { position: relative; }
+  #tab-indicator {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: #000000; border-radius: 9999px; z-index: 0;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), width .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .tab-btn { position: relative; z-index: 1; transition: color .2s ease-out; }
+
+  /* Shimmer / skeleton loading sheen */
+  .shimmer { position: relative; overflow: hidden; background: #eceae4; }
+  .shimmer::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+    transform: translateX(-100%);
+    animation: shimmerSweep 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmerSweep { to { transform: translateX(100%); } }
+
+  /* Idle float on decorative accent dot */
+  @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .float-idle { animation: floatY 4.5s ease-in-out infinite; }
+
+  /* Pulse — ambient attention cue */
+  @keyframes softPulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  .pulse-dot { animation: softPulse 2s ease-in-out infinite; }
+
+  /* Ripple on tap */
+  .ripple-wrap { position: relative; overflow: hidden; }
+  .ripple { position: absolute; border-radius: 9999px; background: rgba(0,0,0,0.15); transform: scale(0); animation: rippleOut .6s ease-out forwards; pointer-events: none; }
+  @keyframes rippleOut { to { transform: scale(2.6); opacity: 0; } }
+
+  /* Number ticker uses tabular numbers so digits don't jitter */
+  .ticker { font-variant-numeric: tabular-nums; }
+
+  /* Respect reduced motion: strip all non-essential motion */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .stagger-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .hero-pop { opacity: 1 !important; animation: none !important; }
+    .marquee-track { animation: none !important; }
+    .float-idle, .pulse-dot, .shimmer::after { animation: none !important; }
+    .pill-btn, .icon-btn, .lift-card, .swatch { transition: none !important; }
+  }
+</style>
+</head>
+<body class="bg-canvas text-ink font-sans antialiased">
+
+  <!-- TOP NAV -->
+  <header class="sticky top-0 z-40 bg-canvas h-14 flex items-center border-b border-hairline-soft">
+    <div class="max-w-[1280px] w-full mx-auto px-lg2 md:px-xxl flex items-center justify-between">
+      <span class="card-title !text-[20px]">Figma</span>
+      <nav class="hidden md:flex items-center gap-xl2 body-sm">
+        <a href="#colors" class="hover:opacity-60">Design</a>
+        <a href="#typography" class="hover:opacity-60">FigJam</a>
+        <a href="#components" class="hover:opacity-60">Slides</a>
+        <a href="#blocks" class="hover:opacity-60">Pricing</a>
+      </nav>
+      <div class="flex items-center gap-xs2">
+        <button class="pill-btn bg-canvas text-ink btn-type rounded-pill px-[18px] pt-2 pb-2.5">Contact sales</button>
+        <button class="pill-btn bg-ink text-white btn-type rounded-pill px-5 py-2.5">Get started for free</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MARQUEE STRIP -->
+  <div class="h-9 bg-inverse-canvas text-inverse-ink flex items-center overflow-hidden">
+    <div class="marquee-track body-sm">
+      <span class="px-6 whitespace-nowrap">Trusted by design teams at Duolingo · Stripe · Airbnb · Notion · Spotify · Linear · Vercel</span>
+      <span class="px-6 whitespace-nowrap" aria-hidden="true">Trusted by design teams at Duolingo · Stripe · Airbnb · Notion · Spotify · Linear · Vercel</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="max-w-[1280px] mx-auto px-lg2 md:px-xxl pt-xxl pb-section">
+    <p class="eyebrow text-ink/70 mb-md2 hero-pop" style="animation-delay:0ms">Design system</p>
+    <h1 class="display-xl max-w-4xl hero-pop" style="animation-delay:80ms">Think it.<br/>Make it.</h1>
+    <p class="body-lg max-w-xl mt-lg2 text-ink/80 hero-pop" style="animation-delay:220ms">
+      A monochrome editorial canvas, interrupted — on purpose — by oversized pastel color blocks. Serious tools, made by people who like color.
+    </p>
+    <div class="flex gap-md2 mt-xl2 hero-pop" style="animation-delay:360ms">
+      <button class="pill-btn bg-ink text-white btn-type rounded-pill px-5 py-2.5">Get started for free</button>
+      <button class="pill-btn bg-canvas text-ink btn-type rounded-pill px-[18px] pt-2 pb-2.5 border border-hairline">Contact sales</button>
+      <span class="w-2.5 h-2.5 rounded-full bg-accent-magenta self-center float-idle" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <!-- COLOR PALETTE -->
+  <section id="colors" class="reveal max-w-[1280px] mx-auto px-lg2 md:px-xxl pb-section">
+    <p class="eyebrow text-ink/70 mb-xs2">01 · Palette</p>
+    <h2 class="display-lg mb-xl2">Monochrome core, pastel storytelling</h2>
+
+    <h3 class="card-title mb-md2">System</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-md2 mb-xxl stagger-parent">
+      <div class="swatch stagger-item" style="--d:0ms">
+        <div class="h-24 rounded-md bg-ink"></div>
+        <p class="caption mt-xs2">Primary / Ink</p>
+        <p class="body-sm text-ink/60">#000000</p>
+      </div>
+      <div class="swatch stagger-item" style="--d:60ms">
+        <div class="h-24 rounded-md bg-canvas border border-hairline"></div>
+        <p class="caption mt-xs2">Canvas</p>
+        <p class="body-sm text-ink/60">#ffffff</p>
+      </div>
+      <div class="swatch stagger-item" style="--d:120ms">
+        <div class="h-24 rounded-md bg-surface-soft border border-hairline-soft"></div>
+        <p class="caption mt-xs2">Surface soft</p>
+        <p class="body-sm text-ink/60">#f7f7f5</p>
+      </div>
+      <div class="swatch stagger-item" style="--d:180ms">
+        <div class="h-24 rounded-md bg-accent-magenta"></div>
+        <p class="caption mt-xs2">Accent magenta</p>
+        <p class="body-sm text-ink/60">#ff3d8b · one-shot promo only</p>
+      </div>
+    </div>
+
+    <h3 class="card-title mb-md2">Color blocks — all seven</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-md2 stagger-parent">
+      <div class="swatch stagger-item" style="--d:0ms"><div class="h-24 rounded-md bg-block-lime"></div><p class="caption mt-xs2">Lime</p></div>
+      <div class="swatch stagger-item" style="--d:40ms"><div class="h-24 rounded-md bg-block-lilac"></div><p class="caption mt-xs2">Lilac</p></div>
+      <div class="swatch stagger-item" style="--d:80ms"><div class="h-24 rounded-md bg-block-cream"></div><p class="caption mt-xs2">Cream</p></div>
+      <div class="swatch stagger-item" style="--d:120ms"><div class="h-24 rounded-md bg-block-mint"></div><p class="caption mt-xs2">Mint</p></div>
+      <div class="swatch stagger-item" style="--d:160ms"><div class="h-24 rounded-md bg-block-pink"></div><p class="caption mt-xs2">Pink</p></div>
+      <div class="swatch stagger-item" style="--d:200ms"><div class="h-24 rounded-md bg-block-coral"></div><p class="caption mt-xs2">Coral</p></div>
+      <div class="swatch stagger-item" style="--d:240ms"><div class="h-24 rounded-md bg-block-navy"></div><p class="caption mt-xs2 text-ink">Navy</p></div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section id="typography" class="reveal max-w-[1280px] mx-auto px-lg2 md:px-xxl pb-section">
+    <p class="eyebrow text-ink/70 mb-xs2">02 · Typography</p>
+    <h2 class="display-lg mb-xl2">One voice, many weights</h2>
+    <div class="divide-y divide-hairline-soft border-t border-b border-hairline-soft">
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">display-xl / 340</span>
+        <span class="display-xl !text-[56px] sm:!text-[86px]">Aa Bb</span>
+      </div>
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">display-lg / 340</span>
+        <span class="display-lg !text-[42px] sm:!text-[64px]">Aa Bb Cc</span>
+      </div>
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">headline / 540</span>
+        <span class="headline">A story-block title reads at weight 540</span>
+      </div>
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">subhead / 340</span>
+        <span class="subhead">Long-form intros sit near headline scale, lighter</span>
+      </div>
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">body / 320</span>
+        <span class="body max-w-lg">Default body copy runs at weight 320 — hierarchy comes from weight, never opacity.</span>
+      </div>
+      <div class="py-lg2 flex flex-col sm:flex-row sm:items-baseline gap-md2">
+        <span class="caption w-40 shrink-0 text-ink/50">eyebrow / mono</span>
+        <span class="eyebrow">Section label, uppercase, tracked</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUTTONS & FORMS -->
+  <section id="components" class="reveal max-w-[1280px] mx-auto px-lg2 md:px-xxl pb-section">
+    <p class="eyebrow text-ink/70 mb-xs2">03 · Components</p>
+    <h2 class="display-lg mb-xl2">Pills, tabs, inputs</h2>
+
+    <div class="grid md:grid-cols-2 gap-xl2">
+      <div>
+        <h3 class="card-title mb-md2">Buttons <span class="body-sm text-ink/40">— hover to lift, tap to press</span></h3>
+        <div class="flex flex-wrap items-center gap-md2 mb-lg2">
+          <button class="pill-btn bg-ink text-white btn-type rounded-pill px-5 py-2.5">Primary pill</button>
+          <button class="pill-btn bg-canvas text-ink btn-type rounded-pill px-[18px] pt-2 pb-2.5 border border-hairline">Secondary pill</button>
+          <button class="pill-btn text-ink link rounded-full px-3 py-2 hover:bg-surface-soft">Text link</button>
+          <button class="pill-btn bg-accent-magenta text-white btn-type rounded-pill px-[18px] py-2.5">Save your spot</button>
+        </div>
+        <div class="flex items-center gap-md2">
+          <button class="ripple-wrap icon-btn w-10 h-10 rounded-full bg-surface-soft flex items-center justify-center" data-ripple>→</button>
+          <button class="ripple-wrap icon-btn w-10 h-10 rounded-full text-white flex items-center justify-center" style="background:#1f1d3d1a" data-ripple>→</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="card-title mb-md2">Pricing tabs <span class="body-sm text-ink/40">— indicator morphs between tabs</span></h3>
+        <div id="tab-group" class="flex gap-xs2 mb-lg2 p-1" role="tablist">
+          <div id="tab-indicator"></div>
+          <button class="tab-btn btn-type rounded-pill px-[18px] py-2 text-white" data-tab aria-selected="true">Professional</button>
+          <button class="tab-btn btn-type rounded-pill px-[18px] py-2 text-ink" data-tab>Starter</button>
+          <button class="tab-btn btn-type rounded-pill px-[18px] py-2 text-ink" data-tab>Organization</button>
+        </div>
+        <h3 class="card-title mb-md2">Text input</h3>
+        <input type="text" placeholder="Work email" class="body w-full max-w-sm rounded-md border border-hairline px-[14px] py-3 transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-ink/20" />
+      </div>
+    </div>
+  </section>
+
+  <!-- COLOR BLOCK SECTIONS -->
+  <section id="blocks" class="max-w-[1280px] mx-auto px-lg2 md:px-xxl pb-section space-y-xxl">
+    <p class="eyebrow text-ink/70 reveal">04 · Color-block sections — all seven grounds</p>
+
+    <div class="reveal rounded-lg bg-block-lime p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">Systems</p>
+      <h3 class="subhead max-w-xl">Design systems that scale with your team, not against it.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-navy text-inverse-ink p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2 text-inverse-ink/70">Ship products</p>
+      <h3 class="subhead max-w-xl">From idea to production, without leaving the canvas.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-coral p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">Developers</p>
+      <h3 class="subhead max-w-xl">Inspect, extract, and ship the exact spec your design team made.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-cream p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">FigJam · brainstorm</p>
+      <h3 class="subhead max-w-xl">Sticky notes, timers, and templates for a room that thinks out loud.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-mint p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">FigJam · workshop</p>
+      <h3 class="subhead max-w-xl">Run retros and workshops without losing the thread — or the notes.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-pink p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">FigJam · mapping</p>
+      <h3 class="subhead max-w-xl">Turn a tangle of ideas into a map everyone can follow.</h3>
+    </div>
+
+    <div class="reveal rounded-lg bg-block-lilac p-xl2 md:p-xxl">
+      <p class="eyebrow mb-md2">Release notes</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-md2">
+        <span class="body-sm">Config 2026 registration is now open — save your spot before seats run out.</span>
+        <button class="pill-btn bg-accent-magenta text-white btn-type rounded-pill px-[18px] py-2.5 whitespace-nowrap">Save your spot</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="reveal max-w-[1280px] mx-auto px-lg2 md:px-xxl pb-section">
+    <p class="eyebrow text-ink/70 mb-xs2">05 · Cards</p>
+    <h2 class="display-lg mb-xl2">Pricing &amp; templates <span class="body-sm text-ink/40 align-middle">— hover to lift</span></h2>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-lg2 mb-xxl">
+      <div class="lift-card rounded-lg border border-hairline p-lg2">
+        <p class="caption text-ink/50 mb-xs2">Starter</p>
+        <p class="card-title mb-md2">Free</p>
+        <p class="body-sm mb-lg2 text-ink/70">For individuals exploring ideas.</p>
+        <div class="space-y-xs2">
+          <div class="flex items-center gap-xs2 body-sm"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span> 3 files</div>
+          <div class="flex items-center gap-xs2 body-sm"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span> Unlimited viewers</div>
+        </div>
+      </div>
+      <div class="lift-card rounded-lg border border-hairline p-lg2">
+        <p class="caption text-ink/50 mb-xs2">Professional</p>
+        <p class="card-title mb-md2"><span class="ticker" data-count-to="12">$0</span>/editor</p>
+        <p class="body-sm mb-lg2 text-ink/70">For small teams and freelancers.</p>
+        <div class="space-y-xs2">
+          <div class="flex items-center gap-xs2 body-sm"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span> Unlimited files</div>
+          <div class="flex items-center gap-xs2 body-sm"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span> Version history</div>
+        </div>
+      </div>
+      <div class="lift-card rounded-md bg-surface-soft p-md2">
+        <div class="h-32 rounded-md shimmer mb-md2"></div>
+        <p class="body-sm">Onboarding flow template <span class="text-ink/40">(loading state)</span></p>
+      </div>
+    </div>
+
+    <h3 class="card-title mb-md2">Compare plans</h3>
+    <div class="rounded-lg border border-hairline overflow-hidden">
+      <div class="grid grid-cols-4 body-sm">
+        <div class="p-md2 text-ink/50 caption">Feature</div>
+        <div class="p-md2 text-center caption">Starter</div>
+        <div class="p-md2 text-center caption">Pro</div>
+        <div class="p-md2 text-center caption">Org</div>
+      </div>
+      <div class="grid grid-cols-4 body-sm border-t border-hairline-soft">
+        <div class="p-md2">Unlimited files</div>
+        <div class="p-md2 flex justify-center"><span class="text-ink/20">—</span></div>
+        <div class="p-md2 flex justify-center"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span></div>
+        <div class="p-md2 flex justify-center"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span></div>
+      </div>
+      <div class="grid grid-cols-4 body-sm border-t border-hairline-soft">
+        <div class="p-md2">Version history</div>
+        <div class="p-md2 flex justify-center"><span class="text-ink/20">—</span></div>
+        <div class="p-md2 flex justify-center"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span></div>
+        <div class="p-md2 flex justify-center"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span></div>
+      </div>
+      <div class="grid grid-cols-4 body-sm border-t border-hairline-soft">
+        <div class="p-md2">SSO &amp; provisioning</div>
+        <div class="p-md2 flex justify-center"><span class="text-ink/20">—</span></div>
+        <div class="p-md2 flex justify-center"><span class="text-ink/20">—</span></div>
+        <div class="p-md2 flex justify-center"><span class="w-4 h-4 rounded-full bg-canvas text-success flex items-center justify-center text-xs">✓</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="reveal bg-canvas pt-section pb-xxl px-lg2 md:px-xl2">
+    <div class="max-w-[1280px] mx-auto">
+      <p class="display-lg mb-xxl">Figma</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-lg2 caption text-ink/50">
+        <div class="space-y-xs2">
+          <p class="text-ink">Product</p>
+          <p>Design</p><p>FigJam</p><p>Slides</p>
+        </div>
+        <div class="space-y-xs2">
+          <p class="text-ink">Resources</p>
+          <p>Blog</p><p>Community</p><p>Support</p>
+        </div>
+        <div class="space-y-xs2">
+          <p class="text-ink">Company</p>
+          <p>Careers</p><p>Press</p><p>Contact</p>
+        </div>
+        <div class="space-y-xs2">
+          <p class="text-ink">Legal</p>
+          <p>Terms</p><p>Privacy</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal + stagger orchestration (IntersectionObserver, fires once)
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          entry.target.querySelectorAll('.stagger-item').forEach((el) => el.classList.add('in-view'));
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Pricing tab: sliding "shared element" indicator that morphs width/position
+    const tabGroup = document.getElementById('tab-group');
+    const indicator = document.getElementById('tab-indicator');
+    const tabs = Array.from(document.querySelectorAll('[data-tab]'));
+
+    function positionIndicator(el, animate = true) {
+      const groupRect = tabGroup.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      if (!animate) indicator.style.transition = 'none';
+      indicator.style.width = rect.width + 'px';
+      indicator.style.transform = `translateX(${rect.left - groupRect.left}px)`;
+      if (!animate) requestAnimationFrame(() => { indicator.style.transition = ''; });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach((t) => { t.classList.remove('text-white'); t.classList.add('text-ink'); t.setAttribute('aria-selected', 'false'); });
+        tab.classList.remove('text-ink'); tab.classList.add('text-white'); tab.setAttribute('aria-selected', 'true');
+        positionIndicator(tab);
+      });
+    });
+    window.addEventListener('load', () => positionIndicator(tabs[0], false));
+    window.addEventListener('resize', () => {
+      const active = tabs.find((t) => t.getAttribute('aria-selected') === 'true');
+      if (active) positionIndicator(active, false);
+    });
+
+    // Ripple on tap feedback
+    document.querySelectorAll('[data-ripple]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        if (prefersReduced) return;
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const span = document.createElement('span');
+        span.className = 'ripple';
+        span.style.width = span.style.height = size + 'px';
+        span.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        span.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        btn.appendChild(span);
+        span.addEventListener('animationend', () => span.remove());
+      });
+    });
+
+    // Number ticker: counts up once when scrolled into view, tabular-nums keeps width stable
+    const tickerEls = document.querySelectorAll('[data-count-to]');
+    const tickerIo = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const target = parseInt(el.dataset.countTo, 10);
+        if (prefersReduced) { el.textContent = '$' + target; tickerIo.unobserve(el); return; }
+        const duration = 900;
+        const start = performance.now();
+        function tick(now) {
+          const p = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+          el.textContent = '$' + Math.round(eased * target);
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        tickerIo.unobserve(el);
+      });
+    }, { threshold: 0.6 });
+    tickerEls.forEach((el) => tickerIo.observe(el));
+  </script>
+</body>
+</html>

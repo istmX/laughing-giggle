@@ -15,7 +15,7 @@ export const Loader = ({ size = 'md', text = 'Loading...' }) => {
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
         className={`${sizeClasses[size]} border-2 border-ink/20 border-t-ink rounded-full`}
       />
-      {text && <p className="text-caption font-mono uppercase tracking-caption text-ink-muted">{text}</p>}
+      {text && <p className="text-caption font-mono uppercase tracking-caption text-ink-muted w-full max-w-[60ch] block">{text}</p>}
     </div>
   )
 }

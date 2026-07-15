@@ -24,7 +24,7 @@ export const PreferencesPage = () => {
         <h1 className="text-display-lg font-340 tracking-display-lg text-ink">
           Preferences
         </h1>
-        <p className="text-subhead font-340 text-ink-muted tracking-subhead">
+        <p className="text-subhead font-340 text-ink-muted tracking-subhead w-full max-w-[60ch] block">
           Customize your dashboard experience.
         </p>
       </motion.div>
@@ -37,7 +37,7 @@ export const PreferencesPage = () => {
       >
         <div>
           <h2 className="text-headline font-540 tracking-headline text-ink mb-2">Appearance</h2>
-          <p className="text-body font-320 text-ink-muted mb-8">Choose a theme for the dashboard. Landing pages will always remain in light mode.</p>
+          <p className="text-body font-320 text-ink-muted mb-8 w-full max-w-[60ch] block">Choose a theme for the dashboard. Landing pages will always remain in light mode.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

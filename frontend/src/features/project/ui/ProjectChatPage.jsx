@@ -145,7 +145,7 @@ Your requirements have been cataloged. You can trigger the context engine to bui
             <h1 className="text-body-sm font-semibold text-ink tracking-tight">
               {project?.project_title || 'Dating Site for Developers'}
             </h1>
-            <p className="text-caption text-ink-muted">Developer Chat Sandbox</p>
+            <p className="text-caption text-ink-muted w-full max-w-[60ch] block">Developer Chat Sandbox</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -8,6 +8,9 @@ import ProfilePage from '@/Pages/ProfilePage'
 import PublicProfilePage from '@/Pages/PublicProfilePage'
 import PreferencesPage from '@/Pages/Preferences'
 import NotFound from '@/Pages/NotFound'
+import Docs from '@/Pages/Docs'
+import About from '@/Pages/About'
+import Sponsor from '@/Pages/Sponsor'
 import { Overview } from '@/Dashboard/components/Overview'
 import { PlaygroundPage } from '@/Dashboard/components/PlaygroundPage'
 import { Playground } from '@/features/playground/ui/Playground'
@@ -48,6 +51,9 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/docs" element={<Docs />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/sponsor" element={<Sponsor />} />
       </Route>
       
       {/* Publicly accessible profile, outside both Protected/Public layout wrappers if we want it completely standalone, 

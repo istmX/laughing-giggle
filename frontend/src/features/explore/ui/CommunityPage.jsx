@@ -70,7 +70,7 @@ export function CommunityPage() {
     <div className="w-full min-h-full p-4 md:p-8 max-w-7xl mx-auto pb-24">
       <div className="mb-12 text-center max-w-2xl mx-auto">
         <h1 className="text-display-lg font-340 tracking-display-lg text-ink mb-4">Community</h1>
-        <p className="text-subhead font-340 text-ink-muted">Discover top creators and templates in the Zenix ecosystem.</p>
+        <p className="text-subhead font-340 text-ink-muted w-full max-w-[60ch] block">Discover top creators and templates in the Zenix ecosystem.</p>
         
         <div className="mt-8 relative">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -108,7 +108,7 @@ export function CommunityPage() {
               <Search className="w-8 h-8 text-ink-muted" />
             </div>
             <h3 className="text-card-title font-700 text-ink mb-2">No creators found</h3>
-            <p className="text-body-sm text-ink-muted w-full max-w-md mx-auto whitespace-normal">
+            <p className="text-body-sm text-ink-muted w-full mx-auto whitespace-normal max-w-[60ch] block">
               We couldn't find anyone matching "{query}". Try checking for typos or searching another name.
             </p>
           </motion.div>
@@ -144,7 +144,7 @@ export function CommunityPage() {
                         <h3 className="text-body-lg font-540 text-ink truncate group-hover:text-brand-indigo transition-colors">
                           {user.name}
                         </h3>
-                        <p className="text-body-sm text-ink-muted truncate">
+                        <p className="text-body-sm text-ink-muted truncate w-full max-w-[60ch] block">
                           @{user.username || 'user'}
                         </p>
                         {user.location && (
@@ -157,7 +157,7 @@ export function CommunityPage() {
                     </div>
                     
                     {user.bio && (
-                      <p className="text-body-sm text-ink-soft line-clamp-2 mb-4 flex-1">
+                      <p className="text-body-sm text-ink-soft line-clamp-2 mb-4 flex-1 w-full max-w-[60ch] block">
                         {user.bio}
                       </p>
                     )}

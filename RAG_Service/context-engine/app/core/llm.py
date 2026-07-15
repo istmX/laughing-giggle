@@ -1,7 +1,11 @@
 import os
+from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_mistralai import ChatMistralAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
+load_dotenv(env_path)
 
 def get_fallback_llm():
     """

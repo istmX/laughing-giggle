@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import json
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Any
 from loguru import logger
 from app.rag.retriever.retriever import ZenixRetriever
 from app.langgraph.pm_wizard import pm_wizard_graph
@@ -162,19 +162,19 @@ async def refine_specification(request: RefinementRequest):
     return {"refined_spec": result["refined_spec"]}
 
 class PlaygroundRequest(BaseModel):
-    user_message: str
-    chat_history: List[Dict[str, str]]
+    messages: List[Dict[str, str]]
+    designTokens: Dict[str, Any]
 
 @router.post("/playground")
 async def process_playground(request: PlaygroundRequest):
     logger.info("Triggering AI Playground")
     result = playground_graph.invoke({
-        "user_message": request.user_message,
-        "chat_history": request.chat_history
+        "chat_history": request.messages,
+        "design_tokens": request.designTokens
     })
     return {
         "message": result["ai_response"],
-        "html": result["generated_html"]
+        "designTokens": result["design_tokens"]
     }
 
 class DeveloperRequest(BaseModel):

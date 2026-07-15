@@ -67,7 +67,7 @@ export function SpecReadyPanel({ specContent, onContinue, artifactCount = 0 }) {
           transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.15 }}
           className="flex flex-col items-center gap-3"
         >
-          <p className="text-[13px] text-ink-muted text-center max-w-sm leading-relaxed">
+          <p className="text-[13px] text-ink-muted text-center leading-relaxed w-full max-w-[60ch] block">
             Your project context has been generated. You can now ask Zenix to help build, refine, and expand it.
           </p>
           <motion.button

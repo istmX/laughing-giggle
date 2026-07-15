@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, LockKeyhole, Mail, User, UserCircle2 } from 'lucide-react'
+import { LockKeyhole, Mail, User, UserCircle2 } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 
-import { Button } from '@/components/ui/button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useGoogleAuth } from '@/features/auth/hooks/useGoogleAuth'
 
 import AuthShell from './AuthShell'
 import AuthField from './AuthField'
 import AuthSocialSection from './AuthSocialSection'
+import { AuthSubmitButton } from './AuthSubmitButton'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -18,131 +19,85 @@ const Signup = () => {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { ready: googleReady, loading: googleLoading, error: googleError, signInWithGoogle } = useGoogleAuth({
-    onCredential: async (credential) => {
-      await googleLogin({ credential })
-    },
+  const prefersReducedMotion = useReducedMotion()
+  const { ready, loading: googleLoading, error: googleError, signInWithGoogle } = useGoogleAuth({
+    onCredential: async (credential) => { await googleLogin({ credential }) },
   })
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    setFormError('')
+  const isLoading = status === 'loading'
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setFormError('')
     try {
       const auth = await signup({ name: name.trim(), username: username.trim(), email: email.trim(), password })
-
-      if (auth?.token) {
-        navigate('/dashboard')
-      } else {
-        setFormError('Account created but sign-in failed. Please try logging in.')
-      }
-    } catch (submitError) {
-      setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign up')
+      if (auth?.token) navigate('/dashboard')
+      else setFormError('Account created but sign-in failed. Please try logging in.')
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Unable to sign up')
     }
   }
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogle = async () => {
     setFormError('')
-
-    try {
-      await signInWithGoogle()
-      navigate('/dashboard')
-    } catch (submitError) {
-      setFormError(submitError instanceof Error ? submitError.message : 'Unable to sign up with Google')
-    }
+    try { await signInWithGoogle(); navigate('/dashboard') }
+    catch (err) { setFormError(err instanceof Error ? err.message : 'Unable to sign up with Google') }
   }
+
+  const fieldDelay = (i) => ({
+    initial: prefersReducedMotion ? {} : { opacity: 0, y: 6 },
+    animate: prefersReducedMotion ? {} : { opacity: 1, y: 0 },
+    transition: { delay: 0.2 + i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+  })
 
   return (
-    <AuthShell
-      panelTitle="Create your account"
-      panelDescription="Set up your workspace and start organizing your context."
-    >
-      <div className="space-y-6">
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <AuthField
-              label="Name"
-              name="signup-name"
-              type="text"
-              placeholder="Jane Doe"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              autoComplete="name"
-              icon={UserCircle2}
-            />
+    <AuthShell panelTitle="Create your account" panelDescription="Start generating AI-ready context.">
+      <form className="space-y-[var(--spacing-md)]" onSubmit={handleSubmit}>
+        <motion.div {...fieldDelay(0)} className="grid gap-[var(--spacing-md)] sm:grid-cols-2">
+          <AuthField label="Name" name="signup-name" type="text" placeholder="Jane Doe"
+            value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" icon={UserCircle2} />
+          <AuthField label="Username" name="signup-username" type="text" placeholder="janedoe"
+            value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" icon={User} />
+        </motion.div>
 
-            <AuthField
-              label="Username"
-              name="signup-username"
-              type="text"
-              placeholder="janedoe"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              autoComplete="username"
-              icon={User}
-            />
-          </div>
+        <motion.div {...fieldDelay(1)}>
+          <AuthField label="Email" name="signup-email" type="email" placeholder="you@example.com"
+            value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" icon={Mail} />
+        </motion.div>
 
-          <AuthField
-            label="Email"
-            name="signup-email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            autoComplete="email"
-            inputMode="email"
-            icon={Mail}
-          />
+        <motion.div {...fieldDelay(2)}>
+          <AuthField label="Password" name="signup-password" type="password" placeholder="Create a password"
+            value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" icon={LockKeyhole} />
+        </motion.div>
 
-          <AuthField
-            label="Password"
-            name="signup-password"
-            type="password"
-            placeholder="Create a password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="new-password"
-            icon={LockKeyhole}
-          />
+        <motion.label {...fieldDelay(3)}
+          className="flex cursor-pointer items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border border-hairline/60 bg-surface-soft/50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-[var(--text-body-sm)] leading-5 text-ink/40 transition-colors hover:border-ink/10 hover:bg-surface-soft/80">
+          <input type="checkbox" className="mt-0.5 size-3.5 rounded border-hairline bg-canvas accent-ink focus:ring-0 focus:ring-offset-0" />
+          <span>I agree to the terms, privacy policy, and account creation flow for Zenix.</span>
+        </motion.label>
 
-          <label className="flex items-start gap-3 rounded-lg border border-hairline bg-surface-soft px-4 py-4 text-body-sm leading-6 text-ink-muted">
-            <input
-              type="checkbox"
-              className="mt-1 size-4 rounded border-border bg-background accent-primary focus:ring-primary/30"
-            />
-            <span>I agree to the terms, privacy policy, and account creation flow for Zenix.</span>
-          </label>
+        {(formError || error || googleError) && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="rounded-[var(--radius-sm)] bg-destructive/5 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-[var(--text-body-sm)] text-destructive">
+            {formError || error || googleError}
+          </motion.p>
+        )}
 
-          <Button
-            type="submit"
-            disabled={status === 'loading'}
-            size="lg"
-            className="h-14 w-full rounded-lg bg-primary text-body-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:translate-y-0"
-          >
-            {status === 'loading' ? 'Creating account...' : 'Create account'}
-            <ArrowRight className="ml-3 size-5" />
-          </Button>
-        </form>
+        <motion.div {...fieldDelay(4)}>
+          <AuthSubmitButton loading={isLoading}>Create account</AuthSubmitButton>
+        </motion.div>
+      </form>
 
-        {formError || error || googleError ? (
-          <p className="text-sm text-destructive">{formError || error || googleError}</p>
-        ) : null}
-
-        <AuthSocialSection
-          onAction={handleGoogleSignIn}
-          ready={googleReady}
-          loading={googleLoading}
-          disabled={status === 'loading'}
-        />
-
-        <p className="text-center text-body-sm text-ink-muted">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-foreground transition-colors hover:text-ink-soft">
-            Sign in
-          </Link>
-        </p>
+      <div className="mt-[var(--spacing-lg)]">
+        <AuthSocialSection onAction={handleGoogle} ready={ready} loading={googleLoading} disabled={isLoading} />
       </div>
+
+      <motion.p initial={prefersReducedMotion ? {} : { opacity: 0 }} animate={prefersReducedMotion ? {} : { opacity: 1 }}
+        transition={{ delay: 0.7, duration: 0.5 }}
+        className="mt-[var(--spacing-xl)] text-center text-[var(--text-body-sm)] font-[var(--font-weight-320)] text-ink/30">
+        Already have an account?{' '}
+        <Link to="/login" className="font-[var(--font-weight-480)] text-ink transition-colors hover:text-ink/50">Sign in</Link>
+      </motion.p>
     </AuthShell>
   )
 }

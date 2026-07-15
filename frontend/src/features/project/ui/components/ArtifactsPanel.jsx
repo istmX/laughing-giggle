@@ -120,8 +120,8 @@ export function ArtifactsPanel({
                 <div className="h-10 w-10 rounded-xl bg-surface-soft border border-hairline flex items-center justify-center mb-3">
                   <FileCode2 className="h-5 w-5 text-ink-muted/50" />
                 </div>
-                <p className="text-[13px] font-medium text-ink mb-1">No context files yet</p>
-                <p className="text-[12px] text-ink-muted max-w-[180px] leading-relaxed">
+                <p className="text-[13px] font-medium text-ink mb-1 w-full max-w-[60ch] block">No context files yet</p>
+                <p className="text-[12px] text-ink-muted max-w-[180px] leading-relaxed w-full max-w-[60ch] block">
                   Complete the AI interview to generate your project architecture.
                 </p>
               </div>
@@ -153,7 +153,7 @@ export function ArtifactsPanel({
                           <p className={`text-[13.5px] font-medium truncate ${isActive ? 'text-ink' : 'text-ink-muted group-hover:text-ink transition-colors'}`}>
                             {basename(a.file_path)}
                           </p>
-                          <p className="text-[11px] text-ink-faint font-mono truncate">
+                          <p className="text-[11px] text-ink-faint font-mono truncate w-full max-w-[60ch] block">
                             {a.file_path.split('/').slice(0, -1).join('/') || '/'}
                           </p>
                         </div>

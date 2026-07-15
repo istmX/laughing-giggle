@@ -94,7 +94,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
   const handleDeleteAccount = async () => {
     toast((t) => (
       <div className="flex flex-col gap-3">
-        <p className="text-body-sm font-[500] text-ink">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+        <p className="text-body-sm font-[500] text-ink w-full max-w-[60ch] block">Are you sure you want to permanently delete your account? This action cannot be undone.</p>
         <div className="flex justify-end gap-2">
           <button 
             onClick={() => toast.dismiss(t.id)}
@@ -184,14 +184,14 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
                   {profile.name}
                   {profile.isVerified && <BadgeCheck className="w-7 h-7 text-primary fill-primary/10" strokeWidth={1.5} />}
                 </h1>
-                <p className="text-body-lg font-[480] text-ink-muted mb-4">@{profile.username}</p>
+                <p className="text-body-lg font-[480] text-ink-muted mb-4 w-full max-w-[60ch] block">@{profile.username}</p>
                 
                 {profile.bio ? (
-                  <p className="text-body font-[340] text-ink/90 max-w-2xl mb-6 leading-relaxed">
+                  <p className="text-body font-[340] text-ink/90 mb-6 leading-relaxed w-full max-w-[60ch] block">
                     {profile.bio}
                   </p>
                 ) : (
-                  <p className="text-body font-[340] text-ink-muted italic max-w-2xl mb-6">
+                  <p className="text-body font-[340] text-ink-muted italic mb-6 w-full max-w-[60ch] block">
                     No bio added yet. Add one in Edit Profile.
                   </p>
                 )}
@@ -289,8 +289,8 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
             </h2>
             <div className="space-y-6">
               <div>
-                <p className="text-caption font-mono uppercase tracking-caption text-ink-muted mb-1">Email</p>
-                <p className="text-body-sm font-[480] text-ink">{profile.email}</p>
+                <p className="text-caption font-mono uppercase tracking-caption text-ink-muted mb-1 w-full max-w-[60ch] block">Email</p>
+                <p className="text-body-sm font-[480] text-ink w-full max-w-[60ch] block">{profile.email}</p>
               </div>
             </div>
           </div>
@@ -305,8 +305,8 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
                   <KeyRound className="w-5 h-5 text-ink" />
                 </div>
                 <div>
-                  <p className="text-body-sm font-[540] text-ink capitalize">{profile.provider || 'Password'}</p>
-                  <p className="text-caption font-[480] text-ink-muted">Primary login method</p>
+                  <p className="text-body-sm font-[540] text-ink capitalize w-full max-w-[60ch] block">{profile.provider || 'Password'}</p>
+                  <p className="text-caption font-[480] text-ink-muted w-full max-w-[60ch] block">Primary login method</p>
                 </div>
               </div>
               <CheckCircle2 className="w-5 h-5 text-primary" />
@@ -318,7 +318,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
           <div className="bg-canvas border border-hairline rounded-2xl p-6 shadow-sm">
             <h2 className="text-body-lg font-[540] tracking-body text-ink mb-2">Preferences & Security</h2>
-            <p className="text-body-sm font-[340] text-ink-muted mb-6">Manage your app experience and profile visibility.</p>
+            <p className="text-body-sm font-[340] text-ink-muted mb-6 w-full max-w-[60ch] block">Manage your app experience and profile visibility.</p>
             
             <div className="space-y-1">
               <div className="flex items-center justify-between p-4 rounded-xl hover:bg-surface-soft transition-colors group">
@@ -394,7 +394,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-headline font-[540] tracking-headline text-ink">My Templates</h2>
-            <p className="text-body-sm font-[340] text-ink-muted mt-1">Reusable architectures and design systems you've created.</p>
+            <p className="text-body-sm font-[340] text-ink-muted mt-1 w-full max-w-[60ch] block">Reusable architectures and design systems you've created.</p>
           </div>
           <button className="bg-canvas border border-hairline text-ink rounded-full px-5 py-2.5 text-button font-[480] hover:bg-surface-soft shadow-sm transition-colors">
             Create Template
@@ -408,7 +408,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
                 <Box className="w-8 h-8 text-ink-muted" />
               </div>
               <h3 className="text-body-lg font-[540] text-ink mb-2">No Templates Yet</h3>
-              <p className="text-body-sm font-[340] text-ink-muted max-w-[400px] w-full mb-6 mx-auto leading-relaxed">
+              <p className="text-body-sm font-[340] text-ink-muted max-w-[400px] w-full mb-6 mx-auto leading-relaxed max-w-[60ch] block">
                 You haven't created any templates. Start building reusable layouts and architectures.
               </p>
               <button className="bg-primary text-primary-foreground text-button font-[480] px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity shadow-sm">
@@ -428,7 +428,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
             </div>
             <div className="flex-1 w-full">
               <h2 className="text-body-lg font-[540] text-destructive mb-1">Delete Account</h2>
-              <p className="text-body-sm font-[340] text-ink-muted w-full max-w-[600px] leading-relaxed">
+              <p className="text-body-sm font-[340] text-ink-muted w-full max-w-[600px] leading-relaxed max-w-[60ch] block">
                 Permanently delete your account, projects, templates, and all associated data. This action cannot be undone.
               </p>
             </div>
@@ -479,7 +479,7 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
                 <UserPlus className="w-8 h-8 text-ink-muted" />
               </div>
               <h3 className="text-body-lg font-[540] text-ink mb-2">No {followModal.type} yet</h3>
-              <p className="text-body-sm font-[340] text-ink-muted max-w-[250px] mx-auto">
+              <p className="text-body-sm font-[340] text-ink-muted max-w-[250px] mx-auto w-full max-w-[60ch] block">
                 When people start following you, they will appear here.
               </p>
             </div>

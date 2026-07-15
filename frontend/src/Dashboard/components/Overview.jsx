@@ -84,7 +84,7 @@ function ContinueWorkingCard({ project }) {
                   Active
                 </span>
               </div>
-              <p className="text-[14px] text-ink-muted line-clamp-2 max-w-2xl mb-6">
+              <p className="text-[14px] text-ink-muted line-clamp-2 mb-6 w-full max-w-[60ch] block">
                 {project.project_description || 'Resume your architecture and specification session.'}
               </p>
               
@@ -132,7 +132,7 @@ function RecentProjectsList({ projects, onToggleFavorite, onEdit, onDelete }) {
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-[14px] font-[540] text-ink truncate group-hover:text-brand-indigo transition-colors">{p.project_title}</h4>
-                  <p className="text-[12px] text-ink-muted truncate mt-0.5">
+                  <p className="text-[12px] text-ink-muted truncate mt-0.5 w-full max-w-[60ch] block">
                     Updated {formatRelativeDate(p.last_opened_at || p.createdAt)}
                   </p>
                 </div>
@@ -297,7 +297,7 @@ export function Overview() {
                   <Database className="w-6 h-6 text-ink-muted" />
                 </div>
                 <h3 className="text-[16px] font-[540] text-ink mb-2">Your workspace is empty</h3>
-                <p className="text-[14px] text-ink-muted max-w-sm mb-6 whitespace-normal">
+                <p className="text-[14px] text-ink-muted mb-6 whitespace-normal w-full max-w-[60ch] block">
                   Start a new project to begin building with Zenix.
                 </p>
                 <button
@@ -314,7 +314,7 @@ export function Overview() {
 
       {/* Action Modals */}
       <Modal isOpen={!!projectToDelete} onClose={() => setProjectToDelete(null)} title="Delete Project">
-        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed">
+        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed w-full max-w-[60ch] block">
           Are you sure you want to delete <span className="font-[540] text-ink">"{projectToDelete?.project_title}"</span>? This action cannot be undone.
         </p>
         <div className="flex items-center justify-end gap-3">

@@ -82,10 +82,30 @@ export const addMessage = async (req, res, next) => {
     if (!response.ok) throw new Error("Failed to fetch from python service");
     const finalState = await response.json();
 
+    let aiMessage = finalState.message || "Here are your updated design tokens.";
+    // Failsafe: if the python backend leaked raw JSON into the message string, intercept it
+    if (aiMessage.includes('"typography":') || aiMessage.includes('"designTokens":') || aiMessage.includes('{\n  "')) {
+      aiMessage = "I have updated the design tokens based on your request.";
+    }
+
+    // Auto-generate title if it's the first message and still the default
+    if (sessionWithUserMessage.chatHistory.length === 1 && sessionWithUserMessage.title === 'New Session') {
+      const generatedTitle = message.substring(0, 30) + (message.length > 30 ? '...' : '');
+      await playgroundService.updateTitle(req.params.sessionId, req.user.id, generatedTitle);
+    }
+
+    // Save AI response to chat history
+    await playgroundService.addMessage(
+      req.params.sessionId,
+      req.user.id,
+      'assistant',
+      aiMessage
+    );
+
     const session = await playgroundService.updatePreview(
       req.params.sessionId,
       req.user.id,
-      finalState.previewHtml,
+      '', // HTML preview removed, using JSON tokens
       finalState.designTokens
     );
 

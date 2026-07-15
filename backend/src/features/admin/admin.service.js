@@ -6,6 +6,7 @@ import Idea from '../ideas/idea.model.js';
 import Brief from '../brief/brief.model.js';
 import AIGeneration from '../ai/ai.model.js';
 import Artifact from '../artifacts/artifact.model.js';
+import Playground from '../playground/playground.model.js';
 import mongoose from 'mongoose';
 import admin from '../../config/firebase.js';
 
@@ -118,12 +119,20 @@ export const adminService = {
   },
 
   async getAllProjects() {
-    return await Project.find().populate('owner', 'name username email').sort({ createdAt: -1 });
+    return await Project.find()
+      .populate('owner', 'name username email avatar')
+      .sort({ createdAt: -1 });
   },
 
   async getDashboardStats() {
-    const totalUsers = await User.countDocuments();
-    const totalProjects = await Project.countDocuments();
-    return { totalUsers, totalProjects };
+    const [totalUsers, totalProjects, totalArtifacts, totalIdeas, totalPlaygrounds, totalTasks] = await Promise.all([
+      User.countDocuments(),
+      Project.countDocuments(),
+      Artifact.countDocuments(),
+      Idea.countDocuments(),
+      Playground.countDocuments(),
+      Task.countDocuments()
+    ]);
+    return { totalUsers, totalProjects, totalArtifacts, totalIdeas, totalPlaygrounds, totalTasks };
   }
 };

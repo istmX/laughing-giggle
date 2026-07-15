@@ -137,7 +137,7 @@ export function QuestionCard({ currentStep, totalSteps, question, onSubmit, isLo
         <h2 className="text-[40px] leading-[1.1] font-semibold tracking-tight text-ink mt-6 mb-4">
           {questionText}
         </h2>
-        <p className="text-body text-ink-muted">
+        <p className="text-body text-ink-muted w-full max-w-[60ch] block">
           {showCustomInput
             ? "Be as specific as you like — the more detail, the better the output."
             : "Choose one or more suggested options or write your own answer."}

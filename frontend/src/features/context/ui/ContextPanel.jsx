@@ -31,7 +31,7 @@ export function ContextPanel({ projectId, ideaId }) {
   return (
     <div className="bg-surface border border-hairline rounded-xl p-6 shadow-sm">
       <h3 className="text-body-lg font-medium tracking-tight text-ink mb-2">Project Context</h3>
-      <p className="text-body-sm text-ink-muted mb-6">
+      <p className="text-body-sm text-ink-muted mb-6 w-full max-w-[60ch] block">
         Generate developer-ready engineering assets (Agents.md, build-plan.md, ui-tokens.md, etc.) for this project.
       </p>
 
@@ -64,7 +64,7 @@ export function ContextPanel({ projectId, ideaId }) {
 
       {error && (
         <div className="flex items-start gap-2 border border-destructive/20 bg-destructive/5 p-3 rounded-lg mt-4" aria-live="assertive">
-          <p className="text-destructive text-caption">{error}</p>
+          <p className="text-destructive text-caption w-full max-w-[60ch] block">{error}</p>
         </div>
       )}
 
