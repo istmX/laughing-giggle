@@ -1,15 +1,20 @@
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Download, X, FileCode2, Loader2 } from 'lucide-react'
+import { Download, X, FileCode2, Loader2, Edit2, Eye } from 'lucide-react'
 import { GenerationProgress } from './GenerationProgress'
 import { toast } from 'react-hot-toast'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 /** Derive a color class from file extension and type based on DESIGN.md */
 function fileIconColor(filePath = '') {
-  if (filePath.includes('agents')) return 'bg-[#c5b0f4]' // Lilac
-  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return 'bg-[#dceeb1]' // Lime
-  if (filePath.includes('task') || filePath.includes('plan')) return 'bg-[#f3c9b6]' // Coral
-  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return 'bg-[#efd4d4]' // Pink
-  return 'bg-[#c8e6cd]' // Mint (default)
+  if (filePath.includes('agents')) return 'bg-block-lilac'
+  if (filePath.includes('ui') || filePath.includes('tokens') || filePath.includes('design')) return 'bg-block-lime'
+  if (filePath.includes('task') || filePath.includes('plan')) return 'bg-block-coral'
+  if (filePath.includes('arch') || filePath.includes('overview') || filePath.includes('structure')) return 'bg-block-pink'
+  return 'bg-block-mint'
 }
 
 function basename(fp = '') {
@@ -20,8 +25,8 @@ function StatusBadge({ isGenerating }) {
   if (isGenerating) {
     return (
       <span className="shrink-0 flex items-center gap-1.5">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
-        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-[#fef9c3] text-[#a16207] border-[#fef08a] animate-pulse">
+        <span className="h-1.5 w-1.5 rounded-full bg-doc-orange animate-ping opacity-75" />
+        <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-doc-orange/10 text-doc-orange border-doc-orange/30 animate-pulse">
           Generating
         </span>
       </span>
@@ -29,8 +34,8 @@ function StatusBadge({ isGenerating }) {
   }
   return (
     <span className="shrink-0 flex items-center gap-1.5">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]">
+      <span className="h-1.5 w-1.5 rounded-full bg-doc-green animate-pulse opacity-75" />
+      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border bg-doc-green/10 text-doc-green border-doc-green/30">
         Ready
       </span>
     </span>
@@ -55,6 +60,8 @@ export function ArtifactsPanel({
   sidebarWidth,
   handleMouseDown,
 }) {
+  const [isEditing, setIsEditing] = useState(false)
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -127,29 +134,31 @@ export function ArtifactsPanel({
                     const isActive = activeArtifact?._id === a._id
                     const cardBg = fileIconColor(a.file_path)
                     return (
-                      <motion.button
+                      <button
                         key={a._id}
-                        whileHover={{ x: 1 }}
-                        whileTap={{ scale: 0.99 }}
                         onClick={() => onSelectArtifact(a)}
-                        className={`flex items-center gap-3 w-full p-2 rounded-lg text-left cursor-pointer border transition-colors ${
+                        className={`group flex items-center gap-3 w-full p-2.5 rounded-[10px] text-left cursor-pointer border transition-all duration-200 ${
                           isActive
-                            ? 'border-ink bg-surface-soft shadow-sm'
-                            : 'border-transparent hover:bg-surface-soft'
+                            ? 'border-hairline bg-surface-elevated shadow-sm'
+                            : 'border-transparent hover:bg-surface-soft hover:border-hairline/50'
                         }`}
                       >
-                        {/* File type color square — Vibrant solid block */}
-                        <div className={`h-8 w-8 rounded-lg shrink-0 flex items-center justify-center ${cardBg} shadow-sm`}>
-                          <span className="text-[10px] font-mono text-white font-bold uppercase">
-                            {(a.file_path || '').split('.').pop()?.slice(0, 2) || 'F'}
+                        {/* File type color square */}
+                        <div className={`h-8 w-8 rounded-lg shrink-0 flex items-center justify-center ${cardBg} shadow-sm group-hover:scale-105 transition-transform`}>
+                          <span className="text-[10.5px] font-mono text-white font-bold uppercase tracking-wider">
+                            {(a.file_path || '').split('.').pop()?.slice(0, 3) || 'F'}
                           </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-ink truncate">{basename(a.file_path)}</p>
-                          <p className="text-[11px] text-ink-muted font-mono truncate">{a.file_path}</p>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <p className={`text-[13.5px] font-medium truncate ${isActive ? 'text-ink' : 'text-ink-muted group-hover:text-ink transition-colors'}`}>
+                            {basename(a.file_path)}
+                          </p>
+                          <p className="text-[11px] text-ink-faint font-mono truncate">
+                            {a.file_path.split('/').slice(0, -1).join('/') || '/'}
+                          </p>
                         </div>
                         <StatusBadge isGenerating={isPending} />
-                      </motion.button>
+                      </button>
                     )
                   })}
                 </div>
@@ -163,38 +172,77 @@ export function ArtifactsPanel({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.2 }}
-                      className="flex-1 flex flex-col min-h-0 p-4 border border-ink/10 bg-surface-soft rounded-[24px] m-3 shadow-sm select-none"
+                      className="flex-1 flex flex-col min-h-0 p-5 bg-surface-elevated rounded-t-[20px] shadow-[0_-4px_24px_rgba(0,0,0,0.02)] select-text"
                     >
-                      <div className="flex items-center justify-between mb-3 px-1">
-                        <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-[#c8e6cd]" />
-                          <span className="text-[11px] font-mono font-medium text-ink-muted truncate max-w-[150px]">
+                      <div className="flex items-start justify-between mb-5 px-1 pb-4 border-b border-hairline/60">
+                        <div className="flex flex-col min-w-0 pr-4">
+                          <span className="text-[15px] font-[600] text-ink truncate mb-0.5">
+                            {basename(activeArtifact.file_path)}
+                          </span>
+                          <span className="text-[11.5px] font-mono text-ink-muted truncate">
                             {activeArtifact.file_path}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           {isSavingArtifact && (
-                            <span className="flex items-center gap-1 text-[11px] text-ink-muted">
-                              <Loader2 className="h-3 w-3 animate-spin text-ink-muted shrink-0" />
-                              Saving
+                            <span className="flex items-center gap-1.5 text-[11px] text-ink-muted font-medium mr-2">
+                              <Loader2 className="h-3 w-3 animate-spin text-ink-muted" />
+                              Saving...
                             </span>
                           )}
                           <button
+                            onClick={() => setIsEditing(!isEditing)}
+                            className="p-1.5 text-ink-muted hover:bg-surface-soft hover:text-ink border border-hairline rounded-lg transition-colors cursor-pointer"
+                            title={isEditing ? "View Documentation" : "Edit Raw"}
+                          >
+                            {isEditing ? <Eye className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
+                          </button>
+                          <button
                             onClick={() => {
                               navigator.clipboard.writeText(activeArtifact.content || '')
-                              toast.success('Copied file contents')
+                              toast.success('Copied to clipboard')
                             }}
-                            className="px-2 py-1 text-[11px] font-medium border border-hairline rounded-md hover:bg-canvas hover:text-ink text-ink-muted transition-colors cursor-pointer"
+                            className="px-2.5 py-1.5 text-[11.5px] font-medium border border-hairline rounded-lg hover:bg-surface-soft hover:text-ink text-ink-muted transition-colors cursor-pointer"
                           >
                             Copy
                           </button>
                         </div>
                       </div>
-                      <textarea
-                        className="flex-1 w-full bg-canvas rounded-xl p-4 resize-none border border-hairline outline-none text-[13px] text-ink font-mono focus:border-ink/25 focus:ring-2 focus:ring-ink/5 transition-all leading-relaxed [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                        value={activeArtifact.content || ''}
-                        onChange={(e) => onArtifactChange(e.target.value)}
-                      />
+                      {isEditing ? (
+                        <textarea
+                          className="flex-1 w-full bg-canvas rounded-xl p-5 resize-none border border-hairline outline-none text-[13px] text-ink font-mono focus:border-ink/20 focus:ring-4 focus:ring-ink/5 transition-all leading-relaxed [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                          value={activeArtifact.content || ''}
+                          onChange={(e) => onArtifactChange(e.target.value)}
+                        />
+                      ) : (
+                        <div className="flex-1 w-full bg-canvas rounded-xl px-8 py-6 overflow-y-auto border border-hairline [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] notion-markdown">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              code({node, inline, className, children, ...props}) {
+                                const match = /language-(\w+)/.exec(className || '')
+                                return !inline && match ? (
+                                  <SyntaxHighlighter
+                                    style={oneLight}
+                                    language={match[1]}
+                                    PreTag="div"
+                                    className="rounded-xl border border-hairline my-6 text-[13px] !bg-surface-soft"
+                                    {...props}
+                                  >
+                                    {String(children).replace(/\n$/, '')}
+                                  </SyntaxHighlighter>
+                                ) : (
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                )
+                              }
+                            }}
+                          >
+                            {activeArtifact.content || ''}
+                          </ReactMarkdown>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

@@ -145,3 +145,14 @@ vite.config.ts.timestamp-*
 
 
 mcp.json
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.sqlite3
+
+# Qdrant / RAG
+qdrant_storage/
