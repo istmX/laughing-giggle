@@ -201,20 +201,18 @@
   - Added a "Let Zenix decide all remaining questions" bypass button in `QuestionCard.jsx` starting at Question 10. When clicked, it signals the backend to finalize the specification using default architectural assumptions.
   - Updated the frontend step counter to display current question steps dynamically without hardcoded bounds, and enabled real-time state updates so that navigating away and reopening the project instantly displays both the initial prompt and completed specification correctly.
   - Enhanced the final summary screens (`Brief Complete` and `Brief Already Completed`) in `NewProjectPage.jsx` to display both the user's initial prompt and the final AI-refined project specification side by side.
-- **Auth pages redesigned** into a centered split-screen layout that matches the login reference more closely:
-  - dark editorial left panel with centered hero copy
-  - bordered right-side card with centered form heading
-  - mobile brand header so the shell still reads well on small screens
-- **Shared auth field component added** for login and signup:
-  - typing pulse animation on `onChange`
-  - password visibility toggle
-  - consistent icon + label layout
-- **Shared social auth section added** for the Google sign-in row and divider
-- **Login and signup forms cleaned up**:
-  - removed the legacy decorative AnimatedForm block
-  - kept auth logic intact
-  - navigation now only happens after a successful auth response
-- **Password toggle logic fixed** so the eye icon now actually reveals and hides the password value
+- **Auth pages fully redesigned** (premium editorial aesthetic):
+  - Two-column desktop layout: floating context file cards on left, form on right
+  - No nested cards — form sits directly on canvas with clean container
+  - `FloatingContextCards.jsx` — animated floating markdown document cards (project-overview.md, architecture.md, ui-rules.md, build-plan.md, code-standards.md) with subtle float animation and staggered entrance
+  - `AuthShell.jsx` — rebuilt with monochrome foundation, DESIGN.md tokens, responsive grid (desktop 2-col, mobile stacked), mobile brand header
+  - `AuthField.jsx` — improved hover/focus/placeholder states, better transitions, focused icon color change, password toggle with hover feedback
+  - `AuthSocialSection.jsx` — official Google SVG branding, improved spacing and styling
+  - `Login.jsx` — staggered form entrance animation, pill-shaped primary CTA (`rounded-pill bg-ink`), animated arrow on hover, better visual hierarchy
+  - `Signup.jsx` — same treatment as Login, unified experience across both screens
+  - All typography uses DESIGN.md tokens (body-sm, font-weight-320/330/480, tracking-body-sm/button)
+  - Accessibility: visible focus states, 48px touch targets, password manager support
+  - Staggered entrance animations via `motion/react` with reduced-motion fallback
 - **Landing page hero corrected** so the live `/` route uses the original `hero-03.jsx` structure again:
   - added `split-type` powered GSAP character reveal to the existing hero text
   - kept the original headline structure, side copy, metadata row, media strip, and vertical "Context First" marker
@@ -236,7 +234,9 @@
 
 ## Current status
 
-Auth forms now use a shared dark shell, centered heading treatment, and input-level motion that matches the reference more closely.
+Auth pages fully redesigned with premium editorial aesthetic, floating context file cards, and staggered entrance animations. Two-column desktop layout with product identity panel on left, form on right. No nested cards. All typography and spacing use DESIGN.md tokens.
+
+Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
 Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
@@ -401,8 +401,14 @@ The home page now includes:
 
 - **Firebase Auth Migration (Full)**: Replaced custom JWT auth with Firebase Email/Password Auth across both frontend (`auth.api.js`, `useAuth.js`, `Login.jsx`, `Signup.jsx`) and backend (`auth.controller.js`, `auth.middleware.js`), removing bcrypt/jwt dependencies and switching to `verifyFirebaseToken`.
 
-- **Playground Bug Fix**:
   - Debugged and fixed an `Uncaught SyntaxError` caused by `react-resizable-panels` missing exports.
   - Cleared corrupted Vite cache to ensure fresh dependency resolution.
   - Mapped `PanelGroup` and `PanelResizeHandle` to the updated `Group` and `Separator` exports introduced in `react-resizable-panels@4.12.2`.
   - Replaced the deprecated `direction` prop with `orientation="horizontal"` in `Playground.jsx` to match the latest typing specification.
+  - Fixed an infinite loop (`Maximum update depth exceeded`) in `usePlayground.js` by detaching the Zustand store from the `useCallback` dependency array.
+  - Fixed a `TypeError: sessions.map is not a function` crash by properly plucking `res.data.sessions` and enforcing `Array.isArray()` in the store.
+  - Fixed a 400 Bad Request error on `POST /api/playground/.../message` by formatting the payload as `{ message: content }` to match the backend controller's expectation.
+  - Implemented a collapsible sidebar in `Playground.jsx` using `lucide-react` toggle icons (`PanelLeftClose` and `PanelLeftOpen`), giving users more workspace area.
+  - Updated the Playground UI loading text to a conversational `Thinking...`.
+  - Fixed an internal 500 server error in the Python `RAG_Service` where `ChatGroq` crashed due to a missing API key; resolved by explicitly pointing `dotenv` to load the `.env` file from the parent directory in `app/core/llm.py`.
+  - Hardened the `playground.py` AI prompt, turning the agent into an opinionated senior designer that critiques poor design choices instead of blindly agreeing with the user.
