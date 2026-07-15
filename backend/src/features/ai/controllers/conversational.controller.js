@@ -19,10 +19,10 @@ export const processConversation = async (req, res, next) => {
     });
 
     try {
-      const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/idea", {
+      const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/conversation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: ideaDoc.prompt, history, ideaId, userId })
+        body: JSON.stringify({ prompt: ideaDoc.prompt, idea_id: ideaId, history: history || [] })
       });
       
       if (!response.ok) throw new Error("Failed to fetch from python service");
