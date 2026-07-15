@@ -272,7 +272,7 @@ export function ProjectWorkspace() {
                         {msg.role === 'user' ? (
                           <div className="flex justify-end py-3">
                             <div className="max-w-[72%] text-right">
-                              <p className="text-[15px] text-ink leading-[1.65] font-normal">
+                              <p className="text-[15px] text-ink leading-[1.65] font-normal w-full max-w-[60ch] block">
                                 {msg.content}
                               </p>
                               {msg.timestamp && (
@@ -509,7 +509,7 @@ export function ProjectWorkspace() {
                 )}
               </div>
 
-              <p className="text-center mt-2 text-[11px] text-ink-muted/45 font-mono">
+              <p className="text-center mt-2 text-[11px] text-ink-muted/45 font-mono w-full max-w-[60ch] block">
                 Zenix AI can make mistakes. Review output carefully.
               </p>
             </div>

@@ -16,6 +16,12 @@ export const usePlayground = () => {
       const res = await api.getSessions(token)
       const fetchedSessions = res?.data?.sessions || res?.sessions || res?.data || res || []
       state.setSessions(Array.isArray(fetchedSessions) ? fetchedSessions : [])
+      
+      // Auto-select the first session if none is active
+      const currentState = usePlaygroundStore.getState()
+      if (!currentState.activeSessionId && Array.isArray(fetchedSessions) && fetchedSessions.length > 0) {
+        currentState.setActiveSessionId(fetchedSessions[0]._id)
+      }
     } catch (error) {
       console.error(error)
       toast.error('Failed to load sessions')
@@ -92,12 +98,26 @@ export const usePlayground = () => {
     }
   }, [token])
 
+  const renameSession = useCallback(async (sessionId, title) => {
+    if (!token) return
+    const state = usePlaygroundStore.getState()
+    try {
+      await api.updateSessionTitle(token, sessionId, title)
+      state.updateActiveSessionTitle(title)
+      toast.success('Session renamed')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to rename session')
+    }
+  }, [token])
+
   return {
     ...store,
     loadSessions,
     loadSession,
     createNewSession,
     deleteSession,
+    renameSession,
     sendMessage
   }
 }

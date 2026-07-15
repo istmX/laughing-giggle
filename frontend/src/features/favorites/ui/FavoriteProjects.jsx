@@ -202,7 +202,7 @@ export function FavoriteProjects() {
               <h1 className="text-[32px] md:text-[40px] font-[480] tracking-[-0.04em] text-ink leading-[1.1]">
                 Favorites
               </h1>
-              <p className="text-[14px] text-ink-muted mt-2">Your most important projects.</p>
+              <p className="text-[14px] text-ink-muted mt-2 w-full max-w-[60ch] block">Your most important projects.</p>
             </div>
           </div>
 
@@ -283,7 +283,7 @@ export function FavoriteProjects() {
                 <Star className="w-6 h-6 text-ink-muted" />
               </div>
               <h3 className="text-[16px] font-[540] text-ink mb-2">No favorite projects</h3>
-              <p className="text-[14px] text-ink-muted max-w-sm">
+              <p className="text-[14px] text-ink-muted w-full max-w-[60ch] block">
                 Star your most important projects from the dashboard to keep them handy here.
               </p>
             </div>
@@ -336,7 +336,7 @@ export function FavoriteProjects() {
                         
                         <div className="relative z-10">
                           <h3 className="text-[16px] font-[540] text-ink truncate mb-1 pr-4">{project.project_title}</h3>
-                          <p className="text-[13px] text-ink-muted line-clamp-2 min-h-[40px] mb-4">
+                          <p className="text-[13px] text-ink-muted line-clamp-2 min-h-[40px] mb-4 w-full max-w-[60ch] block">
                             {project.project_description || 'No description.'}
                           </p>
                           
@@ -366,7 +366,7 @@ export function FavoriteProjects() {
                       
                       <div className="flex-1 min-w-0 relative z-10">
                         <h3 className="text-[15px] font-[540] text-ink truncate">{project.project_title}</h3>
-                        <p className="text-[13px] text-ink-muted truncate mt-0.5">{project.project_description || 'No description'}</p>
+                        <p className="text-[13px] text-ink-muted truncate mt-0.5 w-full max-w-[60ch] block">{project.project_description || 'No description'}</p>
                       </div>
                       
                       <div className="hidden md:flex items-center justify-end w-32 relative z-10">
@@ -401,7 +401,7 @@ export function FavoriteProjects() {
 
       {/* Modals */}
       <Modal isOpen={!!projectToDelete} onClose={() => setProjectToDelete(null)} title="Delete Project">
-        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed">
+        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed w-full max-w-[60ch] block">
           Are you sure you want to delete <span className="font-[540] text-ink">"{projectToDelete?.project_title}"</span>? This action cannot be undone.
         </p>
         <div className="flex items-center justify-end gap-3">
@@ -411,7 +411,7 @@ export function FavoriteProjects() {
       </Modal>
 
       <Modal isOpen={bulkDeleteConfirm} onClose={() => setBulkDeleteConfirm(false)} title="Delete Projects">
-        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed">
+        <p className="text-ink-muted text-[15px] mb-8 leading-relaxed w-full max-w-[60ch] block">
           Are you sure you want to delete {selectedIds.size} projects? This action cannot be undone.
         </p>
         <div className="flex items-center justify-end gap-3">

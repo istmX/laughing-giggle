@@ -74,72 +74,72 @@ export function AdminUserForm() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-[#f7f7f5]">
-        <Loader2 className="h-10 w-10 animate-spin text-black" />
+      <div className="flex min-h-screen w-full items-center justify-center bg-surface-soft">
+        <Loader2 className="h-10 w-10 animate-spin text-ink" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f5] px-6 py-12 md:px-12 font-sans text-black overflow-y-auto">
+    <div className="min-h-screen bg-surface-soft px-6 py-12 md:px-12 font-sans text-ink overflow-y-auto">
       <div className="mx-auto max-w-3xl">
-        <button onClick={() => navigate('/ary/8776/admin')} className="mb-10 flex h-12 w-12 items-center justify-center rounded-full bg-black text-white hover:opacity-80 transition-opacity">
+        <button onClick={() => navigate('/ary/8776/admin')} className="mb-10 flex h-10 w-10 items-center justify-center rounded-full bg-ink text-canvas hover:opacity-80 transition-opacity">
           <ArrowLeft className="h-5 w-5" />
         </button>
 
-        <h1 className="mb-12 text-6xl md:text-7xl font-light tracking-tighter">
+        <h1 className="mb-12 text-display-lg tracking-display-lg text-ink">
           {isEdit ? 'Edit User.' : 'New User.'}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-           <div className={`p-8 md:p-12 rounded-[32px] ${isEdit ? 'bg-[#c5b0f4]' : 'bg-[#dceeb1]'} space-y-8`}>
+           <div className={`p-8 md:p-12 rounded-xl ${isEdit ? 'bg-block-lilac' : 'bg-block-lime'} space-y-8`}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                   <label className="block text-sm font-bold uppercase tracking-widest mb-3 text-black/70">Full Name</label>
-                   <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-2xl border-none bg-white px-5 py-5 text-lg text-black focus:outline-none focus:ring-4 focus:ring-black/10 transition-shadow" placeholder="Jane Doe" />
+                   <label className="block text-eyebrow tracking-eyebrow mb-3 text-ink">Full Name</label>
+                   <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full rounded-md border border-hairline bg-canvas px-4 py-3 text-body text-ink focus:outline-none focus:border-ink transition-colors" placeholder="Jane Doe" />
                 </div>
                 <div>
-                   <label className="block text-sm font-bold uppercase tracking-widest mb-3 text-black/70">Email Address</label>
-                   <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full rounded-2xl border-none bg-white px-5 py-5 text-lg text-black focus:outline-none focus:ring-4 focus:ring-black/10 transition-shadow" placeholder="jane@example.com" />
+                   <label className="block text-eyebrow tracking-eyebrow mb-3 text-ink">Email Address</label>
+                   <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} className="w-full rounded-md border border-hairline bg-canvas px-4 py-3 text-body text-ink focus:outline-none focus:border-ink transition-colors" placeholder="jane@example.com" />
                 </div>
               </div>
               <div>
-                 <label className="block text-sm font-bold uppercase tracking-widest mb-3 text-black/70">Password {isEdit && <span className="normal-case tracking-normal font-normal opacity-75">(Leave blank to keep current)</span>}</label>
-                 <input type="password" required={!isEdit} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full rounded-2xl border-none bg-white px-5 py-5 text-lg text-black focus:outline-none focus:ring-4 focus:ring-black/10 transition-shadow" placeholder="••••••••" />
+                 <label className="block text-eyebrow tracking-eyebrow mb-3 text-ink">Password {isEdit && <span className="normal-case tracking-normal font-mono text-caption opacity-75">(Leave blank to keep current)</span>}</label>
+                 <input type="password" required={!isEdit} value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} className="w-full rounded-md border border-hairline bg-canvas px-4 py-3 text-body text-ink focus:outline-none focus:border-ink transition-colors" placeholder="••••••••" />
               </div>
            </div>
            
            {isEdit && (
              <>
-               <div className="p-8 md:p-12 rounded-[32px] bg-[#c8e6cd] space-y-6">
+               <div className="p-8 md:p-12 rounded-xl bg-block-mint space-y-6">
                   <div>
-                     <label className="block text-sm font-bold uppercase tracking-widest mb-3 text-black/70">Loyalty Badges</label>
-                     <input type="text" value={formData.badges} onChange={(e) => setFormData({...formData, badges: e.target.value})} placeholder="e.g. Early Adopter, Top Creator (comma separated)" className="w-full rounded-2xl border-none bg-white px-5 py-5 text-lg text-black focus:outline-none focus:ring-4 focus:ring-black/10 transition-shadow font-mono text-sm" />
+                     <label className="block text-eyebrow tracking-eyebrow mb-3 text-ink">Loyalty Badges</label>
+                     <input type="text" value={formData.badges} onChange={(e) => setFormData({...formData, badges: e.target.value})} placeholder="e.g. Early Adopter, Top Creator (comma separated)" className="w-full rounded-md border border-hairline bg-canvas px-4 py-3 text-body text-ink focus:outline-none focus:border-ink transition-colors font-mono text-sm" />
                   </div>
                </div>
 
-               <div className="p-8 md:p-12 rounded-[32px] bg-[#f4ecd6]">
-                  <label className="block text-sm font-bold uppercase tracking-widest mb-6 text-black/70">Permissions & Flags</label>
+               <div className="p-8 md:p-12 rounded-xl bg-block-cream">
+                  <label className="block text-eyebrow tracking-eyebrow mb-6 text-ink">Permissions & Flags</label>
                   <div className="flex flex-col sm:flex-row gap-6">
-                     <label className="flex flex-1 items-center gap-5 cursor-pointer rounded-2xl bg-white/50 p-6 transition-colors hover:bg-white/80">
-                        <Checkbox checked={formData.isVerified} onCheckedChange={(checked) => setFormData({...formData, isVerified: checked})} className="h-7 w-7 rounded-md border-2 border-black/20 data-[state=checked]:bg-black data-[state=checked]:border-black" />
-                        <span className="text-xl font-medium text-black">Verified User</span>
+                     <label className="flex flex-1 items-center gap-5 cursor-pointer rounded-lg bg-canvas/50 p-6 transition-colors hover:bg-canvas/80">
+                        <Checkbox checked={formData.isVerified} onCheckedChange={(checked) => setFormData({...formData, isVerified: checked})} className="h-6 w-6 rounded border border-hairline data-[state=checked]:bg-ink data-[state=checked]:border-ink" />
+                        <span className="text-body font-480 text-ink">Verified User</span>
                      </label>
-                     <label className="flex flex-1 items-center gap-5 cursor-pointer rounded-2xl bg-white/50 p-6 transition-colors hover:bg-white/80">
-                        <Checkbox checked={formData.isAdmin} onCheckedChange={(checked) => setFormData({...formData, isAdmin: checked})} className="h-7 w-7 rounded-md border-2 border-black/20 data-[state=checked]:bg-black data-[state=checked]:border-black" />
-                        <span className="text-xl font-medium text-black">Administrator</span>
+                     <label className="flex flex-1 items-center gap-5 cursor-pointer rounded-lg bg-canvas/50 p-6 transition-colors hover:bg-canvas/80">
+                        <Checkbox checked={formData.isAdmin} onCheckedChange={(checked) => setFormData({...formData, isAdmin: checked})} className="h-6 w-6 rounded border border-hairline data-[state=checked]:bg-ink data-[state=checked]:border-ink" />
+                        <span className="text-body font-480 text-ink">Administrator</span>
                      </label>
                   </div>
                </div>
              </>
            )}
 
-           <div className="pt-8 flex flex-col sm:flex-row gap-6">
-              <button type="button" onClick={() => navigate('/ary/8776/admin')} className="flex-1 rounded-full bg-white px-8 py-5 text-xl font-medium text-black transition-opacity hover:opacity-70 shadow-sm border border-[#e6e6e6]">
+           <div className="pt-8 flex flex-col sm:flex-row gap-4">
+              <button type="button" onClick={() => navigate('/ary/8776/admin')} className="flex-1 rounded-pill bg-canvas px-6 py-3 text-button font-480 text-ink transition-opacity hover:opacity-70 border border-hairline">
                  Cancel
               </button>
-              <button type="submit" disabled={isSubmitting} className="flex-1 flex items-center justify-center rounded-full bg-black px-8 py-5 text-xl font-medium text-white transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100">
-                 {isSubmitting ? <Loader2 className="h-6 w-6 animate-spin" /> : 'Save Changes'}
+              <button type="submit" disabled={isSubmitting} className="flex-1 flex items-center justify-center rounded-pill bg-ink px-6 py-3 text-button font-480 text-canvas transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100">
+                 {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Save Changes'}
               </button>
            </div>
         </form>

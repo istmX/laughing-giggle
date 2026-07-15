@@ -42,7 +42,7 @@ export function PlaygroundPage() {
               <PlaySquare className="h-8 w-8 text-ink-muted" />
             </div>
             <h2 className="text-2xl font-semibold text-ink mb-2">Welcome to AI Playground</h2>
-            <p className="text-ink-muted mb-8 text-sm">
+            <p className="text-ink-muted mb-8 text-sm w-full max-w-[60ch] block">
               You need a project to enter the AI Playground. Go to Projects to create one first.
             </p>
             <Link to="/dashboard" className="rounded-lg bg-ink px-6 py-3 text-sm font-medium text-canvas hover:opacity-90 transition-opacity">
@@ -58,7 +58,7 @@ export function PlaygroundPage() {
                 </div>
                 <h1 className="text-display-sm font-340 tracking-display-sm text-ink">AI Playground</h1>
               </div>
-              <p className="text-ink-muted text-base">Select a project below to enter the sandbox and start generating architecture, UI rules, and artifacts.</p>
+              <p className="text-ink-muted text-base w-full max-w-[60ch] block">Select a project below to enter the sandbox and start generating architecture, UI rules, and artifacts.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -81,7 +81,7 @@ export function PlaygroundPage() {
                   </div>
 
                   <h3 className="text-body-lg font-480 text-ink mb-1 relative z-10 pointer-events-none">{project.project_title}</h3>
-                  <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none">
+                  <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none w-full max-w-[60ch] block">
                     {project.project_description || 'No description provided'}
                   </p>
                   

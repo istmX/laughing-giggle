@@ -44,7 +44,7 @@ export function GenerationProgress({ artifacts = [] }) {
 
   return (
     <div className="w-full">
-      <p className="text-xs font-mono uppercase tracking-widest text-ink-muted mb-4">
+      <p className="text-xs font-mono uppercase tracking-widest text-ink-muted mb-4 w-full max-w-[60ch] block">
         Building your project
       </p>
       <motion.div

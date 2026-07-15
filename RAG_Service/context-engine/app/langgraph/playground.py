@@ -73,6 +73,10 @@ Update the designTokens based on the user's request. Always include the full des
     response = llm.invoke(messages)
     try:
         content = response.content.replace('```json', '').replace('```', '').strip()
+        start_idx = content.find('{')
+        end_idx = content.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            content = content[start_idx:end_idx+1]
         parsed = json.loads(content)
         ai_message = parsed.get("message", "Here is your updated design.")
         new_tokens = parsed.get("designTokens", state.get("design_tokens", {}))

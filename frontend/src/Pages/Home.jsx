@@ -1,21 +1,16 @@
-
-import { HeroSection03 } from '@/components/ui/hero-03'
-import { ContextComparison } from '@/components/ui/context-comparison'
-import { LandingArtifactsSection } from '@/features/landing/ui/LandingArtifactsSection'
-import { LandingBentoSection } from '@/features/landing/ui/LandingBentoSection'
-import { LandingProcessSection } from '@/features/landing/ui/LandingProcessSection'
-import { LandingUseCasesSection } from '@/features/landing/ui/LandingUseCasesSection'
-
-const Home = () =>
-  (
-    <div>
-      <HeroSection03 />
-      <ContextComparison />
-      <LandingProcessSection />
-      <LandingArtifactsSection />
-      <LandingBentoSection />
-      <LandingUseCasesSection />
+const Home = () => (
+  <div className="min-h-dvh bg-canvas">
+      <div className="flex min-h-dvh items-center justify-center px-6 pt-32">
+      <div className="mx-auto max-w-3xl text-center">
+        <h1 className="text-display-lg font-[340] tracking-display-lg text-ink mb-6">
+          Zenix
+        </h1>
+        <p className="text-body-lg font-[330] tracking-body-lg text-ink-muted leading-relaxed">
+          Transform rough software ideas into complete, implementation-ready development context for AI coding agents.
+        </p>
+      </div>
     </div>
-  )
+  </div>
+)
 
 export default Home

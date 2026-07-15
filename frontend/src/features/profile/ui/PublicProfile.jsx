@@ -174,7 +174,7 @@ export const PublicProfile = () => {
                 {user.name}
                 {user.isVerified && <BadgeCheck className="w-7 h-7 text-primary fill-primary/10" strokeWidth={1.5} />}
               </h1>
-              <p className="text-body-lg font-[480] text-ink-muted">@{user.username}</p>
+              <p className="text-body-lg font-[480] text-ink-muted w-full max-w-[60ch] block">@{user.username}</p>
             </div>
           </div>
 
@@ -208,11 +208,11 @@ export const PublicProfile = () => {
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-6">
             {user.bio ? (
-              <p className="text-body-lg font-[340] text-ink/90 leading-relaxed max-w-3xl">
+              <p className="text-body-lg font-[340] text-ink/90 leading-relaxed max-w-3xl w-full max-w-[60ch] block">
                 {user.bio}
               </p>
             ) : (
-              <p className="text-body-lg font-[340] text-ink-muted italic max-w-3xl">
+              <p className="text-body-lg font-[340] text-ink-muted italic max-w-3xl w-full max-w-[60ch] block">
                 This creator hasn't written a bio yet.
               </p>
             )}
@@ -343,7 +343,7 @@ export const PublicProfile = () => {
                   <LayoutTemplate className="w-10 h-10 text-ink-muted" />
                 </div>
                 <h3 className="text-headline font-[540] text-ink mb-3">No Templates Found</h3>
-                <p className="text-body font-[340] text-ink-muted max-w-[400px] w-full mx-auto leading-relaxed">
+                <p className="text-body font-[340] text-ink-muted max-w-[400px] w-full mx-auto leading-relaxed max-w-[60ch] block">
                   {user.name} hasn't published any templates in this category yet. Check back later!
                 </p>
               </div>
@@ -435,7 +435,7 @@ export const PublicProfile = () => {
                   <UserPlus className="w-8 h-8 text-ink-muted" />
                 </div>
                 <h3 className="text-body-lg font-[540] text-ink mb-2">No {followModal.type} yet</h3>
-                <p className="text-body-sm font-[340] text-ink-muted max-w-[250px] mx-auto">
+                <p className="text-body-sm font-[340] text-ink-muted max-w-[250px] mx-auto w-full max-w-[60ch] block">
                   {followModal.type === 'followers' 
                     ? `When people start following ${user.name}, they will appear here.`
                     : `${user.name} isn't following anyone yet.`}

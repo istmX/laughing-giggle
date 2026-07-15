@@ -44,6 +44,8 @@
   - `POST /api/playground` — Create new design session
   - `GET /api/playground` — List all user sessions
   - `GET /api/playground/:sessionId` — Load session with full chat history
+  - **Playground Fixes:** Debugged layout flexbox blowouts causing broken scrolling on the Chat and Live Sandbox areas (implemented `fixed inset-0` and strict `min-h-0` flex bounds).
+  - **Backend Failsafes:** Intercepted raw JSON responses from the python context-engine before they are piped into the chat thread as raw strings. Added an auto-title generation hook that dynamically renames 'New Session' to a snippet of the user's first prompt.
   - `PUT /api/playground/:sessionId/title` — Rename a session
   - `DELETE /api/playground/:sessionId` — Delete session
   - Session model stores: title, chatHistory, token state, and compiled previewHtml
@@ -201,18 +203,13 @@
   - Added a "Let Zenix decide all remaining questions" bypass button in `QuestionCard.jsx` starting at Question 10. When clicked, it signals the backend to finalize the specification using default architectural assumptions.
   - Updated the frontend step counter to display current question steps dynamically without hardcoded bounds, and enabled real-time state updates so that navigating away and reopening the project instantly displays both the initial prompt and completed specification correctly.
   - Enhanced the final summary screens (`Brief Complete` and `Brief Already Completed`) in `NewProjectPage.jsx` to display both the user's initial prompt and the final AI-refined project specification side by side.
-- **Auth pages fully redesigned** (premium editorial aesthetic):
-  - Two-column desktop layout: floating context file cards on left, form on right
-  - No nested cards — form sits directly on canvas with clean container
-  - `FloatingContextCards.jsx` — animated floating markdown document cards (project-overview.md, architecture.md, ui-rules.md, build-plan.md, code-standards.md) with subtle float animation and staggered entrance
-  - `AuthShell.jsx` — rebuilt with monochrome foundation, DESIGN.md tokens, responsive grid (desktop 2-col, mobile stacked), mobile brand header
-  - `AuthField.jsx` — improved hover/focus/placeholder states, better transitions, focused icon color change, password toggle with hover feedback
-  - `AuthSocialSection.jsx` — official Google SVG branding, improved spacing and styling
-  - `Login.jsx` — staggered form entrance animation, pill-shaped primary CTA (`rounded-pill bg-ink`), animated arrow on hover, better visual hierarchy
-  - `Signup.jsx` — same treatment as Login, unified experience across both screens
-  - All typography uses DESIGN.md tokens (body-sm, font-weight-320/330/480, tracking-body-sm/button)
-  - Accessibility: visible focus states, 48px touch targets, password manager support
-  - Staggered entrance animations via `motion/react` with reduced-motion fallback
+- **Auth pages fully redesigned** (third pass — final polish):
+  - Layout: 40%/60% split (was 55/45), wider auth card `max-w-[28rem]`
+  - `AuthShell.jsx` — dot-grid background pattern (`radial-gradient` 20px grid), connected workflow with SVG lines, improved hero copy ("Turn ideas into implementation-ready context."), 8 credibility badges (Multi-Agent, Cursor, Claude, Markdown, Architecture Aware, RAG Ready, Template Driven, OpenRouter), sequential motion
+  - `ProductStory.jsx` — 6 realistic markdown preview cards (`architecture.md`, `agents.md`, `ui-tokens.md`, `build-plan.md`, `code-standards.md`, `project-overview.md`) with fake syntax coloring, window titlebar dots, overlapping layers, blur depth, float animation with random timing
+  - `AuthField.jsx` — focus glow (`shadow-[0_0_0_4px_rgba(0,0,0,0.06)]`), hover border transition, label color shift on focus
+  - `AuthSubmitButton.jsx` — loading spinner (`Loader2 animate-spin`), hover `-translate-y-[1px]` lift, `focus-visible` ring, shine gradient, animated arrow
+  - All files under 150 lines (max 131)
 - **Landing page hero corrected** so the live `/` route uses the original `hero-03.jsx` structure again:
   - added `split-type` powered GSAP character reveal to the existing hero text
   - kept the original headline structure, side copy, metadata row, media strip, and vertical "Context First" marker
@@ -234,7 +231,7 @@
 
 ## Current status
 
-Auth pages fully redesigned with premium editorial aesthetic, floating context file cards, and staggered entrance animations. Two-column desktop layout with product identity panel on left, form on right. No nested cards. All typography and spacing use DESIGN.md tokens.
+Auth pages fully redesigned (third pass) with 40%/60% layout, realistic markdown preview cards, dot-grid background, connected workflow, wider auth card (28rem), focus glow on inputs, loading spinner button, hover lift, 8 credibility badges, sequential motion.
 
 Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 

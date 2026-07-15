@@ -304,7 +304,7 @@ export function NewProjectPage() {
                   </div>
                   <h3 className="text-[17px] font-[540] text-ink tracking-tight">Project foundation</h3>
                 </div>
-                <p className="text-[16px] text-ink-muted whitespace-pre-wrap ml-12 leading-[1.65] font-[480]">{prompt}</p>
+                <p className="text-[16px] text-ink-muted whitespace-pre-wrap ml-12 leading-[1.65] font-[480] w-full max-w-[60ch] block">{prompt}</p>
               </div>
             )}
 
@@ -318,7 +318,7 @@ export function NewProjectPage() {
                     </div>
                     <div>
                       <h4 className="text-[14px] font-[600] tracking-wider uppercase text-ink mb-2 font-mono">Zenix</h4>
-                      <p className="text-[17px] font-[480] text-ink-muted leading-[1.6]">{item.question}</p>
+                      <p className="text-[17px] font-[480] text-ink-muted leading-[1.6] w-full max-w-[60ch] block">{item.question}</p>
                     </div>
                   </div>
                   
@@ -327,7 +327,7 @@ export function NewProjectPage() {
                       <span className="text-[11px] font-[700] font-mono text-canvas">U</span>
                     </div>
                     <div className="bg-canvas border border-hairline rounded-[20px] p-6 flex-1 shadow-sm">
-                      <p className="text-[16px] font-[480] text-ink whitespace-pre-wrap leading-[1.65]">{item.answer}</p>
+                      <p className="text-[16px] font-[480] text-ink whitespace-pre-wrap leading-[1.65] w-full max-w-[60ch] block">{item.answer}</p>
                     </div>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ export function NewProjectPage() {
               <div className="bg-brand-indigo/5 rounded-[32px] border border-brand-indigo/20 p-10 sm:p-16 text-center animate-fade-in relative overflow-hidden mt-6 shadow-sm">
                 <Sparkles className="h-14 w-14 text-brand-indigo mx-auto mb-6 opacity-80" />
                 <h2 className="text-[36px] font-[340] tracking-tight text-ink mb-4">Context is ready</h2>
-                <p className="text-[18px] text-ink-muted mb-10 max-w-lg mx-auto font-[480]">
+                <p className="text-[18px] text-ink-muted mb-10 mx-auto font-[480] w-full max-w-[60ch] block">
                   We've gathered all the necessary details. Your project is ready to be built.
                 </p>
                 

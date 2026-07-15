@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { Navbar } from '@/features/navbar/ui/Navbar'
 
 const PublicRoute = () => {
   const { hasHydrated, isAuthenticated } = useAuth()
@@ -13,7 +14,12 @@ const PublicRoute = () => {
     return <Navigate to="/dashboard" replace />
   }
 
-  return <Outlet />
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  )
 }
 
 export default PublicRoute

@@ -69,8 +69,8 @@ function UserPopover({ user, logout, onClose }) {
       className="absolute bottom-full left-0 mb-2 w-48 rounded-xl border border-hairline bg-canvas shadow-lg shadow-black/10 overflow-hidden z-50"
     >
       <div className="px-3 py-2.5 border-b border-hairline/60">
-        <p className="text-[12px] font-[540] text-ink truncate">{user?.name || 'Account'}</p>
-        <p className="text-[11px] text-ink-muted truncate mt-0.5">{user?.email || ''}</p>
+        <p className="text-[12px] font-[540] text-ink truncate w-full max-w-[60ch] block">{user?.name || 'Account'}</p>
+        <p className="text-[11px] text-ink-muted truncate mt-0.5 w-full max-w-[60ch] block">{user?.email || ''}</p>
       </div>
       <Link
         to="/dashboard/profile"
@@ -84,7 +84,7 @@ function UserPopover({ user, logout, onClose }) {
           onClick={() => {
             toast((t) => (
               <div className="flex flex-col gap-3">
-                <p className="text-body-sm font-500 text-ink">Are you sure you want to sign out?</p>
+                <p className="text-body-sm font-500 text-ink w-full max-w-[60ch] block">Are you sure you want to sign out?</p>
                 <div className="flex justify-end gap-2">
                   <button 
                     onClick={() => toast.dismiss(t.id)}

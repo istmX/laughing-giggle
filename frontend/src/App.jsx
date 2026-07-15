@@ -2,11 +2,12 @@ import { useEffect } from 'react'
 import gsap from 'gsap'
 import Lenis from 'lenis'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import AppRoutes from './Routes/AppRoutes'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/features/preferences/ui/ThemeProvider'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 const App = () => {
   useEffect(() => {

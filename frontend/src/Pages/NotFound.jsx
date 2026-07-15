@@ -12,7 +12,7 @@ const NotFound = () => {
       >
         <div className="space-y-2 flex flex-col items-center">
           <h1 className="text-[100px] leading-none font-340 tracking-display-xl text-ink">404</h1>
-          <p className="text-headline font-340 text-ink-muted tracking-subhead">
+          <p className="text-headline font-340 text-ink-muted tracking-subhead w-full max-w-[60ch] block">
             We couldn't find the page you're looking for.
           </p>
         </div>
