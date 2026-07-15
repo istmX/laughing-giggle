@@ -1,6 +1,5 @@
 import { playgroundService } from './playground.service.js';
 import AppError from '../../utils/AppError.js';
-import { playgroundGraph } from '../ai/graphs/playground.graph.js';
 
 export const createSession = async (req, res, next) => {
   try {
@@ -66,21 +65,32 @@ export const addMessage = async (req, res, next) => {
       message
     );
 
-    const messages = sessionWithUserMessage.chatHistory.map(m => ({
+    const chat_history = sessionWithUserMessage.chatHistory.map(m => ({
       role: m.role,
       content: m.content,
     }));
 
-    const finalState = await playgroundGraph.invoke({
-      messages,
-      designTokens: sessionWithUserMessage.tokens || {},
+    const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/playground", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_message: message, chat_history })
     });
+
+    if (!response.ok) throw new Error("Failed to fetch from python service");
+    const result = await response.json();
+
+    await playgroundService.addMessage(
+      req.params.sessionId,
+      req.user.id,
+      'assistant',
+      result.message
+    );
 
     const session = await playgroundService.updatePreview(
       req.params.sessionId,
       req.user.id,
-      finalState.previewHtml,
-      finalState.designTokens
+      result.html,
+      sessionWithUserMessage.tokens || {}
     );
 
     res.status(200).json({ session });

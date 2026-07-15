@@ -85,7 +85,8 @@ async def generate_artifact(request: ArtifactRequest):
     logger.info(f"Generating artifact {request.target_file_path} for project {request.project_id}")
     
     try:
-        retrieved_docs = retriever.retrieve_context(request.target_file_path)
+        search_query = f"{request.target_file_path} design system UI rules tokens components architecture"
+        retrieved_docs = retriever.retrieve_context(search_query)
         rag_context = retriever.format_context(retrieved_docs)
         
         graph_input = {
@@ -160,6 +161,58 @@ async def refine_specification(request: RefinementRequest):
         "questions_and_answers": request.qa_history
     })
     return {"refined_spec": result["refined_spec"]}
+
+class ConvoRequest(BaseModel):
+    prompt: str
+    idea_id: str
+    history: List[Dict[str, str]]
+
+@router.post("/conversation")
+async def process_conversation_route(request: ConvoRequest):
+    last_answer = ""
+    if request.history:
+        last_answer = request.history[-1].get("answer", "").lower()
+        
+    is_done = len(request.history) >= 3 or "zenix decide" in last_answer or "no other details" in last_answer
+    
+    if is_done:
+        result = refinement_graph.invoke({
+            "idea_prompt": request.prompt,
+            "questions_and_answers": request.history
+        })
+        return {
+            "is_complete": True,
+            "refined_spec": result["refined_spec"]
+        }
+    else:
+        from app.core.llm import get_fallback_llm
+        from langchain_core.messages import SystemMessage
+        import json
+        
+        history_text = "\\n".join([f"Q: {h['question']}\\nA: {h['answer']}" for h in request.history])
+        
+        sys_prompt = f"""You are Zenix, an expert Software Product Manager.
+The user wants to build: {request.prompt}
+
+Here is the conversation so far:
+{history_text}
+
+Ask ONE highly specific, technical, or design-oriented clarification question to gather more context.
+Provide exactly 2 specific multiple choice options for your question.
+Output ONLY a raw JSON object. Do not use markdown wrapping.
+Example:
+{{"next_question": "What framework?", "options": ["React", "Vue"]}}"""
+        
+        llm = get_fallback_llm()
+        resp = llm.invoke([SystemMessage(content=sys_prompt)])
+        try:
+            raw_text = resp.content.replace('```json', '').replace('```', '').strip()
+            data = json.loads(raw_text)
+        except Exception as e:
+            data = {"next_question": "Any other specific preferences?", "options": ["Yes", "No"]}
+            
+        data["is_complete"] = False
+        return data
 
 class PlaygroundRequest(BaseModel):
     user_message: str

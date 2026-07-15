@@ -18,10 +18,11 @@ export const generateRefinement = async (req, res, next) => {
     });
 
     try {
+      const qa_history = (questions || []).map(q => ({ question: q.question, answer: q.answer || "" }));
       const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: ideaDoc.prompt, answers, questions, ideaId, userId })
+        body: JSON.stringify({ idea_prompt: ideaDoc.prompt, qa_history })
       });
       
       if (!response.ok) throw new Error("Failed to fetch from python service");

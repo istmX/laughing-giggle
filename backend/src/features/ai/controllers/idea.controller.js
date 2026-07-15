@@ -20,7 +20,7 @@ export const analyzeIdea = async (req, res, next) => {
       const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: ideaDoc.prompt, ideaId, userId })
+        body: JSON.stringify({ prompt: ideaDoc.prompt, idea_id: ideaId })
       });
       
       if (!response.ok) throw new Error("Failed to fetch from python service");
