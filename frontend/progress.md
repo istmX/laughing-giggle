@@ -9,6 +9,10 @@
 ## Backend LangGraph Phase
 
 - **LangGraph Integration**: Implemented `context_engine.graph.js` and `playground.graph.js` using `@langchain/langgraph` and `@langchain/google-genai`.
+- **Legacy Orchestrator Decommissioned**: Fully removed the old `ai.orchestrator.js` legacy providers, migrating all AI reasoning to LangChain and LangGraph.
+- **PM Wizard Graph**: Implemented `pm_wizard.graph.js` using `StateGraph` and `MemorySaver` checkpointer for stateful conversational requirements gathering.
+- **Context Engine Verify Loop**: Added a strict QA `validateArtifactNode` inside `context_engine.graph.js` that analyzes code against requirements, introducing a robust 3-iteration automated self-correction loop.
+- **Fallback Chain**: Extracted core LLM invocation into a reusable `fallback_chain.js` component used across all graphs.
 - **Playground API Logic**: Hooked the Playground controller (`addMessage`) into the LangGraph state machine to process design feedback and compile HTML previews.
 - **Upstash Redis Rate Limiting**: Added rate-limiting middleware for the playground endpoints to restrict queries.
 ## Frontend Phase Implementation
@@ -21,6 +25,7 @@
   - Added "Templates Grid" showcase for both the private dashboard and public `/u/:username` route with embedded HTML iframe previews.
   - Added "Share Profile" button to user's dashboard profile view.
   - Enforced strict color contrast and multi-theme adaptability for Badges and UI blocks.
+  - **Gamification Badges UI**: Implemented specialized styling for loyalty badges (e.g., "Founder", "Pro", "Elite") with distinct gradients (amber/purple) and dynamic icons in `ProfileDetails.jsx`.
 ## Backend Phase Implementation (Latest)
 
 - **User Model Extended**: Added `pfpUrl`, `isVerified`, `loyaltyBadges`, `isAdmin` fields to User schema.
