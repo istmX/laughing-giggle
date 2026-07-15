@@ -35,6 +35,6 @@ export const addMessage = async (token, sessionId, message) => {
   return authFetch(`/playground/${sessionId}/message`, {
     method: 'POST',
     token,
-    body: JSON.stringify(message),
+    body: JSON.stringify({ message: typeof message === 'string' ? message : message.content }),
   })
 }
