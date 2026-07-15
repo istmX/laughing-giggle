@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, GripVertical } from 'lucide-react'
+import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, GripVertical, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { usePlayground } from '../hooks/usePlayground'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -23,6 +23,7 @@ export const Playground = () => {
   } = usePlayground()
 
   const [input, setInput] = useState('')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -48,21 +49,42 @@ export const Playground = () => {
 
   return (
     <div className="flex h-screen w-full bg-canvas overflow-hidden">
+      {/* Sidebar Toggle Button (when closed) */}
+      {!isSidebarOpen && (
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="absolute top-4 left-4 z-50 p-2 bg-surface-elevated border border-hairline rounded-md shadow-sm text-ink hover:bg-canvas transition-colors"
+          title="Open Sidebar"
+        >
+          <PanelLeftOpen className="h-4 w-4" />
+        </button>
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 border-r border-hairline bg-surface-soft flex flex-col shrink-0">
-        <div className="p-4 border-b border-hairline flex items-center justify-between">
-          <Link to="/dashboard" className="text-ink-muted hover:text-ink transition-colors" title="Back to Dashboard">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h2 className="font-[540] text-ink">Zenix Copilot</h2>
-          <button 
-            onClick={() => createNewSession()}
-            className="p-1.5 hover:bg-canvas rounded-md transition-colors text-ink"
-            title="New Session"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
+      {isSidebarOpen && (
+        <div className="w-64 border-r border-hairline bg-surface-soft flex flex-col shrink-0">
+          <div className="p-4 border-b border-hairline flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link to="/dashboard" className="text-ink-muted hover:text-ink transition-colors" title="Back to Dashboard">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="text-ink-muted hover:text-ink transition-colors"
+                title="Hide Sidebar"
+              >
+                <PanelLeftClose className="h-4 w-4" />
+              </button>
+            </div>
+            <h2 className="font-[540] text-ink text-sm">Zenix Copilot</h2>
+            <button 
+              onClick={() => createNewSession()}
+              className="p-1.5 hover:bg-canvas rounded-md transition-colors text-ink"
+              title="New Session"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {isLoadingSessions ? (
             <div className="p-4 text-center text-sm text-ink-muted">Loading...</div>
@@ -98,6 +120,7 @@ export const Playground = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 h-full overflow-hidden">
@@ -137,7 +160,7 @@ export const Playground = () => {
                     ))}
                     {isSendingMessage && (
                       <div className="bg-surface-soft text-ink mr-auto max-w-[85%] rounded-2xl p-4 text-[15px] flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-brand-indigo" /> Updating design...
+                        <Loader2 className="h-4 w-4 animate-spin text-brand-indigo" /> Thinking...
                       </div>
                     )}
                     <div ref={chatEndRef} />
