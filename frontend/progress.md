@@ -400,3 +400,9 @@ The home page now includes:
   - Corrected a JSX syntax error `</motion.div>` in `QuestionCard.jsx` caused by the previous polish pass.
 
 - **Firebase Auth Migration (Full)**: Replaced custom JWT auth with Firebase Email/Password Auth across both frontend (`auth.api.js`, `useAuth.js`, `Login.jsx`, `Signup.jsx`) and backend (`auth.controller.js`, `auth.middleware.js`), removing bcrypt/jwt dependencies and switching to `verifyFirebaseToken`.
+
+- **Playground Bug Fix**:
+  - Debugged and fixed an `Uncaught SyntaxError` caused by `react-resizable-panels` missing exports.
+  - Cleared corrupted Vite cache to ensure fresh dependency resolution.
+  - Mapped `PanelGroup` and `PanelResizeHandle` to the updated `Group` and `Separator` exports introduced in `react-resizable-panels@4.12.2`.
+  - Replaced the deprecated `direction` prop with `orientation="horizontal"` in `Playground.jsx` to match the latest typing specification.
