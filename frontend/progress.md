@@ -53,6 +53,17 @@
 
 ## Completed
 
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
+
 - **Community Search & Hashmaps Integration**:
   - Implemented the `CommunityPage.jsx` component adhering strictly to `DESIGN.md` monochrome + accent block styling.
   - Wired an in-memory `UserSearchIndex` (Trie + Hashmap) into `backend/src/features/explore/explore.service.js` for instant, regex-free user lookups.
@@ -303,6 +314,17 @@ The home page now includes:
 ## Dashboard implementation
 
 ### Completed
+
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
 - **Created a collapsible dashboard shell**
   - Integrated `lucide-react` for familiar product iconography
   - Built a collapsible desktop sidebar using `framer-motion` for smooth width transitions
@@ -340,6 +362,17 @@ The home page now includes:
 ## Design system token migration
 
 ### Completed
+
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
 
 - **`index.css` redesigned** with the full Figma DESIGN.md token set:
   - Added typography tokens: `--font-size-*` with paired line-heights for display-xl, display-lg, headline, subhead, card-title, body-lg, body, body-sm, link, button, eyebrow, caption
