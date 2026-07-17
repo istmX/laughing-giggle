@@ -456,3 +456,9 @@ The home page now includes:
   - Added a custom `RollingText` Framer Motion component for CTAs, featuring a character-by-character upward rolling hover effect.
   - Adjusted Nav bar layout to use `flex-1` for perfect centering and smooth Framer Motion `layoutId` gliding pills for active/hover states.
   - Added a responsive GSAP-powered mobile menu with an animated hamburger to "X" toggle and staggered link reveals.
+- **Ecosystem / Marquee Section**:
+  - Implemented a custom `TrustedEcosystem.jsx` marquee replacing the bloated `skiper31` component.
+  - Built a butter-smooth, CSS keyframe-powered infinite loop (`animate-marquee`).
+  - Integrated high-fidelity logos for GitHub, Cursor, Claude Code, Gemini, VS Code, Windsurf, and Codex.
+  - Implemented premium hover micro-interactions: logo scales up (`scale-125`) and lifts (`-translate-y-1`) with an `ease-out` transition.
+  - Updated global `index.html` to correctly map to the new `favicon.png`.
