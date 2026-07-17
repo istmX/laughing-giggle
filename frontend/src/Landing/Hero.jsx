@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MOCKUP_DATA } from './constants';
+import { MOCKUP_DATA } from './constants.jsx';
+import { ContainerScroll } from '../components/ui/container-scroll-animation';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import SplitType from 'split-type';
+import { useRef } from 'react';
 
 const NAV_LINKS = [
   { name: 'Home', href: '/' },
@@ -13,16 +18,91 @@ const NAV_LINKS = [
 export default function Hero() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [activeFile, setActiveFile] = useState('architecture.md');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const containerRef = useRef(null);
+  const mobileMenuRef = useRef(null);
+  const { contextSafe } = useGSAP({ scope: containerRef });
 
   const activeData = MOCKUP_DATA[activeFile] || MOCKUP_DATA['architecture.md'];
 
+  useGSAP(() => {
+    // 1. Split the headline and subheadline text
+    const headline = new SplitType('.split-headline', { types: 'words, chars' });
+    const subhead = new SplitType('.split-subhead', { types: 'lines, words' });
+
+    // 2. Animate the characters of the headline from the center
+    gsap.from(headline.chars, {
+      y: 60,
+      opacity: 0,
+      rotationX: -90,
+      stagger: {
+        amount: 0.8,
+        from: 'center'
+      },
+      duration: 1.2,
+      ease: 'expo.out',
+      transformOrigin: '50% 50% -20px',
+    });
+
+    // 3. Animate the subheadline words
+    gsap.from(subhead.words, {
+      y: 20,
+      opacity: 0,
+      stagger: 0.015,
+      duration: 1,
+      ease: 'expo.out',
+      delay: 0.3,
+    });
+
+    // 4. Fade in the CTAs
+    gsap.from('.hero-ctas', {
+      y: 20,
+      opacity: 0,
+      duration: 1,
+      ease: 'expo.out',
+      delay: 0.6,
+    });
+
+    // 5. Animate Nav Bar dropping in
+    gsap.from('.hero-nav', {
+      y: -100,
+      opacity: 0,
+      duration: 1.2,
+      ease: 'expo.out',
+      delay: 0.1,
+    });
+  }, { scope: containerRef });
+
+  const toggleMobileMenu = contextSafe(() => {
+    const tl = gsap.timeline();
+    if (!isMobileMenuOpen) {
+      setIsMobileMenuOpen(true);
+      gsap.to(mobileMenuRef.current, { display: 'flex', opacity: 1, duration: 0.4, ease: 'power2.out' });
+      gsap.fromTo('.mobile-link', 
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.1 }
+      );
+      gsap.to('.hamburger-top', { rotation: 45, y: 6, duration: 0.3 });
+      gsap.to('.hamburger-mid', { opacity: 0, duration: 0.3 });
+      gsap.to('.hamburger-bot', { rotation: -45, y: -6, duration: 0.3 });
+    } else {
+      tl.to('.mobile-link', { y: 20, opacity: 0, duration: 0.3, stagger: -0.05, ease: 'power2.in' })
+        .to(mobileMenuRef.current, { opacity: 0, duration: 0.3, onComplete: () => setIsMobileMenuOpen(false) }, "-=0.1")
+        .set(mobileMenuRef.current, { display: 'none' });
+      
+      gsap.to('.hamburger-top', { rotation: 0, y: 0, duration: 0.3 });
+      gsap.to('.hamburger-mid', { opacity: 1, duration: 0.3 });
+      gsap.to('.hamburger-bot', { rotation: 0, y: 0, duration: 0.3 });
+    }
+  });
+
   return (
-    <div className="relative w-full min-h-screen bg-white text-zinc-950 font-sans selection:bg-zinc-200 overflow-hidden flex flex-col">
+    <div ref={containerRef} className="relative w-full min-h-screen bg-white text-zinc-950 font-sans selection:bg-zinc-200 overflow-hidden flex flex-col">
       {/* Navigation */}
-      <nav className="fixed top-0 inset-x-0 h-20 flex items-center justify-between px-6 lg:px-12 z-50 bg-white/90 backdrop-blur-md border-b border-zinc-100">
+      <nav className="hero-nav fixed top-0 inset-x-0 h-20 flex items-center justify-between px-6 lg:px-12 z-50 bg-white/90 backdrop-blur-md border-b border-zinc-100">
         
         {/* Left: Logo Placeholder */}
-        <div className="flex items-center gap-3 w-48">
+        <div className="flex-1 flex items-center gap-3">
           <div className="w-8 h-8 bg-zinc-950 rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
             <span className="text-white text-xs font-bold">Z</span>
           </div>
@@ -30,7 +110,7 @@ export default function Hero() {
         </div>
 
         {/* Center: Gliding Nav Links */}
-        <div className="hidden md:flex items-center p-1.5 rounded-full border border-zinc-100 bg-zinc-50/50">
+        <div className="flex-none hidden md:flex items-center p-1.5 rounded-full border border-zinc-100 bg-zinc-50/50">
           {NAV_LINKS.map((link, idx) => (
             <a
               key={link.name}
@@ -46,55 +126,97 @@ export default function Hero() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
                 />
               )}
-              {link.name}
+              <span className="relative z-10">{link.name}</span>
             </a>
           ))}
         </div>
 
         {/* Right: CTAs */}
-        <div className="flex items-center justify-end gap-6 w-48">
-          <a href="/login" className="hidden sm:block text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors">Log in</a>
-          <a href="/signup" className="text-white bg-zinc-950 px-6 py-2.5 rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors shadow-sm">
+        <div className="flex-1 hidden md:flex items-center justify-end gap-2 lg:gap-4">
+          <RollingButton 
+            href="/login" 
+            text="Log in"
+            className="hidden sm:inline-flex text-zinc-500 hover:text-zinc-900 bg-transparent px-4 lg:px-6"
+          />
+          <RollingButton 
+            href="/signup" 
+            text="Get Started"
+            className="text-white bg-zinc-950 hover:bg-zinc-800 shadow-sm"
+          />
+        </div>
+
+        {/* Mobile Hamburger */}
+        <button 
+          onClick={toggleMobileMenu}
+          className="md:hidden flex flex-col items-center justify-center w-10 h-10 gap-1.5 z-[60]"
+          aria-label="Toggle menu"
+        >
+          <span className="hamburger-top w-6 h-[2px] bg-zinc-900 block origin-center transition-transform"></span>
+          <span className="hamburger-mid w-6 h-[2px] bg-zinc-900 block transition-opacity"></span>
+          <span className="hamburger-bot w-6 h-[2px] bg-zinc-900 block origin-center transition-transform"></span>
+        </button>
+      </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div 
+        ref={mobileMenuRef}
+        className="fixed inset-0 z-40 bg-white pt-24 px-6 pb-6 hidden flex-col"
+        style={{ display: 'none', opacity: 0 }}
+      >
+        <div className="flex flex-col gap-6 text-2xl font-medium tracking-tight">
+          {NAV_LINKS.map((link) => (
+            <a key={link.name} href={link.href} className="mobile-link text-zinc-900 hover:text-zinc-600 border-b border-zinc-100 pb-4">
+              {link.name}
+            </a>
+          ))}
+        </div>
+        <div className="mt-auto flex flex-col gap-4">
+          <a href="/login" className="mobile-link flex h-14 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-900 font-medium">
+            Log in
+          </a>
+          <a href="/signup" className="mobile-link flex h-14 items-center justify-center rounded-full bg-zinc-950 text-white font-medium">
             Get Started
           </a>
         </div>
-      </nav>
+      </div>
 
       {/* Hero Content */}
-      <main className="flex-1 flex flex-col items-center justify-start text-center px-6 z-10 pt-36 lg:pt-48 pb-24">
+      <main className="flex-1 flex flex-col items-center justify-start text-center px-6 z-10 pt-20 pb-24">
         
-        {/* Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-[88px] font-medium tracking-[-0.04em] max-w-5xl leading-[0.95] text-zinc-950">
-          Stop shipping AI slop.
-        </h1>
-        
-        {/* Subheadline */}
-        <p className="mt-8 text-lg md:text-xl text-zinc-500 max-w-2xl leading-relaxed font-light tracking-[-0.01em]">
-          Build software with context, architecture and design systems—not prompts.
-        </p>
+        <ContainerScroll
+          titleComponent={
+            <>
+              {/* Headline */}
+              <h1 className="split-headline text-5xl md:text-7xl lg:text-[104px] font-bold tracking-[-0.05em] max-w-6xl leading-[0.95] text-zinc-950 mx-auto" style={{ perspective: "1000px" }}>
+                Stop shipping AI slop.
+              </h1>
+              
+              {/* Subheadline */}
+              <p className="split-subhead mt-8 text-lg md:text-xl text-zinc-500 max-w-2xl leading-relaxed font-light tracking-[-0.01em] mx-auto">
+                Build software with context, architecture and design systems not prompts.
+              </p>
 
-        {/* CTAs */}
-        <div className="mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <a 
-            href="/signup" 
-            className="inline-flex h-12 items-center justify-center rounded-full bg-zinc-950 px-8 text-sm font-medium text-white transition-transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm hover:shadow-md"
-          >
-            Start Building
-          </a>
-          <a 
-            href="/github" 
-            className="inline-flex h-12 items-center justify-center rounded-full border border-zinc-200 bg-white px-8 text-sm font-medium text-zinc-900 transition-all hover:bg-zinc-50 hover:border-zinc-300 shadow-sm"
-          >
-            Import from GitHub
-          </a>
-        </div>
-
-        {/* Realistic Dashboard Mockup */}
-        <div className="mt-20 w-full max-w-7xl mx-auto relative group perspective-[2000px]">
-          <div className="relative w-full aspect-[16/9] bg-[#0E0E11] rounded-2xl border border-zinc-800 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col text-left transition-transform duration-700 ease-out hover:rotate-x-[2deg]">
+              {/* CTAs */}
+              <div className="hero-ctas mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center mb-10">
+                <RollingButton 
+                  href="/signup" 
+                  text="Start Building" 
+                  className="bg-zinc-950 text-white hover:bg-zinc-800 shadow-sm hover:shadow-md"
+                />
+                <RollingButton 
+                  href="/github" 
+                  text="Import from GitHub" 
+                  className="border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 shadow-sm"
+                />
+              </div>
+            </>
+          }
+        >
+          {/* Realistic Dashboard Mockup */}
+          <div className="relative w-full h-[450px] md:h-[500px] lg:h-auto lg:aspect-[16/9] bg-[#0E0E11] rounded-2xl border border-zinc-800 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col text-left">
             
             {/* Mac Window Controls */}
             <div className="h-12 border-b border-zinc-800/80 flex items-center px-4 gap-2 bg-[#18181B] shrink-0">
@@ -227,9 +349,64 @@ export default function Hero() {
             </div>
 
           </div>
-        </div>
+        </ContainerScroll>
 
       </main>
     </div>
+  );
+}
+
+// Base Rolling Text logic (Char by Char)
+function RollingText({ text }) {
+  return (
+    <motion.div
+      initial="rest"
+      whileHover="hover"
+      animate="rest"
+      className="relative overflow-hidden h-[1.5em] flex items-center justify-center whitespace-pre"
+    >
+      <div className="flex">
+        {text.split("").map((char, i) => (
+          <motion.span
+            key={`top-${i}`}
+            variants={{
+              rest: { y: 0 },
+              hover: { y: "-150%" },
+            }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: i * 0.02 }}
+            className="block"
+          >
+            {char}
+          </motion.span>
+        ))}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center">
+        {text.split("").map((char, i) => (
+          <motion.span
+            key={`bottom-${i}`}
+            variants={{
+              rest: { y: "150%" },
+              hover: { y: 0 },
+            }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: i * 0.02 }}
+            className="block"
+          >
+            {char}
+          </motion.span>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// Rolling Text Button Component
+function RollingButton({ href, text, className }) {
+  return (
+    <a
+      href={href}
+      className={`inline-flex h-12 items-center justify-center rounded-full px-8 text-sm font-medium transition-transform active:translate-y-px ${className}`}
+    >
+      <RollingText text={text} />
+    </a>
   );
 }

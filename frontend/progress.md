@@ -446,3 +446,13 @@ The home page now includes:
   - Updated the Playground UI loading text to a conversational `Thinking...`.
   - Fixed an internal 500 server error in the Python `RAG_Service` where `ChatGroq` crashed due to a missing API key; resolved by explicitly pointing `dotenv` to load the `.env` file from the parent directory in `app/core/llm.py`.
   - Hardened the `playground.py` AI prompt, turning the agent into an opinionated senior designer that critiques poor design choices instead of blindly agreeing with the user.
+- **Landing Page Hero Redesign (Impeccable Craft)**:
+  - Rebuilt the main hero component (`Hero.jsx`) and mockup using high-fidelity Framer Motion and GSAP animations.
+  - Added Aceternity's `ContainerScroll` for a premium 3D scroll reveal of the dashboard mockup, tuned down scale to prevent viewport cutoffs.
+  - Implemented GSAP `SplitType` text reveal for the main headline, character-by-character from the center with 3D rotation (`rotationX`).
+  - Implemented GSAP `SplitType` word stagger for the subheadline.
+  - Implemented a smooth GSAP drop-down animation for the full navigation bar.
+  - Removed em-dashes from the subheadline for cleaner typography.
+  - Added a custom `RollingText` Framer Motion component for CTAs, featuring a character-by-character upward rolling hover effect.
+  - Adjusted Nav bar layout to use `flex-1` for perfect centering and smooth Framer Motion `layoutId` gliding pills for active/hover states.
+  - Added a responsive GSAP-powered mobile menu with an animated hamburger to "X" toggle and staggered link reveals.
