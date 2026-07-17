@@ -68,9 +68,9 @@ const Login = () => {
         </motion.div>
 
         <motion.div {...fieldDelay(2)} className="flex items-center justify-end">
-          <button type="button" className="text-[var(--text-body-sm)] font-[var(--font-weight-330)] text-ink/30 transition-colors hover:text-ink/60">
+          <Link to="/forgot-password" className="text-[var(--text-body-sm)] font-[var(--font-weight-330)] text-ink-muted transition-colors hover:text-ink">
             Forgot password?
-          </button>
+          </Link>
         </motion.div>
 
         {(formError || error || googleError) && (
@@ -91,7 +91,7 @@ const Login = () => {
 
       <motion.p initial={prefersReducedMotion ? {} : { opacity: 0 }} animate={prefersReducedMotion ? {} : { opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="mt-[var(--spacing-xl)] text-center text-[var(--text-body-sm)] font-[var(--font-weight-320)] text-ink/30">
+        className="mt-[var(--spacing-xl)] text-center text-[var(--text-body-sm)] font-[var(--font-weight-320)] text-ink-muted">
         Don&apos;t have an account?{' '}
         <Link to="/signup" className="font-[var(--font-weight-480)] text-ink transition-colors hover:text-ink/50">Sign up</Link>
       </motion.p>

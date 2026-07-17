@@ -4,6 +4,7 @@ import Home from '@/Pages/Home'
 import Dashboard from '@/Pages/Dashboard'
 import LoginPage from '@/Pages/Login'
 import SignupPage from '@/Pages/Signup'
+import ForgotPasswordPage from '@/Pages/ForgotPassword'
 import ProfilePage from '@/Pages/ProfilePage'
 import PublicProfilePage from '@/Pages/PublicProfilePage'
 import PreferencesPage from '@/Pages/Preferences'
@@ -51,6 +52,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/about" element={<About />} />
         <Route path="/sponsor" element={<Sponsor />} />

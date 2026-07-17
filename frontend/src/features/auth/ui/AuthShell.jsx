@@ -44,13 +44,13 @@ const AuthShell = ({ children, panelTitle, panelDescription }) => {
               animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
-              <p className="text-[clamp(0.6rem,0.7vw,0.7rem)] font-mono uppercase tracking-[0.14em] text-ink/25">
+              <p className="text-[clamp(0.6rem,0.7vw,0.7rem)] font-mono uppercase tracking-[0.14em] text-ink-soft">
                 AI Context Engineering
               </p>
               <h1 className="mt-[var(--spacing-md)] text-[clamp(2rem,3.2vw,3.2rem)] font-[var(--font-weight-340)] leading-[1.04] tracking-[-0.03em] text-balance max-w-[14ch]">
                 Turn ideas into implementation-ready context.
               </h1>
-              <p className="mt-[var(--spacing-md)] text-[clamp(0.9rem,1.05vw,1.05rem)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink/45 max-w-[32ch]">
+               <p className="mt-[var(--spacing-md)] text-[clamp(0.9rem,1.05vw,1.05rem)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink-muted max-w-[32ch]">
                 Describe your idea once. Zenix generates architecture, design tokens, build plans, and agent rules — ready for Cursor, Claude Code, or any AI coding tool.
               </p>
             </motion.div>
@@ -73,7 +73,7 @@ const AuthShell = ({ children, panelTitle, panelDescription }) => {
             <Link to="/" className="inline-flex items-start gap-0.5 text-[var(--text-body)] font-[var(--font-weight-480)] tracking-[var(--tracking-body)]">
               <span>zenix</span><span className="-translate-y-1 text-xs leading-none">*</span>
             </Link>
-            <span className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink/20">Context First</span>
+            <span className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink-soft">Context First</span>
           </div>
 
           <div className="w-full max-w-[28rem]">
@@ -86,7 +86,7 @@ const AuthShell = ({ children, panelTitle, panelDescription }) => {
               <h2 className="text-[var(--text-headline)] font-[var(--font-weight-340)] leading-[1.2] tracking-[var(--tracking-headline)] text-balance">
                 {panelTitle}
               </h2>
-              <p className="mt-[var(--spacing-sm)] mx-auto max-w-[28ch] text-[var(--text-body)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink/40">
+               <p className="mt-[var(--spacing-sm)] mx-auto max-w-[28ch] text-[var(--text-body)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink-muted">
                 {panelDescription}
               </p>
             </motion.div>
@@ -108,14 +108,14 @@ const AuthShell = ({ children, panelTitle, panelDescription }) => {
             >
               <div className="flex flex-wrap items-center justify-center gap-x-[var(--spacing-lg)] gap-y-[var(--spacing-xs)]">
                 {CREDIBILITY.slice(0, 4).map((item) => (
-                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink/25">
+                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink-soft">
                     <span className="text-semantic-success/70">✓</span>{item}
                   </span>
                 ))}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-x-[var(--spacing-lg)] gap-y-[var(--spacing-xs)] mt-[var(--spacing-xs)]">
                 {CREDIBILITY.slice(4).map((item) => (
-                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink/25">
+                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink-soft">
                     <span className="text-semantic-success/70">✓</span>{item}
                   </span>
                 ))}

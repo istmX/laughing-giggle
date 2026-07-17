@@ -10,6 +10,7 @@ import AuthShell from './AuthShell'
 import AuthField from './AuthField'
 import AuthSocialSection from './AuthSocialSection'
 import { AuthSubmitButton } from './AuthSubmitButton'
+import { Checkbox } from '@/components/ui/checkbox'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -71,9 +72,10 @@ const Signup = () => {
         </motion.div>
 
         <motion.label {...fieldDelay(3)}
-          className="flex cursor-pointer items-start gap-[var(--spacing-sm)] rounded-[var(--radius-md)] border border-hairline/60 bg-surface-soft/50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-[var(--text-body-sm)] leading-5 text-ink/40 transition-colors hover:border-ink/10 hover:bg-surface-soft/80">
-          <input type="checkbox" className="mt-0.5 size-3.5 rounded border-hairline bg-canvas accent-ink focus:ring-0 focus:ring-offset-0" />
-          <span>I agree to the terms, privacy policy, and account creation flow for Zenix.</span>
+          htmlFor="signup-terms"
+          className="flex cursor-pointer items-start gap-[var(--spacing-sm)] text-[var(--text-body-sm)] leading-5 text-ink-muted">
+          <Checkbox id="signup-terms" name="signup-terms" className="mt-0.5" />
+          <span>I agree to the <Link to="/about" className="font-[var(--font-weight-480)] text-ink underline underline-offset-2 transition-colors hover:text-ink/70">terms</Link> and <Link to="/docs" className="font-[var(--font-weight-480)] text-ink underline underline-offset-2 transition-colors hover:text-ink/70">privacy policy</Link> for Zenix.</span>
         </motion.label>
 
         {(formError || error || googleError) && (
@@ -94,7 +96,7 @@ const Signup = () => {
 
       <motion.p initial={prefersReducedMotion ? {} : { opacity: 0 }} animate={prefersReducedMotion ? {} : { opacity: 1 }}
         transition={{ delay: 0.7, duration: 0.5 }}
-        className="mt-[var(--spacing-xl)] text-center text-[var(--text-body-sm)] font-[var(--font-weight-320)] text-ink/30">
+        className="mt-[var(--spacing-xl)] text-center text-[var(--text-body-sm)] font-[var(--font-weight-320)] text-ink-muted">
         Already have an account?{' '}
         <Link to="/login" className="font-[var(--font-weight-480)] text-ink transition-colors hover:text-ink/50">Sign in</Link>
       </motion.p>

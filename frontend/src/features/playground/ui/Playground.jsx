@@ -3,7 +3,7 @@ import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, GripVertical, Panel
 import { usePlayground } from '../hooks/usePlayground'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { Panel, Group, Separator } from 'react-resizable-panels'
 import { LiveSandbox } from './LiveSandbox'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -238,7 +238,7 @@ export const Playground = () => {
         </div>
 
         {activeSessionId ? (
-          <PanelGroup direction="horizontal" className="flex-1 w-full min-h-0">
+          <Group orientation="horizontal" className="flex-1 w-full min-h-0">
             {/* Conversation Panel */}
             <Panel defaultSize={40} minSize={25} className="flex flex-col min-w-0 min-h-0 bg-canvas relative z-10">
               <div className="flex-1 min-h-0 overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar">
@@ -361,9 +361,9 @@ export const Playground = () => {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-[1px] bg-hairline hover:bg-brand-indigo/50 hover:w-1 active:bg-brand-indigo transition-all flex items-center justify-center cursor-col-resize z-20 group">
-               <div className="opacity-0 group-hover:opacity-100 h-8 w-1 bg-brand-indigo rounded-full transition-opacity absolute" />
-            </PanelResizeHandle>
+            <Separator className="w-[1px] bg-hairline hover:bg-brand-indigo/50 hover:w-1 active:bg-brand-indigo transition-all flex items-center justify-center cursor-col-resize z-20 group">
+                <div className="opacity-0 group-hover:opacity-100 h-8 w-1 bg-brand-indigo rounded-full transition-opacity absolute" />
+             </Separator>
 
             {/* Live Preview Panel */}
             <Panel defaultSize={60} minSize={30} className="bg-surface relative min-w-0 min-h-0 flex flex-col z-10">
@@ -386,7 +386,7 @@ export const Playground = () => {
 
               </div>
             </Panel>
-          </PanelGroup>
+           </Group>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-canvas">
             <div className="h-16 w-16 bg-surface border border-hairline rounded-2xl flex items-center justify-center mb-6 shadow-sm">

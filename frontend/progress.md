@@ -207,7 +207,7 @@
   - Layout: 40%/60% split (was 55/45), wider auth card `max-w-[28rem]`
   - `AuthShell.jsx` — dot-grid background pattern (`radial-gradient` 20px grid), connected workflow with SVG lines, improved hero copy ("Turn ideas into implementation-ready context."), 8 credibility badges (Multi-Agent, Cursor, Claude, Markdown, Architecture Aware, RAG Ready, Template Driven, OpenRouter), sequential motion
   - `ProductStory.jsx` — 6 realistic markdown preview cards (`architecture.md`, `agents.md`, `ui-tokens.md`, `build-plan.md`, `code-standards.md`, `project-overview.md`) with fake syntax coloring, window titlebar dots, overlapping layers, blur depth, float animation with random timing
-  - `AuthField.jsx` — focus glow (`shadow-[0_0_0_4px_rgba(0,0,0,0.06)]`), hover border transition, label color shift on focus
+  - `AuthField.jsx` — migrated from raw `<input>` to shadcn `Input` component, fixed inconsistent padding with `px-0 py-0` override, reduced padding to `pl-[var(--spacing-md)] pr-[var(--spacing-sm)]`
   - `AuthSubmitButton.jsx` — loading spinner (`Loader2 animate-spin`), hover `-translate-y-[1px]` lift, `focus-visible` ring, shine gradient, animated arrow
   - All files under 150 lines (max 131)
 - **Landing page hero corrected** so the live `/` route uses the original `hero-03.jsx` structure again:
@@ -232,6 +232,10 @@
 ## Current status
 
 Auth pages fully redesigned (third pass) with 40%/60% layout, realistic markdown preview cards, dot-grid background, connected workflow, wider auth card (28rem), focus glow on inputs, loading spinner button, hover lift, 8 credibility badges, sequential motion.
+- Swapped raw inputs to shadcn `Input` component with consistent token-based padding
+- Remove unused landing section components and hero files
+- Add Navbar, Docs/About/Sponsor pages, AuthSubmitButton, ProductStory
+- PR created: https://github.com/RandintRayquaza/laughing-giggle/pull/22
 
 Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 

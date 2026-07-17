@@ -46,7 +46,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --color-doc-blue: var(--doc-blue);
+  --color-doc-blue: 
+  var(--doc-blue);
   --color-doc-orange: var(--doc-orange);
   --color-doc-green: var(--doc-green);
   --color-doc-purple: var(--doc-purple);
