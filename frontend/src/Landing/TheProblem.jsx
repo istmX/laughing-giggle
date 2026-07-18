@@ -53,7 +53,7 @@ const PROBLEMS = [
       { text: '}', type: 'error' },
       { text: '', type: 'blank' },
       { text: '// Your codebase uses:', type: 'comment' },
-      { text: "export default function MyPage() {...}", type: 'code' },
+      { text: 'export default function MyPage() {...}', type: 'code' },
     ],
     isSolution: false,
   },
@@ -91,7 +91,7 @@ const PROBLEMS = [
   },
 ];
 
-const SCROLL_DISTANCE = '500%';
+const DESKTOP_SCROLL = '500%';
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
@@ -104,398 +104,439 @@ export default function TheProblem() {
     () => {
       const mm = gsap.matchMedia();
 
-      // ── No-motion: staggered fade reveal ──────────────────────────────────
+      // ── 1. Reduced-motion: bare static reveal, no scroll choreography ──────
       mm.add('(prefers-reduced-motion: reduce)', () => {
         const cards = gsap.utils.toArray('.pcard');
-        const snippets = gsap.utils.toArray('.psnippet');
-        gsap.from([...cards, ...snippets], {
-          opacity: 0,
-          y: 20,
-          stagger: 0.1,
-          duration: 0.5,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 80%',
-          },
-        });
+        gsap.set(cards, { opacity: 1, y: 0 });
       });
 
-      // ── Full motion: pinned scroll-driven card + snippet swap ──────────────
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const cards = gsap.utils.toArray('.pcard');
-        const snippets = gsap.utils.toArray('.psnippet');
-        const mobileSnippets = gsap.utils.toArray('.psnippet-mobile');
-        const dots = gsap.utils.toArray('.pstep-dot');
-        const total = cards.length;
+      // ── 2. Mobile (<1024px): stacked scroll reveal — no pin ─────────────────
+      // Each card + snippet fades up as it enters, fades out upward as it leaves.
+      mm.add(
+        '(prefers-reduced-motion: no-preference) and (max-width: 1023px)',
+        () => {
+          const mobileSections = gsap.utils.toArray('.pmobile-section');
 
-        // Initial states
-        cards.forEach((card, i) => {
-          gsap.set(card, {
-            opacity: i === 0 ? 1 : 0,
-            y: i === 0 ? 0 : 56,
-            scale: i === 0 ? 1 : 0.97,
-            filter: i === 0 ? 'blur(0px)' : 'blur(3px)',
-          });
-        });
-
-        snippets.forEach((snippet, i) => {
-          gsap.set(snippet, {
-            opacity: i === 0 ? 1 : 0,
-            y: i === 0 ? 0 : 20,
-          });
-        });
-
-        mobileSnippets.forEach((snippet, i) => {
-          gsap.set(snippet, {
-            opacity: i === 0 ? 1 : 0,
-            y: i === 0 ? 0 : 16,
-          });
-        });
-
-        // Mark first step dot active
-        gsap.set(dots[0], { backgroundColor: 'var(--foreground)', scale: 1.4 });
-
-        // Master scrub timeline
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top top',
-            end: `+=${SCROLL_DISTANCE}`,
-            scrub: 0.9,
-            pin: true,
-            pinSpacing: true,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              // Progress bar
-              if (progressFillRef.current) {
-                progressFillRef.current.style.width = `${self.progress * 100}%`;
-              }
-              // Step counter
-              const idx = Math.min(Math.floor(self.progress * total), total - 1);
-              if (countRef.current) {
-                countRef.current.textContent = `0${idx + 1}`;
-              }
-            },
-          },
-        });
-
-        cards.forEach((card, i) => {
-          if (i === 0) return;
-          const prev = cards[i - 1];
-          const prevSnippet = snippets[i - 1];
-          const nextSnippet = snippets[i];
-          const prevDot = dots[i - 1];
-          const currDot = dots[i];
-          const seg = i;
-
-          // Split headline chars
-          const split = new SplitType(card.querySelector('.pheadline'), {
-            types: 'chars',
-          });
-
-          // Exit: previous card
-          tl.to(prev, { opacity: 0, y: -48, scale: 0.94, filter: 'blur(6px)', duration: 1, ease: 'power3.inOut' }, seg);
-          // Exit: previous snippets (desktop + mobile)
-          tl.to(prevSnippet, { opacity: 0, y: -16, duration: 0.6, ease: 'power2.in' }, seg);
-          if (mobileSnippets[i - 1]) {
-            tl.to(mobileSnippets[i - 1], { opacity: 0, y: -12, duration: 0.5, ease: 'power2.in' }, seg);
-          }
-
-          // Enter: new card
-          tl.to(card, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 1, ease: 'power3.out' }, seg + 0.1);
-          // Enter: new snippets (desktop + mobile)
-          tl.to(nextSnippet, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, seg + 0.2);
-          if (mobileSnippets[i]) {
-            tl.to(mobileSnippets[i], { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, seg + 0.2);
-          }
-
-          // Step dot transitions
-          tl.to(prevDot, { backgroundColor: 'var(--hairline)', scale: 1, duration: 0.4 }, seg);
-          tl.to(currDot, { backgroundColor: 'var(--foreground)', scale: 1.4, duration: 0.4 }, seg + 0.1);
-
-          // Char stagger on new headline
-          if (split.chars?.length) {
-            gsap.set(split.chars, { opacity: 0, y: 16, rotationX: -45 });
-            tl.to(
-              split.chars,
-              {
-                opacity: 1,
-                y: 0,
-                rotationX: 0,
-                duration: 0.5,
-                stagger: { amount: 0.25, from: 'start' },
-                ease: 'expo.out',
+          mobileSections.forEach((el) => {
+            // Entrance: y:40→0, opacity:0→1
+            gsap.from(el, {
+              opacity: 0,
+              y: 40,
+              duration: 0.7,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 88%',
+                end: 'top 40%',
+                scrub: false,
+                toggleActions: 'play none none reverse',
               },
-              seg + 0.2
-            );
-          }
-        });
-      });
+            });
+
+            // Exit: as it scrolls past, y:0→-32, opacity:1→0
+            gsap.to(el, {
+              opacity: 0,
+              y: -32,
+              duration: 0.5,
+              ease: 'power2.in',
+              scrollTrigger: {
+                trigger: el,
+                start: 'bottom 30%',
+                end: 'bottom 5%',
+                scrub: true,
+              },
+            });
+          });
+
+          // Mobile counter update — update on each section entering
+          mobileSections.forEach((el, i) => {
+            ScrollTrigger.create({
+              trigger: el,
+              start: 'top 60%',
+              onEnter: () => {
+                if (countRef.current) {
+                  countRef.current.textContent = `0${i + 1}`;
+                }
+                if (progressFillRef.current) {
+                  progressFillRef.current.style.width = `${((i + 1) / PROBLEMS.length) * 100}%`;
+                }
+              },
+              onLeaveBack: () => {
+                if (countRef.current) {
+                  countRef.current.textContent = `0${Math.max(i, 1)}`;
+                }
+                if (progressFillRef.current) {
+                  progressFillRef.current.style.width = `${(Math.max(i, 0) / PROBLEMS.length) * 100}%`;
+                }
+              },
+            });
+          });
+        }
+      );
+
+      // ── 3. Desktop (≥1024px): pinned scrub scroll ─────────────────────────
+      mm.add(
+        '(prefers-reduced-motion: no-preference) and (min-width: 1024px)',
+        () => {
+          const cards = gsap.utils.toArray('.pcard');
+          const snippets = gsap.utils.toArray('.psnippet');
+          const dots = gsap.utils.toArray('.pstep-dot');
+          const total = cards.length;
+
+          // Initial states
+          cards.forEach((card, i) => {
+            gsap.set(card, {
+              opacity: i === 0 ? 1 : 0,
+              y: i === 0 ? 0 : 56,
+              scale: i === 0 ? 1 : 0.97,
+              filter: i === 0 ? 'blur(0px)' : 'blur(3px)',
+            });
+          });
+
+          snippets.forEach((snippet, i) => {
+            gsap.set(snippet, {
+              opacity: i === 0 ? 1 : 0,
+              y: i === 0 ? 0 : 20,
+            });
+          });
+
+          gsap.set(dots[0], { backgroundColor: 'var(--foreground)', scale: 1.4 });
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top top',
+              end: `+=${DESKTOP_SCROLL}`,
+              scrub: 0.9,
+              pin: true,
+              pinSpacing: true,
+              anticipatePin: 1,
+              onUpdate: (self) => {
+                if (progressFillRef.current) {
+                  progressFillRef.current.style.width = `${self.progress * 100}%`;
+                }
+                const idx = Math.min(
+                  Math.floor(self.progress * total),
+                  total - 1
+                );
+                if (countRef.current) {
+                  countRef.current.textContent = `0${idx + 1}`;
+                }
+              },
+            },
+          });
+
+          cards.forEach((card, i) => {
+            if (i === 0) return;
+            const prev = cards[i - 1];
+            const prevSnippet = snippets[i - 1];
+            const nextSnippet = snippets[i];
+            const prevDot = dots[i - 1];
+            const currDot = dots[i];
+            const seg = i;
+
+            const split = new SplitType(card.querySelector('.pheadline'), {
+              types: 'chars',
+            });
+
+            // Exit previous
+            tl.to(prev, { opacity: 0, y: -48, scale: 0.94, filter: 'blur(6px)', duration: 1, ease: 'power3.inOut' }, seg);
+            tl.to(prevSnippet, { opacity: 0, y: -16, duration: 0.6, ease: 'power2.in' }, seg);
+
+            // Enter new
+            tl.to(card, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 1, ease: 'power3.out' }, seg + 0.1);
+            tl.to(nextSnippet, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, seg + 0.2);
+
+            // Dot transitions
+            tl.to(prevDot, { backgroundColor: 'var(--hairline)', scale: 1, duration: 0.4 }, seg);
+            tl.to(currDot, { backgroundColor: 'var(--foreground)', scale: 1.4, duration: 0.4 }, seg + 0.1);
+
+            // Char stagger
+            if (split.chars?.length) {
+              gsap.set(split.chars, { opacity: 0, y: 16, rotationX: -45 });
+              tl.to(
+                split.chars,
+                {
+                  opacity: 1,
+                  y: 0,
+                  rotationX: 0,
+                  duration: 0.5,
+                  stagger: { amount: 0.25, from: 'start' },
+                  ease: 'expo.out',
+                },
+                seg + 0.2
+              );
+            }
+          });
+        }
+      );
     },
     { scope: sectionRef }
   );
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative w-full h-screen bg-white overflow-hidden flex flex-col"
-    >
-      {/* ── Top bar ─────────────────────────────────────────────────────────── */}
-      <div className="shrink-0 w-full flex items-center justify-between px-6 sm:px-10 md:px-16 pt-8">
-        <span
-          className="font-mono text-[11px] uppercase text-ink-faint"
-          style={{ letterSpacing: 'var(--tracking-eyebrow)' }}
-        >
-          The Problem
-        </span>
-        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint tabular-nums">
-          <span ref={countRef}>01</span>
-          <span>/ 0{PROBLEMS.length}</span>
-        </div>
-      </div>
-
-      {/* ── Progress bar ────────────────────────────────────────────────────── */}
-      <div className="shrink-0 w-full h-px mt-5" style={{ background: 'var(--hairline)' }}>
-        <div
-          ref={progressFillRef}
-          className="h-full"
-          style={{ width: '0%', background: 'var(--foreground)', transition: 'none' }}
-        />
-      </div>
-
-      {/* ── Main layout ─ col on mobile, row on lg+ ──────────────────── */}
-      <div className="flex-1 flex flex-col lg:flex-row lg:items-center min-h-0 px-6 sm:px-10 md:px-16 py-6 lg:py-8 gap-4 sm:gap-6 lg:gap-16">
-
-        {/* Left column: step dots + card ───────────────────────────── */}
-        <div className="flex gap-6 md:gap-8 flex-1 min-w-0 items-center lg:items-center">
-
-          {/* Vertical step dots — desktop only */}
-          <div className="hidden md:flex flex-col gap-3 shrink-0">
-            {PROBLEMS.map((p, i) => (
-              <div
-                key={p.index}
-                className="pstep-dot rounded-full"
-                style={{
-                  width: 7,
-                  height: 7,
-                  background: i === 0 ? 'var(--foreground)' : 'var(--hairline)',
-                  transform: i === 0 ? 'scale(1.4)' : 'scale(1)',
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Card stack */}
-          <div className="relative flex-1 min-w-0" style={{ minHeight: 280 }}>
-            {PROBLEMS.map((item, i) => (
-              <div
-                key={item.index}
-                className={`pcard will-change-transform ${i === 0 ? 'relative' : 'absolute inset-x-0 top-0'}`}
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <div
-                  className="w-full p-8 md:p-10 rounded-xl"
-                  style={{
-                    border: `1px solid ${item.isSolution ? 'var(--brand-indigo)' : 'var(--hairline)'}`,
-                    background: item.isSolution ? 'oklch(0.97 0.012 264)' : 'white',
-                    boxShadow: item.isSolution
-                      ? '0 0 0 1px var(--brand-indigo), 0 20px 40px -8px rgba(77,73,252,0.1)'
-                      : '0 4px 16px -4px rgba(0,0,0,0.08)',
-                  }}
-                >
-                  {/* Tag */}
-                  <span
-                    className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase mb-5 px-2.5 py-1 rounded-full"
-                    style={{
-                      letterSpacing: 'var(--tracking-eyebrow)',
-                      background: item.isSolution ? 'var(--brand-indigo)' : 'var(--surface-muted)',
-                      color: item.isSolution ? 'white' : 'var(--text-muted)',
-                    }}
-                  >
-                    {item.isSolution && (
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                        <path d="M1.5 4l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                    {item.tag}
-                  </span>
-
-                  {/* Headline */}
-                  <h3
-                    className="pheadline font-semibold mb-4"
-                    style={{
-                      fontSize: 'clamp(1.75rem, 3.5vw, 3rem)',
-                      lineHeight: 1.08,
-                      letterSpacing: '-0.03em',
-                      color: item.isSolution ? 'var(--brand-indigo)' : 'var(--foreground)',
-                      textWrap: 'balance',
-                    }}
-                  >
-                    {item.headline}
-                  </h3>
-
-                  {/* Body */}
-                  <p
-                    className="leading-relaxed"
-                    style={{
-                      fontSize: 'clamp(0.9375rem, 1.5vw, 1.0625rem)',
-                      color: 'var(--text-muted)',
-                      maxWidth: '42ch',
-                      lineHeight: 1.65,
-                    }}
-                  >
-                    {item.body}
-                  </p>
-                </div>
-              </div>
-            ))}
+    <>
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      {/* DESKTOP: single pinned section (h-screen, hidden on mobile)           */}
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      <section
+        ref={sectionRef}
+        className="hidden lg:flex relative w-full h-screen bg-white overflow-hidden flex-col"
+      >
+        {/* Top bar */}
+        <div className="shrink-0 w-full flex items-center justify-between px-10 md:px-16 pt-8">
+          <span
+            className="font-mono text-[11px] uppercase text-ink-faint"
+            style={{ letterSpacing: 'var(--tracking-eyebrow)' }}
+          >
+            The Problem
+          </span>
+          <div className="flex items-center gap-2 font-mono text-[11px] text-ink-faint tabular-nums">
+            <span ref={countRef}>01</span>
+            <span>/ 0{PROBLEMS.length}</span>
           </div>
         </div>
 
-        {/* Right column: code snippet panel — full sidebar on lg+, compact bar below card on mobile ── */}
-        <div
-          className="hidden lg:flex shrink-0 flex-col"
-          style={{ width: 'clamp(260px, 30vw, 400px)' }}
-        >
-          {/* Terminal chrome */}
+        {/* Progress bar */}
+        <div className="shrink-0 w-full h-px mt-5" style={{ background: 'var(--hairline)' }}>
           <div
-            className="rounded-xl overflow-hidden flex flex-col"
-            style={{
-              border: '1px solid var(--hairline)',
-              background: 'oklch(0.09 0.005 264)',
-              boxShadow: '0 8px 32px -8px rgba(0,0,0,0.2)',
-            }}
-          >
-            {/* Title bar */}
-            <div
-              className="flex items-center gap-1.5 px-4 py-3 border-b"
-              style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-            >
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5f57' }} />
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#febc2e' }} />
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#28c840' }} />
-              <span
-                className="ml-auto font-mono text-[10px]"
-                style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}
-              >
-                context.md
-              </span>
-            </div>
+            ref={progressFillRef}
+            className="h-full"
+            style={{ width: '0%', background: 'var(--foreground)', transition: 'none' }}
+          />
+        </div>
 
-            {/* Code area */}
-            <div className="relative" style={{ minHeight: 196 }}>
-              {PROBLEMS.map((item, i) => (
+        {/* Main row: dots + card stack | terminal panel */}
+        <div className="flex-1 flex lg:flex-row lg:items-center min-h-0 px-10 md:px-16 py-8 gap-16">
+
+          {/* Left: step dots + card */}
+          <div className="flex gap-8 flex-1 min-w-0 items-center">
+            {/* Dots */}
+            <div className="flex flex-col gap-3 shrink-0">
+              {PROBLEMS.map((p, i) => (
                 <div
-                  key={item.index}
-                  className={`psnippet ${i === 0 ? 'relative' : 'absolute inset-0'} p-5`}
-                >
-                  <div className="flex flex-col gap-1.5">
-                    {item.snippet.map((line, li) => (
-                      <span
-                        key={li}
-                        className="font-mono text-[11.5px] leading-relaxed block"
-                        style={{
-                          color:
-                            line.type === 'comment' ? 'rgba(255,255,255,0.3)'
-                              : line.type === 'error' ? '#ff7b72'
-                              : line.type === 'solution' ? '#7ee787'
-                              : line.type === 'blank' ? 'transparent'
-                              : 'rgba(255,255,255,0.7)',
-                          userSelect: 'none',
-                        }}
-                      >
-                        {line.text || '\u00a0'}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Below terminal: "scroll to continue" nudge */}
-          <div
-            className="mt-6 flex items-center gap-2.5 opacity-30"
-          >
-            <div className="flex flex-col gap-1">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="block rounded-full animate-bounce"
+                  key={p.index}
+                  className="pstep-dot rounded-full"
                   style={{
-                    width: 3,
-                    height: 3,
-                    background: 'var(--foreground)',
-                    animationDelay: `${i * 0.15}s`,
-                    animationDuration: '1.2s',
+                    width: 7,
+                    height: 7,
+                    background: i === 0 ? 'var(--foreground)' : 'var(--hairline)',
+                    transform: i === 0 ? 'scale(1.4)' : 'scale(1)',
                   }}
                 />
               ))}
             </div>
-            <span
-              className="font-mono text-[10px] uppercase"
-              style={{ letterSpacing: 'var(--tracking-eyebrow)', color: 'var(--text-faint)' }}
-            >
-              Scroll to advance
-            </span>
-          </div>
-        </div>
 
-        {/* ── Mobile compact snippet strip — visible below lg ────────────── */}
-        <div
-          className="lg:hidden shrink-0 rounded-xl overflow-hidden"
-          style={{
-            border: '1px solid var(--hairline)',
-            background: 'oklch(0.09 0.005 264)',
-          }}
-        >
-          {/* Mini title bar */}
-          <div
-            className="flex items-center gap-1.5 px-3 py-2 border-b"
-            style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <span className="w-2 h-2 rounded-full" style={{ background: '#ff5f57' }} />
-            <span className="w-2 h-2 rounded-full" style={{ background: '#febc2e' }} />
-            <span className="w-2 h-2 rounded-full" style={{ background: '#28c840' }} />
-            <span
-              className="ml-auto font-mono text-[10px]"
-              style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}
-            >
-              context.md
-            </span>
-          </div>
-          {/* Snippet lines — compact 4-line max on mobile */}
-          <div className="relative px-4 py-3" style={{ minHeight: 80 }}>
-            {PROBLEMS.map((item, i) => (
-              <div
-                key={item.index}
-                className={`psnippet-mobile ${i === 0 ? 'relative' : 'absolute inset-x-0 top-0 px-4 py-3'}`}
-              >
-                <div className="flex flex-col gap-1">
-                  {item.snippet.slice(0, 4).map((line, li) => (
-                    <span
-                      key={li}
-                      className="font-mono text-[10.5px] leading-relaxed block truncate"
-                      style={{
-                        color:
-                          line.type === 'comment' ? 'rgba(255,255,255,0.3)'
-                            : line.type === 'error' ? '#ff7b72'
-                            : line.type === 'solution' ? '#7ee787'
-                            : line.type === 'blank' ? 'transparent'
-                            : 'rgba(255,255,255,0.7)',
-                      }}
-                    >
-                      {line.text || '\u00a0'}
-                    </span>
-                  ))}
+            {/* Card stack */}
+            <div className="relative flex-1 min-w-0" style={{ minHeight: 280 }}>
+              {PROBLEMS.map((item, i) => (
+                <div
+                  key={item.index}
+                  className={`pcard will-change-transform ${i === 0 ? 'relative' : 'absolute inset-x-0 top-0'}`}
+                  style={{ transformStyle: 'preserve-3d' }}
+                >
+                  <CardInner item={item} />
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Right: terminal panel */}
+          <div className="shrink-0 flex flex-col" style={{ width: 'clamp(260px, 30vw, 400px)' }}>
+            <TerminalPanel snippets={PROBLEMS.map(p => p.snippet)} variant="desktop" />
+          </div>
+        </div>
+      </section>
+
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      {/* MOBILE: stacked individual sections, each scroll-animated             */}
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      <div className="lg:hidden relative bg-white">
+        {/* Sticky top bar */}
+        <div
+          className="sticky top-0 z-20 w-full flex items-center justify-between px-5 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-b"
+          style={{ borderColor: 'var(--hairline)' }}
+        >
+          <span
+            className="font-mono text-[10px] uppercase text-ink-faint"
+            style={{ letterSpacing: 'var(--tracking-eyebrow)' }}
+          >
+            The Problem
+          </span>
+          <div className="flex items-center gap-2 font-mono text-[10px] text-ink-faint tabular-nums">
+            <span ref={countRef}>01</span>
+            <span>/ 0{PROBLEMS.length}</span>
           </div>
         </div>
 
+        {/* Sticky progress bar below header */}
+        <div className="sticky top-[49px] z-10 w-full h-px" style={{ background: 'var(--hairline)' }}>
+          <div
+            ref={progressFillRef}
+            className="h-full"
+            style={{ width: '0%', background: 'var(--foreground)', transition: 'width 0.3s ease' }}
+          />
+        </div>
+
+        {/* One full-screen section per card */}
+        {PROBLEMS.map((item) => (
+          <div
+            key={item.index}
+            className="pmobile-section min-h-screen flex flex-col justify-center px-5 sm:px-8 py-16 gap-6"
+          >
+            <CardInner item={item} />
+            {/* Compact terminal strip */}
+            <TerminalPanel snippets={[item.snippet]} variant="mobile" />
+          </div>
+        ))}
       </div>
-    </section>
+    </>
   );
+}
+
+// ─── Shared card content ──────────────────────────────────────────────────────
+
+function CardInner({ item }) {
+  return (
+    <div
+      className="w-full p-8 md:p-10 rounded-xl"
+      style={{
+        border: `1px solid ${item.isSolution ? 'var(--brand-indigo)' : 'var(--hairline)'}`,
+        background: item.isSolution ? 'oklch(0.97 0.012 264)' : 'white',
+        boxShadow: item.isSolution
+          ? '0 0 0 1px var(--brand-indigo), 0 20px 40px -8px rgba(77,73,252,0.1)'
+          : '0 4px 16px -4px rgba(0,0,0,0.08)',
+      }}
+    >
+      {/* Tag pill */}
+      <span
+        className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase mb-5 px-2.5 py-1 rounded-full"
+        style={{
+          letterSpacing: 'var(--tracking-eyebrow)',
+          background: item.isSolution ? 'var(--brand-indigo)' : 'var(--surface-muted)',
+          color: item.isSolution ? 'white' : 'var(--text-muted)',
+        }}
+      >
+        {item.isSolution && (
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path d="M1.5 4l2 2 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+        {item.tag}
+      </span>
+
+      {/* Headline */}
+      <h3
+        className="pheadline font-semibold mb-4"
+        style={{
+          fontSize: 'clamp(1.75rem, 5vw, 3rem)',
+          lineHeight: 1.08,
+          letterSpacing: '-0.03em',
+          color: item.isSolution ? 'var(--brand-indigo)' : 'var(--foreground)',
+          textWrap: 'balance',
+        }}
+      >
+        {item.headline}
+      </h3>
+
+      {/* Body */}
+      <p
+        className="leading-relaxed"
+        style={{
+          fontSize: 'clamp(0.9375rem, 1.5vw, 1.0625rem)',
+          color: 'var(--text-muted)',
+          maxWidth: '46ch',
+          lineHeight: 1.65,
+        }}
+      >
+        {item.body}
+      </p>
+    </div>
+  );
+}
+
+// ─── Terminal panel (desktop: stacked absolute; mobile: single) ───────────────
+
+function TerminalPanel({ snippets, variant }) {
+  const isMobile = variant === 'mobile';
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        border: '1px solid var(--hairline)',
+        background: 'oklch(0.09 0.005 264)',
+        boxShadow: isMobile ? 'none' : '0 8px 32px -8px rgba(0,0,0,0.2)',
+      }}
+    >
+      {/* Title bar */}
+      <div
+        className="flex items-center gap-1.5 px-4 py-3 border-b"
+        style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+      >
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#ff5f57' }} />
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#febc2e' }} />
+        <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#28c840' }} />
+        <span
+          className="ml-auto font-mono text-[10px]"
+          style={{ color: 'rgba(255,255,255,0.25)', letterSpacing: '0.05em' }}
+        >
+          context.md
+        </span>
+      </div>
+
+      {/* Code lines */}
+      <div
+        className="relative"
+        style={{ minHeight: isMobile ? 72 : 196 }}
+      >
+        {isMobile ? (
+          // Mobile: just render the single snippet directly
+          <div className="p-4">
+            <div className="flex flex-col gap-1">
+              {snippets[0].slice(0, 4).map((line, li) => (
+                <span
+                  key={li}
+                  className="font-mono text-[10.5px] leading-relaxed block truncate"
+                  style={{ color: snippetColor(line.type) }}
+                >
+                  {line.text || '\u00a0'}
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : (
+          // Desktop: stacked absolute snippets (animated by GSAP)
+          snippets.map((snippet, si) => (
+            <div
+              key={si}
+              className={`psnippet ${si === 0 ? 'relative' : 'absolute inset-0'} p-5`}
+            >
+              <div className="flex flex-col gap-1.5">
+                {snippet.map((line, li) => (
+                  <span
+                    key={li}
+                    className="font-mono text-[11.5px] leading-relaxed block"
+                    style={{ color: snippetColor(line.type), userSelect: 'none' }}
+                  >
+                    {line.text || '\u00a0'}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+function snippetColor(type) {
+  switch (type) {
+    case 'comment': return 'rgba(255,255,255,0.3)';
+    case 'error':   return '#ff7b72';
+    case 'solution':return '#7ee787';
+    case 'blank':   return 'transparent';
+    default:        return 'rgba(255,255,255,0.7)';
+  }
 }

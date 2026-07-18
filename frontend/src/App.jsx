@@ -18,7 +18,8 @@ const App = () => {
     const lenis = new Lenis({
       lerp: 0.085,
       smoothWheel: true,
-      syncTouch: false,
+      syncTouch: true,
+      touchMultiplier: 1.5,
       wheelMultiplier: 0.82,
     })
     const raf = (time) => lenis.raf(time * 1000)
@@ -26,6 +27,7 @@ const App = () => {
     lenis.on('scroll', ScrollTrigger.update)
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
+    ScrollTrigger.normalizeScroll(true)
 
     return () => {
       gsap.ticker.remove(raf)
