@@ -1,3 +1,34 @@
+## TheProblem Section — Full Rebuild & Polish (Latest)
+
+### Completed
+- **Full section rebuild** (`frontend/src/Landing/TheProblem.jsx`): Replaced the old dark-bg isolated card with a light-theme, token-compliant, production-grade section.
+- **Layout**: Two-column on desktop (`lg+`) — card stack left with vertical step dots, dark terminal code panel right. Single column on mobile/tablet — card on top, compact terminal strip below.
+- **Card stack**: `flex-1` width (was `max-w-2xl`) fills available space. First card `position: relative` establishes container height; rest stack `absolute inset-x-0 top-0`.
+- **Semantic tag pills**: Each card has a tag (`No memory`, `Bad output`, `No architecture`, `Tech debt`, `Solved`) rendered as a monospace pill badge.
+- **Solution card**: `var(--brand-indigo)` border + tinted background + indigo headline + checkmark icon in tag on card 05.
+- **Dark terminal panel**: macOS-style chrome (traffic lights), dark `oklch(0.09 0.005 264)` background, showing context-aware code snippets per card — hallucinated imports (red), messy file structures (red), correct AGENTS.md output (green). Animates in sync with card transitions.
+- **Mobile compact snippet strip**: `lg:hidden` version of terminal below card, 4-line condensed view, same animation sync.
+- **GSAP scroll animation**: Pinned section, scrub `0.9`, `500%` scroll distance. Cards exit up with blur/scale, enter from below. `SplitType` char stagger on each incoming headline (`rotationX` + `y` + opacity). Both `psnippet` (desktop) and `psnippet-mobile` targets animated simultaneously.
+- **Vertical step dots**: 5 dots animate between `var(--hairline)` inactive and `var(--foreground)` active state via GSAP on each transition.
+- **Progress bar**: Hairline track fills in `var(--foreground)` color as scroll advances (pure DOM mutation, zero React re-renders).
+- **Live step counter**: `01`–`05` updates via `ref.textContent` inside `onUpdate`.
+- **Reduced-motion fallback**: `gsap.matchMedia()` — no pin, simple staggered scroll reveal for `prefers-reduced-motion: reduce`.
+- **Token compliance**: Zero hardcoded colors — all from `var(--foreground)`, `var(--hairline)`, `var(--brand-indigo)`, `var(--text-muted)`, `var(--surface-muted)`.
+- **Version references**: Updated all "Next.js 14" references to **Next.js 16** (latest) in both card body copy and snippet content.
+- **No React setState in scroll callbacks**: All scroll-driven updates use direct DOM mutations (`ref.current.textContent`, `ref.current.style.width`).
+- **Lint**: Zero ESLint errors. Vite build passes clean.
+
+### Current Status
+TheProblem section is complete and pushed to GitHub. Landing page flow: Hero → TrustedEcosystem → TheProblem (all three wired in `Hero.jsx`).
+
+### Pending
+- Section 4 (Sticky Story) implementation per `Landing.md`
+- Section 5 (Interactive Product Preview)
+- Section 6 (Everything Zenix Generates) — file-fly-into-folder animation
+- Review TheProblem pin scroll pacing on real browser at various viewport heights
+
+---
+
 ## Python RAG Service Migration
 
 - **Foundation**: Set up `app/rag` with Qdrant vectorstore and Markdown chunker.
@@ -52,6 +83,14 @@
 - **LangGraph Graph Stubs**: Created `src/features/ai/graphs/` with placeholder files for `pm_wizard.graph.js`, `context_engine.graph.js`, and `playground.graph.js`. Ready for full implementation after `@langchain/langgraph` installation.
 
 ## Completed
+
+- **The Problem Section (Aceternity Style)**:
+  - Built `TheProblem.jsx` following the user's `Landing.md` blueprint.
+  - Implemented a GSAP ScrollTrigger sequence that pins the viewport and creates a 3D physical stacking effect for the problem statement cards.
+  - Redesigned the cards to match the requested "Aceternity" dark hierarchy aesthetic: deep `bg-zinc-950/80` with backdrop blur, glowing drop shadows, and subtle top-highlight borders.
+  - Implemented a dynamic right-hand visualization panel that transforms from a "System Overload" state to a "Zenix Context Engine" state as the final card clicks into place.
+  - Integrated the section directly below the Trusted Ecosystem marquee.
+
 
 - **Landing Page Hero Rebuild (Interactive Mockup)**:
   - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
