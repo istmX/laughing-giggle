@@ -15,7 +15,8 @@ export const PROBLEMS = [
     desc: 'LLMs have no permanent memory. Start a new chat, and it has no idea what you built yesterday. Every session starts from scratch.',
     icon: BrainCircuit,
     keyword: 'LLMs',
-    tooltip: 'Large language models'
+    tooltipTitle: 'LLMs',
+    tooltipDesc: 'Large Language Models generate responses based on context but do not permanently remember previous conversations.'
   },
   {
     id: 'hallucinates',
@@ -24,7 +25,8 @@ export const PROBLEMS = [
     desc: 'The assistant confidently invents code dependencies, API parameters, or libraries that do not exist, causing compile errors.',
     icon: Sparkles,
     keyword: 'API parameters',
-    tooltip: 'Signature function arguments'
+    tooltipTitle: 'API Parameters',
+    tooltipDesc: 'Function signature arguments passed to backend endpoints that must align with actual compiler declarations.'
   },
   {
     id: 'repeats-work',
@@ -33,7 +35,8 @@ export const PROBLEMS = [
     desc: 'Suggests changes you already rejected or writes duplicate helper methods that go against your existing system design decisions.',
     icon: RefreshCw,
     keyword: 'system design decisions',
-    tooltip: 'Code architectural conventions'
+    tooltipTitle: 'System Design',
+    tooltipDesc: 'Architectural constraints, directory layouts, and module patterns that define how your codebase fits together.'
   },
   {
     id: 'wastes-tokens',
@@ -42,7 +45,8 @@ export const PROBLEMS = [
     desc: 'Repeatedly sends huge directories of code to build simple items, blowing past your rate limits and budget.',
     icon: Coins,
     keyword: 'rate limits',
-    tooltip: 'API request caps'
+    tooltipTitle: 'Rate Limits',
+    tooltipDesc: 'API request caps enforced by LLM providers to throttle token consumption volume per minute or project budget.'
   },
   {
     id: 'no-shared-context',
@@ -51,7 +55,8 @@ export const PROBLEMS = [
     desc: 'Collaborating agents do not share a single source of truth. One agent refactors while the other builds on outdated specs.',
     icon: Boxes,
     keyword: 'source of truth',
-    tooltip: 'Unified layout blueprints'
+    tooltipTitle: 'Source of Truth',
+    tooltipDesc: 'A unified workspace specification document ensuring all collaborating agents build on synchronized blueprints.'
   },
   {
     id: 'prompt-fatigue',
@@ -60,6 +65,7 @@ export const PROBLEMS = [
     desc: 'Writing long, detailed explanations of your architectural rules over and over in every chat session to get correct outputs.',
     icon: MessageSquareOff,
     keyword: 'architectural rules',
-    tooltip: 'Code standards docs'
+    tooltipTitle: 'Architectural Rules',
+    tooltipDesc: 'Coding guidelines, design tokens, and structural conventions stored inside AGENTS.md to instruct code generation.'
   }
 ];

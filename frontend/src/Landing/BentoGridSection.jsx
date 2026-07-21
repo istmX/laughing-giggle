@@ -16,9 +16,14 @@ const ITEMS = [
   },
   {
     area: "md:[grid-area:2/1/3/7] xl:[grid-area:1/5/3/8]",
-    icon: <Play className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />,
+    icon: <Play className="h-4 w-4 text-zinc-950 dark:text-zinc-50" />,
     title: "Interactive AI Playground",
-    description: "Built-in sandbox to iterate on UI layouts, tweak design tokens, and preview HTML changes instantly with real-time feedback.",
+    description: (
+      <>
+        Built-in sandbox to iterate <br />
+        on UI layouts, tweak design tokens, and preview the live UI in front of you while editing with AI.
+      </>
+    ),
   },
   {
     area: "md:[grid-area:2/7/3/13] xl:[grid-area:1/8/2/13]",
@@ -56,7 +61,7 @@ export default function BentoGridSection() {
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-12 md:grid-rows-3 lg:gap-6 xl:grid-rows-2">
           {ITEMS.map((item, index) => (
             <li key={index} className={`min-h-[12rem] md:min-h-[14rem] h-auto list-none ${item.area}`}>
-              <div className="relative h-full rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-2 md:rounded-3xl md:p-3 bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="relative min-h-full h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-2 md:rounded-3xl md:p-3 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col">
                 <GlowingEffect
                   spread={40}
                   glow={true}
@@ -64,7 +69,7 @@ export default function BentoGridSection() {
                   proximity={64}
                   inactiveZone={0.01}
                 />
-                <div className="relative flex h-full flex-col justify-between gap-6 rounded-xl bg-white dark:bg-zinc-900 p-6 md:p-8 border border-zinc-100/50 dark:border-zinc-800/60">
+                <div className="relative flex flex-1 flex-col justify-between gap-6 rounded-xl bg-white dark:bg-zinc-900 p-6 md:p-8 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full">
                   <div className="relative flex flex-1 flex-col justify-between gap-4">
                     <div className="w-fit rounded-lg border border-zinc-200 dark:border-zinc-805 bg-zinc-50 dark:bg-zinc-800 p-2 text-zinc-700 dark:text-zinc-300">
                       {item.icon}
@@ -73,7 +78,7 @@ export default function BentoGridSection() {
                       <h3 className="font-sans text-lg sm:text-xl font-semibold text-zinc-900 dark:text-white leading-tight">
                         {item.title}
                       </h3>
-                      <p className="font-sans text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-light">
+                      <p className="font-sans text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed font-light pr-4 md:pr-8">
                         {item.description}
                       </p>
                     </div>
