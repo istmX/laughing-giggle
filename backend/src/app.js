@@ -13,7 +13,11 @@ import errorMiddleware from './middleware/error.middleware.js';
 
 const app = express();
 
-app.set('trust proxy', process.env.TRUST_PROXY || 'loopback');
+let trustProxy = process.env.TRUST_PROXY || 'loopback';
+if (trustProxy === 'trusted' || trustProxy === 'true' || trustProxy === '1') {
+  trustProxy = 1;
+}
+app.set('trust proxy', trustProxy);
 
 app.use(corsMiddleware);
 app.options(/.*/, corsMiddleware);

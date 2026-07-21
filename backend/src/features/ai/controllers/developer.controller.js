@@ -19,11 +19,9 @@ export const processDeveloperChat = async (req, res, next) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
-        projectId, 
-        userId, 
-        userMessage: prompt, 
-        history: history || [], 
-        refinedSpec: project.wizard_state?.refinedSpec || "" 
+        user_message: prompt, 
+        chat_history: history || [], 
+        refined_spec: project.wizard_state?.refinedSpec || "" 
       })
     });
     

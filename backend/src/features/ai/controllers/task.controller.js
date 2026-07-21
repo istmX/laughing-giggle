@@ -1,5 +1,6 @@
 import AIGeneration from "../ai.model.js";
 import Idea from "../../ideas/idea.model.js";
+import Project from "../../projects/project.model.js";
 import { validateTaskMission } from "../validators/task.validator.js";
 
 export const generateTasks = async (req, res, next) => {
@@ -18,10 +19,13 @@ export const generateTasks = async (req, res, next) => {
     });
 
     try {
+      const project = await Project.findOne({ idea: ideaId });
+      const refinedSpec = project && project.wizard_state ? project.wizard_state.refinedSpec : "";
+      
       const resp = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: ideaDoc.prompt, ideaId, userId })
+        body: JSON.stringify({ project_id: project ? project._id.toString() : ideaId, refined_spec: refinedSpec, rag_context: "" })
       });
       
       if (!resp.ok) throw new Error("Failed to fetch from python service");
