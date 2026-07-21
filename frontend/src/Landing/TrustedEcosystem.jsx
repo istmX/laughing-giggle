@@ -10,7 +10,7 @@ const ECOSYSTEM_ITEMS = [
 
 export default function TrustedEcosystem() {
   return (
-    <section className="w-full bg-white dark:bg-zinc-950 py-24 overflow-hidden border-b border-zinc-100 dark:border-zinc-900 flex flex-col items-center transition-colors duration-300">
+    <section className="w-full bg-white dark:bg-zinc-950 py-12 md:py-24 overflow-hidden border-b border-zinc-100 dark:border-zinc-900 flex flex-col items-center transition-colors duration-300">
       
       {/* Section Heading */}
       <div className="text-center mb-12 px-6">

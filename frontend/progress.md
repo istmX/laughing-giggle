@@ -1,9 +1,17 @@
-## Hero Typographic Poster Layout (Latest)
+## Problems Section Redesign & Interactive Typography (Latest)
 
-### Layout Refactor
-- **Removed Workspace Mockup**: Completely deleted the `<ContainerScroll>` frame wrapper and `<InteractiveMiniDashboard />` component from [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx).
-- **Giant Bold Heading**: Upgraded the main headline to a massive display header layout (`text-[56px] sm:text-[72px] md:text-[96px] lg:text-[110px] leading-[0.9] tracking-[-0.04em] font-black uppercase`) centered vertically inside the viewport.
-- **Animation Sync**: Maintained the high-fidelity GSAP character SplitType 3D drop animation on the hero display heading, rendering smooth letters falling into place on scroll and load.
+### Problems Section Redesign
+- **Redesigned TheProblem.jsx**: Completely replaced the old developer terminal slideshow layout with a visually dense, multi-column masonry grid matching the premium templates section.
+- **ProblemCard Architecture**: Created [ProblemCard.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemCard.jsx) featuring spring-driven magnetic hover tracking (`useSpring`), radial hover gradient glow, dynamic 3D icon animations, and rounded (`rounded-[28px]`) elevated surfaces.
+- **Interactive Keywords**: Built [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) inline popovers that dynamically mount glassmorphism contextual knowledge panels (fade + scale, pointer arrow, soft shadow) when hovering highlight words (`AI Forgets`, `Hallucinates`, `Context`, `Tokens`, `AGENTS.md`, `Context Engineering`).
+- **Scrub Pin Storytelling**: Maintained desktop pinning scroll animations. As the user scrubs down, Card Stage 2 and Stage 3 cards fade and translate up into the masonry layout, building the problem grid step-by-step.
+- **Code Standards Compliant**: Factored data and components into separate files ([ProblemData.js](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemData.js), [ProblemCard.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemCard.jsx), [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx)) to keep all files strictly under 150 lines.
+
+### Hero Interactive Typography
+- **GSAP Hover Wave**: Implemented GSAP character mouseenter/mouseleave triggers in [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) to animate the tall display heading characters. Moving the cursor over the text lifts the characters (`y: -8`) and adds a glowing text shadow that adapts dynamically to the active theme.
+- **Text Selection Prevention**: Added the `select-none` class to the headline to prevent highlight interference on hover.
+
+## Hero Typographic Poster Layout (Previous)
 
 ## Interactive Mini Dashboard & Bento Grid Refinements (Previous)
 

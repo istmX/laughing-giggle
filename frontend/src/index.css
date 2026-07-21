@@ -540,6 +540,19 @@
     text-wrap: balance;
   }
 
+  .landing-display-tall {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(50px, 14vw, 195px) !important;
+    line-height: 0.82;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .split-headline .char {
+    display: inline-block;
+    cursor: default;
+  }
+
   .landing-section h2,
   .landing-heading {
     max-width: 760px;

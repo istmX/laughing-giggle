@@ -65,6 +65,39 @@ export default function Hero() {
       delay: 0.6,
     });
 
+    // 4.5. Add premium interactive GSAP hover character effects
+    if (headline.chars) {
+      headline.chars.forEach((char) => {
+        char.addEventListener('mouseenter', () => {
+          const isDark = document.documentElement.classList.contains('dark');
+          gsap.to(char, {
+            y: -8,
+            scale: 1.12,
+            rotateY: 12,
+            color: isDark ? '#ffffff' : '#000000',
+            textShadow: isDark 
+              ? '0 0 24px rgba(255, 255, 255, 0.45)' 
+              : '0 8px 16px rgba(0, 0, 0, 0.12)',
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+        });
+        char.addEventListener('mouseleave', () => {
+          gsap.to(char, {
+            y: 0,
+            scale: 1,
+            rotateY: 0,
+            color: '',
+            textShadow: 'none',
+            duration: 0.4,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          });
+        });
+      });
+    }
+
     // 5. Animate Nav Bar dropping in
     gsap.from('.hero-nav', {
       y: -100,
@@ -101,8 +134,7 @@ export default function Hero() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-screen bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 overflow-hidden flex flex-col transition-colors duration-300">
-      {/* Navigation divided into 3 floating parts */}
+    <div ref={containerRef} className="relative w-full min-h-fit md:min-h-screen bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 overflow-hidden flex flex-col transition-colors duration-300">
       {/* Navigation */}
       <nav className="hero-nav fixed top-6 inset-x-0 mx-auto max-w-5xl h-14 flex items-center justify-between px-4 sm:px-6 z-50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-zinc-200/60 dark:border-zinc-800/60 rounded-full shadow-[0_8px_32px_-8px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] transition-all">
         
@@ -194,21 +226,21 @@ export default function Hero() {
       </div>
 
       {/* Hero Content */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-8 z-10 min-h-[85vh] max-w-7xl mx-auto w-full">
-        <div className="flex-1 flex flex-col items-center justify-center">
+      <main className="flex-1 flex flex-col items-center justify-start text-center px-4 md:px-8 z-10 pt-28 md:pt-36 pb-12 md:pb-20 max-w-7xl mx-auto w-full">
+        <div className="w-full flex flex-col items-center">
           {/* Headline */}
-          <h1 className="split-headline font-display max-w-7xl text-zinc-950 dark:text-white mx-auto font-black uppercase text-[52px] sm:text-[80px] md:text-[110px] lg:text-[145px] xl:text-[175px] leading-[0.8] tracking-[-0.045em] text-wrap:balance" style={{ perspective: "1000px" }}>
+          <h1 className="split-headline landing-display-tall max-w-7xl text-zinc-950 dark:text-white mx-auto font-black uppercase select-none" style={{ perspective: "1000px" }}>
             Stop shipping <br className="hidden sm:inline" /> AI slop.
           </h1>
           
           {/* Subheadline */}
-          <p className="split-subhead mt-10 text-lg md:text-xl lg:text-2xl text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed font-light tracking-[-0.015em] mx-auto">
+          <p className="split-subhead mt-8 sm:mt-10 text-lg md:text-xl lg:text-2xl text-zinc-500 dark:text-zinc-400 max-w-3xl leading-relaxed font-light tracking-[-0.015em] mx-auto">
             Build software with context, architecture and design systems not prompts.
           </p>
         </div>
 
         {/* CTAs */}
-        <div className="hero-ctas mt-16 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center pb-12">
+        <div className="hero-ctas mt-12 sm:mt-16 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
           <RollingButton 
             href="/signup" 
             text="Start Building" 
