@@ -329,25 +329,25 @@ export default function Hero() {
       {/* Decorative premium background SVGs */}
       <div className="absolute inset-0 pointer-events-none select-none z-0 overflow-hidden">
         {/* Top Left: 4-pointed Minimalist Star */}
-        <svg className="absolute left-[12%] top-[22%] w-6 h-6 text-zinc-400 dark:text-zinc-650 opacity-25 dark:opacity-10 animate-pulse duration-[3000ms]" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="absolute left-[8%] top-[120px] w-6 h-6 text-zinc-400 dark:text-zinc-650 opacity-35 dark:opacity-20 animate-pulse duration-[3000ms]" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" />
         </svg>
 
         {/* Top Right: Concentric Vector Rings */}
-        <svg className="absolute right-[14%] top-[18%] w-24 h-24 text-zinc-350 dark:text-zinc-700 opacity-20 dark:opacity-8 animate-[spin_40s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.8">
+        <svg className="absolute right-[8%] top-[90px] w-24 h-24 text-zinc-350 dark:text-zinc-700 opacity-30 dark:opacity-15 animate-[spin_40s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.8">
           <circle cx="50" cy="50" r="45" strokeDasharray="3,6" />
           <circle cx="50" cy="50" r="30" />
           <circle cx="50" cy="50" r="15" strokeDasharray="2,2" />
         </svg>
 
         {/* Center-Left: Coordinate Crosshairs */}
-        <svg className="absolute left-[6%] top-[45%] w-8 h-8 text-zinc-400 dark:text-zinc-650 opacity-25 dark:opacity-12" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
+        <svg className="absolute left-[4%] top-[45%] w-8 h-8 text-zinc-400 dark:text-zinc-650 opacity-35 dark:opacity-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
           <path d="M20 0v40M0 20h40" strokeDasharray="2,2" />
           <circle cx="20" cy="20" r="6" strokeWidth="0.8" />
         </svg>
 
         {/* Center-Right: 5x5 Dot Matrix Grid */}
-        <svg className="absolute right-[8%] top-[42%] w-20 h-20 text-zinc-350 dark:text-zinc-750 opacity-15 dark:opacity-6" viewBox="0 0 100 100" fill="currentColor">
+        <svg className="absolute right-[5%] top-[40%] w-20 h-20 text-zinc-350 dark:text-zinc-750 opacity-25 dark:opacity-12" viewBox="0 0 100 100" fill="currentColor">
           <circle cx="10" cy="10" r="1.5" />
           <circle cx="30" cy="10" r="1.5" />
           <circle cx="50" cy="10" r="1.5" />
@@ -376,19 +376,19 @@ export default function Hero() {
         </svg>
 
         {/* Bottom Left: Angle corner bracket */}
-        <svg className="absolute left-[16%] bottom-[18%] w-10 h-10 text-zinc-400 dark:text-zinc-650 opacity-30 dark:opacity-10" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
+        <svg className="absolute left-[12%] bottom-[120px] w-10 h-10 text-zinc-400 dark:text-zinc-650 opacity-40 dark:opacity-20" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1">
           <path d="M12 4H4v8M28 4h8v8M12 36H4v-8M28 36h8v-8" strokeLinecap="round" />
         </svg>
 
         {/* Bottom Right: Sleek 4-pointed Minimalist Star */}
-        <svg className="absolute right-[18%] bottom-[20%] w-5 h-5 text-zinc-400 dark:text-zinc-605 opacity-25 dark:opacity-10 animate-pulse duration-[4000ms]" viewBox="0 0 24 24" fill="currentColor">
+        <svg className="absolute right-[12%] bottom-[100px] w-5 h-5 text-zinc-400 dark:text-zinc-605 opacity-35 dark:opacity-20 animate-pulse duration-[4000ms]" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 0L14.6 9.4L24 12L14.6 14.6L12 24L9.4 14.6L0 12L9.4 9.4Z" />
         </svg>
       </div>
 
       {/* Ghost Typography Background */}
       <div className="hero-ghost-word absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
-        <span className="font-sans font-black text-[clamp(140px,28vw,440px)] uppercase tracking-[-0.04em] text-zinc-950 dark:text-white opacity-[0.025] dark:opacity-[0.015] leading-none select-none">
+        <span className="font-sans font-black text-[clamp(140px,28vw,440px)] uppercase tracking-[-0.04em] text-zinc-950 dark:text-white opacity-[0.055] dark:opacity-[0.035] leading-none select-none">
           CONTEXT
         </span>
       </div>
@@ -566,7 +566,7 @@ export default function Hero() {
         <div className="hero-ctas mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
           <RollingButton 
             href="/signup" 
-            className="bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-850 dark:hover:bg-zinc-100 hover:-translate-y-0.5 hover:scale-[1.015] shadow-md hover:shadow-xl dark:shadow-none dark:hover:shadow-[0_0_16px_rgba(255,255,255,0.15)] border border-transparent hover:border-zinc-800 dark:hover:border-zinc-200 transition-all duration-300 ease-out px-8 py-3 text-sm md:text-base font-semibold flex items-center gap-1.5 group/hero-primary"
+            className="bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-855 dark:hover:bg-zinc-100 hover:-translate-y-0.5 hover:scale-[1.015] shadow-md hover:shadow-xl dark:shadow-none dark:hover:shadow-[0_0_16px_rgba(255,255,255,0.15)] border border-transparent hover:border-zinc-800 dark:hover:border-zinc-200 transition-all duration-300 ease-out px-8 py-3 text-sm md:text-base font-semibold flex items-center gap-1.5 group/hero-primary"
           >
             <span className="flex items-center gap-1.5">
               <span>Start Building</span>
