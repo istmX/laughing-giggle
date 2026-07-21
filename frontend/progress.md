@@ -1,4 +1,11 @@
-## Theme Toggle & Reusable Rolling Buttons (Latest)
+## Hero Typographic Poster Layout (Latest)
+
+### Layout Refactor
+- **Removed Workspace Mockup**: Completely deleted the `<ContainerScroll>` frame wrapper and `<InteractiveMiniDashboard />` component from [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx).
+- **Giant Bold Heading**: Upgraded the main headline to a massive display header layout (`text-[56px] sm:text-[72px] md:text-[96px] lg:text-[110px] leading-[0.9] tracking-[-0.04em] font-black uppercase`) centered vertically inside the viewport.
+- **Animation Sync**: Maintained the high-fidelity GSAP character SplitType 3D drop animation on the hero display heading, rendering smooth letters falling into place on scroll and load.
+
+## Interactive Mini Dashboard & Bento Grid Refinements (Previous)
 
 ### Theme Toggle & Responsive Dark Mode
 - **Refactored Theme Provider**: Modified [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx) so that the landing page `/` is not forced to `light` mode and can dynamically toggle between `light` and `dark` styles.

@@ -29,8 +29,8 @@ const ITEMS = [
   {
     area: "md:[grid-area:3/1/4/13] xl:[grid-area:2/8/3/13]",
     icon: <Terminal className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />,
-    title: "Multi-Theme Workspace",
-    description: "Custom developer dashboard with multiple themes (Light, Dark, Midnight, Emerald) and synchronous real-time workspace updates.",
+    title: "Task & Mission Control",
+    description: "Converts feature requests into atomic, step-by-step development tasks and implementation missions for structured execution.",
   },
 ];
 
@@ -55,7 +55,7 @@ export default function BentoGridSection() {
         {/* Bento Grid */}
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-12 md:grid-rows-3 lg:gap-6 xl:grid-rows-2">
           {ITEMS.map((item, index) => (
-            <li key={index} className={`min-h-[14rem] list-none ${item.area}`}>
+            <li key={index} className={`min-h-[12rem] md:min-h-[14rem] h-auto list-none ${item.area}`}>
               <div className="relative h-full rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-2 md:rounded-3xl md:p-3 bg-zinc-50/50 dark:bg-zinc-900/50">
                 <GlowingEffect
                   spread={40}
@@ -64,9 +64,9 @@ export default function BentoGridSection() {
                   proximity={64}
                   inactiveZone={0.01}
                 />
-                <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl bg-white dark:bg-zinc-900 p-6 md:p-8 border border-zinc-100/50 dark:border-zinc-800/60">
+                <div className="relative flex h-full flex-col justify-between gap-6 rounded-xl bg-white dark:bg-zinc-900 p-6 md:p-8 border border-zinc-100/50 dark:border-zinc-800/60">
                   <div className="relative flex flex-1 flex-col justify-between gap-4">
-                    <div className="w-fit rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-2 text-zinc-700 dark:text-zinc-300">
+                    <div className="w-fit rounded-lg border border-zinc-200 dark:border-zinc-805 bg-zinc-50 dark:bg-zinc-800 p-2 text-zinc-700 dark:text-zinc-300">
                       {item.icon}
                     </div>
                     <div className="space-y-2">
