@@ -18,17 +18,22 @@ const App = () => {
     const lenis = new Lenis({
       lerp: 0.085,
       smoothWheel: true,
-      syncTouch: false,
+      syncTouch: true,
+      touchMultiplier: 1.5,
       wheelMultiplier: 0.82,
     })
+    window.lenis = lenis
     const raf = (time) => lenis.raf(time * 1000)
 
     lenis.on('scroll', ScrollTrigger.update)
     gsap.ticker.add(raf)
     gsap.ticker.lagSmoothing(0)
+    // Lenis drives ScrollTrigger via the lenis.on('scroll') binding above.
+    // normalizeScroll(true) is not needed and fights Lenis pin+scrub sections.
 
     return () => {
       gsap.ticker.remove(raf)
+      window.lenis = null
       lenis.destroy()
     }
   }, [])

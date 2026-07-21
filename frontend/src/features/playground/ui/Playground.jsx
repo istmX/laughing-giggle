@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, GripVertical, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Maximize2, Download, RefreshCw, Layout, Code2, Sparkles, Wand2, Paintbrush } from 'lucide-react'
+import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Download, Layout, Code2, Sparkles, Wand2, Paintbrush } from 'lucide-react'
 import { usePlayground } from '../hooks/usePlayground'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import { Panel, Group, Separator } from 'react-resizable-panels'
 import { LiveSandbox } from './LiveSandbox'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -29,6 +29,7 @@ export const Playground = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [previewMode, setPreviewMode] = useState('desktop') // desktop, mobile
   
+  const chatScrollRef = useRef(null)
   const chatEndRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -43,7 +44,9 @@ export const Playground = () => {
   }, [activeSessionId, loadSession, activeSession])
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const viewport = chatScrollRef.current
+    if (!viewport) return
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' })
   }, [activeSession?.chatHistory, isSendingMessage])
 
   // Auto-resize textarea
@@ -77,7 +80,7 @@ export const Playground = () => {
   )
 
   return (
-    <div className="fixed inset-0 flex bg-canvas overflow-hidden text-ink font-sans selection:bg-brand-indigo/20">
+    <div data-lenis-prevent className="fixed inset-0 flex bg-canvas overflow-hidden text-ink font-sans selection:bg-brand-indigo/20">
       
       {/* Sidebar Toggle (Floating) */}
       {!isSidebarOpen && (
@@ -200,7 +203,8 @@ export const Playground = () => {
         {/* Global Toolbar */}
         <div className="h-14 border-b border-hairline flex items-center justify-between px-4 shrink-0 bg-canvas z-20">
           <div className="flex items-center gap-2">
-             {!activeSessionId && <span className="text-[14px] font-[500] text-ink">Welcome</span>}
+             {!activeSessionId && !activeSession?.isDraft && <span className="text-[14px] font-[500] text-ink">Welcome</span>}
+             {activeSession?.isDraft && <span className="text-[14px] font-[500] text-ink">New chat</span>}
              {activeSessionId && (
                <>
                  <span className="text-[14px] font-[500] text-ink">Active Session</span>
@@ -210,7 +214,7 @@ export const Playground = () => {
              )}
           </div>
           
-          {activeSessionId && (
+          {(activeSessionId || activeSession?.isDraft) && (
             <div className="flex items-center gap-1.5 bg-surface-soft p-1 rounded-md border border-hairline">
               <button 
                 onClick={() => setPreviewMode('desktop')}
@@ -237,11 +241,11 @@ export const Playground = () => {
           )}
         </div>
 
-        {activeSessionId ? (
-          <PanelGroup direction="horizontal" className="flex-1 w-full min-h-0">
+        {activeSessionId || activeSession?.isDraft ? (
+          <Group orientation="horizontal" className="flex-1 w-full min-w-0 min-h-0">
             {/* Conversation Panel */}
-            <Panel defaultSize={40} minSize={25} className="flex flex-col min-w-0 min-h-0 bg-canvas relative z-10">
-              <div className="flex-1 min-h-0 overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar">
+            <Panel defaultSize={40} minSize={25} className="flex min-w-0 min-h-0 flex-col bg-canvas relative z-10">
+              <div ref={chatScrollRef} data-lenis-prevent className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain px-6 py-6 custom-scrollbar">
                 {isLoadingSession ? (
                   <div className="flex flex-col items-center justify-center h-full gap-3 opacity-50">
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -270,7 +274,7 @@ export const Playground = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6 pb-4">
+                  <div className="w-full min-w-0 space-y-6 pb-4">
                     <AnimatePresence initial={false}>
                       {activeSession?.chatHistory?.map((msg, i) => (
                         <motion.div 
@@ -279,7 +283,7 @@ export const Playground = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.2, ease: "easeOut" }}
                           className={cn(
-                            "group flex flex-col max-w-[90%]",
+                            "group flex min-w-0 max-w-[min(90%,65ch)] flex-col",
                             msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
                           )}
                         >
@@ -287,16 +291,16 @@ export const Playground = () => {
                             {msg.role === 'user' ? 'You' : 'Zenix AI'}
                           </span>
                           <div className={cn(
-                            "rounded-2xl px-5 py-3.5 text-[14px] leading-[1.6]",
+                            "max-w-full min-w-0 break-words rounded-2xl px-5 py-3.5 text-[14px] leading-[1.6] [overflow-wrap:anywhere]",
                             msg.role === 'user' 
-                              ? "bg-ink text-canvas rounded-tr-sm shadow-sm" 
-                              : "bg-surface-soft text-ink rounded-tl-sm border border-hairline shadow-sm prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-canvas prose-pre:border prose-pre:border-hairline"
+                              ? "w-fit bg-ink text-canvas rounded-tr-sm shadow-sm" 
+                              : "playground-ai-response w-full bg-surface-soft text-ink rounded-tl-sm border border-hairline shadow-sm"
                           )}>
                             <ReactMarkdown 
                               remarkPlugins={[remarkGfm]}
                               components={{
                                 code(props) {
-                                  const {children, className, node, ...rest} = props
+                                  const {children, className, ...rest} = props
                                   const text = String(children).trim();
                                   const isHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(text);
                                   
@@ -361,9 +365,9 @@ export const Playground = () => {
               </div>
             </Panel>
 
-            <PanelResizeHandle className="w-[1px] bg-hairline hover:bg-brand-indigo/50 hover:w-1 active:bg-brand-indigo transition-all flex items-center justify-center cursor-col-resize z-20 group">
-               <div className="opacity-0 group-hover:opacity-100 h-8 w-1 bg-brand-indigo rounded-full transition-opacity absolute" />
-            </PanelResizeHandle>
+            <Separator className="w-[1px] bg-hairline hover:bg-brand-indigo/50 hover:w-1 active:bg-brand-indigo transition-all flex items-center justify-center cursor-col-resize z-20 group">
+                <div className="opacity-0 group-hover:opacity-100 h-8 w-1 bg-brand-indigo rounded-full transition-opacity absolute" />
+             </Separator>
 
             {/* Live Preview Panel */}
             <Panel defaultSize={60} minSize={30} className="bg-surface relative min-w-0 min-h-0 flex flex-col z-10">
@@ -386,7 +390,7 @@ export const Playground = () => {
 
               </div>
             </Panel>
-          </PanelGroup>
+           </Group>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-canvas">
             <div className="h-16 w-16 bg-surface border border-hairline rounded-2xl flex items-center justify-center mb-6 shadow-sm">

@@ -98,4 +98,11 @@ const logoutUser = async () => {
   })
 }
 
-export { authFetch, getBaseUrl, getGoogleClientId, googleLogin, loginUser, logoutUser, registerUser }
+const requestPasswordReset = async ({ email }) => {
+  return authFetch('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}
+
+export { authFetch, getBaseUrl, getGoogleClientId, googleLogin, loginUser, logoutUser, registerUser, requestPasswordReset }

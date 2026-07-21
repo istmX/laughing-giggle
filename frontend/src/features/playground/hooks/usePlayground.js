@@ -19,7 +19,7 @@ export const usePlayground = () => {
       
       // Auto-select the first session if none is active
       const currentState = usePlaygroundStore.getState()
-      if (!currentState.activeSessionId && Array.isArray(fetchedSessions) && fetchedSessions.length > 0) {
+      if (!currentState.activeSessionId && !currentState.isDraft && Array.isArray(fetchedSessions) && fetchedSessions.length > 0) {
         currentState.setActiveSessionId(fetchedSessions[0]._id)
       }
     } catch (error) {
@@ -37,8 +37,7 @@ export const usePlayground = () => {
     try {
       const res = await api.getSession(token, sessionId)
       const session = res?.data?.session || res?.session || res?.data || res
-      state.setActiveSession(session)
-      state.setActiveSessionId(sessionId)
+      state.activateSession(session)
     } catch (error) {
       console.error(error)
       toast.error('Failed to load session')
@@ -47,21 +46,9 @@ export const usePlayground = () => {
     }
   }, [token])
 
-  const createNewSession = useCallback(async (title = 'New Session') => {
-    if (!token) return
-    const state = usePlaygroundStore.getState()
-    try {
-      const res = await api.createSession(token, { title })
-      const newSession = res?.data?.session || res?.session || res?.data || res
-      state.setSessions([newSession, ...state.sessions])
-      state.setActiveSessionId(newSession._id)
-      state.setActiveSession(newSession)
-      return newSession
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to create session')
-    }
-  }, [token])
+  const createNewSession = useCallback(() => {
+    usePlaygroundStore.getState().startDraft()
+  }, [])
 
   const deleteSession = useCallback(async (sessionId) => {
     if (!token) return
@@ -78,18 +65,39 @@ export const usePlayground = () => {
 
   const sendMessage = useCallback(async (content) => {
     const state = usePlaygroundStore.getState()
-    if (!token || !state.activeSessionId) return
+    const message = typeof content === 'string' ? content.trim() : ''
+    if (!token || !message || state.isSendingMessage) return
+
+    let sessionId = state.activeSessionId
+
+    if (!sessionId) {
+      try {
+        state.setIsSendingMessage(true)
+        const createRes = await api.createSession(token, { title: message.slice(0, 48) })
+        const newSession = createRes?.data?.session || createRes?.session || createRes?.data || createRes
+        if (!newSession?._id) throw new Error('Session creation returned no id')
+
+        sessionId = newSession._id
+        const current = usePlaygroundStore.getState()
+        current.setSessions([newSession, ...current.sessions])
+        current.activateSession({ ...newSession, chatHistory: newSession.chatHistory || [] })
+      } catch (error) {
+        console.error(error)
+        usePlaygroundStore.getState().setIsSendingMessage(false)
+        toast.error('Failed to create session')
+        return
+      }
+    }
     
-    const userMsg = { role: 'user', content }
-    state.addMessageToActive(userMsg)
-    state.setIsSendingMessage(true)
+    const userMsg = { role: 'user', content: message }
+    usePlaygroundStore.getState().addMessageToActive(userMsg)
 
     try {
-      await api.addMessage(token, state.activeSessionId, userMsg)
+      await api.addMessage(token, sessionId, userMsg)
       // Call loadSession directly inside without using the dependent closure
-      const res = await api.getSession(token, state.activeSessionId)
+      const res = await api.getSession(token, sessionId)
       const session = res?.data?.session || res?.session || res?.data || res
-      usePlaygroundStore.getState().setActiveSession(session)
+      usePlaygroundStore.getState().activateSession(session)
     } catch (error) {
       console.error(error)
       toast.error('Failed to send message')

@@ -2,12 +2,17 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
-export function Modal({ isOpen, onClose, title, children }) {
+export function Modal({ isOpen, onClose, title, children, accent = 'bg-block-lilac' }) {
   const modalRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     
     // Simple focus trap
@@ -39,22 +44,28 @@ export function Modal({ isOpen, onClose, title, children }) {
     if (isOpen) {
       window.addEventListener('keydown', handleEscape)
       window.addEventListener('keydown', handleTab)
+      const previousOverflow = document.body.style.overflow
       document.body.style.overflow = 'hidden'
       
       // Auto-focus first focusable element on open
-      setTimeout(() => {
+      const focusTimer = setTimeout(() => {
         if (modalRef.current) {
           const focusable = modalRef.current.querySelector('input, button')
           if (focusable) focusable.focus()
         }
       }, 50)
+      return () => {
+        window.removeEventListener('keydown', handleEscape)
+        window.removeEventListener('keydown', handleTab)
+        window.clearTimeout(focusTimer)
+        document.body.style.overflow = previousOverflow
+      }
     }
     return () => {
       window.removeEventListener('keydown', handleEscape)
       window.removeEventListener('keydown', handleTab)
-      document.body.style.overflow = 'unset'
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   return (
     <AnimatePresence>
@@ -79,14 +90,15 @@ export function Modal({ isOpen, onClose, title, children }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="w-full max-w-2xl rounded-2xl border border-hairline bg-surface-elevated shadow-xl pointer-events-auto flex flex-col mx-4"
+              className="pointer-events-auto mx-4 flex w-[calc(100vw-2rem)] max-w-[32rem] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-surface-elevated shadow-xl"
             >
-              <div className="flex items-center justify-between border-b border-hairline/50 px-6 py-4">
-                <h2 id="modal-title" className="text-lg font-semibold text-ink">{title}</h2>
+              <div className={`${accent} flex items-center justify-between border-b border-ink/10 px-6 py-5`}>
+                <h2 id="modal-title" className="text-[20px] font-[var(--font-weight-540)] tracking-[-0.03em] text-ink">{title}</h2>
                 <button
+                  type="button"
                   onClick={onClose}
                   aria-label="Close dialog"
-                  className="rounded-md p-2 text-ink-muted hover:bg-surface-soft hover:text-ink transition-colors"
+                  className="flex size-10 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-white/50 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/25"
                 >
                   <X className="h-5 w-5" />
                 </button>

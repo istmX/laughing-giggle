@@ -4,6 +4,7 @@ import Home from '@/Pages/Home'
 import Dashboard from '@/Pages/Dashboard'
 import LoginPage from '@/Pages/Login'
 import SignupPage from '@/Pages/Signup'
+import ForgotPasswordPage from '@/Pages/ForgotPassword'
 import ProfilePage from '@/Pages/ProfilePage'
 import PublicProfilePage from '@/Pages/PublicProfilePage'
 import PreferencesPage from '@/Pages/Preferences'
@@ -11,6 +12,7 @@ import NotFound from '@/Pages/NotFound'
 import Docs from '@/Pages/Docs'
 import About from '@/Pages/About'
 import Sponsor from '@/Pages/Sponsor'
+import TemplateDetailPage from '@/Pages/TemplateDetailPage'
 import { Overview } from '@/Dashboard/components/Overview'
 import { PlaygroundPage } from '@/Dashboard/components/PlaygroundPage'
 import { Playground } from '@/features/playground/ui/Playground'
@@ -51,6 +53,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/about" element={<About />} />
         <Route path="/sponsor" element={<Sponsor />} />
@@ -59,6 +62,7 @@ const AppRoutes = () => {
       {/* Publicly accessible profile, outside both Protected/Public layout wrappers if we want it completely standalone, 
           or we can put it in a separate layout. We'll leave it at the root level so it's fully accessible without redirecting logged-in users. */}
       <Route path="/u/:username" element={<PublicProfilePage />} />
+      <Route path="/templates/:templateId" element={<TemplateDetailPage />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,3 +1,322 @@
+## Hero Section Typography & Motion Polish (Latest)
+
+### Hero Redesign
+- **Editorial Typography Scale**: Restored the original [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) `landing-display-tall` (Bebas Neue) typography scale and uppercase layout for high-impact visual presence.
+- **Interactive Scramble Morph**: Implemented a pointer-cursor unified morph trigger. On hover, a character-scramble algorithm morphs both `STOP` to `START` and `SLOP.` to `CONTEXT.` in tandem over an accelerated 120ms duration (15ms ticks). Wired a synchronized back-and-front swap: when hovering either the foreground `SLOP.` keyword OR the giant background ghost `CONTEXT` word, they scramble and swap values simultaneously (`SLOP.` ↔ `CONTEXT.`). Styled the interactive word in bold Satoshi font (`font-sans font-bold`) and high-contrast theme color (`text-zinc-950 dark:text-white`) with a clean custom underline draw.
+- **Enormous Ghost Background & 6 Premium SVGs**: Embedded a large, subtle parallax backdrop word `CONTEXT` positioned behind the headline (opacity increased to 5.5% in Light Mode, 3.5% in Dark Mode) that drifts dynamically on vertical scroll. Added 6 slow-animating decorative background SVGs positioned relative to the screen bounds to frame the headline/CTAs, and increased their visibility/opacity to fit premium design standards.
+- **Kinetic Load Reveal**: Choreographed sequential fade and translate reveals for each line of the headline (`line-1`, `line-2`), followed by the ghost word, split subheadline words, and primary CTA buttons.
+- **Refined Spacing, Copy & Bounds**: Consolidated padding, narrowed the subheadline paragraph container to an optimal width of `580px`, tightened spacing, and corrected the punctuation in the subheadline copy (`Build software with context, architecture, and design systems—not prompts.`).
+- **Button Hover Elevation & Sliding Icons**: Upgraded primary and secondary CTA buttons with micro-lifts (`-translate-y-0.5`), soft shadow transitions, and sliding arrow SVGs inside both the Hero body and the Navbar.
+- **Premium Navigation Bar Redesign**: Redesigned the fixed navbar in [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) as a responsive floating glassmorphic container:
+  * **Theme Adaptive**: Styled in soft translucent white with a thin border/shadow in Light Mode, and rich charcoal (`#0B0B0D` tint), high blur, and a soft glow in Dark Mode.
+  * **Magnetic Pull & Spotlight**: Integrated cursor-tracking springs to subtly attract the entire navbar toward the cursor, alongside an absolute cursor spotlight overlay (white in Light Mode, gray in Dark Mode). Resolved rendering invisibility issues by initializing spring values with raw numbers directly in `useSpring` hooks, removing CSS `transition-all` transform conflicts, and replacing the load-reveal GSAP `y` translate trigger with an opacity fade to avoid transform parameter collisions.
+  * **Scroll Settle**: Wired scroll state tracking so the navbar smoothly shrinks in height, increases corner radius, and deepens blur/glow when scrolling down.
+  * **Sliding Active Indicator**: Created a shared spring-based gliding pill (`layoutId="nav-hover-indicator"`) that shifts and morphs width dynamically behind nav links on hover.
+  * **Sun/Moon Spring Toggle**: Built a custom theme toggle button featuring a spring-loaded sliding knob and rotating sun/moon transitions.
+  * **Logo Rotation**: Added a subtle `rotate-[8deg]` and scale animation to the logo icon on hover.
+- **Global Theme Transitions (Performance Optimized)**: Implemented a lifecycle-aware transitioning system to smoothly morph the theme change (Light ↔ Dark). Configured a `.theme-transitioning` helper class in [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css) targeting only layout/container elements (avoiding the universal `*` selector performance leak) and integrated it via `useLayoutEffect` in [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx). This synchronously injects the transition rules before the browser paints the new frame, completely eliminating visual lag, flashing, or stutters during theme switches. Optimized transition curves to `300ms` durations.
+
+### Verification
+- Checked that targeted ESLint passes on [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx).
+- Confirmed production build runs successfully.
+
+## Community Templates Redesign & Launch Empty State (Previous)
+
+### Redesigned Community Templates Section
+- **Premium Launch State**: Replaced the fake populated grid of templates in [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx) with a high-fidelity "Template Coming Soon" empty state card stack.
+- **Editorial Layout & Proportions**: Balanced the left column (eyebrow, "Community Beta" badge, "Stop starting from scratch." headline, active filters) with a relative-positioned preview column containing the featured card and two blurred background skeletons.
+- **Dynamic Content & Future Reusability**: Refactored the component to receive `initialTemplatesData` as a prop. If populated, it dynamically renders a grid of live template cards; if empty, it falls back to the premium coming soon placeholder.
+- **Interactive Bottom Chips**: Made the context chips (e.g. `✓ Project Architecture`, `✓ AGENTS.md`) hover-interactive with smooth micro-lifts and custom CSS-driven absolute tooltips explaining file contents.
+- **Micro-Interactions**: Integrated subtle GSAP entrance animations, hover card translate/lifts, animated bounce indicator for the Coming Soon status, and pulse animations for the background skeleton loaders.
+
+### Verification
+- Checked that targeted ESLint passes on [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx).
+- Confirmed production build runs successfully.
+
+## Editorial Typographic Problems Section & Interactive Typography (Previous)
+
+### Bento Grid Overflow Resolution
+- **Flex-grow Bento Cards**: Replaced static height properties inside the cards of [BentoGridSection.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/BentoGridSection.jsx) with `min-h-full h-auto` and `min-h-fit` layouts. This allows cards to scale their boundaries dynamically to match their contents, preventing description text in the center card or any other card from spilling or overflowing.
+
+### Typographic Problems Section Redesign & Pin Fixes
+- **Sticky HUD Reveal & Pin**: Refined desktop scroll trigger animations in [TheProblem.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/TheProblem.jsx) to use `toggleActions: 'play none none reverse'`. The left sticky HUD now slides and fades up elegantly only after the first problem item (**AI Forgets**) starts scrolling, and stays pinned and visible throughout the rest of the list scroll duration.
+- **Fail-safe Column Widths**: Replaced grid-span declarations in [TheProblem.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/TheProblem.jsx) with a flexible `flex flex-col lg:flex-row` structure assigning absolute desktop widths (`lg:w-[38%]` left column, `lg:w-[62%]` right column) to prevent text squeezing.
+- **2-3 Word Sharp Tooltips**: Configured [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) inline tooltip cards to use sharp edges (`rounded-none`) and mapped bold target keywords to ultra-concise `2-3 word` HUD definitions.
+- **Code Standards Compliant**: Modularized components into clean helper scripts under 150 lines ([ProblemData.js](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemData.js), [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx), [TheProblem.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/TheProblem.jsx)).
+
+### Hero Interactive Typography & Fixed Navbar Clipping
+- **Fixed Navbar Clipping**: Changed the parent container wrapper in [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) to use `overflow-x-hidden` instead of `overflow-hidden`. This prevents browser layout clipping on fixed elements, allowing the navigation bar to remain floating and visible when scrolling down the page.
+- **Removed Muddy Character Hover**: Deleted single-character GSAP hover event listeners on the display heading to keep the visual presentation clean and simple.
+- **Text Selection Prevention**: Added the `select-none` class to the headline to prevent highlight interference on hover.
+
+## Hero Typographic Poster Layout (Previous)
+
+## Interactive Mini Dashboard & Bento Grid Refinements (Previous)
+
+### Theme Toggle & Responsive Dark Mode
+- **Refactored Theme Provider**: Modified [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx) so that the landing page `/` is not forced to `light` mode and can dynamically toggle between `light` and `dark` styles.
+- **Added Theme Toggle in Header**: Embedded a premium, responsive Sun/Moon theme toggle button in the header inside [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx), allowing users on both desktop and mobile to seamlessly switch themes.
+- **Landing Page Theme Adaptability**: Upgraded [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx), [TheProblem.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/TheProblem.jsx), [BentoGridSection.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/BentoGridSection.jsx), [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx), and [FAQ.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FAQ.jsx) to utilize Tailwind CSS dark selectors (`dark:bg-zinc-950`, `dark:text-zinc-50`, etc.) and adapt to the dark theme state.
+
+### Reusable Premium Button Component
+- **Created RollingButton**: Designed and built the reusable [RollingButton.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/RollingButton.jsx) component using `framer-motion` character rolling text hover animations.
+- **Integrated Reusable Buttons**: Replaced all hardcoded action buttons across the hero layout, navbar, mobile overlays, final CTA, and community templates bottom section with the premium `<RollingButton>` component.
+
+### Code Quality & Verification
+- **ESLint Lint Fixes**: Resolved all React Compiler and ESLint issues in the modified files. Converted `toggleMobileMenu`'s `contextSafe` initialization to execute lazily during event handling to prevent ref access during renders, and cleaned up unused definitions (`PreviewModal`, `index`, and imports).
+- **Compilation check**: Ran the build checks and verified zero new lint warnings or errors in the updated files.
+
+## Bento Grid Showcase & Dark Footer (Previous)
+
+### Aceternity Text Hover Effect added to Footer
+- **Added TextHoverEffect Component**: Ran the `npx shadcn@latest add @aceternity/text-hover-effect-demo` command to pull the `TextHoverEffect` component and its demo from the registry.
+- **Branding Update**: Modified the demo [text-hover-effect-demo.jsx](file:///workspaces/laughing-giggle/frontend/src/components/text-hover-effect-demo.jsx) to change the hover text from "ACET" to "ZENIX".
+- **Integrated into Footer**: Added the [TextHoverEffect](file:///workspaces/laughing-giggle/frontend/src/components/ui/text-hover-effect.jsx) component into [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx) as a large, premium, interactive branding separator between the links grid and the copyright bottom row.
+- **Verification**: Verified that the production build passes successfully.
+
+## Landing Page Sections Cleanup (Previous)
+  - `StickyStory` (Section 4)
+  - `ProductPreview` (Section 5)
+  - `GeneratedFiles` (Section 6)
+  - `DesignSystemGen` (Section 7)
+  - `GitHubImport` (Section 8)
+  - `WhyZenix` (Section 10)
+  - `Pricing` (Section 11)
+- **Preserved critical sections**: Kept the core hero-to-templates narrative:
+  - `Hero`
+  - `TrustedEcosystem` (the logo marquee)
+  - `TheProblem`
+  - `CommunityTemplates` (kept as the only intermediate section)
+  - Boilerplate footer sections (`FAQ`, `FinalCTA`, `Footer`)
+- **Unused imports cleanup**: Removed all unused imports for the deleted sections from `Home.jsx` to prevent bundle bloating and ESLint warnings.
+
+### Verification
+- Production build passes successfully.
+
+## $impeccable craft — HTML Templates, Anchoring & Unlocking (Previous)
+
+### High-Fidelity HTML & Tailwind Templates Rebuild
+- **Static Template migration**: Rebuilt all Zenix community templates as premium single-page static HTML files under `public/templates/` (satisfying copy-paste and direct asset use):
+  - `ai-startup.html` (Cyber-emerald HUD landing page)
+  - `portfolio.html` (Asymmetrical editorial portfolio)
+  - `design-agency.html` (Bold black/crimson studio board)
+  - `saas-board.html` (Zinc dark-mode task board commander)
+  - `editorial-blog.html` (Clean magazine prose simulator with base font zoom controls)
+  - `smart-home.html` (IoT phone device simulator)
+- **Advanced Interactive Motion**: Equipped templates with **GSAP + ScrollTrigger** and **Lenis** smooth scroll, featuring staggers, scroll-reveal fades, custom active tabs, toggles, and range inputs.
+- **Iframe Jitter Prevention**: Solved double-scroll competing inputs inside sandbox iframes by bypassing Lenis smooth scrolling initialization when loaded inside iframe context (`window.self === window.top`).
+
+### Navigation & Smooth Anchoring
+- **Templates Navigation Link**: Added an active `Templates` navigation menu item pointing to `/#templates` in the main header of the site inside `Hero.jsx`.
+- **Lenis-Driven Scroll Anchoring**: Exposed the global Lenis scroll instance to `window.lenis` inside `App.jsx`. Configured `Home.jsx` to intercept the `#templates` hash on mount/navigation, executing a smooth `window.lenis.scrollTo` animation down to the templates section.
+
+### Auth Lock Removal
+- **Design System Unlocked**: Bypassed the authentication check in `TemplateDetailPage.jsx` by defaulting `isAuthenticated` to true. All visitors can now preview the Design System specifications, visual rules, layout guides, color tokens, and typographies without needing to log in.
+
+## $impeccable craft — Final Polish (Previous)
+
+### ProductPreview Enhancements
+- **Dynamic Preview Pane (Scrapbook Mode)**: The right-side preview now perfectly matches the project's brand guidelines (playful, scrapbook, memory-box). Markdown files are beautifully rendered with soft terracotta accents (`#d68560`), warm parchment/cream background tones, elegant serif headers, horizontal dividers, and circular list dots, avoiding generic Markdown viewer UI.
+- **Editor Caret & Typing Alignment**: Fixed the exact left-padding calculations for the transparent `textarea` overlay so that the caret and text align perfectly over the syntax-highlighted `<pre>` tags. `pl-[52px]` and `sm:pl-[60px]` align exactly with the grid columns beneath. `whitespace-pre` and `border-none` were added to prevent drift when clicking or typing inside quotes.
+- **GSAP Reveal Animation**: Integrated `ScrollTrigger` to animate the entire IDE interface sliding up (`y: 80`) and fading in (`opacity: 0 -> 1` with `expo.out`) as it enters the viewport. 
+- **Full Width / Height Experience**: Removed the narrow `landing-container` constraint. The component now stretches full width (`max-w-[1920px] px-4 md:px-8`) and its height adapts dynamically to viewport size (`calc(100vh - 120px)`) to make it incredibly immersive. 
+- **Context Highlight Priority**: Highlighted the `context` folder specifically using an emerald-green tint (`#5cbf88`). Both the folder icon and the file buttons within it now have distinct green accenting compared to standard app folders.
+- **Scrollbars Checked**: Verified all scroll areas (the file explorer, the code textarea, the terminal logs, and the preview panes) are stripped of vertical scrollbars via `[scrollbar-width:none]` and `[&::-webkit-scrollbar]:hidden`, maintaining a clean IDE aesthetic.
+
+
+
+### StickyStory (Section 4) — Scroll & Handoff Fixes
+- **Removed `ScrollTrigger.normalizeScroll(true)`** from `App.jsx` — this was the root cause of the stuck animation. Lenis is already wired to drive ScrollTrigger via `lenis.on('scroll', ScrollTrigger.update)`; normalizeScroll double-intercepted scroll events and starved the scrub of proper deltas.
+- **Removed `data-lenis-prevent`** from the StickyStory section — Lenis must drive page scroll for the pin+scrub to function. The attribute was preventing Lenis from sending scroll events to ScrollTrigger.
+- **Removed `Math.max(..., window.innerHeight)` scroll distance override** — the artificial minimum was causing wrong total pin duration; restored exact `(totalPanels - 1) * panelHeight`.
+- **Added `anticipatePin: 1`** — tells GSAP to pre-calculate the pin position for smoother entry with Lenis lerp.
+- **Added `pinSpacing: true` (explicit)** — ensures GSAP spacer height matches scroll distance so Section 5 enters only after Section 4 fully unpin.
+- **Adjusted scrub to 0.8** — slightly more damping for premium feel with Lenis lerp 0.085.
+
+### ProductPreview (Section 5) — Editor, Icons, Explorer
+- **Editable textarea restored** — transparent text textarea layered over syntax-highlight `<pre>` using CSS grid + absolute positioning. Caret visible, selection works, no duplicate rendering.
+- **Live preview reflects edits** — `contents` state is now mutable (`setContents`); typing in the editor updates the right-pane phone preview in real time.
+- **Scrollbars hidden everywhere** — all scroll containers use `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden` — no visible scrollbars in code area, explorer, terminal, or preview pane.
+- **Explorer reordered**: AGENTS.md pinned at top with purple badge + "pinned" chip → app folder → components folder → context folder → other groups → root files (json/md) at the very bottom.
+- **AGENTS.md visual priority** — dedicated `AgentsFileButton` with purple/indigo badge icon, colored text, and "pinned" label ring.
+- **Section height capped** — IDE shell `max-height: min(82vh, 760px)`, flex layout fills remaining height correctly.
+
+### Verification
+- `npm run build` passes: `✓ built in 5.50s`. No new errors or warnings.
+
+## ProductPreview — Code Duplication, Overflow & Icon Fixes (Latest)
+
+### Completed
+- **Fixed code duplication**: Removed the broken textarea+pre overlay approach. The code editor now uses a single `<pre>` with syntax highlighting — no more invisible transparent text layer causing doubled rendering. The landing preview is read-only showcase, so the textarea editing surface was unnecessary.
+- **Fixed overflow containment**: Capped the IDE shell to `max-height: min(82vh, 760px)` so it never bleeds past the section. The code area uses `overflow-auto` with `overscroll-contain` and proper flex layout (`min-h-0 flex-1`) so code scrolls inside the container.
+- **Added `data-lenis-prevent`**: Applied to both the IDE shell and the code scroll area so Lenis smooth scrolling doesn't intercept wheel events inside the editor. Inner scrolling now works properly.
+- **Added file/folder SVG icons**: Replaced plain text characters (`◇`, `·`, `▾`, `▸`, `▱`) with proper SVG icons — TypeScript (blue TS badge), CSS (blue CSS badge), JSON (yellow {} badge), Markdown (document outline), folder open/closed (yellow folder), and chevron arrows for expand/collapse.
+- **Scroll reset on file switch**: Code scroll position resets to top-left when selecting a new file.
+- **Structural cleanup**: Terminal area capped at 120px with internal scroll. Explorer sidebar gets `overflow-y-auto`. Preview pane uses proper flex layout with `min-h-0` to prevent overflow.
+
+### Verification
+- Vite build passes (`✓ built in 7.35s`). Pre-existing chunk size and dynamic import warnings are unrelated.
+
+## StickyStory Pin & Scrub Repair with Lenis (Latest)
+
+### Completed
+- Added `data-lenis-prevent` to the StickyStory section to stop Lenis intercepting while ScrollTrigger pins.
+- Refined `getScrollDistance` fallback to safely use `Math.max((totalPanels - 1) * getPanelHeight(), window.innerHeight)`.
+- Added a `requestAnimationFrame(() => ScrollTrigger.refresh())` to ensure measurements are correct after mount.
+- Correctly scoped `.story-progress-bar` query to `containerRef.current` using `gsap.utils.toArray`.
+
+## Landing Page Visual Consistency — Sections 4–5 Consolidated Status (Latest)
+
+### Completed
+- Reworked Section 4 Sticky Story into a premium editorial two-column layout with readable copy, balanced cards, consistent spacing, and responsive behavior.
+- Preserved GSAP ScrollTrigger storytelling while repairing the pinned handoff: the single story track now moves through all six panels and releases only after the final panel completes.
+- Scoped the Section 4 animation to its own container, measured the actual desktop viewport, reset stale transforms on mount, and kept reduced-motion/mobile behavior intact.
+- Rebuilt Section 5 as an integrated ScribbleBox Expo workspace rather than a generic Next.js mockup.
+- Loaded the real Expo project source from the repository `app/src` tree, including Expo Router screens, components, hooks, theme, and global CSS.
+- Loaded complete RAG source files from `RAG_Service/context-engine/app/knowledge`, including the full `Agents.md` content and all context Markdown files.
+- Displayed `AGENTS.md` once at the project root and removed its duplicate from the context folder. The knowledge `ui/` directory is intentionally excluded.
+- Added a clickable, alphabetized, accordion-style Explorer with folder icons and displayed paths simplified from `src/app` to `app`.
+- Added an editable Monaco-style code surface with syntax coloring, line numbers, active file state, and a single contained VS Code-like horizontal/vertical scroll boundary.
+- Prevented duplicate code rendering by making the textarea glyph layer transparent while keeping the syntax-highlight layer visible underneath.
+- Added Expo terminal/build feedback and a source-driven preview using the ScribbleBox palette from the context tokens.
+- Connected the preview to `app/index.tsx`, including:
+  - `Welcome to Expo`
+  - `Try editing → src/app/index.tsx`
+  - `Dev tools → use browser devtools`
+  - `Fresh start → npm run reset-project`
+- Added Vite filesystem access for bundling local Expo and RAG source files outside `frontend/`.
+
+### Verification
+- Targeted ESLint passes for `ProductPreview.jsx`, `productContext.js`, and `StickyStory.jsx`.
+- `npm run build --prefix frontend` passes.
+- Existing Vite bundle-size and dynamic-import warnings are unrelated to Sections 4–5.
+
+## Product Preview & Sticky Story — Final Duplication and Scroll Repair (Latest)
+
+### Completed
+- Fixed duplicated source rendering by explicitly hiding the textarea glyph layer with transparent text and preserving the syntax-highlight layer underneath.
+- Added `pointer-events-none` to the syntax layer so editing remains controlled by the single textarea surface.
+- Changed the editor to one `overflow-auto` container with overscroll containment, matching a VS Code-like scroll boundary.
+- Scoped StickyStory panel lookup to its own container and measured the desktop viewport height for the GSAP track distance.
+- Reset the story track before ScrollTrigger setup so repeated mounts do not inherit stale transforms.
+
+### Verification
+- Targeted ESLint passes for ProductPreview and StickyStory.
+- `npm run build --prefix frontend` passes. Existing bundle-size and dynamic-import warnings remain unrelated.
+
+## Product Preview & Sticky Story — Handoff and Overflow Repair (Latest)
+
+### Completed
+- Repaired Section 4 GSAP behavior by animating the single `story-panel-track` instead of translating every panel independently.
+- Made the ScrollTrigger distance derive from the real panel height and hold the pin until the final panel completes.
+- Removed the desktop landing-section padding from the pinned viewport so the story copy and panels remain vertically visible.
+- Constrained ProductPreview’s editor to one internal horizontal/vertical scroll surface inside the hidden-overflow frame.
+- Removed the fixed 680px editor width that was creating excess page overflow.
+- Updated the Expo preview rows to show the source-aligned outputs: `src/app/index.tsx`, `use browser devtools`, and `npm run reset-project`.
+
+### Verification
+- Targeted ESLint passes for ProductPreview, productContext, and StickyStory.
+- `npm run build --prefix frontend` passes. Existing bundle-size and dynamic-import warnings remain unrelated.
+
+## Product Preview Workspace — Editor Polish & Section Handoff (Latest)
+
+### Completed
+- Added lightweight Monaco-style syntax coloring for TypeScript, strings, numbers, keywords, comments, and types without adding a dependency.
+- Kept the outer workspace overflow hidden while allowing the code surface to scroll horizontally and vertically inside the editor.
+- Converted Explorer folders into an accordion and alphabetized files within each folder.
+- Removed the displayed `src/` prefix so the tree reads `app`, `components`, `constants`, `hooks`, and `context`.
+- Moved the full RAG `Agents.md` content to a single root `AGENTS.md` entry and removed its duplicate from the context folder.
+- Updated the preview output to clearly show `ScribbleBox`, `Expo Web`, `Your memory box`, `Welcome to Expo`, `Try editing`, `Dev tools`, and `Fresh start` from the source-driven model.
+- Used the documented ScribbleBox palette for the preview output: lavender, cream, purple, mint, and coral.
+- Extended the Sticky Story handoff to the full panel sequence so Section 4 finishes before Section 5 enters.
+
+### Verification
+- Targeted ESLint passes for `ProductPreview.jsx`, `productContext.js`, and `StickyStory.jsx`.
+- `npm run build --prefix frontend` passes. Existing bundle-size and dynamic-import warnings remain unrelated.
+
+## Product Preview Workspace — Full ScribbleBox Expo Source (Latest)
+
+### Completed
+- Replaced the synthetic Next.js file model with the real Expo project under the repository root `app/src`.
+- Loaded the complete source files at build time, including Expo Router screens, components, hooks, theme, and global CSS.
+- Loaded the complete `Agents.md` and all Markdown files under `RAG_Service/context-engine/app/knowledge/context`.
+- Explicitly excludes the knowledge `ui/` directory from the displayed context tree, as requested.
+- Added a real editable code surface with full file contents, line numbers, horizontal source scrolling, active file state, and terminal output.
+- Reworked the preview to represent ScribbleBox with the documented cream, lavender, purple, mint, and coral visual language.
+- Connected the live preview to `src/app/index.tsx`: changing the title or `HintRow` labels in the editor updates the preview immediately.
+- Added the actual Expo project root files (`app.json`, `package.json`, `README.md`, and `tsconfig.json`) to the explorer.
+- Expanded Vite filesystem access so local source files outside `frontend/` can be bundled safely for this preview.
+
+### Verification
+- Targeted ESLint passes for `ProductPreview.jsx` and `productContext.js`.
+- `npm run build --prefix frontend` passes. Existing bundle-size and dynamic-import warnings are unrelated to this section.
+
+## Product Preview Workspace — Integrated Next.js Editor (Latest)
+
+### Completed
+- Rebuilt `frontend/src/Landing/ProductPreview.jsx` as an integrated editor workspace instead of a floating-card mockup.
+- Added `frontend/src/Landing/productContext.js` with source-derived `next-text` files plus `Agents.md` and the nine files in `RAG_Service/context-engine/app/knowledge/context`.
+- Added a clickable explorer: selecting `page.tsx`, `layout.tsx`, `Agents.md`, or any context file opens it in the central editor with line numbers and its source path.
+- Added an integrated browser preview, terminal output, build button, repository chrome, and status bar while keeping the product-preview interaction self-contained.
+- Kept the requested file tree focused on `app`, `Agents.md`, and `context`; no `ui` folder is displayed or added.
+- Removed the purple treatment and floating assistant-card pattern in favor of a graphite editor surface, warm amber accent, and quiet paper preview pane.
+
+### Verification
+- Targeted ESLint passes for `ProductPreview.jsx` and `productContext.js`.
+- `npm run build --prefix frontend` passes. Existing Vite warnings remain unrelated to this section.
+
+## TheProblem Section — Full Rebuild & Polish (Latest)
+
+### Completed
+- **Full section rebuild** (`frontend/src/Landing/TheProblem.jsx`): Replaced the old dark-bg isolated card with a light-theme, token-compliant, production-grade section.
+- **Layout**: Two-column on desktop (`lg+`) — card stack left with vertical step dots, dark terminal code panel right. Single column on mobile/tablet — card on top, compact terminal strip below.
+- **Card stack**: `flex-1` width (was `max-w-2xl`) fills available space. First card `position: relative` establishes container height; rest stack `absolute inset-x-0 top-0`.
+- **Semantic tag pills**: Each card has a tag (`No memory`, `Bad output`, `No architecture`, `Tech debt`, `Solved`) rendered as a monospace pill badge.
+- **Solution card**: `var(--brand-indigo)` border + tinted background + indigo headline + checkmark icon in tag on card 05.
+- **Dark terminal panel**: macOS-style chrome (traffic lights), dark `oklch(0.09 0.005 264)` background, showing context-aware code snippets per card — hallucinated imports (red), messy file structures (red), correct AGENTS.md output (green). Animates in sync with card transitions.
+- **Mobile compact snippet strip**: `lg:hidden` version of terminal below card, 4-line condensed view, same animation sync.
+- **GSAP scroll animation**: Pinned section, scrub `0.9`, `500%` scroll distance. Cards exit up with blur/scale, enter from below. `SplitType` char stagger on each incoming headline (`rotationX` + `y` + opacity). Both `psnippet` (desktop) and `psnippet-mobile` targets animated simultaneously.
+- **Vertical step dots**: 5 dots animate between `var(--hairline)` inactive and `var(--foreground)` active state via GSAP on each transition.
+- **Progress bar**: Hairline track fills in `var(--foreground)` color as scroll advances (pure DOM mutation, zero React re-renders).
+- **Live step counter**: `01`–`05` updates via `ref.textContent` inside `onUpdate`.
+- **Reduced-motion fallback**: `gsap.matchMedia()` — no pin, simple staggered scroll reveal for `prefers-reduced-motion: reduce`.
+- **Token compliance**: Zero hardcoded colors — all from `var(--foreground)`, `var(--hairline)`, `var(--brand-indigo)`, `var(--text-muted)`, `var(--surface-muted)`.
+- **Version references**: Updated all "Next.js 14" references to **Next.js 16** (latest) in both card body copy and snippet content.
+- **No React setState in scroll callbacks**: All scroll-driven updates use direct DOM mutations (`ref.current.textContent`, `ref.current.style.width`).
+- **Lint**: Zero ESLint errors. Vite build passes clean.
+
+## Batch 0, 1 & 2 Landing Page Construction
+
+### Completed
+- **Orchestrator Refactor**: Updated `Home.jsx` as the primary layout flow controller.
+- **Sticky Story (Section 4)**: Pinned 6-step interactive visual narrative built (`StickyStory.jsx`) with custom SVG illustrations.
+- **Generated Files (Section 6)**: Staggered entrance grid of 18 framework documents (`GeneratedFiles.jsx`).
+- **FAQ Accordion (Section 17)**: Fully animated height drawer using Framer Motion (`FAQ.jsx`).
+- **Final CTA (Section 18)**: Centered layout with magnetic CTA triggers and typography split motion elements (`FinalCTA.jsx`).
+- **Footer (Section 19)**: Corporate structured footer with social link arrays (`Footer.jsx`).
+
+## Batch 3 & 4 Landing Page Construction
+
+### Completed
+- **Product Preview (Section 5)**: Intersecting tab workspace environment (`ProductPreview.jsx`).
+- **Design System Generator (Section 7)**: Split compiling design spec preview block (`DesignSystemGen.jsx`).
+- **GitHub Import (Section 9)**: Active repository scan timeline animation (`GitHubImport.jsx`).
+- **Why Zenix (Section 13)**: desktop horizontal scroll panels comparing prompting to context synthesis (`WhyZenix.jsx`).
+- **Pricing Cards (Section 16)**: High-contrast highlighted subscription card layouts (`Pricing.jsx`).
+
+### Current Status
+Vite build succeeds without warnings. Scroll order in `Home.jsx`: Hero → TrustedEcosystem → TheProblem → StickyStory → ProductPreview → GeneratedFiles → DesignSystemGen → GitHubImport → WhyZenix → Pricing → FAQ → FinalCTA → Footer.
+
+### Pending
+- Section 8 (Template Marketplace)
+- Section 10 (AI Playground)
+- Section 11 (Architecture Visualizer)
+- Section 12 (Context Engine)
+- Section 14 (Community)
+- Section 15 (Testimonials)
+
+---
+
 ## Python RAG Service Migration
 
 - **Foundation**: Set up `app/rag` with Qdrant vectorstore and Markdown chunker.
@@ -52,6 +371,25 @@
 - **LangGraph Graph Stubs**: Created `src/features/ai/graphs/` with placeholder files for `pm_wizard.graph.js`, `context_engine.graph.js`, and `playground.graph.js`. Ready for full implementation after `@langchain/langgraph` installation.
 
 ## Completed
+
+- **The Problem Section (Aceternity Style)**:
+  - Built `TheProblem.jsx` following the user's `Landing.md` blueprint.
+  - Implemented a GSAP ScrollTrigger sequence that pins the viewport and creates a 3D physical stacking effect for the problem statement cards.
+  - Redesigned the cards to match the requested "Aceternity" dark hierarchy aesthetic: deep `bg-zinc-950/80` with backdrop blur, glowing drop shadows, and subtle top-highlight borders.
+  - Implemented a dynamic right-hand visualization panel that transforms from a "System Overload" state to a "Zenix Context Engine" state as the final card clicks into place.
+  - Integrated the section directly below the Trusted Ecosystem marquee.
+
+
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
 
 - **Community Search & Hashmaps Integration**:
   - Implemented the `CommunityPage.jsx` component adhering strictly to `DESIGN.md` monochrome + accent block styling.
@@ -207,7 +545,7 @@
   - Layout: 40%/60% split (was 55/45), wider auth card `max-w-[28rem]`
   - `AuthShell.jsx` — dot-grid background pattern (`radial-gradient` 20px grid), connected workflow with SVG lines, improved hero copy ("Turn ideas into implementation-ready context."), 8 credibility badges (Multi-Agent, Cursor, Claude, Markdown, Architecture Aware, RAG Ready, Template Driven, OpenRouter), sequential motion
   - `ProductStory.jsx` — 6 realistic markdown preview cards (`architecture.md`, `agents.md`, `ui-tokens.md`, `build-plan.md`, `code-standards.md`, `project-overview.md`) with fake syntax coloring, window titlebar dots, overlapping layers, blur depth, float animation with random timing
-  - `AuthField.jsx` — focus glow (`shadow-[0_0_0_4px_rgba(0,0,0,0.06)]`), hover border transition, label color shift on focus
+  - `AuthField.jsx` — migrated from raw `<input>` to shadcn `Input` component, fixed inconsistent padding with `px-0 py-0` override, reduced padding to `pl-[var(--spacing-md)] pr-[var(--spacing-sm)]`
   - `AuthSubmitButton.jsx` — loading spinner (`Loader2 animate-spin`), hover `-translate-y-[1px]` lift, `focus-visible` ring, shine gradient, animated arrow
   - All files under 150 lines (max 131)
 - **Landing page hero corrected** so the live `/` route uses the original `hero-03.jsx` structure again:
@@ -232,6 +570,10 @@
 ## Current status
 
 Auth pages fully redesigned (third pass) with 40%/60% layout, realistic markdown preview cards, dot-grid background, connected workflow, wider auth card (28rem), focus glow on inputs, loading spinner button, hover lift, 8 credibility badges, sequential motion.
+- Swapped raw inputs to shadcn `Input` component with consistent token-based padding
+- Remove unused landing section components and hero files
+- Add Navbar, Docs/About/Sponsor pages, AuthSubmitButton, ProductStory
+- PR created: https://github.com/RandintRayquaza/laughing-giggle/pull/22
 
 Landing page work is active on the `/` route with the hero and first full set of supporting sections now wired in.
 
@@ -299,6 +641,17 @@ The home page now includes:
 ## Dashboard implementation
 
 ### Completed
+
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
 - **Created a collapsible dashboard shell**
   - Integrated `lucide-react` for familiar product iconography
   - Built a collapsible desktop sidebar using `framer-motion` for smooth width transitions
@@ -336,6 +689,17 @@ The home page now includes:
 ## Design system token migration
 
 ### Completed
+
+- **Landing Page Hero Rebuild (Interactive Mockup)**:
+  - Completely rebuilt the Hero section following the `Landing.md` specification with a clean, light-themed editorial aesthetic.
+  - Implemented tight, premium typography for the headline (`tracking-[-0.04em]`).
+  - Built a Framer Motion-powered navigation bar featuring a gooey background pill effect (`layoutId`) that smoothly glides between links on hover.
+  - Removed the unwanted eyebrow badge and replaced it with a sleek navigation layout including a logo placeholder and solid CTAs.
+  - Replaced the static placeholder with a hyper-realistic, fully dynamic Zenix workspace mockup (JSX).
+  - Implemented `constants.jsx` to serve as a local state database for the mockup.
+  - Added Framer Motion crossfades (`AnimatePresence`) to the mockup: clicking files in the sidebar dynamically updates the active editor code, swaps the floating 'Live Preview' UI component, and updates the 'Developer Agent' terminal logs in real-time to match the file context.
+  - Increased the max-width of the mockup container to `max-w-7xl` for a spacious, high-end presentation without cramping.
+
 
 - **`index.css` redesigned** with the full Figma DESIGN.md token set:
   - Added typography tokens: `--font-size-*` with paired line-heights for display-xl, display-lg, headline, subhead, card-title, body-lg, body, body-sm, link, button, eyebrow, caption
@@ -409,3 +773,86 @@ The home page now includes:
   - Updated the Playground UI loading text to a conversational `Thinking...`.
   - Fixed an internal 500 server error in the Python `RAG_Service` where `ChatGroq` crashed due to a missing API key; resolved by explicitly pointing `dotenv` to load the `.env` file from the parent directory in `app/core/llm.py`.
   - Hardened the `playground.py` AI prompt, turning the agent into an opinionated senior designer that critiques poor design choices instead of blindly agreeing with the user.
+- **Landing Page Hero Redesign (Impeccable Craft)**:
+  - Rebuilt the main hero component (`Hero.jsx`) and mockup using high-fidelity Framer Motion and GSAP animations.
+  - Added Aceternity's `ContainerScroll` for a premium 3D scroll reveal of the dashboard mockup, tuned down scale to prevent viewport cutoffs.
+  - Implemented GSAP `SplitType` text reveal for the main headline, character-by-character from the center with 3D rotation (`rotationX`).
+  - Implemented GSAP `SplitType` word stagger for the subheadline.
+  - Implemented a smooth GSAP drop-down animation for the full navigation bar.
+  - Removed em-dashes from the subheadline for cleaner typography.
+  - Added a custom `RollingText` Framer Motion component for CTAs, featuring a character-by-character upward rolling hover effect.
+  - Adjusted Nav bar layout to use `flex-1` for perfect centering and smooth Framer Motion `layoutId` gliding pills for active/hover states.
+  - Added a responsive GSAP-powered mobile menu with an animated hamburger to "X" toggle and staggered link reveals.
+- **Ecosystem / Marquee Section**:
+  - Implemented a custom `TrustedEcosystem.jsx` marquee replacing the bloated `skiper31` component.
+  - Built a butter-smooth, CSS keyframe-powered infinite loop (`animate-marquee`).
+  - Integrated high-fidelity logos for GitHub, Cursor, Claude Code, Gemini, VS Code, Windsurf, and Codex.
+  - Implemented premium hover micro-interactions: logo scales up (`scale-125`) and lifts (`-translate-y-1`) with an `ease-out` transition.
+  - Updated global `index.html` to correctly map to the new `favicon.png`.
+## Landing visual consistency pass (latest)
+
+### Completed
+- Added a shared landing visual system in `frontend/src/index.css` with a strict 12-column container, shared 96px section rhythm, 64px content-group rhythm, responsive gutters, and consistent card primitives.
+- Unified post-hero section typography around display/H1/H2/body/small/code roles, balanced headings, readable paragraph widths, and a minimum 280px paragraph width on desktop.
+- Migrated Sticky Story, Product Preview, Generated Files, Design System Generator, GitHub Import, Why Zenix, Pricing, FAQ, Final CTA, and Footer onto shared landing section/container/header/card classes.
+- Normalized card radius, padding, hairline borders, low elevation, hover behavior, buttons, and dark-surface text treatment while preserving existing GSAP selectors and interactions.
+- Tightened the hero display scale from 104px to a responsive 56–96px range and preserved its SplitType/GSAP choreography.
+- Refined Section 4 Sticky Story specifically: reduced the oversized lilac shell, aligned it to the shared 1200px grid and spacing, standardized story panels and visual surfaces, and preserved the pinned six-step GSAP sequence.
+- Fixed Sticky Story copy collapse by replacing generic 50/50 sizing with explicit 44/56 editorial columns and capped readable text measures for desktop and mobile.
+- Replaced the remaining fragile flex sizing in Sticky Story with an explicit desktop grid and hard width guards for the copy column and active story panel.
+- Softened the Sticky Story background to a pale lavender editorial surface, kept the “Interactive Story” label on one line, and tightened headline/body measures for intentional wrapping.
+- Added a minimum-width desktop copy grid so the left story cannot collapse, and replaced the Architecture Synthesis illustration with a layered App → UI/Domain/Data → Services diagram matching the approved reference.
+- Removed conflicting `w-1/2` and `grid-cols-2` utilities from the Sticky Story desktop wrapper; they were overriding the custom grid and collapsing the left copy into a quarter-width column.
+- Made `StickyStory.jsx` self-describing with explicit copy, stage, track, and card layout roles; removed its unused React import and added min-width protections without changing the ScrollTrigger tween.
+- Finalized Section 4 surface polish: pale palette-matched lilac background, transparent inner stage, white story cards, subtle divider, and shared readable title/body typography.
+- Replaced the purple Section 4 treatment with the documented cream landing block, neutral ink accents, cream architecture diagram lines, and amber detail accents.
+- Added copy breathing room beside the progress line, shortened the pinned handoff to settle the final story card near viewport center, and raised Product Preview above the unpinned story surface so the next section can cover it cleanly.
+
+### Verification
+- Targeted ESLint still reports existing unused React imports, pre-existing `Hero.jsx` ref/import issues, and the existing `WhyZenix.jsx` unused variable.
+- Full Vite build remains blocked by the pre-existing adjacent JSX `<script>` error in `frontend/src/Pages/Sponsor.jsx`.
+
+## Dashboard Community refresh (2026-07-18)
+
+### Completed
+- Reworked `features/explore/ui/CommunityPage.jsx` to match the All Projects dashboard shell, including shared max-width, gutters, spacing, and pastel block treatment.
+- Added consistent equal-height creator cards with rotating mint, lilac, cream, pink, and coral headers.
+- Added verified badges, online indicators, profile links, follower/template metadata, and accessible keyboard focus states.
+- Added debounced creator search with a clear action, result count, skeleton loading cards, empty state, and retryable error state.
+- Added request cancellation protection so an older search response cannot overwrite newer results.
+- Fixed Community page scrolling by giving the page its own full-height vertical scroll container inside the dashboard shell.
+
+### Verification
+- `npm run build` passes successfully.
+- Targeted ESLint check passes for `features/explore/ui/CommunityPage.jsx`.
+
+### Next
+- Plan and redesign the AI Playground entry page and workspace using the same dashboard design system, without introducing unsupported backend actions.
+## AI Playground — Chat Layout & Draft Session Fix (Latest)
+
+### Completed
+- Fixed Playground message wrapping so chat content uses the available conversation width instead of collapsing into narrow two-word lines.
+- Added width-safe message bubbles with overflow protection for long words, markdown, and code.
+- Made the conversation viewport own vertical scrolling and auto-scroll directly to the latest message without affecting the surrounding workspace.
+- Kept the composer outside the scroll area so it remains fixed and usable while chat history grows.
+- Changed “New Session” / “Start Workspace” to open a local draft without creating a backend session.
+- The first non-empty message now creates exactly one persisted session, then sends the message into it.
+- Empty and whitespace-only drafts remain unpersisted; failed first sends remain retryable.
+- Prevented session-list loading from overriding a newly opened local draft.
+
+### Verification
+- Targeted ESLint passes for `Playground.jsx`, `usePlayground.js`, and `playground.store.js`.
+- `npm run build` passes. Existing Vite chunk-size and dynamic-import warnings remain unrelated.
+## AI Playground — Native Scroll & Focused AI Updates (Latest)
+
+### Completed
+- Added `data-lenis-prevent` to the Playground shell and chat viewport so mouse-wheel and trackpad scrolling use the native nested scroll container.
+- Added a dedicated AI response rhythm with readable paragraphs, headings, lists, links, and horizontally contained code blocks.
+- Updated the Playground AI contract to apply only the fields requested by the user and preserve unrelated tokens.
+- Removed unsolicited critique, redesign suggestions, and broad typography/color changes from normal token updates.
+- Constrained AI messages to a short acknowledgement and up to three exact changed-token bullets.
+- Rebranded the legacy `HTML_PREVIEW_TEMPLATE.html` surface from Figma/FigJam copy to Zenix AI Playground preview language.
+
+### Verification
+- Targeted ESLint passes for Playground files.
+- `npm run build` passes. Existing Vite chunk-size and dynamic-import warnings remain unrelated.

@@ -1,129 +1,84 @@
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 
-import { ProductStory } from './ProductStory'
-
-const CREDIBILITY = [
-  'Multi-Agent Context Generation',
-  'Cursor Ready',
-  'Claude Code Ready',
-  'Markdown First',
-  'Architecture Aware',
-  'RAG Ready',
-  'Template Driven',
-  'OpenRouter Compatible',
-]
-
-const AuthShell = ({ children, panelTitle, panelDescription }) => {
+const AuthShell = ({ children, panelTitle, panelDescription, panelEyebrow = 'Developer workspace', accent = 'lime' }) => {
   const prefersReducedMotion = useReducedMotion()
+  const accentClass = accent === 'lilac' ? 'bg-block-lilac' : 'bg-block-lime'
 
   return (
-    <main className="flex min-h-dvh flex-col bg-canvas text-ink lg:flex-row">
-
-      <section className="relative hidden overflow-hidden lg:flex lg:w-[42%] 2xl:w-[40%]">
-        <div className="absolute inset-0 bg-surface-soft">
-          <div className="absolute inset-0 opacity-[0.35]"
-            style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.08) 0.5px, transparent 0.5px)', backgroundSize: '20px 20px' }} />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,var(--block-lilac)_0%,transparent_35%),radial-gradient(circle_at_75%_20%,var(--block-lime)_0%,transparent_30%),radial-gradient(circle_at_50%_70%,var(--block-cream)_0%,transparent_32%)] opacity-60" />
-        </div>
-
-        <div className="relative z-10 flex w-full flex-col p-[var(--spacing-xxl)]">
-          <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: -4 }}
-            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    <main className="min-h-dvh bg-canvas px-4 py-4 text-ink sm:px-6 sm:py-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100dvh-2rem)] max-w-6xl flex-col lg:min-h-[calc(100dvh-3rem)]">
+        <header className="flex items-center justify-between px-2 py-2 sm:px-4">
+          <Link
+            to="/"
+            className="inline-flex min-h-11 items-center text-[21px] font-[var(--font-weight-540)] tracking-[-0.04em] text-ink outline-none transition-opacity hover:opacity-60 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ink/30"
+            aria-label="Zenix home"
           >
-            <Link to="/" className="inline-flex items-start gap-0.5 text-[var(--text-body)] font-[var(--font-weight-480)] tracking-[var(--tracking-body)]">
-              <span>zenix</span><span className="-translate-y-1 text-xs leading-none">*</span>
-            </Link>
-          </motion.div>
+            zenix<span className="ml-0.5 -translate-y-2 text-[11px]">*</span>
+          </Link>
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+            Context first
+          </span>
+        </header>
 
-          <div className="flex flex-1 flex-col justify-center -mt-[var(--spacing-xl)]">
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={{ delay: 0.12, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <p className="text-[clamp(0.6rem,0.7vw,0.7rem)] font-mono uppercase tracking-[0.14em] text-ink/25">
-                AI Context Engineering
+        <div className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,28rem)] lg:gap-16 lg:py-12">
+          <motion.section
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            className={`${accentClass} relative hidden min-h-[min(620px,calc(100dvh-12rem))] overflow-hidden rounded-[var(--radius-lg)] p-8 sm:p-12 lg:flex lg:flex-col lg:justify-between`}
+            aria-hidden="true"
+          >
+            <div className="relative z-10 max-w-[21rem]">
+              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/65">
+                Zenix / Auth
+              </span>
+              <p className="mt-6 max-w-[12ch] text-[clamp(2.75rem,5vw,5rem)] font-[var(--font-weight-340)] leading-[0.96] tracking-[-0.04em] text-ink">
+                Start with context.
               </p>
-              <h1 className="mt-[var(--spacing-md)] text-[clamp(2rem,3.2vw,3.2rem)] font-[var(--font-weight-340)] leading-[1.04] tracking-[-0.03em] text-balance max-w-[14ch]">
-                Turn ideas into implementation-ready context.
-              </h1>
-              <p className="mt-[var(--spacing-md)] text-[clamp(0.9rem,1.05vw,1.05rem)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink/45 max-w-[32ch]">
-                Describe your idea once. Zenix generates architecture, design tokens, build plans, and agent rules — ready for Cursor, Claude Code, or any AI coding tool.
+            </div>
+
+            <div className="relative z-10 flex items-end justify-between gap-6">
+              <p className="max-w-[18rem] text-[15px] leading-6 text-ink/70">
+                A focused workspace for turning ideas into software that AI can actually understand.
               </p>
-            </motion.div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink/60">01</span>
+            </div>
 
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.7 }}
-              className="mt-[var(--spacing-xxl)] flex-1 min-h-0 relative"
-            >
-              <ProductStory />
-            </motion.div>
-          </div>
-        </div>
-      </section>
+            <div className="absolute -right-14 top-24 size-56 rounded-full border-[18px] border-ink/10" />
+            <div className="absolute -bottom-16 -left-8 size-44 rotate-12 bg-white/25" />
+          </motion.section>
 
-      <section className="flex flex-1 flex-col overflow-y-auto">
-        <div className="flex flex-1 flex-col items-center justify-center px-[var(--spacing-xl)] py-[var(--spacing-xxl)] sm:px-[var(--spacing-xxl)]">
-          <div className="mb-[var(--spacing-xl)] flex w-full max-w-[28rem] items-center justify-between lg:hidden">
-            <Link to="/" className="inline-flex items-start gap-0.5 text-[var(--text-body)] font-[var(--font-weight-480)] tracking-[var(--tracking-body)]">
-              <span>zenix</span><span className="-translate-y-1 text-xs leading-none">*</span>
-            </Link>
-            <span className="text-[11px] font-mono uppercase tracking-[0.1em] text-ink/20">Context First</span>
-          </div>
-
-          <div className="w-full max-w-[28rem]">
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="mb-[var(--spacing-xl)] text-center"
-            >
-              <h2 className="text-[var(--text-headline)] font-[var(--font-weight-340)] leading-[1.2] tracking-[var(--tracking-headline)] text-balance">
-                {panelTitle}
-              </h2>
-              <p className="mt-[var(--spacing-sm)] mx-auto max-w-[28ch] text-[var(--text-body)] font-[var(--font-weight-320)] leading-[1.5] tracking-[var(--tracking-body)] text-ink/40">
-                {panelDescription}
-              </p>
-            </motion.div>
-
+          <section className="flex w-full justify-center">
             <motion.div
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
               animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="rounded-[var(--radius-xl)] border border-hairline/80 bg-canvas p-[var(--spacing-xl)] shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)] sm:p-[var(--spacing-xxl)]"
+              transition={{ delay: 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-[28rem]"
             >
-              {children}
-            </motion.div>
-
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="mt-[var(--spacing-xl)]"
-            >
-              <div className="flex flex-wrap items-center justify-center gap-x-[var(--spacing-lg)] gap-y-[var(--spacing-xs)]">
-                {CREDIBILITY.slice(0, 4).map((item) => (
-                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink/25">
-                    <span className="text-semantic-success/70">✓</span>{item}
-                  </span>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-x-[var(--spacing-lg)] gap-y-[var(--spacing-xs)] mt-[var(--spacing-xs)]">
-                {CREDIBILITY.slice(4).map((item) => (
-                  <span key={item} className="flex items-center gap-[var(--spacing-xxs)] text-[11px] font-[var(--font-weight-330)] text-ink/25">
-                    <span className="text-semantic-success/70">✓</span>{item}
-                  </span>
-                ))}
+              <div className="rounded-[var(--radius-lg)] border border-hairline bg-white p-6 sm:p-8">
+                <div className="mb-8">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-soft">
+                    {panelEyebrow}
+                  </p>
+                  <h1 className="mt-3 text-[32px] font-[var(--font-weight-540)] leading-[1.08] tracking-[-0.035em] text-ink sm:text-[36px]">
+                    {panelTitle}
+                  </h1>
+                  <p className="mt-3 text-[15px] leading-6 text-ink-muted">
+                    {panelDescription}
+                  </p>
+                </div>
+                {children}
               </div>
             </motion.div>
-          </div>
+          </section>
         </div>
-      </section>
+
+        <footer className="flex items-center justify-between gap-4 px-2 pb-2 pt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft sm:px-4">
+          <span>© {new Date().getFullYear()} Zenix</span>
+          <span className="hidden sm:inline">Built for better context</span>
+        </footer>
+      </div>
     </main>
   )
 }
