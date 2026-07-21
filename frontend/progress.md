@@ -1,14 +1,15 @@
-## Problems Section Redesign & Interactive Typography (Latest)
+## Editorial Typographic Problems Section & Interactive Typography (Latest)
 
-### Problems Section Redesign
-- **Redesigned TheProblem.jsx**: Completely replaced the old developer terminal slideshow layout with a visually dense, multi-column masonry grid matching the premium templates section.
-- **ProblemCard Architecture**: Created [ProblemCard.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemCard.jsx) featuring spring-driven magnetic hover tracking (`useSpring`), radial hover gradient glow, dynamic 3D icon animations, and rounded (`rounded-[28px]`) elevated surfaces.
-- **Interactive Keywords**: Built [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) inline popovers that dynamically mount glassmorphism contextual knowledge panels (fade + scale, pointer arrow, soft shadow) when hovering highlight words (`AI Forgets`, `Hallucinates`, `Context`, `Tokens`, `AGENTS.md`, `Context Engineering`).
-- **Scrub Pin Storytelling**: Maintained desktop pinning scroll animations. As the user scrubs down, Card Stage 2 and Stage 3 cards fade and translate up into the masonry layout, building the problem grid step-by-step.
-- **Code Standards Compliant**: Factored data and components into separate files ([ProblemData.js](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemData.js), [ProblemCard.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemCard.jsx), [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx)) to keep all files strictly under 150 lines.
+### Typographic Problems Section Redesign
+- **Refactored TheProblem.jsx**: Completely removed card/bento boxes grids. Re-architected the layout as a premium 2-column typographic editorial split screen (Left: sticky progress HUD and counter; Right: elegant bibliographic problem list stack) matching Vercel and Apple landing styles.
+- **Scroll Highlight Scrub**: Configured smooth GSAP scroll-highlight timelines on list items. Scrolling highlights the active problem item (color transitions from dark zinc/muted to bright zinc/white in dark mode, and black in light mode), while automatically updating the left vertical progress bar and counter (`01` to `06`).
+- **2-3 Word Bold Tooltips**: Highlighted and bolded a single complex keyword in every paragraph description (`memory`, `dependencies`, `helper methods`, `limits`, `agents`, `architectural`). Created a smooth `180ms` fade+scale tooltip card explaining that specific word in a concise `2-3 word` phrase (e.g. *Starts completely fresh*, *Duplicate code routines*, *Autonomous AI workers*).
+- **Layout Width Protection**: Enforced strict `w-full` parameters on both column wrappers inside the grid layout to prevent text lines from being squeezed to zero width on mobile/tablet viewports.
+- **Code Standards Compliant**: Modularized components into clean helper scripts under 150 lines ([ProblemData.js](file:///workspaces/laughing-giggle/frontend/src/Landing/ProblemData.js), [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx), [TheProblem.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/TheProblem.jsx)).
 
-### Hero Interactive Typography
-- **GSAP Hover Wave**: Implemented GSAP character mouseenter/mouseleave triggers in [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) to animate the tall display heading characters. Moving the cursor over the text lifts the characters (`y: -8`) and adds a glowing text shadow that adapts dynamically to the active theme.
+### Hero Interactive Typography & Hover Color Tweaks
+- **Light Mode Hover Fix**: Refined character hover transitions in [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) for light mode. Instead of animating to a muddy black/shadow, characters transition to a vibrant, premium deep indigo tone (`#4f46e5`) with a soft matching shadow glow (`rgba(79, 70, 229, 0.15)`), keeping it clean and readable.
+- **GSAP Hover Wave**: Implemented GSAP character mouseenter/mouseleave triggers to animate the tall display heading characters, lifting them (`y: -8`) and scaling smoothly on hover.
 - **Text Selection Prevention**: Added the `select-none` class to the headline to prevent highlight interference on hover.
 
 ## Hero Typographic Poster Layout (Previous)

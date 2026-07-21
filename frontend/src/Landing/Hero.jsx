@@ -65,38 +65,7 @@ export default function Hero() {
       delay: 0.6,
     });
 
-    // 4.5. Add premium interactive GSAP hover character effects
-    if (headline.chars) {
-      headline.chars.forEach((char) => {
-        char.addEventListener('mouseenter', () => {
-          const isDark = document.documentElement.classList.contains('dark');
-          gsap.to(char, {
-            y: -8,
-            scale: 1.12,
-            rotateY: 12,
-            color: isDark ? '#ffffff' : '#000000',
-            textShadow: isDark 
-              ? '0 0 24px rgba(255, 255, 255, 0.45)' 
-              : '0 8px 16px rgba(0, 0, 0, 0.12)',
-            duration: 0.3,
-            ease: 'power2.out',
-            overwrite: 'auto'
-          });
-        });
-        char.addEventListener('mouseleave', () => {
-          gsap.to(char, {
-            y: 0,
-            scale: 1,
-            rotateY: 0,
-            color: '',
-            textShadow: 'none',
-            duration: 0.4,
-            ease: 'power2.out',
-            overwrite: 'auto'
-          });
-        });
-      });
-    }
+
 
     // 5. Animate Nav Bar dropping in
     gsap.from('.hero-nav', {
@@ -134,7 +103,7 @@ export default function Hero() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full min-h-fit md:min-h-screen bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 overflow-hidden flex flex-col transition-colors duration-300">
+    <div ref={containerRef} className="relative w-full min-h-fit md:min-h-screen bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 overflow-x-hidden flex flex-col transition-colors duration-300">
       {/* Navigation */}
       <nav className="hero-nav fixed top-6 inset-x-0 mx-auto max-w-5xl h-14 flex items-center justify-between px-4 sm:px-6 z-50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl border border-zinc-200/60 dark:border-zinc-800/60 rounded-full shadow-[0_8px_32px_-8px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] transition-all">
         
