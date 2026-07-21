@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
     root.classList.add('theme-transitioning')
     const timer = setTimeout(() => {
       root.classList.remove('theme-transitioning')
-    }, 500)
+    }, 350)
 
     root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
 

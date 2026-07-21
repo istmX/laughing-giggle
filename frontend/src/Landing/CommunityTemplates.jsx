@@ -292,7 +292,7 @@ export default function CommunityTemplates({ initialTemplatesData = [] }) {
             >
               
               {/* Blurred Skeleton Card 1 (Left background) */}
-              <div className="animate-on-scroll absolute left-2 sm:left-6 top-6 sm:top-10 w-[78%] sm:w-[320px] aspect-[4/3.2] rounded-xl border border-zinc-205 dark:border-zinc-800/40 bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 dark:opacity-10 blur-[1px] -rotate-6 transform origin-bottom-left pointer-events-none transition-all duration-500 flex flex-col p-4 animate-pulse">
+              <div className="animate-on-scroll absolute left-2 sm:left-6 top-6 sm:top-10 w-[78%] sm:w-[320px] aspect-[4/3.2] rounded-xl border border-zinc-205 dark:border-zinc-800/40 bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 dark:opacity-10 blur-[1px] -rotate-6 transform origin-bottom-left pointer-events-none transition-all duration-500 hidden sm:flex flex-col p-4 animate-pulse">
                 <div className="w-full h-[45%] bg-zinc-200/60 dark:bg-zinc-800/60 rounded-lg mb-4" />
                 <div className="h-4 w-1/3 bg-zinc-200/60 dark:bg-zinc-800/60 rounded mb-2.5" />
                 <div className="h-3 w-4/5 bg-zinc-150 dark:bg-zinc-850 rounded mb-1.5" />
@@ -304,7 +304,7 @@ export default function CommunityTemplates({ initialTemplatesData = [] }) {
               </div>
 
               {/* Blurred Skeleton Card 2 (Right background) */}
-              <div className="animate-on-scroll absolute right-2 sm:right-6 bottom-6 sm:bottom-10 w-[78%] sm:w-[320px] aspect-[4/3.2] rounded-xl border border-zinc-205 dark:border-zinc-800/40 bg-zinc-50/40 dark:bg-zinc-900/10 opacity-35 dark:opacity-15 blur-[1px] rotate-6 transform origin-bottom-right pointer-events-none transition-all duration-500 flex flex-col p-4 animate-pulse">
+              <div className="animate-on-scroll absolute right-2 sm:right-6 bottom-6 sm:bottom-10 w-[78%] sm:w-[320px] aspect-[4/3.2] rounded-xl border border-zinc-205 dark:border-zinc-800/40 bg-zinc-50/40 dark:bg-zinc-900/10 opacity-35 dark:opacity-15 blur-[1px] rotate-6 transform origin-bottom-right pointer-events-none transition-all duration-500 hidden sm:flex flex-col p-4 animate-pulse">
                 <div className="w-full h-[45%] bg-zinc-200/60 dark:bg-zinc-800/60 rounded-lg mb-4" />
                 <div className="h-4 w-1/4 bg-zinc-200/60 dark:bg-zinc-800/60 rounded mb-2.5" />
                 <div className="h-3 w-[85%] bg-zinc-150 dark:bg-zinc-850 rounded mb-1.5" />

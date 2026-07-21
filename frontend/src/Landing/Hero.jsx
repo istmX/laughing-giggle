@@ -28,8 +28,11 @@ export default function Hero() {
   // Interactive word scramble states
   const [displayWord1, setDisplayWord1] = useState('STOP');
   const [displayWord2, setDisplayWord2] = useState('SLOP.');
+  const [displayGhost, setDisplayGhost] = useState('CONTEXT');
+
   const scrambleIntervalRef1 = useRef(null);
   const scrambleIntervalRef2 = useRef(null);
+  const scrambleGhostRef = useRef(null);
 
   // Spotlight coordinates inside navigation
   const [spotlightPos, setSpotlightPos] = useState({ x: 0, y: 0 });
@@ -136,6 +139,64 @@ export default function Hero() {
     scrambleIntervalRef2.current = interval2;
   };
 
+  // Scramble Background Ghost Word CONTEXT -> SLOP
+  const handleMouseEnterGhost = () => {
+    if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current);
+    let iter = 0;
+    const target = 'SLOP';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    const interval = setInterval(() => {
+      iter += 1;
+      if (iter >= target.length) {
+        setDisplayGhost(target);
+        clearInterval(interval);
+        return;
+      }
+      setDisplayGhost(
+        target.split('').map((char, index) => {
+          if (index < iter) return target[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('')
+      );
+    }, 15);
+    scrambleGhostRef.current = interval;
+  };
+
+  const handleMouseLeaveGhost = () => {
+    if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current);
+    let iter = 0;
+    const target = 'CONTEXT';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    const interval = setInterval(() => {
+      iter += 1;
+      if (iter >= target.length) {
+        setDisplayGhost(target);
+        clearInterval(interval);
+        return;
+      }
+      setDisplayGhost(
+        target.split('').map((char, index) => {
+          if (index < iter) return target[index];
+          return chars[Math.floor(Math.random() * chars.length)];
+        }).join('')
+      );
+    }, 15);
+    scrambleGhostRef.current = interval;
+  };
+
+  // Synchronized front & back scramble morph triggers
+  const handleMouseEnterAll = () => {
+    handleMouseEnter();
+    handleMouseEnterGhost();
+  };
+
+  const handleMouseLeaveAll = () => {
+    handleMouseLeave();
+    handleMouseLeaveGhost();
+  };
+
   // Magnetic & Spotlight hover interaction handlers
   const handleMouseMoveNav = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -174,6 +235,7 @@ export default function Hero() {
       window.removeEventListener('scroll', handleScroll);
       if (scrambleIntervalRef1.current) clearInterval(scrambleIntervalRef1.current);
       if (scrambleIntervalRef2.current) clearInterval(scrambleIntervalRef2.current);
+      if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current);
     };
   }, []);
 
@@ -388,8 +450,12 @@ export default function Hero() {
 
       {/* Ghost Typography Background */}
       <div className="hero-ghost-word absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
-        <span className="font-sans font-black text-[clamp(140px,28vw,440px)] uppercase tracking-[-0.04em] text-zinc-950 dark:text-white opacity-[0.055] dark:opacity-[0.035] leading-none select-none">
-          CONTEXT
+        <span 
+          onMouseEnter={handleMouseEnterAll}
+          onMouseLeave={handleMouseLeaveAll}
+          className="font-sans font-black text-[clamp(140px,28vw,440px)] uppercase tracking-[-0.04em] text-zinc-950 dark:text-white opacity-[0.055] dark:opacity-[0.035] leading-none select-none pointer-events-auto cursor-pointer"
+        >
+          {displayGhost}
         </span>
       </div>
 
@@ -539,15 +605,15 @@ export default function Hero() {
       <main className="flex-1 flex flex-col items-center justify-start text-center px-4 md:px-8 z-10 pt-28 md:pt-36 pb-12 md:pb-20 max-w-7xl mx-auto w-full">
         <div className="w-full flex flex-col items-center">
           
-          {/* Headline */}
-          <h1 className="split-headline landing-display-tall max-w-7xl text-zinc-950 dark:text-white mx-auto uppercase select-none" style={{ perspective: "1000px" }}>
-            <span className="line-1 block opacity-95">
+          {/* Headline (pointer-events-none added to avoid overlap with background elements) */}
+          <h1 className="split-headline landing-display-tall max-w-7xl text-zinc-950 dark:text-white mx-auto uppercase select-none pointer-events-none" style={{ perspective: "1000px" }}>
+            <span className="line-1 block w-fit mx-auto opacity-95 pointer-events-auto">
               {displayWord1} shipping
             </span>
-            <span className="line-2 block mt-2">
+            <span className="line-2 block w-fit mx-auto mt-2 pointer-events-auto">
               AI <span 
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onMouseEnter={handleMouseEnterAll}
+                onMouseLeave={handleMouseLeaveAll}
                 className="relative inline-block cursor-pointer text-zinc-950 dark:text-white font-sans font-bold tracking-tight select-none group/slop px-1.5"
               >
                 {displayWord2}
@@ -577,7 +643,7 @@ export default function Hero() {
           </RollingButton>
           <RollingButton 
             href="/github" 
-            className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white hover:bg-zinc-50/50 dark:hover:bg-zinc-850 hover:border-zinc-350 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:scale-[1.015] shadow-sm hover:shadow-md transition-all duration-300 ease-out px-8 py-3 text-sm md:text-base font-semibold flex items-center gap-1.5 group/hero-sec"
+            className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white hover:bg-zinc-50/50 dark:hover:bg-zinc-855 hover:border-zinc-350 dark:hover:border-zinc-700 hover:-translate-y-0.5 hover:scale-[1.015] shadow-sm hover:shadow-md transition-all duration-300 ease-out px-8 py-3 text-sm md:text-base font-semibold flex items-center gap-1.5 group/hero-sec"
           >
             <span className="flex items-center gap-1.5">
               <span>Import from GitHub</span>
