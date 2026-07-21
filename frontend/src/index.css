@@ -485,6 +485,297 @@
 }
 
 @layer components {
+  /* ─── Landing system: one grid, one type scale, one rhythm ─── */
+  .landing-section {
+    --landing-gutter: clamp(20px, 4vw, 48px);
+    width: 100%;
+    padding-block: clamp(64px, 7vw, var(--spacing-section));
+    padding-inline: var(--landing-gutter);
+    background: var(--background);
+    color: var(--foreground);
+    border-top: 1px solid var(--hairline-soft);
+  }
+
+  .landing-container {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(16px, 2vw, var(--spacing-xl));
+    row-gap: var(--spacing-xxl);
+    width: min(100%, 1200px);
+    margin-inline: auto;
+  }
+
+  .landing-container > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .landing-section-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 760px;
+  }
+
+  .landing-eyebrow {
+    color: var(--brand-indigo);
+    font-family: var(--font-mono);
+    font-size: 14px !important;
+    font-weight: 540;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .landing-display {
+    font-size: clamp(56px, 8vw, 96px) !important;
+    font-weight: 540;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .landing-section h2,
+  .landing-heading {
+    max-width: 760px;
+    color: var(--foreground);
+    font-size: clamp(40px, 4.2vw, 48px) !important;
+    font-weight: 540;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .landing-section h3,
+  .landing-section h4 {
+    font-size: 24px !important;
+    font-weight: 540;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .landing-section p {
+    max-width: 65ch;
+    min-width: 280px;
+    font-size: 18px !important;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .landing-section-header > p,
+  .landing-lead {
+    max-width: 65ch;
+    min-width: 280px;
+    color: var(--text-muted);
+    font-size: clamp(18px, 1.6vw, 20px) !important;
+    font-weight: 330;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  .landing-card {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md) !important;
+    background: var(--surface-elevated);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-xs);
+    transition: border-color 200ms ease, background-color 200ms ease, transform 200ms ease;
+  }
+
+  .landing-card:hover {
+    border-color: color-mix(in oklch, var(--foreground) 22%, var(--hairline));
+    background: var(--surface-soft);
+  }
+
+  .landing-card h3,
+  .landing-card h4 {
+    font-size: 24px !important;
+    font-weight: 540;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .landing-card p {
+    max-width: 65ch;
+  }
+
+  .landing-code {
+    font-family: var(--font-mono);
+    font-size: 13px !important;
+    line-height: 1.55;
+  }
+
+  .landing-dark-surface {
+    border-color: color-mix(in oklch, white 16%, transparent);
+    background: var(--surface-dark);
+    color: var(--surface-dark-foreground);
+  }
+
+  .landing-dark-surface h2,
+  .landing-dark-surface h3,
+  .landing-dark-surface h4 {
+    color: var(--surface-dark-foreground);
+  }
+
+  .landing-dark-surface p {
+    color: color-mix(in oklch, var(--surface-dark-foreground) 72%, transparent);
+  }
+
+  .landing-story-shell {
+    border: 1px solid color-mix(in oklch, var(--foreground) 14%, var(--hairline)) !important;
+    border-radius: var(--radius-lg) !important;
+    background: color-mix(in oklch, var(--block-cream) 72%, var(--background));
+    box-shadow: none;
+  }
+
+  .landing-story-copy {
+    width: 100% !important;
+    min-width: 0;
+    padding-inline: clamp(28px, 3.5vw, 56px);
+  }
+
+  .landing-story-desktop {
+    grid-template-columns: minmax(420px, 0.9fr) minmax(520px, 1.1fr);
+  }
+
+  .landing-story-copy h2,
+  .landing-story-copy p {
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .landing-story-copy-content {
+    width: 100%;
+    max-width: 520px;
+    min-width: 0;
+    padding-left: clamp(24px, 2.5vw, 40px);
+  }
+
+  .landing-story-copy h2 {
+    max-width: 520px !important;
+    font-size: clamp(40px, 3.6vw, 48px) !important;
+    line-height: 1.04;
+  }
+
+  .landing-story-copy p {
+    max-width: 46ch !important;
+    min-width: 0 !important;
+  }
+
+  .landing-story-copy .landing-eyebrow {
+    width: max-content;
+    white-space: nowrap;
+  }
+
+  .landing-story-stage {
+    width: auto !important;
+    min-width: 0;
+    display: flex;
+    justify-content: center;
+    background: transparent;
+    border-left-color: color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
+
+  .story-panel-track {
+    min-width: 0;
+  }
+
+  .story-panel-card {
+    flex: 0 1 560px;
+  }
+
+  .story-panel {
+    border-left-color: color-mix(in oklch, var(--foreground) 14%, transparent) !important;
+  }
+
+  .landing-story-title {
+    color: var(--foreground);
+    font-size: 24px !important;
+    font-weight: 540;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  .landing-story-description {
+    max-width: 52ch !important;
+    min-width: 0 !important;
+    color: var(--text-muted);
+    font-size: 18px !important;
+    font-weight: 330;
+    line-height: 1.45;
+  }
+
+  .landing-story-mobile-copy h2,
+  .landing-story-mobile-copy p {
+    max-width: 52ch !important;
+    min-width: 0 !important;
+  }
+
+  .landing-story-mobile-copy .landing-eyebrow {
+    width: max-content;
+    white-space: nowrap;
+  }
+
+  .landing-story-panel {
+    width: min(100%, 560px) !important;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in oklch, var(--foreground) 12%, var(--hairline)) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--surface-elevated);
+    padding: clamp(24px, 2.5vw, 40px);
+    box-shadow: var(--shadow-xs);
+  }
+
+  .landing-story-visual {
+    width: 100%;
+    max-width: none;
+    border-radius: var(--radius-md) !important;
+    box-shadow: none !important;
+  }
+
+  .landing-story-panel p {
+    max-width: 52ch !important;
+    min-width: 0 !important;
+  }
+
+  .landing-button {
+    min-height: 44px;
+    border-radius: var(--radius-2xl) !important;
+    padding-inline: var(--spacing-lg);
+    font-size: 16px !important;
+    font-weight: 480;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 767px) {
+    .landing-section {
+      padding-block: 64px;
+      padding-inline: 20px;
+    }
+
+    .landing-container {
+      row-gap: 48px;
+    }
+
+    .landing-card p,
+    .landing-section-header > p,
+    .landing-lead,
+    .landing-section p {
+      min-width: 0;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1279px) {
+    .landing-story-desktop {
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    }
+  }
+
   .landing-panel {
     @apply rounded-xl border border-hairline bg-white p-8 shadow-xs;
   }
@@ -727,6 +1018,63 @@
   }
   .chat-divider {
     @apply border-hairline/40 my-6;
+  }
+
+  /* ─── Playground: readable AI response rhythm ─── */
+  .playground-ai-response {
+    overflow-wrap: anywhere;
+  }
+  .playground-ai-response p {
+    margin: 0.65rem 0;
+    white-space: pre-wrap;
+  }
+  .playground-ai-response p:first-child,
+  .playground-ai-response h1:first-child,
+  .playground-ai-response h2:first-child,
+  .playground-ai-response h3:first-child {
+    margin-top: 0;
+  }
+  .playground-ai-response p:last-child,
+  .playground-ai-response ul:last-child,
+  .playground-ai-response ol:last-child,
+  .playground-ai-response pre:last-child {
+    margin-bottom: 0;
+  }
+  .playground-ai-response h1,
+  .playground-ai-response h2,
+  .playground-ai-response h3 {
+    margin: 1rem 0 0.45rem;
+    font-weight: 540;
+    line-height: 1.3;
+  }
+  .playground-ai-response ul,
+  .playground-ai-response ol {
+    margin: 0.65rem 0;
+    padding-left: 1.25rem;
+  }
+  .playground-ai-response li {
+    margin: 0.3rem 0;
+    padding-left: 0.15rem;
+  }
+  .playground-ai-response pre {
+    max-width: 100%;
+    margin: 0.8rem 0;
+    overflow-x: auto;
+    padding: 0.8rem;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-md);
+    background: var(--canvas);
+  }
+  .playground-ai-response pre code {
+    display: block;
+    min-width: max-content;
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+  .playground-ai-response a {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
   }
 
   /* ─── Generation progress checklist ─── */

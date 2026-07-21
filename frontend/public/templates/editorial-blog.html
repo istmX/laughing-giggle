@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>l'Écrit — thoughts on typography and restraint</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Playfair Display & Inter Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #18181b;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden selection:bg-zinc-100 selection:text-black">
+
+  <!-- Header Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-white/85 backdrop-blur-md border-b border-zinc-100 h-16">
+    <div class="max-w-[760px] mx-auto px-6 h-full flex items-center justify-between">
+      <span class="font-serif italic font-semibold text-xl tracking-tight">l'Écrit</span>
+      
+      <!-- Typography adjustments controls -->
+      <div class="flex items-center gap-2 border border-zinc-200 p-1 rounded-lg">
+        <button onclick="adjustFontSize(-2)" class="p-1 hover:bg-zinc-100 rounded text-zinc-500 hover:text-black transition-colors" title="Decrease font size">
+          <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+        </button>
+        <span id="font-size-indicator" class="text-[10px] font-mono font-bold text-zinc-400 px-1">16px</span>
+        <button onclick="adjustFontSize(2)" class="p-1 hover:bg-zinc-100 rounded text-zinc-500 hover:text-black transition-colors" title="Increase font size">
+          <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-[760px] mx-auto px-6 pt-24 pb-20">
+    
+    <!-- Category filter buttons -->
+    <div class="flex gap-2 border-b border-zinc-100 pb-6 mb-12">
+      <button onclick="filterArticles('all')" id="btn-all" class="px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider bg-zinc-900 text-white transition-all">
+        ALL
+      </button>
+      <button onclick="filterArticles('design')" id="btn-design" class="px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-black transition-all">
+        DESIGN
+      </button>
+      <button onclick="filterArticles('motion')" id="btn-motion" class="px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-black transition-all">
+        MOTION
+      </button>
+      <button onclick="filterArticles('code')" id="btn-code" class="px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-black transition-all">
+        CODE
+      </button>
+    </div>
+
+    <!-- Article lists -->
+    <div class="flex flex-col gap-12">
+      <!-- Article 1 -->
+      <article class="article-item flex flex-col gap-3" data-category="design">
+        <div class="flex items-center gap-3 text-xs text-zinc-400 font-mono">
+          <span>Jul 18, 2026</span>
+          <span>·</span>
+          <span>5 min read</span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-serif text-zinc-900 leading-tight hover:text-stone-600 transition-colors">
+          The restraint of design details
+        </h2>
+        <p class="article-body text-zinc-600 leading-relaxed font-sans mt-2" style="font-size: 16px;">
+          Why reducing container outlines, glass borders, and multiple colors creates long-term structural confidence.
+        </p>
+        <button class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-900 mt-4 hover:underline">
+          Read article <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </article>
+
+      <!-- Article 2 -->
+      <article class="article-item flex flex-col gap-3" data-category="motion">
+        <div class="flex items-center gap-3 text-xs text-zinc-400 font-mono">
+          <span>Jul 10, 2026</span>
+          <span>·</span>
+          <span>8 min read</span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-serif text-zinc-900 leading-tight hover:text-stone-600 transition-colors">
+          Spring kinetics and dynamic timing
+        </h2>
+        <p class="article-body text-zinc-600 leading-relaxed font-sans mt-2" style="font-size: 16px;">
+          A technical analysis of exponential ease-out curves and timing values in product transitions.
+        </p>
+        <button class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-900 mt-4 hover:underline">
+          Read article <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </article>
+
+      <!-- Article 3 -->
+      <article class="article-item flex flex-col gap-3" data-category="code">
+        <div class="flex items-center gap-3 text-xs text-zinc-400 font-mono">
+          <span>Jun 28, 2026</span>
+          <span>·</span>
+          <span>6 min read</span>
+        </div>
+        <h2 class="text-2xl md:text-3xl font-serif text-zinc-900 leading-tight hover:text-stone-600 transition-colors">
+          Compiling edge databases safely
+        </h2>
+        <p class="article-body text-zinc-600 leading-relaxed font-sans mt-2" style="font-size: 16px;">
+          Structuring secure PII filter nodes to prevent raw compiler logs leaks.
+        </p>
+        <button class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-900 mt-4 hover:underline">
+          Read article <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </article>
+    </div>
+
+    <!-- Newsletter Block -->
+    <div class="mt-24 p-8 border border-zinc-100 bg-zinc-50 rounded-2xl">
+      <h3 class="font-serif text-xl font-bold mb-3 text-zinc-900">Subscribe to l'Écrit</h3>
+      <p class="text-zinc-500 text-[14px] leading-relaxed mb-6">
+        Get bi-weekly case articles directly in your inbox. Free subscription. No visual ads or spam.
+      </p>
+
+      <div id="sub-form-container">
+        <form onsubmit="handleSubscribe(event)" class="flex flex-col sm:flex-row gap-2.5">
+          <input type="email" placeholder="Enter email address" class="flex-1 px-4 py-2 border border-zinc-200 bg-white rounded-lg text-sm outline-none focus:border-zinc-500 transition-colors" required>
+          <button type="submit" class="px-5 py-2 bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all">
+            Join <i data-lucide="mail" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </div>
+      <div id="sub-success" class="hidden bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-sm text-emerald-800 flex items-center gap-3">
+        <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-[10px]">&#10003;</span>
+        <span>Subscribed! Check your inbox soon.</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Detailed Footer -->
+  <footer class="bg-zinc-50 border-t border-zinc-100 py-16">
+    <div class="max-w-[760px] mx-auto px-6 grid grid-cols-2 gap-8">
+      <div>
+        <span class="font-serif italic text-zinc-900 text-[18px]">l'Écrit</span>
+        <p class="text-zinc-400 text-xs mt-2">&copy; 2026 l'Écrit. All rights reserved.</p>
+      </div>
+      <div class="flex flex-col gap-2 text-xs text-zinc-500 font-mono uppercase tracking-wider items-end justify-center">
+        <a href="#" class="hover:text-black">RSS Feed</a>
+        <a href="#" class="hover:text-black">Archived Posts</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Adjust font size controls
+    let currentSize = 16;
+
+    function adjustFontSize(offset) {
+      currentSize = Math.max(12, Math.min(24, currentSize + offset));
+      document.getElementById('font-size-indicator').innerText = `${currentSize}px`;
+
+      const bodies = document.querySelectorAll('.article-body');
+      bodies.forEach(b => {
+        b.style.fontSize = `${currentSize}px`;
+      });
+    }
+
+    // Article Category filters
+    function filterArticles(cat) {
+      const items = document.querySelectorAll('.article-item');
+      const tags = ['all', 'design', 'motion', 'code'];
+
+      tags.forEach(t => {
+        const btn = document.getElementById(`btn-${t}`);
+        if (t === cat) {
+          btn.className = "px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider bg-zinc-900 text-white transition-all";
+        } else {
+          btn.className = "px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-black transition-all";
+        }
+      });
+
+      items.forEach(item => {
+        const itemCat = item.getAttribute('data-category');
+        if (cat === 'all' || itemCat === cat) {
+          gsap.to(item, { opacity: 1, y: 0, duration: 0.3, display: 'flex' });
+        } else {
+          gsap.to(item, { opacity: 0, y: 15, duration: 0.3, display: 'none' });
+        }
+      });
+    }
+
+    function handleSubscribe(e) {
+      e.preventDefault();
+      document.getElementById('sub-form-container').classList.add('hidden');
+      document.getElementById('sub-success').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

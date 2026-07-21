@@ -48,7 +48,6 @@ const useAuthStore = create(
 
       login: async (credentials) => {
         set({ status: 'loading', error: null })
-        const loadingToast = toast.loading('Signing in...')
 
         try {
           const response = await loginUser(credentials)
@@ -61,19 +60,16 @@ const useAuthStore = create(
             error: null,
           })
           
-          toast.success('Welcome back!', { id: loadingToast })
           return auth
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Login failed'
           set({ status: 'error', error: message })
-          toast.error(message, { id: loadingToast })
           throw error
         }
       },
 
       signup: async (payload) => {
         set({ status: 'loading', error: null })
-        const loadingToast = toast.loading('Creating account...')
 
         try {
           const response = await registerUser(payload)
@@ -86,19 +82,16 @@ const useAuthStore = create(
             error: null,
           })
 
-          toast.success('Account created successfully!', { id: loadingToast })
           return auth
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Signup failed'
           set({ status: 'error', error: message })
-          toast.error(message, { id: loadingToast })
           throw error
         }
       },
 
       googleLogin: async ({ credential }) => {
         set({ status: 'loading', error: null })
-        const loadingToast = toast.loading('Authenticating with Google...')
 
         try {
           const response = await googleLoginRequest({ credential })
@@ -111,12 +104,10 @@ const useAuthStore = create(
             error: null,
           })
 
-          toast.success('Google login successful!', { id: loadingToast })
           return auth
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Google sign-in failed'
           set({ status: 'error', error: message })
-          toast.error(message, { id: loadingToast })
           throw error
         }
       },

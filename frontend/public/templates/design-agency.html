@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA — Digital Creative Agency</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Outfit & JetBrains Mono Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <!-- Lenis for smooth scroll -->
+  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            neonRed: '#ff003c'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #000000;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden selection:bg-neonRed selection:text-white">
+
+  <!-- Glowing overlay -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neonRed/5 rounded-full blur-[150px] pointer-events-none"></div>
+
+  <!-- Header Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-black/85 backdrop-blur-md border-b border-zinc-900/60 h-16">
+    <div class="max-w-[1200px] mx-auto px-6 h-full flex items-center justify-between">
+      <span class="font-mono text-xs font-black tracking-[0.25em] text-neonRed uppercase">STUDIO.AURA</span>
+      <nav class="hidden md:flex items-center gap-8 text-[11px] font-mono tracking-widest text-zinc-400">
+        <a href="#work" class="hover:text-white transition-colors">PROJECTS</a>
+        <a href="#capabilities" class="hover:text-white transition-colors">CAPABILITIES</a>
+        <a href="#quote" class="hover:text-white transition-colors">THOUGHTS</a>
+        <a href="#brief" class="hover:text-white transition-colors">START BRIEF</a>
+      </nav>
+      <button class="px-5 py-1.5 bg-neonRed hover:bg-[#d00030] text-white rounded-full text-[12px] font-mono tracking-wider transition-all">
+        GET SYSTEM
+      </button>
+    </div>
+  </header>
+
+  <!-- 1. Hero Section -->
+  <section class="max-w-[1200px] mx-auto px-6 pt-32 pb-24 min-h-screen flex flex-col justify-center items-start">
+    <div class="border-l-4 border-neonRed pl-6 md:pl-8 reveal-up">
+      <span class="font-mono text-xs text-neonRed tracking-[0.2em] uppercase block mb-4">AWARDS AGENCY INDEX</span>
+      <h1 class="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] uppercase max-w-5xl">
+        We architect<br/>interfaces that demand attention.
+      </h1>
+      <p class="text-zinc-400 font-mono text-[13px] tracking-wide mt-8 max-w-xl leading-relaxed">
+        Aura is a digital creative agency. We build interfaces with massive typographic contrast, micro-interactions, and premium motion behaviors.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2. Interactive Projects (Hover selection reveals details) -->
+  <section id="work" class="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900">
+    <span class="font-mono text-xs text-zinc-500 tracking-widest block mb-12">01 · SELECTED CASES</span>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-start">
+      <!-- Project selection lists -->
+      <div class="flex flex-col border-t border-zinc-900">
+        <div onclick="selectProject(0)" onmouseenter="selectProject(0)" class="project-row py-8 border-b border-zinc-900 cursor-pointer flex justify-between items-center transition-all border-neonRed">
+          <div>
+            <span class="font-mono text-[10px] text-zinc-500 tracking-wider block mb-1">BRAND & PRODUCT</span>
+            <h3 id="proj-title-0" class="text-xl md:text-3xl font-black uppercase tracking-tight text-neonRed transition-colors">Vectra Mobile Framework</h3>
+          </div>
+          <i data-lucide="arrow-up-right" id="proj-icon-0" class="w-5 h-5 text-neonRed transition-transform translate-x-0.5 -translate-y-0.5"></i>
+        </div>
+
+        <div onclick="selectProject(1)" onmouseenter="selectProject(1)" class="project-row py-8 border-b border-zinc-900 cursor-pointer flex justify-between items-center transition-all">
+          <div>
+            <span class="font-mono text-[10px] text-zinc-500 tracking-wider block mb-1">PRODUCT DESIGN</span>
+            <h3 id="proj-title-1" class="text-xl md:text-3xl font-black uppercase tracking-tight text-white transition-colors">Linear Workspace Sync</h3>
+          </div>
+          <i data-lucide="arrow-up-right" id="proj-icon-1" class="w-5 h-5 text-zinc-500 transition-transform"></i>
+        </div>
+
+        <div onclick="selectProject(2)" onmouseenter="selectProject(2)" class="project-row py-8 border-b border-zinc-900 cursor-pointer flex justify-between items-center transition-all">
+          <div>
+            <span class="font-mono text-[10px] text-zinc-500 tracking-wider block mb-1">3D & MOTION</span>
+            <h3 id="proj-title-2" class="text-xl md:text-3xl font-black uppercase tracking-tight text-white transition-colors">Aura Interactive Sound</h3>
+          </div>
+          <i data-lucide="arrow-up-right" id="proj-icon-2" class="w-5 h-5 text-zinc-500 transition-transform"></i>
+        </div>
+      </div>
+
+      <!-- Live details display board -->
+      <div class="p-8 border border-zinc-900 bg-zinc-950/40 rounded-3xl min-h-[360px] flex flex-col justify-between relative overflow-hidden reveal-up">
+        <div class="absolute top-0 right-0 bg-neonRed/10 text-neonRed font-mono text-[10px] px-4 py-1.5 rounded-bl-xl border-l border-b border-zinc-900">
+          ACTIVE SPEC
+        </div>
+        <div>
+          <span class="font-mono text-xs text-zinc-500">PROJECT METADATA</span>
+          <h3 id="display-title" class="text-3xl font-black uppercase tracking-tight mt-4 text-white">Vectra Mobile Framework</h3>
+          <p id="display-desc" class="text-zinc-400 font-mono text-[13px] leading-relaxed mt-6 max-w-md">
+            Complete native redesign of habit trackers, streaks, and settings sheets.
+          </p>
+        </div>
+        <div class="flex justify-between items-center border-t border-zinc-900 pt-6 mt-8">
+          <span id="display-year" class="font-mono text-xs text-zinc-500">EDITION: 2026</span>
+          <button class="px-5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full font-mono text-[11px] flex items-center gap-2 border border-zinc-800">
+            EXPLORE SPEC <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Capabilities -->
+  <section id="capabilities" class="max-w-[1200px] mx-auto px-6 py-24 border-t border-zinc-900">
+    <span class="font-mono text-xs text-zinc-500 tracking-widest block mb-12">02 · CAPABILITIES</span>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="p-8 border border-zinc-900 rounded-3xl bg-zinc-950/20 hover:border-zinc-800 transition-colors group reveal-up">
+        <i data-lucide="layout" class="w-8 h-8 text-neonRed mb-6"></i>
+        <h3 class="text-xl font-bold uppercase mb-4">Interface Systems</h3>
+        <p class="text-zinc-400 text-sm font-mono leading-relaxed">
+          Strict token metrics governing layout radius, spacing, margins, and custom components.
+        </p>
+      </div>
+
+      <div class="p-8 border border-zinc-900 rounded-3xl bg-zinc-950/20 hover:border-zinc-800 transition-colors group reveal-up">
+        <i data-lucide="layers" class="w-8 h-8 text-neonRed mb-6"></i>
+        <h3 class="text-xl font-bold uppercase mb-4">Motion Engineering</h3>
+        <p class="text-zinc-400 text-sm font-mono leading-relaxed">
+          Exponential timings, spring kinetics, and staggered cascade lists targeting smooth 60fps.
+        </p>
+      </div>
+
+      <div class="p-8 border border-zinc-900 rounded-3xl bg-zinc-950/20 hover:border-zinc-800 transition-colors group reveal-up">
+        <i data-lucide="command" class="w-8 h-8 text-neonRed mb-6"></i>
+        <h3 class="text-xl font-bold uppercase mb-4">Model Integration</h3>
+        <p class="text-zinc-400 text-sm font-mono leading-relaxed">
+          Routing logic mapping user queries and context databases safely under 120ms.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Client Quotes -->
+  <section id="quote" class="max-w-[900px] mx-auto px-6 py-24 border-t border-zinc-900 text-center">
+    <span class="font-mono text-xs text-neonRed tracking-widest block mb-6">OPINIONS</span>
+    <div class="reveal-up">
+      <blockquote class="text-2xl md:text-4xl font-semibold leading-tight mb-8">
+        "Aura restructured our interface systems, resulting in an immediate 40% gain in sync latency and team confidence."
+      </blockquote>
+      <p class="font-mono text-xs text-zinc-500">— DR. KAI BRANDT, DIRECTOR OF SYSTEMS</p>
+    </div>
+  </section>
+
+  <!-- 5. Brief Form -->
+  <section id="brief" class="max-w-[600px] mx-auto px-6 py-24 border-t border-zinc-900 text-center">
+    <span class="font-mono text-xs text-neonRed tracking-[0.25em] uppercase block mb-4">COLLABORATE</span>
+    <h2 class="text-3xl md:text-5xl font-black uppercase tracking-tight mb-8">HAVE A SYSTEM BRIEF?</h2>
+    <form onsubmit="submitBrief(event)" class="flex flex-col gap-4 text-left font-mono text-[13px]">
+      <input type="text" placeholder="COMPANY NAME" class="px-4 py-3 bg-black border border-zinc-800 text-white rounded-lg outline-none focus:border-neonRed transition-colors" required>
+      <input type="email" placeholder="EMAIL ADDRESS" class="px-4 py-3 bg-black border border-zinc-800 text-white rounded-lg outline-none focus:border-neonRed transition-colors" required>
+      <textarea placeholder="SYSTEM REQUIREMENTS & GOALS" rows="4" class="px-4 py-3 bg-black border border-zinc-800 text-white rounded-lg outline-none focus:border-neonRed transition-colors" required></textarea>
+      <button type="submit" class="w-full py-3 bg-neonRed hover:bg-[#d00030] text-white font-bold rounded-full transition-all">INITIALIZE BRIEF</button>
+    </form>
+    <div id="brief-success" class="hidden mt-6 bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-zinc-300 flex items-center gap-3 justify-center font-mono text-xs">
+      <span>BRIEF SENT. AN AGENT WILL RESPOND SHORTLY.</span>
+    </div>
+  </section>
+
+  <!-- Detailed Footer -->
+  <footer class="bg-black border-t border-zinc-900 py-16">
+    <div class="max-w-[1200px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div>
+        <span class="font-mono text-xs tracking-widest text-neonRed font-black uppercase">STUDIO.AURA</span>
+        <p class="text-zinc-650 text-xs mt-4 leading-relaxed font-mono">&copy; 2026 Aura Studio. All rights reserved.</p>
+      </div>
+      <div>
+        <h4 class="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-4">Navigation</h4>
+        <ul class="space-y-2 text-xs text-zinc-400 font-mono">
+          <li><a href="#" class="hover:text-white transition-colors">PROJECTS</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">CAPABILITIES</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-4">Design Specs</h4>
+        <ul class="space-y-2 text-xs text-zinc-400 font-mono">
+          <li><a href="#" class="hover:text-white transition-colors">COLOR THEORY</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">TYPOGRAPHY</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-4">Contact</h4>
+        <ul class="space-y-2 text-xs text-zinc-400 font-mono">
+          <li><a href="#" class="hover:text-white transition-colors">START BRIEF</a></li>
+          <li><a href="#" class="hover:text-white transition-colors">EMAIL</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Smooth Scroll Lenis
+    if (window.self === window.top) {
+      const lenis = new Lenis({
+        duration: 1.2,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smooth: true
+      });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    }
+
+    // GSAP Scroll Animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.utils.toArray('.reveal-up').forEach((elem) => {
+      gsap.fromTo(elem, 
+        { y: 30, opacity: 0 },
+        { 
+          y: 0, 
+          opacity: 1, 
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: elem,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        }
+      );
+    });
+
+    // Active project hover interaction details
+    const projects = [
+      { title: 'Vectra Mobile Framework', desc: 'Complete native redesign of habit trackers, streaks, and settings sheets.', year: '2026' },
+      { title: 'Linear Workspace Sync', desc: 'A custom developer console illustrating workspace latency parameters.', year: '2025' },
+      { title: 'Aura Interactive Sound', desc: 'Staggered soundscape visualizer with custom CSS spring kinetic sliders.', year: '2025' }
+    ];
+
+    function selectProject(idx) {
+      // Elements
+      const dTitle = document.getElementById('display-title');
+      const dDesc = document.getElementById('display-desc');
+      const dYear = document.getElementById('display-year');
+
+      // Update contents
+      dTitle.innerText = projects[idx].title;
+      dDesc.innerText = projects[idx].desc;
+      dYear.innerText = `EDITION: ${projects[idx].year}`;
+
+      // Reset all row text & icons
+      for (let i = 0; i < 3; i++) {
+        const row = document.querySelectorAll('.project-row')[i];
+        const title = document.getElementById(`proj-title-${i}`);
+        const icon = document.getElementById(`proj-icon-${i}`);
+
+        if (i === idx) {
+          row.classList.add('border-neonRed');
+          title.className = "text-xl md:text-3xl font-black uppercase tracking-tight text-neonRed transition-colors";
+          icon.className = "w-5 h-5 text-neonRed transition-transform translate-x-0.5 -translate-y-0.5";
+        } else {
+          row.classList.remove('border-neonRed');
+          title.className = "text-xl md:text-3xl font-black uppercase tracking-tight text-white transition-colors";
+          icon.className = "w-5 h-5 text-zinc-500 transition-transform";
+        }
+      }
+    }
+
+    function submitBrief(e) {
+      e.preventDefault();
+      document.getElementById('brief-success').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

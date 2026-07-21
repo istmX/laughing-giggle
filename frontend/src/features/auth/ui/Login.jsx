@@ -11,6 +11,8 @@ import AuthShell from './AuthShell'
 import AuthField from './AuthField'
 import AuthSocialSection from './AuthSocialSection'
 import { AuthSubmitButton } from './AuthSubmitButton'
+import { formatAuthError } from '../utils/error'
+import { AuthErrorModal } from './AuthErrorModal'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -18,19 +20,33 @@ const Login = () => {
   const [formError, setFormError] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [dismissedError, setDismissedError] = useState('')
   const prefersReducedMotion = useReducedMotion()
   const { ready, loading: googleLoading, error: googleError, signInWithGoogle } = useGoogleAuth({
     onCredential: async (credential) => { await googleLogin({ credential }) },
   })
+
+  const rawError = formError || error || googleError
+  const errorKey = rawError ? String(rawError) : ''
+  const modalOpen = Boolean(errorKey && errorKey !== dismissedError)
+  const activeError = rawError ? formatAuthError(rawError) : ''
+
+  const handleCloseModal = () => {
+    setDismissedError(errorKey)
+    setFormError('')
+    useAuthStore.setState({ error: null })
+  }
 
   const isLoading = status === 'loading'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormError('')
+    setDismissedError('')
     try {
       const auth = await login({ email: email.trim(), password })
-      if (auth?.token) navigate('/dashboard')
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
+      if (auth?.token) navigate(redirectUrl)
       else setFormError('Sign-in did not return user data. Please try again.')
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Unable to sign in')
@@ -39,9 +55,11 @@ const Login = () => {
 
   const handleGoogle = async () => {
     setFormError('')
+    setDismissedError('')
     try {
       await signInWithGoogle()
-      if (useAuthStore.getState().token) navigate('/dashboard')
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
+      if (useAuthStore.getState().token) navigate(redirectUrl)
       else setFormError('Google sign-in did not return user data.')
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Unable to sign in with Google')
@@ -55,8 +73,8 @@ const Login = () => {
   })
 
   return (
-    <AuthShell panelTitle="Welcome back" panelDescription="Sign in to your workspace.">
-      <form className="space-y-[var(--spacing-md)]" onSubmit={handleSubmit}>
+    <AuthShell panelTitle="Welcome back" panelDescription="Sign in to your Zenix workspace." accent="lime">
+      <form className="space-y-6" onSubmit={handleSubmit}>
         <motion.div {...fieldDelay(0)}>
           <AuthField label="Email" name="login-email" type="email" placeholder="you@example.com"
             value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" icon={Mail} />
@@ -73,15 +91,8 @@ const Login = () => {
           </Link>
         </motion.div>
 
-        {(formError || error || googleError) && (
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="rounded-[var(--radius-sm)] bg-destructive/5 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-[var(--text-body-sm)] text-destructive">
-            {formError || error || googleError}
-          </motion.p>
-        )}
-
         <motion.div {...fieldDelay(3)}>
-          <AuthSubmitButton loading={isLoading}>Sign in</AuthSubmitButton>
+          <AuthSubmitButton loading={isLoading} loadingLabel="Signing in...">Sign in</AuthSubmitButton>
         </motion.div>
       </form>
 
@@ -95,6 +106,8 @@ const Login = () => {
         Don&apos;t have an account?{' '}
         <Link to="/signup" className="font-[var(--font-weight-480)] text-ink transition-colors hover:text-ink/50">Sign up</Link>
       </motion.p>
+
+      <AuthErrorModal isOpen={modalOpen} onClose={handleCloseModal} errorMessage={activeError} />
     </AuthShell>
   )
 }

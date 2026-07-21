@@ -11,11 +11,7 @@ export const ThemeProvider = ({ children }) => {
     root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
 
     const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/projects/')
-    if (!isDashboard) {
-      root.classList.add('light')
-      return
-    }
-
+    
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const applySystemTheme = (e) => {
@@ -29,17 +25,26 @@ export const ThemeProvider = ({ children }) => {
       return () => mediaQuery.removeEventListener('change', applySystemTheme)
     }
 
-    if (theme === 'midnight') {
-      root.classList.add('dark', 'theme-midnight')
-      return
-    }
+    if (isDashboard) {
+      if (theme === 'midnight') {
+        root.classList.add('dark', 'theme-midnight')
+        return
+      }
 
-    if (theme === 'emerald') {
-      root.classList.add('dark', 'theme-emerald')
-      return
-    }
+      if (theme === 'emerald') {
+        root.classList.add('dark', 'theme-emerald')
+        return
+      }
 
-    root.classList.add(theme)
+      root.classList.add(theme)
+    } else {
+      // Landing page and other pages support light and dark theme
+      if (theme === 'dark' || theme === 'midnight' || theme === 'emerald') {
+        root.classList.add('dark')
+      } else {
+        root.classList.add('light')
+      }
+    }
   }, [theme, location.pathname])
 
   return children

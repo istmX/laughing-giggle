@@ -1,66 +1,77 @@
 import { motion } from 'framer-motion'
-import { Folder, ArrowRight, Trash2, Pencil, Star } from 'lucide-react'
+import { ArrowUpRight, Folder, Pencil, Star, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
+const ACCENTS = ['bg-block-lilac', 'bg-block-mint', 'bg-block-coral', 'bg-block-cream']
+
+function formatDate(value) {
+  if (!value) return 'No activity yet'
+  return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDelete }) {
+  const accent = ACCENTS[index % ACCENTS.length]
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
+    <motion.article
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="group relative flex flex-col items-start p-6 text-left rounded-2xl border border-hairline bg-surface-elevated transition-colors hover:bg-surface-soft/50 w-full min-w-0 overflow-hidden"
+      transition={{ delay: index * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative flex min-h-[248px] flex-col overflow-hidden rounded-[var(--radius-lg)] border border-hairline bg-canvas transition-transform hover:-translate-y-0.5"
     >
-      <Link 
-        to={`/projects/${project._id}`} 
-        className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2" 
+      <div className={`${accent} relative h-16 shrink-0`} aria-hidden="true">
+        <div className="absolute -right-5 -top-9 size-28 rounded-full border-[10px] border-ink/10" />
+        <div className="absolute bottom-3 left-5 flex size-9 items-center justify-center rounded-[var(--radius-md)] border border-ink/10 bg-white/55 text-ink">
+          <Folder className="size-4" aria-hidden="true" />
+        </div>
+      </div>
+
+      <Link
+        to={`/projects/${project._id}`}
+        className="absolute inset-0 z-0 rounded-[var(--radius-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 focus-visible:ring-offset-2"
         aria-label={`Open project ${project.project_title}`}
       />
-      
-      <div className="absolute top-4 right-4 flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
-        <button 
-          onClick={(e) => onToggleFavorite(e, project)} 
-          className={`p-2 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-amber-500 hover:bg-amber-500/10' : 'text-ink-muted hover:text-ink hover:bg-surface-soft'}`}
-          title={project.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
-          aria-label="Toggle favorite"
-        >
-          <Star className="h-4 w-4" fill={project.is_favorite ? 'currentColor' : 'none'} />
-        </button>
-        <button 
-          onClick={(e) => onEdit(e, project)} 
-          className="p-2 text-ink-muted hover:text-ink hover:bg-surface-soft rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" 
-          title="Edit Title"
-          aria-label="Edit project title"
-        >
-          <Pencil className="h-4 w-4" />
-        </button>
-        <button 
-          onClick={(e) => onDelete(e, project)} 
-          className="p-2 text-ink-muted hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" 
-          title="Delete Project"
-          aria-label="Delete project"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+
+      <div className="relative z-10 flex flex-1 flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate text-[16px] font-[var(--font-weight-540)] tracking-[-0.02em] text-ink group-hover:underline group-hover:underline-offset-4">
+              {project.project_title}
+            </h3>
+            <p className="mt-2 line-clamp-2 text-[13px] leading-5 text-ink-muted">
+              {project.project_description || 'No description provided yet.'}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full border border-hairline bg-surface-soft px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-ink-muted">
+            Project
+          </span>
+        </div>
+
+        <div className="mt-auto flex items-end justify-between gap-3 pt-6">
+          <span className="text-[11px] text-ink-muted">Updated {formatDate(project.last_opened_at || project.createdAt)}</span>
+          <span className="flex items-center gap-1 text-[12px] font-[var(--font-weight-480)] text-ink">
+            Open <ArrowUpRight className="size-3.5" aria-hidden="true" />
+          </span>
+        </div>
       </div>
 
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-soft text-ink border border-hairline mb-4 group-hover:bg-ink group-hover:text-canvas transition-colors relative z-10 pointer-events-none shrink-0">
-        <Folder className="h-5 w-5" />
+      <div className="absolute right-3 top-20 z-20 flex items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+        <button
+          type="button"
+          onClick={(event) => onToggleFavorite(event, project)}
+          className={`flex size-9 items-center justify-center rounded-full bg-white/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-ink' : 'text-ink-muted hover:text-ink'}`}
+          title={project.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+          aria-label={project.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <Star className="size-4" fill={project.is_favorite ? 'currentColor' : 'none'} aria-hidden="true" />
+        </button>
+        <button type="button" onClick={(event) => onEdit(event, project)} className="flex size-9 items-center justify-center rounded-full bg-white/85 text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" title="Rename project" aria-label="Rename project">
+          <Pencil className="size-4" aria-hidden="true" />
+        </button>
+        <button type="button" onClick={(event) => onDelete(event, project)} className="flex size-9 items-center justify-center rounded-full bg-white/85 text-ink-muted transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" title="Delete project" aria-label="Delete project">
+          <Trash2 className="size-4" aria-hidden="true" />
+        </button>
       </div>
-
-      <h3 className="text-body-lg font-480 text-ink mb-1 pr-12 md:pr-24 relative z-10 pointer-events-none truncate w-full">{project.project_title}</h3>
-      <div className="w-full">
-        <p className="text-body-sm text-ink-muted line-clamp-2 mt-1 relative z-10 pointer-events-none w-full max-w-[60ch] block">
-          {project.project_description || 'No description provided'}
-        </p>
-      </div>
-      
-      <div className="mt-6 flex items-center gap-2 text-xs font-540 text-ink-muted uppercase tracking-wider relative z-10 pointer-events-none">
-        <span>{new Date(project.last_opened_at || project.createdAt).toLocaleDateString()}</span>
-        <span className="h-1 w-1 rounded-full bg-hairline" />
-        <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
-          Open <ArrowRight className="h-3 w-3" />
-        </span>
-      </div>
-    </motion.div>
+    </motion.article>
   )
 }

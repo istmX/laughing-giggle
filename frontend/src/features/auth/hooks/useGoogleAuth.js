@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { auth, googleProvider, signInWithPopup } from '@/lib/firebase';
+import { formatAuthError } from '../utils/error';
 
 const useGoogleAuth = ({ onCredential }) => {
   const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ const useGoogleAuth = ({ onCredential }) => {
       const idToken = await result.user.getIdToken();
       await onCredential(idToken);
     } catch (err) {
-      const message = err.message || 'Failed to sign in with Google';
+      const message = formatAuthError(err);
       setError(message);
       throw new Error(message);
     } finally {

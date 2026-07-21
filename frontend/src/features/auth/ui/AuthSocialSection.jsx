@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 const GoogleIcon = () => (
   <svg className="size-[18px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -23,10 +24,10 @@ const AuthSocialSection = ({ actionLabel = 'Continue with Google', loadingLabel 
       size="lg"
       onClick={onAction}
       disabled={!ready || loading || disabled}
-      className="h-[var(--spacing-xl)] w-full gap-[var(--spacing-sm)] text-[var(--text-body-sm)] font-[var(--font-weight-330)] tracking-[var(--tracking-body-sm)]"
+      className="h-12 w-full gap-[var(--spacing-sm)] rounded-full text-[var(--text-body-sm)] font-[var(--font-weight-330)] tracking-[var(--tracking-body-sm)]"
     >
-      <GoogleIcon />
-      {loading ? loadingLabel : actionLabel}
+      {loading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <GoogleIcon />}
+      <span>{loading ? loadingLabel : actionLabel}</span>
     </Button>
   </div>
 )

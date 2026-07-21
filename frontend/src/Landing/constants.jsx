@@ -1,16 +1,16 @@
 export const MOCKUP_DATA = {
   'architecture.md': {
-    iconColor: 'text-purple-400',
+    iconColor: 'text-emerald-400',
     title: 'Architecture Spec',
     description: 'The platform relies on a multi-agent orchestrator utilizing LangGraph state machines for resilient prompt execution and a 3-iteration self-correction loop.',
     codeSnippet: (
       <>
-        <div className="text-purple-400 mb-1">export const <span className="text-blue-400">ContextEngine</span> = new StateGraph(&#123;</div>
+        <div className="text-emerald-400 mb-1">export const <span className="text-blue-400">ContextEngine</span> = new StateGraph(&#123;</div>
         <div className="pl-4 text-zinc-300">channels: &#123;</div>
         <div className="pl-8 text-zinc-400">messages: <span className="text-orange-300">valueFromReducer</span>,</div>
         <div className="pl-8 text-zinc-400">artifacts: <span className="text-orange-300">artifactReducer</span>,</div>
         <div className="pl-4 text-zinc-300">&#125;</div>
-        <div className="text-purple-400">&#125;)</div>
+        <div className="text-emerald-400">&#125;)</div>
       </>
     ),
     agentLogs: [
@@ -24,7 +24,7 @@ export const MOCKUP_DATA = {
       element: (
         <div className="space-y-3 pt-2">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xs font-bold">In</div>
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold">In</div>
             <div className="flex-1 h-px bg-zinc-200" />
             <div className="w-20 h-8 rounded bg-zinc-900 text-white text-[10px] flex items-center justify-center font-medium shadow-sm">Router</div>
           </div>
@@ -49,7 +49,7 @@ export const MOCKUP_DATA = {
         <div className="pl-4 text-zinc-300">extend: &#123;</div>
         <div className="pl-8 text-zinc-400">colors: &#123;</div>
         <div className="pl-12 text-zinc-300">brand: <span className="text-emerald-300">'#0E0E11'</span>,</div>
-        <div className="pl-12 text-zinc-300">accent: <span className="text-emerald-300">'#6366F1'</span>,</div>
+        <div className="pl-12 text-zinc-300">accent: <span className="text-emerald-300">'#10B981'</span>,</div>
         <div className="pl-8 text-zinc-400">&#125;</div>
         <div className="pl-4 text-zinc-300">&#125;</div>
         <div className="text-blue-400">&#125;</div>

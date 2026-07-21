@@ -7,7 +7,7 @@ function getPageTitle(pathname) {
   if (pathname === '/dashboard/playground') return 'AI Playground'
   if (pathname === '/dashboard/context') return 'Context Library'
   if (pathname === '/dashboard/templates') return 'Templates'
-  if (pathname === '/dashboard/recent') return 'Recent History'
+  if (pathname === '/dashboard/recent') return 'Recent Projects'
   if (pathname === '/dashboard/favorites') return 'Favorites'
   if (pathname === '/dashboard/docs') return 'Documentation'
   if (pathname === '/dashboard/changelog') return 'Changelog'

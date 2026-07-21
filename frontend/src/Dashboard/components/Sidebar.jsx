@@ -94,7 +94,7 @@ function UserPopover({ user, logout, onClose }) {
                   </button>
                   <button 
                     onClick={() => { toast.dismiss(t.id); logout(); }}
-                    className="px-3 py-1.5 bg-red-500 text-white text-button font-480 rounded-md hover:bg-red-600 transition-colors"
+                    className="h-10 rounded-full bg-ink px-4 text-[13px] font-[var(--font-weight-480)] text-canvas transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                   >
                     Sign Out
                   </button>

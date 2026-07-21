@@ -70,7 +70,7 @@ function MarkdownCard({ file, prefersReducedMotion }) {
         animate={prefersReducedMotion ? {} : { y: [0, -4, 0], rotate: [file.rotate, file.rotate + 0.3, file.rotate] }}
         transition={{ duration: 6 + file.delay, repeat: Infinity, ease: 'easeInOut' }}
         style={{ rotate: file.rotate }}
-        className={`${file.color} rounded-[var(--radius-lg)] border border-ink/[0.06] px-[var(--spacing-md)] py-[var(--spacing-sm)] shadow-[0_4px_20px_rgba(0,0,0,0.06)] backdrop-blur-[2px]`}
+        className={`${file.color} rounded-[var(--radius-lg)] border border-ink/[0.06] px-[var(--spacing-md)] py-[var(--spacing-sm)] shadow-[0_2px_8px_rgba(0,0,0,0.04)] backdrop-blur-[2px]`}
       >
         <div className="flex items-center gap-[var(--spacing-xs)] mb-[var(--spacing-xs)]">
           <div className="flex gap-[3px]">

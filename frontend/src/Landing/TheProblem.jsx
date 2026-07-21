@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitType from 'split-type';
+import { usePreferencesStore } from '../features/preferences/store/preferences.store';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -281,7 +282,7 @@ export default function TheProblem() {
       {/* ────────────────────────────────────────────────────────────────────── */}
       <section
         ref={sectionRef}
-        className="hidden lg:flex relative w-full h-screen bg-white overflow-hidden flex-col"
+        className="hidden lg:flex relative w-full h-screen bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-hidden flex-col transition-colors duration-300"
       >
         {/* Top bar */}
         <div className="shrink-0 w-full flex items-center justify-between px-10 md:px-16 pt-8">
@@ -351,10 +352,10 @@ export default function TheProblem() {
       {/* ────────────────────────────────────────────────────────────────────── */}
       {/* MOBILE: stacked individual sections, each scroll-animated             */}
       {/* ────────────────────────────────────────────────────────────────────── */}
-      <div className="lg:hidden relative bg-white">
+      <div className="lg:hidden relative bg-white dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 transition-colors duration-300">
         {/* Sticky top bar */}
         <div
-          className="sticky top-0 z-20 w-full flex items-center justify-between px-5 sm:px-8 py-4 bg-white/95 backdrop-blur-sm border-b"
+          className="sticky top-0 z-20 w-full flex items-center justify-between px-5 sm:px-8 py-4 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b dark:border-zinc-900"
           style={{ borderColor: 'var(--hairline)' }}
         >
           <span
@@ -397,12 +398,17 @@ export default function TheProblem() {
 // ─── Shared card content ──────────────────────────────────────────────────────
 
 function CardInner({ item }) {
+  const theme = usePreferencesStore((state) => state.theme);
+  const isDark = theme === 'dark' || theme === 'midnight' || theme === 'emerald' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   return (
     <div
-      className="w-full p-8 md:p-10 rounded-xl"
+      className="w-full p-8 md:p-10 rounded-xl transition-colors duration-300"
       style={{
         border: `1px solid ${item.isSolution ? 'var(--brand-indigo)' : 'var(--hairline)'}`,
-        background: item.isSolution ? 'oklch(0.97 0.012 264)' : 'white',
+        background: item.isSolution 
+          ? (isDark ? 'oklch(0.18 0.02 264)' : 'oklch(0.97 0.012 264)') 
+          : (isDark ? 'oklch(0.14 0.005 264)' : 'white'),
         boxShadow: item.isSolution
           ? '0 0 0 1px var(--brand-indigo), 0 20px 40px -8px rgba(77,73,252,0.1)'
           : '0 4px 16px -4px rgba(0,0,0,0.08)',

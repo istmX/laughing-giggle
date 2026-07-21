@@ -156,3 +156,10 @@ __pycache__/
 
 # Qdrant / RAG
 qdrant_storage/
+
+
+.impeccable
+.codex
+.augment
+.aider_desk
+.agents

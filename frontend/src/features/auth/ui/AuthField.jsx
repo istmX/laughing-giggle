@@ -12,7 +12,7 @@ const AuthField = ({ label, name, type = 'text', value, onChange, placeholder, i
       <label
         htmlFor={name}
         className={cn(
-          'text-[13px] font-[var(--font-weight-330)] tracking-[var(--tracking-body-sm)] transition-colors duration-200',
+          'text-[13px] font-[var(--font-weight-480)] tracking-[var(--tracking-body-sm)] transition-colors duration-200',
           isFocused ? 'text-ink' : 'text-ink-muted',
         )}
       >
@@ -24,7 +24,7 @@ const AuthField = ({ label, name, type = 'text', value, onChange, placeholder, i
           <span
             className={cn(
               'pointer-events-none absolute left-[var(--spacing-sm)] top-1/2 z-10 -translate-y-1/2 transition-colors duration-200',
-              isFocused ? 'text-ink' : 'text-ink-soft',
+              isFocused ? 'text-ink' : 'text-ink-muted',
             )}
           >
             <Icon className="size-[15px]" strokeWidth={1.5} />
@@ -43,10 +43,11 @@ const AuthField = ({ label, name, type = 'text', value, onChange, placeholder, i
           autoComplete={autoComplete}
           inputMode={inputMode}
           className={cn(
-            'h-[var(--spacing-xl)] bg-canvas text-[var(--text-body-sm)] font-[var(--font-weight-320)] tracking-[var(--tracking-body-sm)] text-ink',
-            'placeholder:text-ink-muted placeholder:font-[var(--font-weight-320)]',
+            'h-12 bg-canvas text-[var(--text-body-sm)] font-[var(--font-weight-330)] tracking-[var(--tracking-body-sm)] text-ink',
+            'border-hairline placeholder:text-ink-muted placeholder:font-[var(--font-weight-330)]',
             Icon ? 'pl-[var(--spacing-xl)]' : 'pl-[var(--spacing-md)]',
             'pr-[var(--spacing-sm)]',
+            'focus-visible:border-ink/50 focus-visible:ring-2 focus-visible:ring-ink/10',
           )}
         />
 
@@ -55,8 +56,8 @@ const AuthField = ({ label, name, type = 'text', value, onChange, placeholder, i
             type="button"
             onClick={() => setShowPassword((v) => !v)}
             className={cn(
-              'absolute right-[var(--spacing-xs)] top-1/2 -translate-y-1/2 rounded-[var(--radius-sm)] p-[var(--spacing-xxs)] transition-all duration-150',
-              'text-ink-soft hover:text-ink hover:bg-surface-soft',
+              'absolute right-[var(--spacing-xxs)] top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-[var(--radius-sm)] transition-all duration-150',
+              'text-ink-muted hover:bg-surface-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-ink/20',
             )}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
