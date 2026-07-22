@@ -202,6 +202,8 @@ export function Navbar() {
             onClick={toggleMobileMenu}
             className="md:hidden flex flex-col items-center justify-center w-8 h-8 gap-1 cursor-pointer"
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu-overlay"
           >
             <span className="hamburger-top w-4 h-[1.2px] bg-zinc-900 dark:bg-zinc-100 block origin-center transition-transform rounded-full"></span>
             <span className="hamburger-mid w-4 h-[1.2px] bg-zinc-900 dark:bg-zinc-100 block transition-opacity rounded-full"></span>
@@ -212,6 +214,7 @@ export function Navbar() {
 
       <div 
         ref={mobileMenuRef}
+        id="mobile-menu-overlay"
         className="fixed inset-0 z-40 bg-white dark:bg-[#0b0b0d] pt-24 px-6 pb-6 hidden flex-col"
         style={{ display: 'none', opacity: 0 }}
       >

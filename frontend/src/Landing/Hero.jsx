@@ -1,177 +1,35 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import SplitType from 'split-type'
 import { RollingButton } from '../components/ui/RollingButton'
 import { Navbar } from '../components/ui/Navbar'
+import { useScramble } from '../hooks/useScramble'
 
 
 export default function Hero() {
-  const [displayWord1, setDisplayWord1] = useState('STOP')
-  const [displayWord2, setDisplayWord2] = useState('SLOP.')
-  const [displayGhost, setDisplayGhost] = useState('CONTEXT')
-
-  const scrambleIntervalRef1 = useRef(null)
-  const scrambleIntervalRef2 = useRef(null)
-  const scrambleGhostRef = useRef(null)
+  const word1 = useScramble({ enterTarget: 'START', leaveTarget: 'STOP', initial: 'STOP' })
+  const word2 = useScramble({
+    enterTarget: 'CONTEXT.',
+    leaveTarget: 'SLOP.',
+    initial: 'SLOP.',
+    preserve: (ch) => ch === '.',
+  })
+  const ghost = useScramble({ enterTarget: 'SLOP', leaveTarget: 'CONTEXT', initial: 'CONTEXT' })
 
   const containerRef = useRef(null)
 
-  const handleMouseEnter = () => {
-    if (scrambleIntervalRef1.current) clearInterval(scrambleIntervalRef1.current);
-    let iter1 = 0;
-    const target1 = 'START';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    
-    const interval1 = setInterval(() => {
-      iter1 += 1;
-      if (iter1 >= target1.length) {
-        setDisplayWord1(target1);
-        clearInterval(interval1);
-        return;
-      }
-      setDisplayWord1(
-        target1.split('').map((char, index) => {
-          if (index < iter1) return target1[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleIntervalRef1.current = interval1;
-
-    // 2. Scramble Line 2 word: SLOP. -> CONTEXT. (Snappy 15ms interval, increment by 1)
-    if (scrambleIntervalRef2.current) clearInterval(scrambleIntervalRef2.current);
-    let iter2 = 0;
-    const target2 = 'CONTEXT.';
-    
-    const interval2 = setInterval(() => {
-      iter2 += 1;
-      if (iter2 >= target2.length) {
-        setDisplayWord2(target2);
-        clearInterval(interval2);
-        return;
-      }
-      setDisplayWord2(
-        target2.split('').map((char, index) => {
-          if (char === '.') return '.';
-          if (index < iter2) return target2[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleIntervalRef2.current = interval2;
-  };
-
-  const handleMouseLeave = () => {
-    // 1. Scramble Line 1 word: START -> STOP (Snappy 15ms interval, increment by 1)
-    if (scrambleIntervalRef1.current) clearInterval(scrambleIntervalRef1.current);
-    let iter1 = 0;
-    const target1 = 'STOP';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    
-    const interval1 = setInterval(() => {
-      iter1 += 1;
-      if (iter1 >= target1.length) {
-        setDisplayWord1(target1);
-        clearInterval(interval1);
-        return;
-      }
-      setDisplayWord1(
-        target1.split('').map((char, index) => {
-          if (index < iter1) return target1[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleIntervalRef1.current = interval1;
-
-    // 2. Scramble Line 2 word: CONTEXT. -> SLOP. (Snappy 15ms interval, increment by 1)
-    if (scrambleIntervalRef2.current) clearInterval(scrambleIntervalRef2.current);
-    let iter2 = 0;
-    const target2 = 'SLOP.';
-    
-    const interval2 = setInterval(() => {
-      iter2 += 1;
-      if (iter2 >= target2.length) {
-        setDisplayWord2(target2);
-        clearInterval(interval2);
-        return;
-      }
-      setDisplayWord2(
-        target2.split('').map((char, index) => {
-          if (char === '.') return '.';
-          if (index < iter2) return target2[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleIntervalRef2.current = interval2;
-  };
-
-  // Scramble Background Ghost Word CONTEXT -> SLOP
-  const handleMouseEnterGhost = () => {
-    if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current);
-    let iter = 0;
-    const target = 'SLOP';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    const interval = setInterval(() => {
-      iter += 1;
-      if (iter >= target.length) {
-        setDisplayGhost(target);
-        clearInterval(interval);
-        return;
-      }
-      setDisplayGhost(
-        target.split('').map((char, index) => {
-          if (index < iter) return target[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleGhostRef.current = interval;
-  };
-
-  const handleMouseLeaveGhost = () => {
-    if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current);
-    let iter = 0;
-    const target = 'CONTEXT';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    const interval = setInterval(() => {
-      iter += 1;
-      if (iter >= target.length) {
-        setDisplayGhost(target);
-        clearInterval(interval);
-        return;
-      }
-      setDisplayGhost(
-        target.split('').map((char, index) => {
-          if (index < iter) return target[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleGhostRef.current = interval;
-  };
-
-  // Synchronized front & back scramble morph triggers
   const handleMouseEnterAll = () => {
-    handleMouseEnter();
-    handleMouseEnterGhost();
-  };
+    word1.handleEnter()
+    word2.handleEnter()
+    ghost.handleEnter()
+  }
 
   const handleMouseLeaveAll = () => {
-    handleMouseLeave();
-    handleMouseLeaveGhost();
-  };
-  useEffect(() => {
-    return () => {
-      if (scrambleIntervalRef1.current) clearInterval(scrambleIntervalRef1.current)
-      if (scrambleIntervalRef2.current) clearInterval(scrambleIntervalRef2.current)
-      if (scrambleGhostRef.current) clearInterval(scrambleGhostRef.current)
-    }
-  }, [])
+    word1.handleLeave()
+    word2.handleLeave()
+    ghost.handleLeave()
+  }
 
 
   useGSAP(() => {
@@ -362,7 +220,7 @@ export default function Hero() {
           onMouseLeave={handleMouseLeaveAll}
           className="font-sans font-black text-[clamp(140px,28vw,440px)] uppercase tracking-[-0.04em] text-zinc-950 dark:text-white opacity-[0.055] dark:opacity-[0.035] leading-none select-none pointer-events-auto cursor-pointer"
         >
-          {displayGhost}
+          {ghost.display}
         </span>
       </div>
       <Navbar />
@@ -374,7 +232,7 @@ export default function Hero() {
           {/* Headline (pointer-events-none added to avoid overlap with background elements) */}
           <h1 className="split-headline landing-display-tall max-w-7xl text-zinc-950 dark:text-white mx-auto uppercase select-none pointer-events-none" style={{ perspective: "1000px" }}>
             <span className="line-1 block w-fit mx-auto opacity-95 pointer-events-auto">
-              {displayWord1} shipping
+              {word1.display} shipping
             </span>
             <span className="line-2 block w-fit mx-auto mt-2 pointer-events-auto">
               AI <span 
@@ -382,7 +240,7 @@ export default function Hero() {
                 onMouseLeave={handleMouseLeaveAll}
                 className="relative inline-block cursor-pointer text-zinc-950 dark:text-white font-sans font-bold tracking-tight select-none group/slop px-1.5"
               >
-                {displayWord2}
+                {word2.display}
                 <span className="absolute bottom-2 left-0 w-full h-[4px] bg-zinc-950 dark:bg-white scale-x-0 origin-left group-hover/slop:scale-x-100 transition-transform duration-250 ease-out" />
               </span>
             </span>

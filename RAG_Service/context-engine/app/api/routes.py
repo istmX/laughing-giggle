@@ -133,6 +133,20 @@ async def generate_artifact(request: ArtifactRequest):
         retrieved_docs = retriever.retrieve_context(fpath)
         rag_context = retriever.format_context(retrieved_docs)
         
+        # Inject design taste files for design.md
+        if "design" in fpath.lower():
+            ui_path = Path(__file__).resolve().parent.parent / "knowledge" / "ui"
+            if ui_path.exists():
+                ui_details = []
+                for file in ui_path.glob("*.md"):
+                    try:
+                        ui_details.append(f"\n\n--- DESIGN GUIDE: {file.name} ---\n" + file.read_text(encoding="utf-8"))
+                    except Exception as e:
+                        logger.error(f"Error reading UI file {file.name}: {e}")
+                if ui_details:
+                    rag_context += "\n" + "\n".join(ui_details)
+                    logger.info(f"Successfully injected {len(ui_details)} design guides into RAG context.")
+        
         graph_input = {
             "refined_spec": spec,
             "rag_context": rag_context,
@@ -191,6 +205,19 @@ async def generate_project_context(request: ContextRequest):
                 
             retrieved_docs = retriever.retrieve_context(fpath)
             rag_context = retriever.format_context(retrieved_docs)
+            
+            # Inject design taste files for design.md
+            if "design" in fpath.lower():
+                ui_path = Path(__file__).resolve().parent.parent / "knowledge" / "ui"
+                if ui_path.exists():
+                    ui_details = []
+                    for file in ui_path.glob("*.md"):
+                        try:
+                            ui_details.append(f"\n\n--- DESIGN GUIDE: {file.name} ---\n" + file.read_text(encoding="utf-8"))
+                        except Exception as e:
+                            logger.error(f"Error reading UI file {file.name}: {e}")
+                    if ui_details:
+                        rag_context += "\n" + "\n".join(ui_details)
             
             graph_input = {
                 "refined_spec": spec,

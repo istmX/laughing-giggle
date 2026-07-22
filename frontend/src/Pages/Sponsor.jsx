@@ -2,8 +2,9 @@ import React, { useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useGSAP } from "@gsap/react"
+import { useNavigate } from "react-router-dom"
 import { Navbar } from "../components/ui/Navbar"
-import { GlowingEffect } from "@/components/ui/glowing-effect"
+import { GlowingCard } from "@/components/ui/GlowingCard"
 import Footer from "../Landing/Footer"
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -136,6 +137,7 @@ export default function SponsorsPage() {
   const checkPathRefs = useRef([]);
   const ctaButtonRefs = useRef([]);
   const skeletonRefs = useRef([]);
+  const navigate = useNavigate();
 
   useGSAP(
     () => {
@@ -447,7 +449,7 @@ export default function SponsorsPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              ref={(el) => (skeletonRefs.current[i] = el)}
+              ref={(el) => { skeletonRefs.current[i] = el }}
               className="skeleton-slot h-16 w-36 rounded-lg border border-hairline bg-surface-soft opacity-30"
             />
           ))}
@@ -470,7 +472,7 @@ export default function SponsorsPage() {
           <p className="w-full min-w-0 max-w-prose font-sans text-ink-muted">
             The first logo here could become part of the journey.
           </p>
-          <button className="group mt-2 inline-flex w-full max-w-full items-center justify-center gap-2 rounded-full border border-foreground/70 px-5 py-3 text-center font-sans text-sm transition-colors duration-300 hover:bg-foreground hover:text-background sm:w-auto sm:whitespace-nowrap sm:px-6">
+          <button onClick={() => navigate('/contact')} className="group mt-2 inline-flex w-full max-w-full items-center justify-center gap-2 rounded-full border border-foreground/70 px-5 py-3 text-center font-sans text-sm transition-colors duration-300 hover:bg-foreground hover:text-background sm:w-auto sm:whitespace-nowrap sm:px-6">
             Become the First Partner
             <IconArrow className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </button>
@@ -487,18 +489,8 @@ export default function SponsorsPage() {
             const Icon = item.icon;
             const colSpan = idx === 0 ? "sm:col-span-2" : idx === 1 ? "sm:col-span-1" : "sm:col-span-3"
             return (
-              <div
-                key={item.title}
-                className={`relative min-h-[12rem] h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-1 md:p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col ${colSpan}`}
-              >
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
-                <div className="why-card cursor-pointer relative flex flex-1 flex-col gap-6 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
+              <GlowingCard key={item.title} className={colSpan}>
+                <div className="why-card group cursor-pointer relative flex flex-1 flex-col gap-6 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
                   <Icon className="h-9 w-9 text-ink-muted transition-colors duration-300 group-hover:text-foreground" />
                   <div>
                     <h3 className="text-xl font-[var(--font-weight-540)] tracking-tight">{item.title}</h3>
@@ -507,7 +499,7 @@ export default function SponsorsPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </GlowingCard>
             )
           })}
         </div>
@@ -526,7 +518,7 @@ export default function SponsorsPage() {
             >
               <IconCheck
                 className="h-6 w-6 shrink-0 text-ink-muted"
-                pathRef={(el) => (checkPathRefs.current[i] = el)}
+                pathRef={(el) => { checkPathRefs.current[i] = el }}
               />
               <span className="font-sans text-lg sm:text-xl">{benefit}</span>
             </li>
@@ -545,17 +537,7 @@ export default function SponsorsPage() {
           {LEVELS.map((level, i) => {
             const colSpan = i === 0 ? "sm:col-span-1" : i === 1 ? "sm:col-span-2" : "sm:col-span-3"
             return (
-              <div
-                key={level.title}
-                className={`relative min-h-[12rem] h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-1 md:p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col ${colSpan}`}
-              >
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
+              <GlowingCard key={level.title} className={colSpan}>
                 <div className="level-card cursor-pointer relative flex flex-1 flex-col justify-between gap-10 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
                   <span className="font-mono text-sm text-ink-muted">
                     0{i + 1}
@@ -570,7 +552,7 @@ export default function SponsorsPage() {
                     Available upon discussion.
                   </span>
                 </div>
-              </div>
+              </GlowingCard>
             )
           })}
         </div>
@@ -605,7 +587,8 @@ export default function SponsorsPage() {
           </p>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row">
             <button
-              ref={(el) => (ctaButtonRefs.current[0] = el)}
+              ref={(el) => { ctaButtonRefs.current[0] = el }}
+              onClick={() => navigate('/contact')}
               onMouseMove={magnetMove(ctaButtonRefs, 0, 0.15, 0.25)}
               onMouseLeave={magnetLeave(ctaButtonRefs, 0)}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-8 py-3 font-sans text-sm text-background transition-transform duration-300"
@@ -614,7 +597,8 @@ export default function SponsorsPage() {
               <IconArrow className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </button>
             <button
-              ref={(el) => (ctaButtonRefs.current[1] = el)}
+              ref={(el) => { ctaButtonRefs.current[1] = el }}
+              onClick={() => navigate('/contact')}
               onMouseMove={magnetMove(ctaButtonRefs, 1, 0.15, 0.25)}
               onMouseLeave={magnetLeave(ctaButtonRefs, 1)}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground/60 px-8 py-3 font-sans text-sm transition-colors duration-300 hover:bg-surface-elevated"

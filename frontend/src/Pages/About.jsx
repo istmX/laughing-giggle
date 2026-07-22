@@ -3,7 +3,7 @@ import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { useGSAP } from "@gsap/react"
 import { Navbar } from "../components/ui/Navbar"
-import { GlowingEffect } from "@/components/ui/glowing-effect"
+import { GlowingCard } from "@/components/ui/GlowingCard"
 import Footer from "../Landing/Footer"
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -361,17 +361,7 @@ export default function AboutPage() {
           {PRINCIPLES.map((p, idx) => {
             const colSpan = (idx === 0 || idx === 3) ? "sm:col-span-2" : "sm:col-span-1"
             return (
-              <div
-                key={p.n}
-                className={`relative min-h-[12rem] h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-1 md:p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col ${colSpan}`}
-              >
-                <GlowingEffect
-                  spread={40}
-                  glow={true}
-                  disabled={false}
-                  proximity={64}
-                  inactiveZone={0.01}
-                />
+              <GlowingCard className={colSpan}>
                 <div className="principle-card cursor-pointer relative flex flex-1 flex-col justify-between gap-10 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
                   <span className="font-mono text-sm text-ink-muted">{p.n}</span>
                   <div>
@@ -381,7 +371,7 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </GlowingCard>
             )
           })}
         </div>
