@@ -126,6 +126,18 @@ Write code that another engineer can immediately understand.
 
 ---
 
+# Frontend Layout and Text-Wrapping Safety
+
+Before adding or changing frontend UI, verify the rendered parent width and alignment at desktop and mobile sizes.
+
+- Do not make a flex or grid text wrapper shrink-to-fit accidentally. A content row that owns a full-width child should explicitly use `w-full min-w-0` when appropriate.
+- Do not use `overflow-wrap: anywhere` for normal prose. It can reduce intrinsic width and cause a parent to collapse, producing one-word or one-character lines. Use normal wrapping or `overflow-wrap: break-word`; reserve `anywhere` for deliberately unbroken tokens such as URLs or identifiers.
+- Do not render normal sentences as one full-width block per word. Keep prose in a paragraph or inline text flow. Use separate rows only when the design intentionally represents a list or typographic composition.
+- Do not use display/tall fonts or very small `max-w-*` values for body copy. Paragraphs should use the body font and a readable measure, generally around 45–75 characters per line.
+- When fixing a wrapping/alignment bug, search all routes and shared components for the same structural pattern before considering the issue complete.
+
+---
+
 # Planning Before Coding
 
 Never immediately start implementing.

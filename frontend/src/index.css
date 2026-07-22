@@ -896,11 +896,11 @@
 
   /* ─── Playground: readable AI response rhythm ─── */
   .playground-ai-response {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .playground-ai-response p {
     margin: 0.65rem 0;
-    white-space: pre-wrap;
+    white-space: normal;
   }
   .playground-ai-response p:first-child,
   .playground-ai-response h1:first-child,

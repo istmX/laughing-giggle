@@ -283,7 +283,7 @@ export const Playground = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.2, ease: "easeOut" }}
                           className={cn(
-                            "group flex min-w-0 max-w-[min(90%,65ch)] flex-col",
+                            "group flex w-full min-w-0 max-w-[min(90%,65ch)] flex-col",
                             msg.role === 'user' ? "ml-auto items-end" : "mr-auto items-start"
                           )}
                         >

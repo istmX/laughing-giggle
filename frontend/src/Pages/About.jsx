@@ -347,10 +347,9 @@ export default function AboutPage() {
             key={idx}
             className="manifesto flex min-h-screen w-full flex-col items-center justify-center px-6"
           >
-            <div className="manifesto-line w-full max-w-5xl font-tall text-center leading-[0.92] text-[9vw] sm:text-[5rem] flex flex-col items-center justify-center">
-              {lines.map((word, wi) => (
-                <div key={wi} className="w-full">{word}</div>
-              ))}
+            <p className="manifesto-line w-full max-w-5xl font-tall text-center leading-[0.92] text-[9vw] sm:text-[5rem]">
+              {lines.join(" ")}
+            </p>
             </div>
           </div>
         ))}
@@ -359,30 +358,33 @@ export default function AboutPage() {
       {/* ===================== 05 — PRINCIPLES ===================== */}
       <section className="principles mx-auto max-w-6xl px-6 py-40">
         <h2 className="mb-16 font-tall text-3xl sm:text-4xl">Principles</h2>
-        <div className="principles-grid grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {PRINCIPLES.map((p) => (
-            <div
-              key={p.n}
-              className="relative min-h-[12rem] h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-1 md:p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col"
-            >
-              <GlowingEffect
-                spread={40}
-                glow={true}
-                disabled={false}
-                proximity={64}
-                inactiveZone={0.01}
-              />
-              <div className="principle-card relative flex flex-1 flex-col justify-between gap-10 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
-                <span className="font-mono text-sm text-ink-muted">{p.n}</span>
-                <div>
-                  <h3 className="font-tall text-2xl">{p.title}</h3>
-                  <p className="mt-3 w-full max-w-xs font-sans text-ink-muted">
-                    {p.body}
-                  </p>
+        <div className="principles-grid grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {PRINCIPLES.map((p, idx) => {
+            const colSpan = (idx === 0 || idx === 3) ? "sm:col-span-2" : "sm:col-span-1"
+            return (
+              <div
+                key={p.n}
+                className={`relative min-h-[12rem] h-auto rounded-2xl border border-zinc-100 dark:border-zinc-800/80 p-1 md:p-1.5 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col ${colSpan}`}
+              >
+                <GlowingEffect
+                  spread={40}
+                  glow={true}
+                  disabled={false}
+                  proximity={64}
+                  inactiveZone={0.01}
+                />
+                <div className="principle-card cursor-pointer relative flex flex-1 flex-col justify-between gap-10 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
+                  <span className="font-mono text-sm text-ink-muted">{p.n}</span>
+                  <div>
+                    <h3 className="font-tall text-2xl">{p.title}</h3>
+                    <p className="mt-3 w-full max-w-[42ch] font-sans text-ink-muted">
+                      {p.body}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </section>
 
