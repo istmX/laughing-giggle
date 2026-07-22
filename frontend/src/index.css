@@ -279,6 +279,16 @@
   --surface-dark: #121826;
   --surface-dark-foreground: #ffffff;
 
+  /* Dark-mode equivalents of the editorial pastel blocks. These preserve
+     the role and hue without carrying light-mode brightness into dark UI. */
+  --block-lime: oklch(0.31 0.075 115);
+  --block-lilac: oklch(0.31 0.08 300);
+  --block-cream: oklch(0.28 0.04 75);
+  --block-pink: oklch(0.30 0.075 20);
+  --block-mint: oklch(0.29 0.07 150);
+  --block-coral: oklch(0.31 0.075 45);
+  --block-navy: oklch(0.16 0.06 280);
+
   --sidebar: oklch(0.14 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.98 0 0);
@@ -309,7 +319,7 @@
 }
 
 
-@layer base {
+  @layer base {
   * {
     @apply border-border outline-ring/50;
   }
@@ -341,7 +351,15 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-heading);
+    text-wrap: balance;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-sans);
   }
 }
 
@@ -651,7 +669,7 @@
   }
 
   .landing-panel {
-    @apply rounded-xl border border-hairline bg-white p-8 shadow-xs;
+    @apply rounded-xl border border-hairline bg-surface-elevated p-8 shadow-xs;
   }
 
   .landing-panel-soft {

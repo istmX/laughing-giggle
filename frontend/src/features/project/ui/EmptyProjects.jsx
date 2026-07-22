@@ -10,7 +10,7 @@ export function EmptyProjects({ onNewProject }) {
         transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
         className="flex w-full max-w-[640px] flex-col items-center rounded-[var(--radius-lg)] bg-block-lime px-6 py-14 text-center sm:px-12"
       >
-        <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-ink/10 bg-white/55">
+        <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-ink/10 bg-canvas/55">
           <FolderOpen className="h-10 w-10 text-ink-muted" strokeWidth={1.5} />
         </div>
         <h2 className="mb-3 text-[24px] font-[var(--font-weight-540)] tracking-[-0.03em] text-ink">

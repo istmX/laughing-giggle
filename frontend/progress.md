@@ -1,6 +1,20 @@
-## Interactive Cursor Enhancements & Tooltip Card Restyling (Latest)
+## Zenix RAG Service Consolidation & API Alignment (Latest)
 
 ### Completed
+- Merged the 10 obsolete templates inside [knowledge/context/](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/knowledge/context/) into **4 core visual/functional blueprints**:
+  - `agents.md`: Consolidating operational rules, code guidelines, approved libraries, and build phases.
+  - `design.md`: Merging token palettes, typography variables, spacing limits, touch target metrics, and custom components.
+  - `project-overview.md`: Combining visión structures, screen inventories, user journeys, and completed log milestones.
+  - `architecture.md`: Standard folder tree, storage layers, and offline limits.
+- Redesigned `/api/orchestrate/artifact` in Python [routes.py](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/api/routes.py) to support flexible request models mapping snake_case and camelCase payloads (`projectId`, `file_path`, `refinedSpec`).
+- Programmed Python `/artifact` to execute `context_engine_graph` synchronously via `.invoke()` and return the final generated content as JSON, solving a crash on Node.js `response.json()` stream parsing.
+- Programmed Python `/artifact` with `action == "generate_all"` to return the list of 4 consolidated files.
+- Programmed Node.js backend [artifacts.controller.js](file:///workspaces/laughing-giggle/backend/src/features/ai/controllers/artifacts.controller.js) to parse the files array from the python bulk request and insert database placeholders dynamically into MongoDB, fixing a critical integration bug.
+- Implemented `/api/orchestrate/context` in Python [routes.py](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/api/routes.py) to generate all 4 files sequentially, and updated Node.js [context.controller.js](file:///workspaces/laughing-giggle/backend/src/features/ai/controllers/context.controller.js) to retrieve and send the `refinedSpec` from MongoDB.
+- Aligned `useContextFlow.js` in the frontend to map generated outputs to the consolidated 4-file structure.
+- Updated [plan.md](file:///workspaces/laughing-giggle/plan.md) with two new integration phases:
+  - **Phase 4: Context Consolidation (The 4-File Blueprint Strategy)** to merge the 11/12 individual files into a streamlined set of 4 core templates (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`).
+  - **Phase 5: Editor-Specific Target Renaming (AI Integration Selector)** to auto-rename files for target AI clients (`.cursorrules`, `.clinerules`, `.windsurfrules`, `GEMINI.md`, etc.).
 - Changed the hover cursor on interactive keywords and template chips from a query helper (`cursor-help`) to a hand pointer (`cursor-pointer`) in [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) and [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx).
 - Added `cursor-pointer` class to bento cards in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) (principles) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) (why partner and levels) so hovering indicates clickability/interactivity.
 - Reduced the border-radius of the keyword tooltip card from extremely rounded (`rounded-2xl`) to a subtle rectangular box (`rounded-lg`) in [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) to prevent it from looking like a bubble/circle.
@@ -937,3 +951,43 @@ The home page now includes:
 ### Verification
 - `npm run build` passes successfully.
 - `git diff --check` reports an existing trailing-whitespace issue in `README.md`, unrelated to this fix.
+
+### Follow-up
+- Widened and stabilized the Sponsor empty-state and CTA copy containers with `w-full min-w-0 max-w-prose`.
+- Removed word-by-word rendering from the About closing sentence and gave the ISTM copy explicit readable bounds.
+- Kept the Sponsor CTA label on one line where the button has room, preventing label/icon collisions.
+
+## Templates and Pricing Pages (Latest)
+
+### Completed
+- Added a public `/templates` page with two sections: a large coming-soon marketplace hero and an `Every template includes` context-system section based on the landing page template messaging.
+- Added a public `/pricing` page with two sections: a free-to-test editorial hero and an early-access `$0` plan with included capabilities and clear future-pricing disclosure.
+- Wired both pages into the public route map and updated the navbar Templates link.
+- Made the Sponsor empty-state CTA full-width on mobile and auto-sized on larger screens.
+- Matched the new Templates and Pricing hero headings to the About/Sponsor individual-letter composition, and made Sponsor empty-state headings explicitly full-width.
+
+### Verification
+- `npm run build` passes successfully.
+
+## Dark Theme Surface Tokens (Latest)
+
+### Completed
+- Added dark-mode equivalents for the lime, lilac, cream, pink, mint, coral, and navy block tokens so pastel UI surfaces become muted dark surfaces automatically.
+- Replaced hardcoded white auth/project/favorites/recent surfaces with semantic canvas/elevated tokens.
+- Documented the no-hardcoded-theme-color rule in `frontend/AGENTS.md` and `GEMINI.md`.
+
+### Verification
+- `npm run build` passes successfully.
+- Remaining literal colors are isolated brand SVG colors, template/sandbox preview data, gradients, or existing landing surfaces that already provide explicit dark variants.
+
+## Typography and Button System Alignment (Latest)
+
+### Completed
+- Changed the global heading baseline from the tall display face to the product sans family.
+- Kept the tall face explicit for editorial hero, manifesto, and other intentionally oversized display moments only.
+- Standardized shared `Button` and `RollingButton` typography on the product sans token and shared weight token.
+- Added inherited sans typography for form controls and documented the typography rule in `frontend/AGENTS.md` and `GEMINI.md`.
+- Removed tall typography from product card titles, section labels, pricing values, and CTA UI where it did not communicate editorial hierarchy.
+
+### Verification
+- `npm run build` passes successfully.

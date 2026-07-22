@@ -453,7 +453,7 @@ export default function SponsorsPage() {
           ))}
         </div>
 
-        <div className="empty-state-card relative z-10 mx-auto flex max-w-md flex-col items-center gap-6 border border-hairline bg-background/90 px-10 py-16 text-center backdrop-blur-sm rounded-2xl">
+        <div className="empty-state-card relative z-10 mx-auto flex w-full max-w-md min-w-0 flex-col items-center gap-6 border border-hairline bg-background/90 px-10 py-16 text-center backdrop-blur-sm rounded-2xl">
           <svg
             viewBox="0 0 48 48"
             fill="none"
@@ -466,11 +466,11 @@ export default function SponsorsPage() {
             <circle cx="14" cy="17" r="1.2" fill="currentColor" stroke="none" />
             <circle cx="19" cy="17" r="1.2" fill="currentColor" stroke="none" />
           </svg>
-          <h2 className="font-tall text-3xl">No Partners Yet</h2>
-          <p className="w-full max-w-[42ch] font-sans text-ink-muted">
+          <h2 className="w-full text-3xl font-[var(--font-weight-540)] tracking-tight">No Partners Yet</h2>
+          <p className="w-full min-w-0 max-w-prose font-sans text-ink-muted">
             The first logo here could become part of the journey.
           </p>
-          <button className="group mt-2 inline-flex items-center gap-2 rounded-full border border-foreground/70 px-6 py-3 font-sans text-sm transition-colors duration-300 hover:bg-foreground hover:text-background">
+          <button className="group mt-2 inline-flex w-full max-w-full items-center justify-center gap-2 rounded-full border border-foreground/70 px-5 py-3 text-center font-sans text-sm transition-colors duration-300 hover:bg-foreground hover:text-background sm:w-auto sm:whitespace-nowrap sm:px-6">
             Become the First Partner
             <IconArrow className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </button>
@@ -479,7 +479,7 @@ export default function SponsorsPage() {
 
       {/* ===================== 04 — WHY PARTNER ===================== */}
       <section className="why-partner mx-auto max-w-6xl px-6 py-40">
-        <h2 className="mb-16 font-tall text-3xl sm:text-4xl">
+        <h2 className="mb-16 text-3xl font-[var(--font-weight-540)] tracking-tight sm:text-4xl">
           Why Partner With Zenix
         </h2>
         <div className="why-grid grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -501,7 +501,7 @@ export default function SponsorsPage() {
                 <div className="why-card cursor-pointer relative flex flex-1 flex-col gap-6 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
                   <Icon className="h-9 w-9 text-ink-muted transition-colors duration-300 group-hover:text-foreground" />
                   <div>
-                    <h3 className="font-tall text-xl">{item.title}</h3>
+                    <h3 className="text-xl font-[var(--font-weight-540)] tracking-tight">{item.title}</h3>
                     <p className="mt-3 w-full max-w-[42ch] font-sans text-ink-muted">
                       {item.body}
                     </p>
@@ -515,7 +515,7 @@ export default function SponsorsPage() {
 
       {/* ===================== 05 — BENEFITS ===================== */}
       <section className="benefits mx-auto max-w-3xl px-6 py-40">
-        <h2 className="mb-16 font-tall text-3xl sm:text-4xl">
+        <h2 className="mb-16 text-3xl font-[var(--font-weight-540)] tracking-tight sm:text-4xl">
           Partnership Benefits
         </h2>
         <ul className="benefits-list flex flex-col gap-6">
@@ -538,7 +538,7 @@ export default function SponsorsPage() {
 
       {/* ===================== 06 — PARTNERSHIP LEVELS ===================== */}
       <section className="levels mx-auto max-w-6xl px-6 py-40">
-        <h2 className="mb-16 font-tall text-3xl sm:text-4xl">
+        <h2 className="mb-16 text-3xl font-[var(--font-weight-540)] tracking-tight sm:text-4xl">
           Partnership Levels
         </h2>
         <div className="levels-grid grid grid-cols-1 gap-6 sm:grid-cols-3">
@@ -561,7 +561,7 @@ export default function SponsorsPage() {
                     0{i + 1}
                   </span>
                   <div>
-                    <h3 className="font-tall text-2xl">{level.title}</h3>
+                    <h3 className="text-2xl font-[var(--font-weight-540)] tracking-tight">{level.title}</h3>
                     <p className="mt-3 w-full max-w-[42ch] font-sans text-ink-muted">
                       {level.body}
                     </p>
@@ -596,11 +596,11 @@ export default function SponsorsPage() {
       </section>
 
       <section className="cta mx-auto max-w-4xl px-6 py-40 sm:py-56">
-        <div className="cta-card flex flex-col items-center gap-8 rounded-2xl border border-hairline bg-surface-soft px-10 py-20 text-center">
-          <h2 className="font-tall text-[7vw] sm:text-5xl leading-[1.05]">
+        <div className="cta-card flex w-full min-w-0 flex-col items-center gap-8 rounded-2xl border border-hairline bg-surface-soft px-10 py-20 text-center">
+          <h2 className="w-full text-[clamp(2rem,5vw,3rem)] font-[var(--font-weight-540)] leading-[1.05] tracking-tight">
             Interested in partnering with Zenix?
           </h2>
-          <p className="w-full max-w-md font-sans text-lg text-ink-muted">
+          <p className="w-full min-w-0 max-w-prose font-sans text-lg text-ink-muted">
             Let&rsquo;s build the future together.
           </p>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row">

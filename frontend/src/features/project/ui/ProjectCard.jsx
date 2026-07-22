@@ -21,7 +21,7 @@ export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDe
     >
       <div className={`${accent} relative h-16 shrink-0`} aria-hidden="true">
         <div className="absolute -right-5 -top-9 size-28 rounded-full border-[10px] border-ink/10" />
-        <div className="absolute bottom-3 left-5 flex size-9 items-center justify-center rounded-[var(--radius-md)] border border-ink/10 bg-white/55 text-ink">
+        <div className="absolute bottom-3 left-5 flex size-9 items-center justify-center rounded-[var(--radius-md)] border border-ink/10 bg-canvas/55 text-ink">
           <Folder className="size-4" aria-hidden="true" />
         </div>
       </div>
@@ -59,16 +59,16 @@ export function ProjectCard({ project, index = 0, onToggleFavorite, onEdit, onDe
         <button
           type="button"
           onClick={(event) => onToggleFavorite(event, project)}
-          className={`flex size-9 items-center justify-center rounded-full bg-white/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-ink' : 'text-ink-muted hover:text-ink'}`}
+          className={`flex size-9 items-center justify-center rounded-full bg-canvas/85 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 ${project.is_favorite ? 'text-ink' : 'text-ink-muted hover:text-ink'}`}
           title={project.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
           aria-label={project.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Star className="size-4" fill={project.is_favorite ? 'currentColor' : 'none'} aria-hidden="true" />
         </button>
-        <button type="button" onClick={(event) => onEdit(event, project)} className="flex size-9 items-center justify-center rounded-full bg-white/85 text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" title="Rename project" aria-label="Rename project">
+        <button type="button" onClick={(event) => onEdit(event, project)} className="flex size-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30" title="Rename project" aria-label="Rename project">
           <Pencil className="size-4" aria-hidden="true" />
         </button>
-        <button type="button" onClick={(event) => onDelete(event, project)} className="flex size-9 items-center justify-center rounded-full bg-white/85 text-ink-muted transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" title="Delete project" aria-label="Delete project">
+        <button type="button" onClick={(event) => onDelete(event, project)} className="flex size-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted transition-colors hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30" title="Delete project" aria-label="Delete project">
           <Trash2 className="size-4" aria-hidden="true" />
         </button>
       </div>

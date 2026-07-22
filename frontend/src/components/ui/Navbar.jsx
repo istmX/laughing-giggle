@@ -8,7 +8,7 @@ import { RollingButton } from './RollingButton'
 
 const NAV_LINKS = [
   { name: 'Home', href: '/' },
-  { name: 'Templates', href: '/#templates' },
+  { name: 'Templates', href: '/templates' },
   { name: 'About', href: '/about' },
   { name: 'Pricing', href: '/pricing' },
   { name: 'Docs', href: '/docs' },

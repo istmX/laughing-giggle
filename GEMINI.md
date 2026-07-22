@@ -135,6 +135,10 @@ Before adding or changing frontend UI, verify the rendered parent width and alig
 - Do not render normal sentences as one full-width block per word. Keep prose in a paragraph or inline text flow. Use separate rows only when the design intentionally represents a list or typographic composition.
 - Do not use display/tall fonts or very small `max-w-*` values for body copy. Paragraphs should use the body font and a readable measure, generally around 45–75 characters per line.
 - When fixing a wrapping/alignment bug, search all routes and shared components for the same structural pattern before considering the issue complete.
+- Do not hardcode UI surface, text, border, or semantic-state colors in components. Use the semantic tokens (`bg-canvas`, `bg-surface-elevated`, `text-ink`, `border-hairline`, and semantic state tokens) so light and dark themes stay coherent. Hardcoded colors are allowed only for isolated brand assets, SVG artwork, or sandbox data previews with a documented reason.
+- When adding a color-block surface, define both light and dark token values in `index.css`; never reuse a bright light-mode pastel unchanged in dark mode.
+- Use the product sans token for body copy, headings, buttons, forms, and navigation. Use the tall/display face only for deliberate editorial hero or manifesto typography via an explicit class; never rely on the global heading selector for display typography.
+- Shared buttons must use the button component vocabulary and typography tokens. New button-like links should reuse `RollingButton` or the shared `Button` before introducing a one-off font, radius, or height.
 
 ---
 

@@ -299,7 +299,7 @@ export function FavoriteProjects() {
           
           {projects.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-[var(--radius-lg)] bg-block-lilac px-6 py-16 text-center">
-              <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-ink/10 bg-white/60">
+              <div className="mb-6 flex size-14 items-center justify-center rounded-full border border-ink/10 bg-canvas/60">
                 <Star className="size-6 text-ink" fill="currentColor" />
               </div>
               <h3 className="mb-2 text-[22px] font-[var(--font-weight-540)] tracking-[-0.03em] text-ink">No favorite projects</h3>
@@ -336,7 +336,7 @@ export function FavoriteProjects() {
                       <div key={project._id} className={`group relative overflow-hidden bg-canvas border rounded-[var(--radius-lg)] p-0 transition-all hover:-translate-y-1 hover:shadow-md ${isSelected ? 'border-brand-indigo ring-1 ring-brand-indigo bg-brand-indigo/5' : 'border-hairline hover:border-ink/20'}`}>
                         <div className="relative h-16 shrink-0 bg-block-pink" aria-hidden="true">
                           <div className="absolute -right-5 -top-9 size-28 rounded-full border-[10px] border-ink/10" />
-                          <div className="absolute bottom-3 left-5 flex size-9 items-center justify-center rounded-[var(--radius-md)] border border-ink/10 bg-white/55 text-ink">
+                          <div className="absolute bottom-3 left-5 flex size-9 items-center justify-center rounded-[var(--radius-md)] border border-ink/10 bg-canvas/55 text-ink">
                             <Folder className="size-4" />
                           </div>
                         </div>

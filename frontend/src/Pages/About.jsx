@@ -356,7 +356,7 @@ export default function AboutPage() {
 
       {/* ===================== 05 — PRINCIPLES ===================== */}
       <section className="principles mx-auto max-w-6xl px-6 py-40">
-        <h2 className="mb-16 font-tall text-3xl sm:text-4xl">Principles</h2>
+        <h2 className="mb-16 text-3xl font-[var(--font-weight-540)] tracking-tight sm:text-4xl">Principles</h2>
         <div className="principles-grid grid grid-cols-1 gap-6 sm:grid-cols-3">
           {PRINCIPLES.map((p, idx) => {
             const colSpan = (idx === 0 || idx === 3) ? "sm:col-span-2" : "sm:col-span-1"
@@ -375,7 +375,7 @@ export default function AboutPage() {
                 <div className="principle-card cursor-pointer relative flex flex-1 flex-col justify-between gap-10 rounded-xl bg-white dark:bg-zinc-950 p-10 border border-zinc-100/50 dark:border-zinc-800/60 w-full h-auto min-h-full transition-colors duration-300">
                   <span className="font-mono text-sm text-ink-muted">{p.n}</span>
                   <div>
-                    <h3 className="font-tall text-2xl">{p.title}</h3>
+                    <h3 className="text-2xl font-[var(--font-weight-540)] tracking-tight">{p.title}</h3>
                     <p className="mt-3 w-full max-w-[42ch] font-sans text-ink-muted">
                       {p.body}
                     </p>
@@ -389,20 +389,20 @@ export default function AboutPage() {
 
       {/* ===================== 06 — WHO IS ISTM ===================== */}
       <section className="istm relative mx-auto max-w-4xl px-6 py-40 sm:py-56 text-center">
-        <div className="istm-block">
+        <div className="istm-block w-full min-w-0">
           <p className="font-mono text-sm uppercase tracking-[0.2em] text-ink-muted">
             Who is ISTM?
           </p>
-          <p className="mt-10 font-tall text-[6vw] sm:text-3xl leading-[1.35]">
+          <p className="mt-10 w-full max-w-[42ch] mx-auto font-tall text-[6vw] sm:text-3xl leading-[1.35]">
             ISTM is an independent builder exploring how humans and AI can
             build software together.
           </p>
-          <p className="mt-8 font-sans text-lg text-ink-muted leading-relaxed">
+          <p className="mt-8 w-full max-w-prose mx-auto font-sans text-lg text-ink-muted leading-relaxed">
             Rather than chasing prompts, the focus is on designing systems
             that help AI understand projects, architectures, and developer
             workflows.
           </p>
-          <p className="mt-4 font-sans text-lg text-ink-muted">
+          <p className="mt-4 w-full max-w-prose mx-auto font-sans text-lg text-ink-muted">
             Zenix is the first step toward that vision.
           </p>
         </div>
@@ -425,10 +425,8 @@ export default function AboutPage() {
           Built by
         </p>
         <p className="closing-signature w-full font-tall text-4xl">ISTM</p>
-        <p className="mt-6 w-full max-w-xl font-sans text-sm text-ink-muted flex flex-wrap justify-center gap-x-1.5 select-none">
-          {"Building tools for the next generation of AI-native developers.".split(" ").map((word, idx) => (
-            <span key={idx} className="closing-word inline-block">{word}</span>
-          ))}
+        <p className="closing-word mt-6 w-full max-w-prose font-sans text-sm text-ink-muted select-none">
+          Building tools for the next generation of AI-native developers.
         </p>
       </section>
 

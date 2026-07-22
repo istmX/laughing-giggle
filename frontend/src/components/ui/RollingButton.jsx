@@ -46,7 +46,7 @@ export function RollingText({ text }) {
 
 export function RollingButton({ href, onClick, text, className, children, ...props }) {
   const content = text || children;
-  const baseClasses = `inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-medium transition-transform active:scale-95 cursor-pointer select-none`;
+  const baseClasses = `inline-flex h-11 items-center justify-center rounded-full px-6 font-sans text-sm font-[var(--font-weight-480)] transition-transform active:scale-95 cursor-pointer select-none`;
 
   const btnContent = typeof content === "string" ? <RollingText text={content} /> : content;
 

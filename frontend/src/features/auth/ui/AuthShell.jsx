@@ -46,7 +46,7 @@ const AuthShell = ({ children, panelTitle, panelDescription, panelEyebrow = 'Dev
             </div>
 
             <div className="absolute -right-14 top-24 size-56 rounded-full border-[18px] border-ink/10" />
-            <div className="absolute -bottom-16 -left-8 size-44 rotate-12 bg-white/25" />
+            <div className="absolute -bottom-16 -left-8 size-44 rotate-12 bg-canvas/25" />
           </motion.section>
 
           <section className="flex w-full justify-center">
@@ -56,7 +56,7 @@ const AuthShell = ({ children, panelTitle, panelDescription, panelEyebrow = 'Dev
               transition={{ delay: 0.08, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
               className="w-full max-w-[28rem]"
             >
-              <div className="rounded-[var(--radius-lg)] border border-hairline bg-white p-6 sm:p-8">
+              <div className="rounded-[var(--radius-lg)] border border-hairline bg-surface-elevated p-6 sm:p-8">
                 <div className="mb-8">
                   <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-ink-soft">
                     {panelEyebrow}
