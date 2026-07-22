@@ -350,7 +350,6 @@ export default function AboutPage() {
             <p className="manifesto-line w-full max-w-5xl font-tall text-center leading-[0.92] text-[9vw] sm:text-[5rem]">
               {lines.join(" ")}
             </p>
-            </div>
           </div>
         ))}
       </section>

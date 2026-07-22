@@ -927,3 +927,13 @@ The home page now includes:
 ### Verification
 - Targeted ESLint passes for Playground files.
 - `npm run build` passes. Existing Vite chunk-size and dynamic-import warnings remain unrelated.
+## Text Wrapping and Layout Safety Fix (Latest)
+
+### Completed
+- Fixed the About manifesto JSX so its normal sentence content remains in a single paragraph flow instead of leaving an extra wrapper that could break the section layout.
+- Confirmed the shared layout/text-wrapping safeguards are documented in [frontend/AGENTS.md](file:///workspaces/laughing-giggle/frontend/AGENTS.md) and [GEMINI.md](file:///workspaces/laughing-giggle/GEMINI.md).
+- Confirmed the matching Sponsor and Playground safeguards are present: readable prose measures, full-width/min-width-safe message wrappers, and safe prose wrapping.
+
+### Verification
+- `npm run build` passes successfully.
+- `git diff --check` reports an existing trailing-whitespace issue in `README.md`, unrelated to this fix.
