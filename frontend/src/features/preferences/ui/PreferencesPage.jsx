@@ -9,9 +9,7 @@ export const PreferencesPage = () => {
   const themes = [
     { id: 'system', name: 'System', icon: Monitor, description: 'Matches your OS settings' },
     { id: 'light', name: 'Light', icon: Sun, description: 'Clean white canvas' },
-    { id: 'dark', name: 'Dark', icon: Moon, description: 'High contrast black' },
-    { id: 'midnight', name: 'Midnight', icon: Palette, description: 'Deep blue-gray editor' },
-    { id: 'emerald', name: 'Emerald', icon: Palette, description: 'Rich dark green' }
+    { id: 'dark', name: 'Dark', icon: Moon, description: 'High contrast black' }
   ]
 
   return (

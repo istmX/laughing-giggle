@@ -1,8 +1,92 @@
-## Hero Section Typography & Motion Polish (Latest)
+## Zenix RAG Service Consolidation & API Alignment (Latest)
 
-### Hero Redesign
+### Completed
+- Merged the 10 obsolete templates inside [knowledge/context/](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/knowledge/context/) into **4 core visual/functional blueprints**:
+  - `agents.md`: Consolidating operational rules, code guidelines, approved libraries, and build phases.
+  - `design.md`: Merging token palettes, typography variables, spacing limits, touch target metrics, and custom components.
+  - `project-overview.md`: Combining visión structures, screen inventories, user journeys, and completed log milestones.
+  - `architecture.md`: Standard folder tree, storage layers, and offline limits.
+- Redesigned `/api/orchestrate/artifact` in Python [routes.py](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/api/routes.py) to support flexible request models mapping snake_case and camelCase payloads (`projectId`, `file_path`, `refinedSpec`).
+- Programmed Python `/artifact` to execute `context_engine_graph` synchronously via `.invoke()` and return the final generated content as JSON, solving a crash on Node.js `response.json()` stream parsing.
+- Programmed Python `/artifact` with `action == "generate_all"` to return the list of 4 consolidated files.
+- Programmed Node.js backend [artifacts.controller.js](file:///workspaces/laughing-giggle/backend/src/features/ai/controllers/artifacts.controller.js) to parse the files array from the python bulk request and insert database placeholders dynamically into MongoDB, fixing a critical integration bug.
+- Implemented `/api/orchestrate/context` in Python [routes.py](file:///workspaces/laughing-giggle/RAG_Service/context-engine/app/api/routes.py) to generate all 4 files sequentially, and updated Node.js [context.controller.js](file:///workspaces/laughing-giggle/backend/src/features/ai/controllers/context.controller.js) to retrieve and send the `refinedSpec` from MongoDB.
+- Aligned `useContextFlow.js` in the frontend to map generated outputs to the consolidated 4-file structure.
+- Updated [plan.md](file:///workspaces/laughing-giggle/plan.md) with two new integration phases:
+  - **Phase 4: Context Consolidation (The 4-File Blueprint Strategy)** to merge the 11/12 individual files into a streamlined set of 4 core templates (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`).
+  - **Phase 5: Editor-Specific Target Renaming (AI Integration Selector)** to auto-rename files for target AI clients (`.cursorrules`, `.clinerules`, `.windsurfrules`, `GEMINI.md`, etc.).
+- Changed the hover cursor on interactive keywords and template chips from a query helper (`cursor-help`) to a hand pointer (`cursor-pointer`) in [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) and [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx).
+- Added `cursor-pointer` class to bento cards in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) (principles) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) (why partner and levels) so hovering indicates clickability/interactivity.
+- Reduced the border-radius of the keyword tooltip card from extremely rounded (`rounded-2xl`) to a subtle rectangular box (`rounded-lg`) in [InteractiveKeyword.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/InteractiveKeyword.jsx) to prevent it from looking like a bubble/circle.
+- Refactored the [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx) component styles to be theme-aware (responsive to both light and dark active themes) rather than hardcoding dark mode defaults, and stripped all code comments from the file.
+- Refactored the Bento grids on [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) (Principles cards) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) (Why Partner cards and Partnership levels cards) to distribute column widths unevenly using staggered CSS grid column spans (`sm:col-span-1`, `sm:col-span-2`, `sm:col-span-3`).
+- Enlarged the maximum bounding width constraint of the FinalCTA supporting text (`"Everything your AI needs. Nothing it doesn't."`) in [FinalCTA.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FinalCTA.jsx) from `max-w-md` to `max-w-2xl` to prevent premature wrapping of the text into multiple lines on desktop viewports.
+- Replaced standard card layout grids on [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) (Principles cards) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) (Why Partner cards and Partnership levels cards) with the high-fidelity hover-glowing Bento grid wrapper using [glowing-effect.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/glowing-effect.jsx).
+- Rendered the shared [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx) at the bottom of both [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx).
+- Split the Hero `"PARTNERS"` text block inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) into individual inline letter wraps, enlarging its typography constraints to cover the viewport (`text-[clamp(8rem,24vw,28rem)]`), and staggered their reveal from underneath a masked baseline using GSAP timeline values.
+- Applied `w-full` class to Built By ISTM labels and vision subtitles, and general paragraph `max-w-` constraints inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) to prevent flexbox squeezing and force proper text line wrapping.
+- Split the Hero `"ABOUT"` text block inside [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) into individual inline letter wraps, enlarging its typography constraints to cover the hero viewport (`text-[clamp(8rem,28vw,32rem)]`), and staggered their reveal from underneath a masked baseline using GSAP timeline values.
+- Implemented a word-by-word stagger animation for the closing manifesto line (`"Building tools for the next generation of AI-native developers."`) in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) and increased its bounding width limit to `max-w-xl`.
+- Scaled up the subheading container dimensions for `"Building the future of AI-native software development."` to `max-w-2xl` in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to match formatting requests.
+- Applied `w-full max-w-5xl` constraints to the manifesto rows (`"SYSTEMS SCALE. PROMPTS DON'T."` etc.) in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to prevent character wrapping constraints inside flex items.
+- Fixed a broken Navbar import path inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) to correctly link to the standalone [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) component.
+- Added `w-full` class to three paragraph elements with `max-w-` constraints inside [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to prevent flexbox squeezing and force proper text line wrapping.
+- Removed Zenix logo image element (`/logo.png`) from the header inside [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) and the brand block inside [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx), keeping only the text-based logo representation.
+- Fixed a broken relative Navbar import in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx).
+- Fixed invalid Tailwind utility spacing classes `w-5.5` and `h-5.5` on the theme toggle handle inside [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) by replacing them with arbitrary Tailwind spacing units `w-[22px]` and `h-[22px]`.
+- Added the `w-full` class to the supporting description text (`Everything your AI needs. Nothing it doesn't.`) in [FinalCTA.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FinalCTA.jsx).
+- Audited the `frontend/src/Landing/` folder and permanently deleted 9 unused files.
+- Extracted the responsive floating glassmorphic navigation bar from [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) into a separate [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) component, containing zero comments.
+- Cleaned up [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css) to remove old dashboard color theme classes.
+- Updated [DESIGN.md](file:///workspaces/laughing-giggle/DESIGN.md) to reflect the transition of the dashboard to strictly support Light (White Canvas) and Dark (Black) themes.
+- Modified [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx).
+- Updated [PreferencesPage.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/PreferencesPage.jsx) and [ProfileDetails.jsx](file:///workspaces/laughing-giggle/frontend/src/features/profile/ui/components/ProfileDetails.jsx) / [PublicProfile.jsx](file:///workspaces/laughing-giggle/frontend/src/features/profile/ui/PublicProfile.jsx) theme selectors.
+- Re-ordered `@import` statements in [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css).
+
+### Verification
+- Production build compilation successfully passes via `npm run build`.
+
+## About Page Editorial Revision (Previous)
+
+### Completed
+- Reworked [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) after Impeccable critique: replaced repeated centered `max-w-6xl` blocks with asymmetric wide/medium/reading columns and intentional `vh`-based editorial spacing.
+- Distilled the manifesto into three distinct compositions (left, offset-right, centered) and replaced the generic 2×2 principles cards with an editorial list.
+- Simplified motion: batched content reveals, reduced hero/parallax intensity, removed word-by-word manifesto animations, and kept the pinned shift focused on active-state progression.
+- Added a quiet fixed section index for desktop that updates its active reading state through ScrollTrigger.
+- Replaced literal 9px/10px caption sizes with the documented `text-caption` token.
+
+### Verification
+- Targeted ESLint passes for `src/Pages/About.jsx`.
+- `npm run build` passes successfully.
+- Existing Vite CSS import, dynamic import, and bundle-size warnings remain unrelated.
+
+## Editorial About Manifesto Page (Latest)
+
+### Completed
+- Replaced the `/about` placeholder with a full manifesto-style Zenix page in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx).
+- Added a responsive fixed reading header with Zenix mark, Home/Templates/About/Docs navigation, and light/dark theme toggle.
+- Built the requested narrative sections: full-viewport `ABOUT` hero, why Zenix exists, pinned Prompt Engineering → AI Coding → Context Engineering → AI Systems shift, four full-screen manifesto panels, operating principles, ISTM identity, cinematic vision, and closing signature.
+- Preserved the landing language with Satoshi/Bebas Neue typography, grayscale theme tokens, hairline dividers, deliberate spacing, and no stock imagery or decorative illustrations.
+- Added GSAP entry timelines, ScrollTrigger parallax and scale effects, line reveals, pinned scroll storytelling, manifesto word reveals, and reduced-motion handling.
+- Added principle card hover lift, border-aware interaction, and subtle active-dot motion while keeping the rest of the page intentionally card-free.
+
+### Verification
+- Targeted ESLint passes for `src/Pages/About.jsx`.
+- `npm run build` passes successfully.
+- Full repository lint still reports pre-existing errors in unrelated files; no new About page errors were introduced.
+
+## Final CTA Editorial Redesign (Latest)
+
+### Final CTA Redesign
+- **Editorial Typography Scale**: Transformed [FinalCTA.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FinalCTA.jsx) from a generic centered SaaS block into a high-impact editorial conclusion. Set the headline text to a bold vertical rhythm (`THE FUTURE` → `ISN'T PROMPTS.` → `IT'S CONTEXT.`) using high-contrast Satoshi font with a tight `0.85` line-height for a cinematic and confident developer-first statement.
+- **Micro-Interaction Headline Morph**: Added a synchronized pointer hover effect on the primary CTA ("Start Building"): hovering the button scrambles the third line of the headline from `IT'S CONTEXT.` to `LET'S START.` in a snappy 120ms character sequence, reverting gracefully when unhovered.
+- **Huge Ghost Background Parallax**: Added a massive background word `SYSTEMS` (2.5% opacity in Dark, 3.5% in Light) that drifts vertically on scroll and slowly scales, and a soft indigo radial center glow to capture a premium developer utility aesthetic.
+- **Refined Content & Tight Spacing**: Consolidated excessive vertical margins and reduced supporting copy to a memorable 2-line statement: `Everything your AI needs. Nothing it doesn't.`. Brought the final section and the footer closer together for a continuous editorial layout.
+- **Cinematic Entry Timeline & Scroll Scale**: Programmed a GSAP entry timeline to sequentially slide-reveal the headline, ghost word, subhead, and CTA buttons on scroll, alongside a scroll scrub that gently scales down and fades the headline as it approaches the footer.
+
+## Hero Section Typography & Motion Polish (Previous)
 - **Editorial Typography Scale**: Restored the original [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) `landing-display-tall` (Bebas Neue) typography scale and uppercase layout for high-impact visual presence.
-- **Interactive Scramble Morph**: Implemented a pointer-cursor unified morph trigger. On hover, a character-scramble algorithm morphs both `STOP` to `START` and `SLOP.` to `CONTEXT.` in tandem over an accelerated 120ms duration (15ms ticks). Wired a synchronized back-and-front swap: when hovering either the foreground `SLOP.` keyword OR the giant background ghost `CONTEXT` word, they scramble and swap values simultaneously (`SLOP.` ↔ `CONTEXT.`). Styled the interactive word in bold Satoshi font (`font-sans font-bold`) and high-contrast theme color (`text-zinc-950 dark:text-white`) with a clean custom underline draw.
+- **Interactive Scramble Morph & Overlap Fix**: Implemented a pointer-cursor unified morph trigger. On hover, a character-scramble algorithm morphs both `STOP` to `START` and `SLOP.` to `CONTEXT.` in tandem over an accelerated 120ms duration (15ms ticks). Wired a synchronized back-and-front swap: when hovering either the foreground `SLOP.` keyword OR the giant background ghost `CONTEXT` word, they scramble and swap values simultaneously (`SLOP.` ↔ `CONTEXT.`). Resolved hover overlap conflicts by setting the parent `h1` to `pointer-events-none` and setting text lines to `w-fit mx-auto pointer-events-auto`, letting transparent margins pass mouse events through directly to the background.
 - **Enormous Ghost Background & 6 Premium SVGs**: Embedded a large, subtle parallax backdrop word `CONTEXT` positioned behind the headline (opacity increased to 5.5% in Light Mode, 3.5% in Dark Mode) that drifts dynamically on vertical scroll. Added 6 slow-animating decorative background SVGs positioned relative to the screen bounds to frame the headline/CTAs, and increased their visibility/opacity to fit premium design standards.
 - **Kinetic Load Reveal**: Choreographed sequential fade and translate reveals for each line of the headline (`line-1`, `line-2`), followed by the ghost word, split subheadline words, and primary CTA buttons.
 - **Refined Spacing, Copy & Bounds**: Consolidated padding, narrowed the subheadline paragraph container to an optimal width of `580px`, tightened spacing, and corrected the punctuation in the subheadline copy (`Build software with context, architecture, and design systems—not prompts.`).
@@ -15,6 +99,7 @@
   * **Sun/Moon Spring Toggle**: Built a custom theme toggle button featuring a spring-loaded sliding knob and rotating sun/moon transitions.
   * **Logo Rotation**: Added a subtle `rotate-[8deg]` and scale animation to the logo icon on hover.
 - **Global Theme Transitions (Performance Optimized)**: Implemented a lifecycle-aware transitioning system to smoothly morph the theme change (Light ↔ Dark). Configured a `.theme-transitioning` helper class in [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css) targeting only layout/container elements (avoiding the universal `*` selector performance leak) and integrated it via `useLayoutEffect` in [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx). This synchronously injects the transition rules before the browser paints the new frame, completely eliminating visual lag, flashing, or stutters during theme switches. Optimized transition curves to `300ms` durations.
+- **Responsive Templates Skeletons Fix**: Modified [CommunityTemplates.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/CommunityTemplates.jsx) to hide the background blurred skeleton cards on mobile screens (`hidden sm:flex`), preventing overlaps and horizontal width page overflow.
 
 ### Verification
 - Checked that targeted ESLint passes on [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx).
@@ -856,3 +941,53 @@ The home page now includes:
 ### Verification
 - Targeted ESLint passes for Playground files.
 - `npm run build` passes. Existing Vite chunk-size and dynamic-import warnings remain unrelated.
+## Text Wrapping and Layout Safety Fix (Latest)
+
+### Completed
+- Fixed the About manifesto JSX so its normal sentence content remains in a single paragraph flow instead of leaving an extra wrapper that could break the section layout.
+- Confirmed the shared layout/text-wrapping safeguards are documented in [frontend/AGENTS.md](file:///workspaces/laughing-giggle/frontend/AGENTS.md) and [GEMINI.md](file:///workspaces/laughing-giggle/GEMINI.md).
+- Confirmed the matching Sponsor and Playground safeguards are present: readable prose measures, full-width/min-width-safe message wrappers, and safe prose wrapping.
+
+### Verification
+- `npm run build` passes successfully.
+- `git diff --check` reports an existing trailing-whitespace issue in `README.md`, unrelated to this fix.
+
+### Follow-up
+- Widened and stabilized the Sponsor empty-state and CTA copy containers with `w-full min-w-0 max-w-prose`.
+- Removed word-by-word rendering from the About closing sentence and gave the ISTM copy explicit readable bounds.
+- Kept the Sponsor CTA label on one line where the button has room, preventing label/icon collisions.
+
+## Templates and Pricing Pages (Latest)
+
+### Completed
+- Added a public `/templates` page with two sections: a large coming-soon marketplace hero and an `Every template includes` context-system section based on the landing page template messaging.
+- Added a public `/pricing` page with two sections: a free-to-test editorial hero and an early-access `$0` plan with included capabilities and clear future-pricing disclosure.
+- Wired both pages into the public route map and updated the navbar Templates link.
+- Made the Sponsor empty-state CTA full-width on mobile and auto-sized on larger screens.
+- Matched the new Templates and Pricing hero headings to the About/Sponsor individual-letter composition, and made Sponsor empty-state headings explicitly full-width.
+
+### Verification
+- `npm run build` passes successfully.
+
+## Dark Theme Surface Tokens (Latest)
+
+### Completed
+- Added dark-mode equivalents for the lime, lilac, cream, pink, mint, coral, and navy block tokens so pastel UI surfaces become muted dark surfaces automatically.
+- Replaced hardcoded white auth/project/favorites/recent surfaces with semantic canvas/elevated tokens.
+- Documented the no-hardcoded-theme-color rule in `frontend/AGENTS.md` and `GEMINI.md`.
+
+### Verification
+- `npm run build` passes successfully.
+- Remaining literal colors are isolated brand SVG colors, template/sandbox preview data, gradients, or existing landing surfaces that already provide explicit dark variants.
+
+## Typography and Button System Alignment (Latest)
+
+### Completed
+- Changed the global heading baseline from the tall display face to the product sans family.
+- Kept the tall face explicit for editorial hero, manifesto, and other intentionally oversized display moments only.
+- Standardized shared `Button` and `RollingButton` typography on the product sans token and shared weight token.
+- Added inherited sans typography for form controls and documented the typography rule in `frontend/AGENTS.md` and `GEMINI.md`.
+- Removed tall typography from product card titles, section labels, pricing values, and CTA UI where it did not communicate editorial hierarchy.
+
+### Verification
+- `npm run build` passes successfully.

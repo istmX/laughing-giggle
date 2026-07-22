@@ -66,10 +66,14 @@ async def process_initial_idea(request: IdeaRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 class ArtifactRequest(BaseModel):
-    project_id: str
-    target_file_path: str
-    refined_spec: str
-    reference_template: str
+    action: str = "generate_single"
+    project_id: str = None
+    projectId: str = None
+    target_file_path: str = None
+    file_path: str = None
+    refined_spec: str = None
+    refinedSpec: str = None
+    reference_template: str = None
 
 class ArtifactResponse(BaseModel):
     project_id: str
@@ -80,74 +84,196 @@ class ArtifactResponse(BaseModel):
 @router.post("/artifact")
 async def generate_artifact(request: ArtifactRequest):
     """
-    Triggers the 3-loop Context Engine to generate a high-quality markdown artifact, streaming updates.
+    Triggers the 3-loop Context Engine to generate a high-quality markdown artifact.
     """
-    logger.info(f"Generating artifact {request.target_file_path} for project {request.project_id}")
+    import os
+    from pathlib import Path
+    
+    logger.info(f"Generating artifact: {request}")
+    
+    # Handle bulk generation placeholder list
+    if request.action == "generate_all":
+        return {
+            "files": [
+                "agents.md",
+                "design.md",
+                "architecture.md",
+                "project-overview.md"
+            ]
+        }
+        
+    pid = request.project_id or request.projectId or ""
+    fpath = request.target_file_path or request.file_path
+    spec = request.refined_spec or request.refinedSpec or ""
+    
+    if not fpath:
+        raise HTTPException(status_code=400, detail="file_path is required")
+        
+    logger.info(f"Generating artifact {fpath} for project {pid}")
+    
+    # Load the template from knowledge/context/
+    template_content = ""
+    try:
+        base_name = os.path.basename(fpath).lower()
+        if base_name == "readme.md":
+            base_name = "project-overview.md"
+            
+        template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / base_name
+        if template_path.exists():
+            template_content = template_path.read_text(encoding="utf-8")
+            logger.info(f"Loaded template from: {template_path}")
+        else:
+            logger.warning(f"Template not found at: {template_path}")
+    except Exception as e:
+        logger.error(f"Error loading template: {e}")
+        
+    ref_template = request.reference_template or template_content
     
     try:
-        retrieved_docs = retriever.retrieve_context(request.target_file_path)
+        retrieved_docs = retriever.retrieve_context(fpath)
         rag_context = retriever.format_context(retrieved_docs)
         
         graph_input = {
-            "refined_spec": request.refined_spec,
+            "refined_spec": spec,
             "rag_context": rag_context,
-            "target_file_path": request.target_file_path,
-            "reference_template": request.reference_template,
+            "target_file_path": fpath,
+            "reference_template": ref_template,
             "iterations": 0,
             "draft_content": "",
             "verification_feedback": "",
             "is_approved": False
         }
         
-        async def event_stream():
-            try:
-                for output in context_engine_graph.stream(graph_input):
-                    # output is a dict mapping node_name -> state update
-                    for node_name, state_update in output.items():
-                        data = json.dumps({
-                            "node": node_name,
-                            "iterations": state_update.get("iterations", 0),
-                            "is_approved": state_update.get("is_approved", False),
-                            "content": state_update.get("draft_content", "")
-                        })
-                        yield f"data: {data}\n\n"
-            except Exception as e:
-                logger.error(f"Stream error: {e}")
-                yield f"event: error\ndata: {str(e)}\n\n"
-                
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
+        result = context_engine_graph.invoke(graph_input)
+        draft = result.get("draft_content", "")
+        iters = result.get("iterations", 0)
+        
+        return {
+            "project_id": pid,
+            "target_file_path": fpath,
+            "content": draft,
+            "response": draft,
+            "iterations": iters
+        }
         
     except Exception as e:
         logger.error(f"Failed to generate artifact: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+class ContextRequest(BaseModel):
+    ideaId: str = None
+    userId: str = None
+    refinedSpec: str = None
+
+@router.post("/context")
+async def generate_project_context(request: ContextRequest):
+    import os
+    from pathlib import Path
+    
+    spec = request.refinedSpec or ""
+    logger.info(f"Generating bulk context using spec: {spec[:100]}...")
+    
+    files_to_generate = [
+        ("agents.md", "agents"),
+        ("design.md", "design"),
+        ("architecture.md", "architecture"),
+        ("project-overview.md", "project_overview")
+    ]
+    
+    result_dict = {}
+    
+    for fpath, key in files_to_generate:
+        try:
+            template_content = ""
+            template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / fpath
+            if template_path.exists():
+                template_content = template_path.read_text(encoding="utf-8")
+                
+            retrieved_docs = retriever.retrieve_context(fpath)
+            rag_context = retriever.format_context(retrieved_docs)
+            
+            graph_input = {
+                "refined_spec": spec,
+                "rag_context": rag_context,
+                "target_file_path": fpath,
+                "reference_template": template_content,
+                "iterations": 0,
+                "draft_content": "",
+                "verification_feedback": "",
+                "is_approved": False
+            }
+            
+            graph_res = context_engine_graph.invoke(graph_input)
+            result_dict[key] = graph_res.get("draft_content", "")
+        except Exception as e:
+            logger.error(f"Failed to generate context file {fpath}: {e}")
+            result_dict[key] = f"Failed to generate: {e}"
+            
+    return result_dict
+
 class TaskRequest(BaseModel):
-    project_id: str
-    refined_spec: str
-    rag_context: str
+    project_id: str = None
+    projectId: str = None
+    refined_spec: str = None
+    refinedSpec: str = None
+    rag_context: str = None
+    idea: str = None
+    ideaId: str = None
+    userId: str = None
 
 @router.post("/tasks")
 async def process_tasks(request: TaskRequest):
-    logger.info(f"Generating tasks for project {request.project_id}")
+    pid = request.project_id or request.projectId or request.ideaId or ""
+    spec = request.refined_spec or request.refinedSpec or request.idea or ""
+    
+    logger.info(f"Generating tasks for project/idea {pid}")
+    
+    rag_context = request.rag_context
+    if not rag_context:
+        try:
+            retrieved_docs = retriever.retrieve_context(spec)
+            rag_context = retriever.format_context(retrieved_docs)
+        except Exception as e:
+            logger.error(f"Failed to retrieve context for tasks: {e}")
+            rag_context = ""
+            
     result = task_engine_graph.invoke({
-        "refined_spec": request.refined_spec,
-        "rag_context": request.rag_context
+        "refined_spec": spec,
+        "rag_context": rag_context
     })
-    return {"tasks": result.get("tasks", [])}
+    return {"tasks": result.get("tasks", []), "response": result.get("tasks", [])}
 
 class DocumentationRequest(BaseModel):
-    project_id: str
-    refined_spec: str
-    rag_context: str
+    project_id: str = None
+    projectId: str = None
+    refined_spec: str = None
+    refinedSpec: str = None
+    rag_context: str = None
+    idea: str = None
+    ideaId: str = None
+    userId: str = None
 
 @router.post("/documentation")
 async def process_documentation(request: DocumentationRequest):
-    logger.info(f"Generating documentation for project {request.project_id}")
+    pid = request.project_id or request.projectId or request.ideaId or ""
+    spec = request.refined_spec or request.refinedSpec or request.idea or ""
+    
+    logger.info(f"Generating documentation for project/idea {pid}")
+    
+    rag_context = request.rag_context
+    if not rag_context:
+        try:
+            retrieved_docs = retriever.retrieve_context(spec)
+            rag_context = retriever.format_context(retrieved_docs)
+        except Exception as e:
+            logger.error(f"Failed to retrieve context for documentation: {e}")
+            rag_context = ""
+            
     result = documentation_engine_graph.invoke({
-        "refined_spec": request.refined_spec,
-        "rag_context": request.rag_context
+        "refined_spec": spec,
+        "rag_context": rag_context
     })
-    return {"documentation": result.get("documentation", "")}
+    return {"documentation": result.get("documentation", ""), "response": result.get("documentation", "")}
 class RefinementRequest(BaseModel):
     idea_prompt: str
     qa_history: List[Dict[str, str]]

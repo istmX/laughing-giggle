@@ -28,27 +28,23 @@ const LINKS = {
 
 export default function Footer() {
   return (
-    <footer className="landing-section relative z-10 bg-zinc-950 text-zinc-100 dark py-16">
+    <footer className="landing-section relative z-10 bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 border-t border-zinc-200 dark:border-zinc-900/50 py-16 transition-colors duration-300">
       <div className="landing-container">
         
-        {/* Main Grid */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           
-          {/* Logo Brand Info */}
           <div className="col-span-2 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Zenix Logo" className="w-6 h-6 object-contain brightness-0 invert" />
-              <span className="font-semibold tracking-tight text-white">Zenix</span>
+              <span className="font-semibold tracking-tight text-zinc-900 dark:text-white">Zenix</span>
             </div>
-            <p className="text-zinc-500 text-xs max-w-xs leading-relaxed font-light">
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs max-w-xs leading-relaxed font-light">
               Structured architecture and development context blueprints for modern software engineering workflows.
             </p>
           </div>
 
-          {/* Links columns */}
           {Object.entries(LINKS).map(([title, list]) => (
             <div key={title} className="flex flex-col gap-3">
-              <h5 className="font-mono text-[10px] uppercase tracking-widest text-zinc-400 font-700">
+              <h5 className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 dark:text-zinc-400 font-700">
                 {title}
               </h5>
               <ul className="flex flex-col gap-2">
@@ -56,7 +52,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <a 
                       href={link.href}
-                      className="text-xs text-zinc-400 hover:text-white transition-colors duration-150 font-light"
+                      className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors duration-150 font-light"
                     >
                       {link.label}
                     </a>
@@ -68,20 +64,18 @@ export default function Footer() {
 
         </div>
 
-        {/* Text Hover Effect Brand Header */}
         <div className="w-full h-[8rem] sm:h-[12rem] md:h-[16rem] flex items-center justify-center my-6 overflow-hidden select-none">
           <TextHoverEffect text="ZENIX" />
         </div>
 
-        {/* Bottom Row */}
-        <div className="border-t border-zinc-900 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] font-mono text-zinc-500">
+        <div className="border-t border-zinc-200 dark:border-zinc-900 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] font-mono text-zinc-500">
           <div>
             &copy; 2026 Zenix. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <a href="/github" className="hover:text-white transition-colors duration-150">GitHub</a>
-            <a href="/x" className="hover:text-white transition-colors duration-150">Twitter</a>
-            <a href="/discord" className="hover:text-white transition-colors duration-150">Discord</a>
+            <a href="/github" className="hover:text-zinc-900 dark:hover:text-white transition-colors duration-150">GitHub</a>
+            <a href="/x" className="hover:text-zinc-900 dark:hover:text-white transition-colors duration-150">Twitter</a>
+            <a href="/discord" className="hover:text-zinc-900 dark:hover:text-white transition-colors duration-150">Discord</a>
           </div>
         </div>
 

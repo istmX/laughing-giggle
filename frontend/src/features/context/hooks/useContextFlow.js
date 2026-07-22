@@ -26,18 +26,10 @@ export function useContextFlow(ideaId) {
       const res = await generateProjectContext(token, ideaId, controller.signal)
       if (res && typeof res === 'object') {
         const fileKeys = [
-          { key: 'readme', name: 'README.md' },
           { key: 'agents', name: 'Agents.md' },
-          { key: 'build_plan', name: 'build-plan.md' },
+          { key: 'design', name: 'design.md' },
           { key: 'architecture', name: 'architecture.md' },
-          { key: 'project_overview', name: 'project-overview.md' },
-          { key: 'mermaid_diagram', name: 'architecture-flow.mermaid' },
-          { key: 'code_standards', name: 'code-standards.md' },
-          { key: 'library_docs', name: 'library-docs.md' },
-          { key: 'progress_tracker', name: 'progress-tracker.md' },
-          { key: 'ui_rules', name: 'ui-rules.md' },
-          { key: 'ui_tokens', name: 'ui-tokens.md' },
-          { key: 'ui_registry', name: 'ui-registry.md' }
+          { key: 'project_overview', name: 'project-overview.md' }
         ]
 
         const files = fileKeys

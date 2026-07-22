@@ -73,6 +73,26 @@ RAG_Service/context-engine/
 2. **Sequential Streaming**:
    - Replicate the Node.js sequential streaming logic over FastAPI Server-Sent Events (SSE) or WebSockets to keep the frontend UI reactive.
 
+### Phase 4: Context Consolidation (The 4-File Blueprint Strategy)
+1. **Consolidated Output Structure**:
+   - Instead of generating 11/12 individual files (e.g., separating token variables, styling rules, libraries, and roadmap tasks), Zenix will consolidate generated contexts into **4 core blueprints**:
+     - **`agents.md`**: Behaviors, instructions, coding standards, library docs, and the build roadmap task list.
+     - **`design.md`**: Design tokens, layout wrapping guidelines, visual parameters, and component specifications.
+     - **`architecture.md`**: Directory layouts, database schema definitions, and server-side API endpoints.
+     - **`project-overview.md`**: Product goals, core features, primary user flow, and vision.
+
+### Phase 5: Editor-Specific Target Renaming (AI Integration Selector)
+1. **AI Integration Presets in UI**:
+   - Add a configuration dropdown above the generation panel enabling developers to select their AI editor (Cursor, Windsurf, Roo Code, Gemini CLI, etc.).
+2. **File Renaming Logic**:
+   - Map files automatically based on target editor conventions:
+     - Cursor -> Export `agents.md` as `.cursorrules`
+     - Windsurf -> Export `agents.md` as `.windsurfrules`
+     - Roo Code / Cline -> Export `agents.md` as `.clinerules`
+     - Gemini CLI -> Export `agents.md` as `GEMINI.md`
+     - Copilot -> Export `agents.md` as `.github/copilot-instructions.md`
+     - Generic -> Keep as `agents.md`
+
 ---
 
 ## 4. Integration Protocol (Node.js <-> Python)

@@ -433,7 +433,7 @@ export default function CommunityTemplates({ initialTemplatesData = [] }) {
               {INCLUDES.map((item) => (
                 <div 
                   key={item.label} 
-                  className="relative group/chip cursor-help"
+                  className="relative group/chip cursor-pointer"
                 >
                   <div 
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-950 border border-zinc-200/80 dark:border-zinc-850/80 text-[12px] font-medium text-zinc-700 dark:text-zinc-350 shadow-[0_1px_2px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 hover:border-brand-indigo/35 dark:hover:border-indigo-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all duration-200"

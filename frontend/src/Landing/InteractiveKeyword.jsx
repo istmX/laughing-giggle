@@ -11,7 +11,7 @@ export default function InteractiveKeyword({ word, tooltipTitle, tooltipDesc, ch
         ref={triggerRef}
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
-        className="cursor-help underline decoration-dotted decoration-zinc-400 dark:decoration-zinc-700 hover:decoration-solid font-bold text-zinc-950 dark:text-zinc-50 transition-colors"
+        className="cursor-pointer underline decoration-dotted decoration-zinc-400 dark:decoration-zinc-700 hover:decoration-solid font-bold text-zinc-950 dark:text-zinc-50 transition-colors"
       >
         {children || word}
       </span>
@@ -23,7 +23,7 @@ export default function InteractiveKeyword({ word, tooltipTitle, tooltipDesc, ch
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 4 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 z-50 w-64 p-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-2xl text-left pointer-events-none"
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3.5 z-50 w-64 p-4 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-2xl text-left pointer-events-none"
           >
             {/* Pointer arrow */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1.5 border-[6px] border-transparent border-t-zinc-200 dark:border-t-zinc-800" />

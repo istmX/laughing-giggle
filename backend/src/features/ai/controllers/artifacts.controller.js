@@ -33,12 +33,20 @@ export const generateArtifacts = async (req, res, next) => {
     
     const result = await response.json();
     
-    // We assume python service gives us a list of artifacts or we just generate pending ones
-    // But since the python side streams or returns data, we'll let it do the logic or mimic it
-    // Wait, the prompt says "artifacts.controller.js -> POST /api/orchestrate/artifact (handles SSE streaming if the Python side streams, otherwise just return the data)"
-    // Let's just return the JSON data from Python. 
-    // And wait, the old aiArtifactsService logic created placeholder artifacts and returned them for `generateArtifacts`. 
-    // If the python proxy returns them, we return the result.
+    if (result && Array.isArray(result.files)) {
+      const createdArtifacts = [];
+      for (const file of result.files) {
+        const artifact = await artifactService.createOrUpdateArtifact(
+          projectId,
+          userId,
+          file,
+          "",
+          "markdown"
+        );
+        createdArtifacts.push(artifact);
+      }
+      return res.status(200).json({ success: true, files: result.files, artifacts: createdArtifacts });
+    }
     
     res.status(200).json(result);
   } catch (error) {

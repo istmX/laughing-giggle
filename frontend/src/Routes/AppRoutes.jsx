@@ -12,6 +12,8 @@ import NotFound from '@/Pages/NotFound'
 import Docs from '@/Pages/Docs'
 import About from '@/Pages/About'
 import Sponsor from '@/Pages/Sponsor'
+import Templates from '@/Pages/Templates'
+import Pricing from '@/Pages/Pricing'
 import TemplateDetailPage from '@/Pages/TemplateDetailPage'
 import { Overview } from '@/Dashboard/components/Overview'
 import { PlaygroundPage } from '@/Dashboard/components/PlaygroundPage'
@@ -57,6 +59,8 @@ const AppRoutes = () => {
         <Route path="/docs" element={<Docs />} />
         <Route path="/about" element={<About />} />
         <Route path="/sponsor" element={<Sponsor />} />
+        <Route path="/templates" element={<Templates />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Route>
       
       {/* Publicly accessible profile, outside both Protected/Public layout wrappers if we want it completely standalone, 

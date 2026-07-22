@@ -29,10 +29,7 @@ const getBadgeIcon = (badgeName) => {
 const THEMES = [
   { id: 'system', name: 'System', icon: Monitor },
   { id: 'light', name: 'Light', icon: Sun },
-  { id: 'dark', name: 'Dark', icon: Moon },
-  { id: 'theme-midnight', name: 'Midnight', icon: Moon },
-  { id: 'theme-emerald', name: 'Emerald', icon: Moon },
-  { id: 'theme-sunset', name: 'Sunset', icon: Moon }
+  { id: 'dark', name: 'Dark', icon: Moon }
 ]
 
 const containerVariants = {
@@ -62,12 +59,12 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('dark', 'theme-midnight', 'theme-emerald', 'theme-sunset')
+    root.classList.remove('light', 'dark')
     
     if (activeTheme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      if (systemTheme === 'dark') root.classList.add('dark')
-    } else if (activeTheme !== 'light') {
+      root.classList.add(systemTheme)
+    } else {
       root.classList.add(activeTheme)
     }
     localStorage.setItem('zenix-theme', activeTheme)
