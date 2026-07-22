@@ -1,4 +1,33 @@
-## About Page Editorial Revision (Latest)
+## FinalCTA Text Width Enlargement & Design Upgrades (Latest)
+
+### Completed
+- Enlarged the maximum bounding width constraint of the FinalCTA supporting text (`"Everything your AI needs. Nothing it doesn't."`) in [FinalCTA.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FinalCTA.jsx) from `max-w-md` to `max-w-2xl` to prevent premature wrapping of the text into multiple lines on desktop viewports.
+- Replaced standard card layout grids on [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) (Principles cards) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) (Why Partner cards and Partnership levels cards) with the high-fidelity hover-glowing Bento grid wrapper using [glowing-effect.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/glowing-effect.jsx).
+- Rendered the shared [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx) at the bottom of both [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) and [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx).
+- Split the Hero `"PARTNERS"` text block inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) into individual inline letter wraps, enlarging its typography constraints to cover the viewport (`text-[clamp(8rem,24vw,28rem)]`), and staggered their reveal from underneath a masked baseline using GSAP timeline values.
+- Applied `w-full` class to Built By ISTM labels and vision subtitles, and general paragraph `max-w-` constraints inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) to prevent flexbox squeezing and force proper text line wrapping.
+- Split the Hero `"ABOUT"` text block inside [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) into individual inline letter wraps, enlarging its typography constraints to cover the hero viewport (`text-[clamp(8rem,28vw,32rem)]`), and staggered their reveal from underneath a masked baseline using GSAP timeline values.
+- Implemented a word-by-word stagger animation for the closing manifesto line (`"Building tools for the next generation of AI-native developers."`) in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) and increased its bounding width limit to `max-w-xl`.
+- Scaled up the subheading container dimensions for `"Building the future of AI-native software development."` to `max-w-2xl` in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to match formatting requests.
+- Applied `w-full max-w-5xl` constraints to the manifesto rows (`"SYSTEMS SCALE. PROMPTS DON'T."` etc.) in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to prevent character wrapping constraints inside flex items.
+- Fixed a broken Navbar import path inside [Sponsor.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/Sponsor.jsx) to correctly link to the standalone [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) component.
+- Added `w-full` class to three paragraph elements with `max-w-` constraints inside [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) to prevent flexbox squeezing and force proper text line wrapping.
+- Removed Zenix logo image element (`/logo.png`) from the header inside [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) and the brand block inside [Footer.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Footer.jsx), keeping only the text-based logo representation.
+- Fixed a broken relative Navbar import in [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx).
+- Fixed invalid Tailwind utility spacing classes `w-5.5` and `h-5.5` on the theme toggle handle inside [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) by replacing them with arbitrary Tailwind spacing units `w-[22px]` and `h-[22px]`.
+- Added the `w-full` class to the supporting description text (`Everything your AI needs. Nothing it doesn't.`) in [FinalCTA.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/FinalCTA.jsx).
+- Audited the `frontend/src/Landing/` folder and permanently deleted 9 unused files.
+- Extracted the responsive floating glassmorphic navigation bar from [Hero.jsx](file:///workspaces/laughing-giggle/frontend/src/Landing/Hero.jsx) into a separate [Navbar.jsx](file:///workspaces/laughing-giggle/frontend/src/components/ui/Navbar.jsx) component, containing zero comments.
+- Cleaned up [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css) to remove old dashboard color theme classes.
+- Updated [DESIGN.md](file:///workspaces/laughing-giggle/DESIGN.md) to reflect the transition of the dashboard to strictly support Light (White Canvas) and Dark (Black) themes.
+- Modified [ThemeProvider.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/ThemeProvider.jsx).
+- Updated [PreferencesPage.jsx](file:///workspaces/laughing-giggle/frontend/src/features/preferences/ui/PreferencesPage.jsx) and [ProfileDetails.jsx](file:///workspaces/laughing-giggle/frontend/src/features/profile/ui/components/ProfileDetails.jsx) / [PublicProfile.jsx](file:///workspaces/laughing-giggle/frontend/src/features/profile/ui/PublicProfile.jsx) theme selectors.
+- Re-ordered `@import` statements in [index.css](file:///workspaces/laughing-giggle/frontend/src/index.css).
+
+### Verification
+- Production build compilation successfully passes via `npm run build`.
+
+## About Page Editorial Revision (Previous)
 
 ### Completed
 - Reworked [About.jsx](file:///workspaces/laughing-giggle/frontend/src/Pages/About.jsx) after Impeccable critique: replaced repeated centered `max-w-6xl` blocks with asymmetric wide/medium/reading columns and intentional `vh`-based editorial spacing.

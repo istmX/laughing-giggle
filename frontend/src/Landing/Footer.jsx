@@ -37,7 +37,6 @@ export default function Footer() {
           {/* Logo Brand Info */}
           <div className="col-span-2 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Zenix Logo" className="w-6 h-6 object-contain brightness-0 invert" />
               <span className="font-semibold tracking-tight text-white">Zenix</span>
             </div>
             <p className="text-zinc-500 text-xs max-w-xs leading-relaxed font-light">

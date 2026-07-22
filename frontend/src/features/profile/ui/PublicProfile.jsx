@@ -56,12 +56,12 @@ export const PublicProfile = () => {
     // Apply user's selected theme globally when viewing public profiles
     const activeTheme = localStorage.getItem('zenix-theme') || 'system'
     const root = window.document.documentElement
-    root.classList.remove('dark', 'theme-midnight', 'theme-emerald', 'theme-sunset')
+    root.classList.remove('light', 'dark')
     
     if (activeTheme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      if (systemTheme === 'dark') root.classList.add('dark')
-    } else if (activeTheme !== 'light') {
+      root.classList.add(systemTheme)
+    } else {
       root.classList.add(activeTheme)
     }
   }, [])

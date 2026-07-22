@@ -196,10 +196,9 @@ export default function FinalCTA() {
           </span>
         </h2>
 
-        {/* Supporting text */}
         <p 
           ref={textRef}
-          className="text-zinc-550 dark:text-zinc-400 font-light text-[clamp(15px,1.8vw,20px)] max-w-md leading-relaxed text-center mb-8"
+          className="text-zinc-550 dark:text-zinc-400 font-light text-[clamp(15px,1.8vw,20px)] w-full max-w-2xl leading-relaxed text-center mb-8"
         >
           Everything your AI needs. Nothing it doesn't.
         </p>

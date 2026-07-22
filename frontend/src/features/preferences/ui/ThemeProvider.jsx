@@ -15,14 +15,14 @@ export const ThemeProvider = ({ children }) => {
       root.classList.remove('theme-transitioning')
     }, 350)
 
-    root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
+    root.classList.remove('light', 'dark')
 
     const isDashboard = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/projects/')
     
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const applySystemTheme = (e) => {
-        root.classList.remove('light', 'dark', 'theme-midnight', 'theme-emerald')
+        root.classList.remove('light', 'dark')
         root.classList.add(e.matches ? 'dark' : 'light')
       }
       
@@ -35,21 +35,13 @@ export const ThemeProvider = ({ children }) => {
       }
     }
 
+    const resolvedTheme = (theme === 'dark' || theme === 'midnight' || theme === 'emerald' || theme === 'sunset') ? 'dark' : 'light'
+
     if (isDashboard) {
-      if (theme === 'midnight') {
-        root.classList.add('dark', 'theme-midnight')
-      } else if (theme === 'emerald') {
-        root.classList.add('dark', 'theme-emerald')
-      } else {
-        root.classList.add(theme)
-      }
+      root.classList.add(resolvedTheme)
     } else {
       // Landing page and other pages support light and dark theme
-      if (theme === 'dark' || theme === 'midnight' || theme === 'emerald') {
-        root.classList.add('dark')
-      } else {
-        root.classList.add('light')
-      }
+      root.classList.add(resolvedTheme)
     }
 
     return () => clearTimeout(timer)
