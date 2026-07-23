@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import json
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from loguru import logger
 from app.rag.retriever.retriever import ZenixRetriever
 from app.langgraph.pm_wizard import pm_wizard_graph
@@ -18,16 +18,48 @@ router = APIRouter(prefix="/api/orchestrate", tags=["orchestration"])
 retriever = ZenixRetriever(k=5)
 
 class IdeaRequest(BaseModel):
-    idea_id: str = None
-    ideaId: str = None
-    prompt: str = None
-    idea: str = None
+    idea_id: Optional[str] = None
+    ideaId: Optional[str] = None
+    prompt: Optional[str] = None
+    idea: Optional[str] = None
+    history: Optional[List[Dict[str, str]]] = None
+    questions: Optional[List[str]] = None
 
 class IdeaResponse(BaseModel):
     idea_id: str
     status: str
-    rag_context: str
-    generated_questions: List[str]
+    rag_context: str = ""
+    generated_questions: Optional[List[str]] = None
+    is_complete: bool = False
+    next_question: Optional[str] = None
+    options: Optional[List[str]] = None
+    refined_spec: Optional[str] = None
+
+def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
+    try:
+        llm = get_fallback_llm()
+        prompt = (
+            "You are Zenix, a premier Software Product Architect.\n"
+            f"For the user's software idea: \"{idea_prompt}\"\n"
+            f"And the clarifying question: \"{question}\"\n"
+            "Generate exactly 3 diverse, highly specific multiple-choice answer options that the user can pick from.\n"
+            "Keep each option short, descriptive, and technical (under 12 words).\n\n"
+            "Output ONLY a raw JSON array of 3 strings. Do not use markdown formatting.\n"
+            "Example:\n"
+            "[\"Option A\", \"Option B\", \"Option C\"]"
+        )
+        from langchain_core.messages import SystemMessage
+        res = llm.invoke([SystemMessage(content=prompt)])
+        import json
+        content = res.content.replace('```json', '').replace('```', '').strip()
+        start = content.find('[')
+        end = content.rfind(']')
+        if start != -1 and end != -1:
+            content = content[start:end+1]
+        return json.loads(content)
+    except Exception as e:
+        logger.error(f"Failed to generate options: {e}")
+        return ["Option A", "Option B", "Option C"]
 
 @router.post("/idea", response_model=IdeaResponse)
 async def process_initial_idea(request: IdeaRequest):
@@ -37,13 +69,15 @@ async def process_initial_idea(request: IdeaRequest):
     """
     actual_idea_id = request.idea_id or request.ideaId
     actual_prompt = request.prompt or request.idea
+    history = request.history or []
+    questions = request.questions or []
 
     if not actual_idea_id:
         raise HTTPException(status_code=400, detail="idea_id or ideaId is required")
     if not actual_prompt:
         raise HTTPException(status_code=400, detail="prompt or idea is required")
 
-    logger.info(f"Processing new idea request: {actual_idea_id}")
+    logger.info(f"Processing new idea request: {actual_idea_id} | History length: {len(history)} | Questions length: {len(questions)}")
     
     try:
         # Step 0: Classify if the prompt is actually a software idea/description
@@ -87,29 +121,59 @@ async def process_initial_idea(request: IdeaRequest):
 
         # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant
         retrieved_docs = retriever.retrieve_context(actual_prompt)
-        
-        # Step 2: Format the raw LangChain documents into a single string for the LLM
         formatted_context = retriever.format_context(retrieved_docs)
+
+        # Case 1: Initial call or first turn with empty questions list
+        if not questions:
+            graph_input = {
+                "idea_prompt": actual_prompt,
+                "rag_context": formatted_context,
+                "messages": []
+            }
+            graph_result = pm_wizard_graph.invoke(graph_input)
+            questions = graph_result["generated_questions"]
+            logger.success(f"Generated 3 clarifying questions: {questions}")
+
+        # Determine current question based on history size
+        num_answered = len(history)
         
-        # Step 3: Run the PM Wizard LangGraph to generate clarification questions
-        graph_input = {
-            "idea_prompt": actual_prompt,
-            "rag_context": formatted_context,
-            "messages": []
-        }
-        graph_result = pm_wizard_graph.invoke(graph_input)
-        
-        logger.success(f"Successfully processed idea {actual_idea_id} through RAG and LangGraph")
-        
-        return IdeaResponse(
-            idea_id=actual_idea_id,
-            status="success",
-            rag_context=formatted_context,
-            generated_questions=graph_result["generated_questions"]
-        )
-        
+        if num_answered < len(questions):
+            next_q = questions[num_answered]
+            options = generate_options_for_question(next_q, actual_prompt)
+            logger.info(f"Serving question {num_answered + 1}/{len(questions)}: '{next_q}' with options {options}")
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="success",
+                rag_context=formatted_context,
+                generated_questions=questions,
+                is_complete=False,
+                next_question=next_q,
+                options=options,
+                refined_spec=None
+            )
+        else:
+            # Case 3: All questions answered -> synthesize specification
+            logger.info("All questions answered. Invoking refinement_graph to synthesize final specification.")
+            refinement_input = {
+                "idea_prompt": actual_prompt,
+                "questions_and_answers": history,
+                "refined_spec": ""
+            }
+            refinement_result = refinement_graph.invoke(refinement_input)
+            logger.success(f"Successfully generated refined specification: {refinement_result['refined_spec'][:100]}...")
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="success",
+                rag_context=formatted_context,
+                generated_questions=questions,
+                is_complete=True,
+                next_question=None,
+                options=None,
+                refined_spec=refinement_result["refined_spec"]
+            )
+            
     except Exception as e:
-        logger.error(f"Failed to process idea through RAG: {e}")
+        logger.error(f"Failed to process idea: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class ArtifactRequest(BaseModel):

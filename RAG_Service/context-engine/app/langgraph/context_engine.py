@@ -44,24 +44,24 @@ Follow these file-specific design and architecture instructions with meticulous 
 
 1. IF GENERATING "agents.md" (OR ".cursorrules" / "GEMINI.md"):
    - Define the absolute source of truth for the AI coding agents.
-   - Include the playful/human mascot identity of the project (e.g., screenshot memory journal rules).
-   - Write out complete code standards: file-size target limits (<200 lines for components, <300 screens, <250 stores), strict naming conventions (PascalCase, camelCase, file extensions), component layout guidelines, state management guidelines (Zustand), async query patterns (TanStack Query), and safe import sequencing rules.
-   - List every single approved library in the whitelists (Expo, NativeWind, AsyncStorage, Clerk, Zod, etc.) with detailed rationales and documentation urls.
-   - Write the entire implementation roadmap of all 13 build phases in chronological order. Each phase must contain clear goals, sequential sub-tasks, deliverables, and success validation criteria. Do not summarize or skip phases.
+   - Include the visual style guidelines and operating rules for the project based on the refined specification.
+   - Write out complete code standards: file-size target limits (<150 lines for components, <300 screens, <250 stores), strict naming conventions (PascalCase, camelCase, file extensions), component layout guidelines, state management guidelines (e.g. Zustand, Redux, etc. as defined in the spec), and safe import sequencing rules.
+   - List every single approved library in the whitelists matching the selected technology stack in the refined specification with detailed rationales and documentation urls.
+   - Write the entire implementation roadmap of all chronological build phases. Each phase must contain clear goals, sequential sub-tasks, deliverables, and success validation criteria. Do not summarize or skip phases.
 
 2. IF GENERATING "design.md":
    - Construct the entire visual system, token guidelines, and component specifications.
-   - Document every single design system token: primary, surface background, peach/mint backgrounds, cream card surfaces, soft white backdrops, semantic success green, and danger coral colors with their exact Hex color codes.
-   - Write the complete typography scale matrix (display-xl, display-lg, subhead, link, caption size metrics, weights, line heights, letter spacings) and outline fallback font substitutions.
-   - Detail the spacing token values (XS: 4px to 3XL: 64px), border radii (xs: 2px to pill/full), drop shadow dimensions, and duration constants.
-   - Include the visual rules: "The Scrapbook Test", layout densities, progressive disclosure rules, copy-writing voice instructions, and anti-pattern boundaries (no glassmorphism, no tiny icon grids, no default Material UI shadows).
-   - Formulate the detailed component registry for buttons, tabs, inputs, headers, navigation tabs, illustrations, and responsive collapsing guidelines across viewports.
+   - Document every single design system token: primary, surface background, card surfaces, border/hairline elements, and semantic state colors (success, danger, info) with their exact Hex color codes matching the theme and vibe in the refined specification.
+   - Write the complete typography scale matrix (headings, body, links, caption size metrics, weights, line heights, letter spacings) and outline fallback font substitutions.
+   - Detail the spacing token values (e.g. XS to 3XL scale), border radii (xs to pill/full), drop shadow dimensions, and duration constants.
+   - Include the specific visual rules, progressive disclosure rules, copy-writing voice instructions, and anti-pattern boundaries matching the project's unique brand.
+   - Formulate the detailed component registry for buttons, inputs, headers, navigation tabs, and responsive collapsing guidelines across desktop and mobile viewports.
 
 3. IF GENERATING "project-overview.md":
    - Detail the product vision statements, problem definition, solution description, target audience segment analysis, core conversational refinement routes, detailed screen wireframe architectures, and a chronological changelog ledger.
 
 4. IF GENERATING "architecture.md":
-   - Outline the standard folder tree configurations, backend Express modules, MongoDB/Mongoose schema models, groq-sdk models, offline/online synchronization rules, and API transaction layers.
+   - Outline the standard folder tree configurations, frontend/backend modules, database schema models, offline/online synchronization rules, and API transaction layers matching the refined specification.
 
 CRITICAL FORMATTING RULES:
 - Output ONLY valid markdown. Do not wrap the output in a markdown block envelope (i.e. do not use ```markdown ... ```). Start directly with the first heading.

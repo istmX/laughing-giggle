@@ -35,7 +35,7 @@ export function WizardDrawer({ questionText, options = [], onSubmit, isLoading, 
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-        className="relative w-full max-w-lg bg-canvas border border-hairline rounded-t-[32px] p-6 pb-10 shadow-2xl pointer-events-auto z-10 flex flex-col min-w-0"
+        className="relative w-[95vw] sm:w-[500px] bg-canvas border border-hairline rounded-t-[32px] p-6 pb-10 shadow-2xl pointer-events-auto z-10 flex flex-col min-w-0"
       >
         {/* Top Centered Handle Bar */}
         <div className="w-12 h-1 bg-hairline/80 rounded-full mx-auto mb-5 shrink-0" />

@@ -1,4 +1,17 @@
-## Project Onboarding Cockpit & Chat Refinement (Latest)
+## LLM Migration, Validation Fixes & Prompt Upgrades (Latest)
+
+### Completed
+- **Groq Model Upgraded**: Replaced decommissioned `llama3-70b-8192` model with the current active production model `llama-3.3-70b-versatile` across both primary and secondary fallback configurations.
+- **Pydantic Validation Resolved**: Correctly wrapped request and response model schema definitions inside the Python RAG service with `typing.Optional` to accept `None` inputs/outputs safely in Pydantic v2.
+- **Modal Viewport Layout Fix**: Enforced safe dynamic responsive width bounds (`w-[95vw] sm:w-[500px]`) inside `WizardDrawer.jsx` to prevent modal collapsing bugs in varying viewport configurations.
+- **Dynamic Context Generation**: Generalised `context_engine.py` template generation parameters to build dynamic specifications tailored to the user's custom prompt description (e.g. 20km local chat app) rather than forcing ScribbleBox templates and "13 build phases".
+- **Expanded System Prompts**: Upgraded all skeleton prompts (`refinement_wizard.py`, `playground.py`, `developer.py`, `task_prompt.py`, `documentation_prompt.py`) into highly detailed, technical, structured, and developer-first system prompts.
+- **Disabled Chat Input During Context Build**: Updated `ProjectWorkspace.jsx` to disable the textarea and send button while `isGeneratingArtifacts` is true (compiling the 4 blueprint files), showing a dedicated placeholder `"Compiling blueprint files..."` to prevent the user from typing or sending chat inputs during compilation.
+
+### Verification
+- Production Vite build succeeds cleanly with zero errors.
+
+## Project Onboarding Cockpit & Chat Refinement (Previous)
 
 ### Completed
 - Removed the separate PM Wizard page flow (`NewProjectPage`) before creating a project.

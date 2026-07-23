@@ -449,11 +449,13 @@ export function ProjectWorkspace() {
                   value={inputValue}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isGeneratingArtifacts}
                   placeholder={
-                    project?.wizard_state?.isComplete
-                      ? 'Refine this workspace, update architecture, or ask a question...'
-                      : 'Describe the software you want to build...'
+                    isGeneratingArtifacts
+                      ? 'Compiling blueprint files...'
+                      : project?.wizard_state?.isComplete
+                        ? 'Refine this workspace, update architecture, or ask a question...'
+                        : 'Describe the software you want to build...'
                   }
                   className="flex-1 bg-transparent resize-none border-none outline-none text-[15px] text-ink placeholder:text-ink-muted/50 max-h-[200px] min-h-[26px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] disabled:opacity-50 w-full focus:ring-0 leading-relaxed py-0.5"
                   rows={1}
@@ -472,7 +474,7 @@ export function ProjectWorkspace() {
                 ) : (
                   <button
                     onClick={() => handleSend(null)}
-                    disabled={!inputValue.trim()}
+                    disabled={!inputValue.trim() || isGeneratingArtifacts}
                     aria-label="Send message"
                     className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
                   >
