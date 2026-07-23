@@ -118,7 +118,7 @@ export function useChatHandlers({
         const parsedAnalysis = parseAIResponse(analyzeRes)
         const title = parsedAnalysis.project_title || 'Untitled Project'
         const description = parsedAnalysis.project_description || text
-        setProject(prev => ({ ...prev, project_title: title }))
+        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
 
         const convoRes = await processConversation(token, newIdeaId, { history: [] })
         const parsedConvo = parseAIResponse(convoRes)

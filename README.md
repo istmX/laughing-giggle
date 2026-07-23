@@ -48,7 +48,7 @@ Generates standard markdown-based codebase guides that align all downstream codi
 
 ### 5. Developer-First Security & Preferences
 * Secure session authentication built using JSON Web Tokens (JWT).
-* Responsive, system-aware Light (White Canvas) and Dark (Pure Black) themes.
+* Responsive, system-aware Light (White Canvas), Dark (Pure Black), and Midnight themes.
 * Floating glassmorphic navigation bars and keyboard-navigable interactive tooltips.
 
 ---
@@ -57,9 +57,9 @@ Generates standard markdown-based codebase guides that align all downstream codi
 
 Zenix uses **Feature-Based Architecture** to keep the codebase modular, readable, and highly maintainable:
 
-* **src/pages/**: Ultra-thin routing layers. They carry no business logic, state management, or API calls.
-* **src/features/**: Standalone product modules (e.g., `auth`, `projects`, `explore`, `profile`) containing their own APIs, custom hooks, state stores, and UI components.
-* **src/shared/**: Reusable utilities, providers, layout wrappers, and design-system components.
+* **frontend/src/Pages/**: Ultra-thin routing layers. They carry no business logic, state management, or API calls.
+* **frontend/src/features/**: Standalone product modules (e.g., `auth`, `projects`, `explore`, `profile`) containing their own APIs, custom hooks, state stores, and UI components.
+* **frontend/src/components/**: Reusable utilities, providers, layout wrappers, and design-system components.
 
 ---
 
@@ -73,7 +73,7 @@ Zenix uses **Feature-Based Architecture** to keep the codebase modular, readable
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/RandintRayquaza/laughing-giggle.git
+   git clone https://github.com/istmX/laughing-giggle.git
    ```
 
 2. Install dependencies:

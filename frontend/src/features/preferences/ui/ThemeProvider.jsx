@@ -40,8 +40,7 @@ export const ThemeProvider = ({ children }) => {
     if (isDashboard) {
       root.classList.add(resolvedTheme)
     } else {
-      // Landing page and other pages support light and dark theme
-      root.classList.add(resolvedTheme)
+      root.classList.add('light')
     }
 
     return () => clearTimeout(timer)

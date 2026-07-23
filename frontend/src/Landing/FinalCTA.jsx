@@ -1,76 +1,22 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { RollingButton } from '@/components/ui/RollingButton';
+import { useScramble } from '@/hooks/useScramble';
 
 export default function FinalCTA() {
-  const [line3Text, setLine3Text] = useState("IT'S CONTEXT.");
-  const scrambleLine3Ref = useRef(null);
+  const line3 = useScramble({
+    enterTarget: "LET'S START.",
+    leaveTarget: "IT'S CONTEXT.",
+    initial: "IT'S CONTEXT.",
+    preserve: (ch) => ch === ' ' || ch === "'" || ch === '.',
+  });
 
   const sectionRef = useRef(null);
   const headlineRef = useRef(null);
   const ghostRef = useRef(null);
   const textRef = useRef(null);
   const ctasRef = useRef(null);
-
-  // Micro-interaction: Hovering the primary CTA scrambles the final headline line
-  const handleMouseEnterPrimaryCTA = () => {
-    if (scrambleLine3Ref.current) clearInterval(scrambleLine3Ref.current);
-    let iter = 0;
-    const target = "LET'S START.";
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    const interval = setInterval(() => {
-      iter += 1;
-      if (iter >= target.length) {
-        setLine3Text(target);
-        clearInterval(interval);
-        return;
-      }
-      setLine3Text(
-        target.split('').map((char, index) => {
-          if (char === ' ') return ' ';
-          if (char === "'") return "'";
-          if (char === '.') return '.';
-          if (index < iter) return target[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleLine3Ref.current = interval;
-  };
-
-  const handleMouseLeavePrimaryCTA = () => {
-    if (scrambleLine3Ref.current) clearInterval(scrambleLine3Ref.current);
-    let iter = 0;
-    const target = "IT'S CONTEXT.";
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    const interval = setInterval(() => {
-      iter += 1;
-      if (iter >= target.length) {
-        setLine3Text(target);
-        clearInterval(interval);
-        return;
-      }
-      setLine3Text(
-        target.split('').map((char, index) => {
-          if (char === ' ') return ' ';
-          if (char === "'") return "'";
-          if (char === '.') return '.';
-          if (index < iter) return target[index];
-          return chars[Math.floor(Math.random() * chars.length)];
-        }).join('')
-      );
-    }, 15);
-    scrambleLine3Ref.current = interval;
-  };
-
-  useEffect(() => {
-    return () => {
-      if (scrambleLine3Ref.current) clearInterval(scrambleLine3Ref.current);
-    };
-  }, []);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -192,7 +138,7 @@ export default function FinalCTA() {
             Isn't Prompts.
           </span>
           <span className="cta-head-line block font-black text-[clamp(48px,8.5vw,115px)] mt-2 h-[1.1em]">
-            {line3Text}
+            {line3.display}
           </span>
         </h2>
 
@@ -210,8 +156,8 @@ export default function FinalCTA() {
         >
           <RollingButton 
             href="/signup" 
-            onMouseEnter={handleMouseEnterPrimaryCTA}
-            onMouseLeave={handleMouseLeavePrimaryCTA}
+onMouseEnter={line3.handleEnter}
+              onMouseLeave={line3.handleLeave}
             className="bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-855 dark:hover:bg-zinc-100 hover:-translate-y-0.5 hover:scale-[1.015] shadow-xs hover:shadow-md dark:shadow-none dark:hover:shadow-[0_0_12px_rgba(255,255,255,0.15)] border border-transparent hover:border-zinc-800 dark:hover:border-zinc-200 transition-all duration-350 ease-out px-8 py-3 font-semibold flex items-center gap-1.5 group/final-primary"
           >
             <span className="flex items-center gap-1.5">

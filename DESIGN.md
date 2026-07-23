@@ -275,7 +275,7 @@ components:
 Figma's marketing canvas is, at the system level, an editor-clean black-and-white frame. The chrome — top nav, body type, footer, primary CTA — is monochrome. Headlines are oversized `{typography.display-xl}` set in `figmaSans` with aggressive negative tracking, body copy hovers around weight 320–340 of the same variable family, and small mono `{typography.eyebrow}` and `{typography.caption}` labels (figmaMono, all-caps, positive tracking) act as section markers. Every CTA is a pill — `{rounded.pill}` — and the primary action across the entire site is the same black `{components.button-primary}` paired with the same white `{components.button-secondary}`.
 
 ## 2. Core Principles
-- **Landing vs. Dashboard Split:** The marketing and landing pages are strictly light-mode to preserve the vibrant, editorial color-blocks. The Dashboard supports Light (White Canvas) and Dark (Black) themes to cater to power-user preferences.
+- **Landing vs. Dashboard Split:** The marketing and landing pages are strictly light-mode to preserve the vibrant, editorial color-blocks. The Dashboard supports Light (White Canvas), Dark (Black), and Midnight themes to cater to power-user preferences.
 - **Monochrome Foundation:** In any theme, the UI is built on a high-contrast core (black/white or dark/light) with sparse, intentional use of brand colors.
 - **Color Blocks:** Used for landing page sections and hero blocks, these are soft pastels (Lilac, Mint, Pink) paired with heavy black typography.
 - **Pill Forms:** Primary buttons and high-emphasis tags use fully rounded pill shapes (`rounded-full`). Cards use structural rounding (`rounded-lg` or `rounded-2xl`).

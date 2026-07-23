@@ -54,7 +54,8 @@ export const PublicProfile = () => {
 
   useEffect(() => {
     // Apply user's selected theme globally when viewing public profiles
-    const activeTheme = localStorage.getItem('zenix-theme') || 'system'
+    const rawTheme = localStorage.getItem('zenix-theme') || 'system'
+    const activeTheme = (rawTheme === 'theme-midnight' || rawTheme === 'theme-emerald' || rawTheme === 'theme-sunset') ? 'dark' : rawTheme
     const root = window.document.documentElement
     root.classList.remove('light', 'dark')
     

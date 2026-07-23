@@ -55,19 +55,26 @@ export const ProfileDetails = ({ profile, updatePfp, deleteAccount, updateProfil
   const [isPublic, setIsPublic] = useState(profile?.isPublic ?? true)
   const [followModal, setFollowModal] = useState({ isOpen: false, type: 'followers' })
   
-  const [activeTheme, setActiveTheme] = useState(() => localStorage.getItem('zenix-theme') || 'system')
+  const normalizeTheme = (t) => {
+    if (t === 'theme-midnight' || t === 'theme-emerald' || t === 'theme-sunset') return 'dark'
+    if (t === 'system' || t === 'light' || t === 'dark') return t
+    return 'system'
+  }
+
+  const [activeTheme, setActiveTheme] = useState(() => normalizeTheme(localStorage.getItem('zenix-theme') || 'system'))
 
   useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove('light', 'dark')
+    const resolved = normalizeTheme(activeTheme)
     
-    if (activeTheme === 'system') {
+    if (resolved === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       root.classList.add(systemTheme)
     } else {
-      root.classList.add(activeTheme)
+      root.classList.add(resolved)
     }
-    localStorage.setItem('zenix-theme', activeTheme)
+    localStorage.setItem('zenix-theme', resolved)
   }, [activeTheme])
 
   if (!profile) return null
