@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Download, Layout, Code2, Sparkles, Wand2, Paintbrush, ExternalLink } from 'lucide-react'
+import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Download, Layout, Code2, Sparkles, Wand2, Paintbrush, ExternalLink, FileText } from 'lucide-react'
 import { usePlayground } from '../hooks/usePlayground'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Panel, Group, Separator } from 'react-resizable-panels'
 import { LiveSandbox } from './LiveSandbox'
+import { DesignDocDrawer } from './components/DesignDocDrawer'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -28,6 +29,7 @@ export const Playground = () => {
   const [editTitle, setEditTitle] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [previewMode, setPreviewMode] = useState('desktop') // desktop, mobile
+  const [isDesignDocOpen, setIsDesignDocOpen] = useState(false)
   
   const handleOpenNewTab = () => {
     if (activeSessionId) {
@@ -239,11 +241,13 @@ export const Playground = () => {
                 <Smartphone className="h-4 w-4" />
               </button>
               <div className="w-[1px] h-4 bg-hairline mx-1" />
-              <button className="p-1.5 rounded transition-all text-ink-muted hover:text-ink hover:bg-canvas" title="Export Tokens">
-                <Download className="h-4 w-4" />
-              </button>
-              <button className="p-1.5 rounded transition-all text-ink-muted hover:text-ink hover:bg-canvas" title="View Code">
-                <Code2 className="h-4 w-4" />
+              <button 
+                onClick={() => setIsDesignDocOpen(true)}
+                className="p-1.5 rounded transition-all text-ink-muted hover:text-ink hover:bg-canvas flex items-center gap-1.5 text-xs font-medium px-2.5" 
+                title="View DESIGN.md Specification"
+              >
+                <FileText className="h-4 w-4 text-brand-indigo" />
+                <span>DESIGN.md</span>
               </button>
               <button 
                 onClick={handleOpenNewTab}
@@ -425,6 +429,13 @@ export const Playground = () => {
           </div>
         )}
       </div>
+
+      <DesignDocDrawer 
+        isOpen={isDesignDocOpen} 
+        onClose={() => setIsDesignDocOpen(false)} 
+        designDoc={activeSession?.previewHtml} 
+        sessionTitle={activeSession?.title} 
+      />
     </div>
   )
 }

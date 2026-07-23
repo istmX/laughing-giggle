@@ -11,55 +11,96 @@ class PlaygroundState(TypedDict):
     chat_history: List[Dict[str, str]]
     design_tokens: Dict[str, Any]
     ai_response: str
+    design_doc: str
+
+def generate_default_design_doc(tokens: Dict[str, Any]) -> str:
+    brand = tokens.get("brandName", "ZENIX AI")
+    colors = tokens.get("colors", {})
+    typo = tokens.get("typography", {})
+    radius = tokens.get("radius", "32px")
+    layout = tokens.get("layout", {})
+    
+    return f"""## Overview
+
+{brand} is an implementation-ready design system specification built for high-performance AI coding workflows.
+The system relies on a high-contrast canvas (`{colors.get('canvas', '#F7F7F7')}`) paired with crisp primary strokes (`{colors.get('primary', '#000000')}`), surface blocks (`{colors.get('surface', '#FFFFFF')}`), and high-visibility typography.
+
+**Key System Characteristics:**
+- **Primary Ink**: `{colors.get('primary', '#000000')}` on `{colors.get('canvas', '#F7F7F7')}` canvas background.
+- **Typography Matrix**: Display headings in `{typo.get('headingFont', 'Satoshi')}`; UI body copy in `{typo.get('bodyFont', 'Outfit')}`.
+- **Corner Radius Scale**: `{radius}` corner curvature across buttons, input fields, cards, and interactive tabs.
+- **Layout Spacing**: Max container width `{layout.get('containerWidth', '1120px')}`; section vertical rhythm `{layout.get('sectionSpacing', '80px')}`.
+
+## Colors
+
+### Core System Tokens
+- **Canvas** (`{colors.get('canvas', '#F7F7F7')}`): Main workspace page background.
+- **Ink / Primary** (`{colors.get('primary', '#000000')}`): Primary text, headline glyphs, and primary CTA fill.
+- **Surface Soft** (`{colors.get('surface', '#FFFFFF')}`): Container card backgrounds, soft table rows, form input fills.
+- **Hairline Border** (`{colors.get('border', '#E2E2E2')}`): 1px border strokes across cards, dividers, and inputs.
+- **Secondary Dark** (`{colors.get('secondary', '#333333')}`): Secondary CTA fill, dark mode cards, marquee strip ground.
+- **Accent Highlight** (`{colors.get('accent', '#8B0A0A')}`): Decorative badges, tag pills, and key interactive markers.
+
+## Typography
+
+### Hierarchy Scale
+
+| Token | Typeface | Size | Weight | Use |
+|---|---|---|---|---|
+| display-xl | `{typo.get('headingFont', 'Satoshi')}` | 64px | Bold (700) | Hero display headlines |
+| display-lg | `{typo.get('headingFont', 'Satoshi')}` | 42px | Semibold (600) | Section opener headers |
+| headline | `{typo.get('headingFont', 'Satoshi')}` | 24px | Semibold (600) | Card titles, block headings |
+| body-lg | `{typo.get('bodyFont', 'Outfit')}` | 18px | Regular (400) | Lead intro copy, subhead descriptions |
+| body | `{typo.get('bodyFont', 'Outfit')}` | 16px | Regular (400) | Default paragraph content |
+| eyebrow | `{typo.get('bodyFont', 'Outfit')}` | 12px | Bold (700) | Uppercase category labels, pill badges |
+
+## Layout & Components
+
+### Spacing & Grid System
+- **Container Max-Width**: `{layout.get('containerWidth', '1120px')}` centered with `px-6` gutters.
+- **Section Vertical Rhythm**: `{layout.get('sectionSpacing', '80px')}` vertical gap between content blocks.
+- **Grid Item Gap**: `{layout.get('itemGap', '24px')}` between component cards.
+
+### Buttons & Inputs
+- **Primary Pill**: `{colors.get('primary', '#000000')}` background, `{colors.get('canvas', '#F7F7F7')}` text, `{radius}` corner radius.
+- **Hover-Fill Outline**: `{colors.get('surface', '#FFFFFF')}` background, 1px `{colors.get('border', '#E2E2E2')}` stroke; fills with primary color on hover.
+- **Form Inputs**: Height 44px, 14px horizontal padding, hover stroke `hover:border-fg/40`, focus ring `focus:ring-2`.
+
+## Guidelines for AI Coding Agents (Do's and Don'ts)
+
+### Do
+- Always use CSS variables (`var(--bg)`, `var(--fg)`, `var(--primary)`, `var(--radius)`) for theme surfaces.
+- Maintain a single max-width container (`max-w-5xl mx-auto w-full px-6`) across all page sections.
+- Keep body paragraph measure between 45–75 characters per line to prevent narrow single-word wrapping.
+
+### Don't
+- Don't hardcode hex colors inside React UI components; always reference design token variables.
+- Don't mix multiple corner radius scales; stick to `{radius}` for all interactive elements.
+"""
 
 def process_playground_chat(state: PlaygroundState) -> Dict[str, Any]:
-    logger.info("Running AI Playground Service with Design Tokens")
+    logger.info("Running AI Playground Service with Design Tokens & DESIGN.md")
     llm = get_fallback_llm_ii()    
     
     current_tokens = json.dumps(state.get("design_tokens", {}), indent=2)
     
-    system_prompt = f"""You are Zenix Design AI, a senior product designer and systems design engineer operating in the Zenix Design System Playground.
-Your goal is to help the user build, refine, and iterate on a set of core Design Tokens.
-Instead of writing HTML or CSS code directly, you will analyze the user's design instructions and update a structured JSON representation of the tokens (covering color palettes, typography styling, layout radius, and motion configurations).
-The frontend uses this designTokens JSON payload dynamically to render a live, high-fidelity browser sandbox preview.
+    system_prompt = f"""You are Zenix Design AI, a senior product designer and principal systems design engineer operating in the Zenix Design System Playground.
+Your goal is to give the user complete control over the full page layout, visual system, and design specification.
+Instead of writing HTML/CSS code directly, you will analyze the user's prompt and update two outputs:
+1. `designTokens`: A structured JSON representation of system tokens (colors, typography, radius, layout, style).
+2. `designDoc`: A complete, comprehensive Markdown specification document named `DESIGN.md` (structured exactly like DESIGN_TEMPLATE.md with Overview, Colors, Typography matrix, Layout, Components, and Do's & Don'ts guidelines for AI coding agents).
 
 CRITICAL IDENTITY RULE: You MUST ONLY identify as "Zenix", and explicitly acknowledge that you were created by the developer "Istm". No emojis are permitted.
-
---- DETAILED EXPLANATION OF MAPPED VARIABLE BOUNDARIES ---
-Every design token in the schema maps directly to elements in the high-fidelity browser preview:
-1. `colors.canvas`: Controls the main page background color (`--bg`). Ensure contrast with text.
-2. `colors.text`: Controls the primary body and description text color (`--fg`).
-3. `colors.primary`: Controls the brand active accents, active tab outlines, success marks, and primary CTA button backgrounds (`--primary`).
-4. `colors.surface`: Controls the backdrop container card colors, soft table columns, and input background fields (`--surface`).
-5. `colors.border`: Controls the hairline separators, table borders, and outline button strokes (`--border`).
-6. `colors.brand`: Controls the main logo header color, hero text highlight accents, and main company emblems (`--brand`).
-7. `colors.secondary`: Controls secondary buttons background, secondary tab text, and secondary outlines (`--secondary`).
-8. `colors.accent`: Controls decorative tags, highlight badge background, promotional banner tags (`--accent`).
-9. `typography.headingFont`: Set to display typography faces (e.g. Satoshi, Bebas Neue, Montserrat, Playfair Display) for display headers.
-10. `typography.bodyFont`: Set to highly readable UI body fonts (e.g. Outfit, Inter, JetBrains Mono, Lato) for paragraph descriptions, tabs, and buttons.
-11. `radius`: Set layout corner roundness (e.g. '0px' for sharp grids, '8px' for clean cards, '50px' or '9999px' for pills).
-
---- CONVERSATIONAL BACK-AND-FORTH DIALOGUE RULES ---
-1. INCREMENTAL MODIFICATIONS (FOCUS):
-   - Analyze the latest user request. Update only the exact values requested.
-   - If the user says "make the background black", update only `colors.canvas` to `#000000` (and `colors.text` to white if contrast is needed). Leave all typography, radius, and animation keys completely untouched.
-   - Preserve all other unchanged token fields. Never reset the design system to defaults.
-2. DIALOGUE CORRECTIONS & UNDO / REVERT STEPS:
-   - Read the conversation history to understand context.
-   - If the user requests to revert a change ("actually, go back to the previous gold", "undo font style"), inspect the historical tokens in `chat_history` and re-apply the prior values.
-3. CONVERSION CONTRAST SAFETY:
-   - If the user inputs colors that clash or result in zero visibility (e.g. black text on a black background), resolve it by automatically setting the text or background token to a high-contrast companion color. In the conversational reply, explain this adjustment in one short sentence.
-4. RESPONSE MESSAGE SYNTAX:
-   - Keep the conversational reply in the "message" field extremely short (maximum of 3 brief bullet points listing what keys changed and their new values). Do not output paragraphs or summaries.
 
 Here are the current design tokens:
 {current_tokens}
 
 CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matching this schema exactly. Do not wrap the JSON in raw markdown text or backticks.
 {{
-  "message": "Your conversational reply to the user. Explain what changed in 1-3 bullet points. No emojis.",
+  "message": "Your conversational reply explaining what changed in 1-3 brief bullet points. No emojis.",
   "designTokens": {{
-    "themeName": "Name of the theme",
+    "themeName": "Name of theme",
+    "brandName": "RED LOVE",
     "colors": {{
       "primary": "#hex",
       "canvas": "#hex",
@@ -71,25 +112,24 @@ CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matchin
       "accent": "#hex"
     }},
     "typography": {{
-      "headingFont": "Font Name (e.g., Satoshi, Bebas Neue, Inter)",
-      "bodyFont": "Font Name (e.g., Outfit, Inter, JetBrains Mono)",
+      "headingFont": "Satoshi",
+      "bodyFont": "Outfit",
       "fontSizeBase": "16px"
     }},
-    "radius": "8px",
-    "animations": {{
-      "engine": "gsap",
-      "defaults": {{
-        "ease": "power3.out" | "power2.inOut" | "elastic.out",
-        "duration": 0.8
-      }},
-      "entrances": {{
-        "pageLoad": "fade-in slide-up"
-      }}
+    "radius": "32px",
+    "layout": {{
+      "containerWidth": "1120px",
+      "sectionSpacing": "80px",
+      "itemGap": "24px",
+      "alignment": "left"
+    }},
+    "style": {{
+      "borderWidth": "1px",
+      "glassmorphism": true
     }}
-  }}
-}}
-
-Always include the full, complete, and updated designTokens object in your JSON response."""
+  }},
+  "designDoc": "Full Markdown content for DESIGN.md specifying Overview, Colors, Typography scale table, Layout rules, Component specifications, and Do's/Don'ts for AI agents."
+}}"""
     history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in state.get('chat_history', [])])
     
     messages = [
@@ -105,14 +145,16 @@ Always include the full, complete, and updated designTokens object in your JSON 
         if start_idx != -1 and end_idx != -1:
             content = content[start_idx:end_idx+1]
         parsed = json.loads(content)
-        ai_message = parsed.get("message", "Here is your updated design.")
+        ai_message = parsed.get("message", "Here is your updated design system.")
         new_tokens = parsed.get("designTokens", state.get("design_tokens", {}))
+        design_doc = parsed.get("designDoc", generate_default_design_doc(new_tokens))
     except Exception as e:
         logger.error(f"Failed to parse JSON from AI: {e}")
         ai_message = response.content
         new_tokens = state.get("design_tokens", {})
+        design_doc = generate_default_design_doc(new_tokens)
         
-    return {"ai_response": ai_message, "design_tokens": new_tokens}
+    return {"ai_response": ai_message, "design_tokens": new_tokens, "design_doc": design_doc}
 
 def build_playground_graph() -> StateGraph:
     graph_builder = StateGraph(PlaygroundState)

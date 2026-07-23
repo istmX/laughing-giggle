@@ -1,10 +1,14 @@
-import { authFetch } from '@/features/auth/api/auth.api'
+import { getBaseUrl } from '@/features/auth/api/auth.api'
 
-// Placeholder context generation API
+// Stream context generation API
 export const generateProjectContext = async (token, ideaId, signal) => {
-  return authFetch(`/ai/context/${ideaId}`, {
+  const url = `${getBaseUrl()}/ai/context/${ideaId}`
+  return fetch(url, {
     method: 'POST',
-    token,
     signal,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   })
 }

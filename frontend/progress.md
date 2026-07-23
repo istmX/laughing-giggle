@@ -1,6 +1,38 @@
-## LLM Migration, Validation Fixes & Prompt Upgrades (Latest)
+## Playground Live Sandbox Global Layout & Impeccable Polish (Latest)
 
 ### Completed
+- **Single Container Width Standardization**: Enforced a single `max-w-5xl mx-auto w-full px-6` container across the header, marquee loop, hero, color swatches, typography scale, components, color blocks, pricing, and footer sections inside `LiveSandbox.jsx` and its sub-components.
+- **Navbar Elevation & Alignment**: Increased top navbar height (`py-4 backdrop-blur-xl`), increased link typography size (`text-sm font-medium`), aligned contact/get started CTA buttons, and bound the trust marquee loop inside the container width padding.
+- **Hero Hierarchy & Spacing Refactor**: Expanded hero body copy container width (`max-w-2xl w-full min-w-0`), increased paragraph text size (`text-base md:text-lg opacity-85 leading-relaxed`), increased spacing above CTAs, and reduced empty dead space below.
+- **Typography Scale & Contrast Overhaul**: Increased section label contrast (`text-xs font-semibold tracking-widest uppercase opacity-85`), set body copy size to 15–16px (`text-base leading-relaxed`), added generous padding to typography scale matrix rows (`py-8`), and standardized headline font weights (`font-semibold` / `font-bold`).
+- **Unified Button & Form System**: Created a single button system (`h-11`, `var(--radius)`, `px-5`) across primary, secondary, link, and tab controls. Upgraded form inputs with hover borders (`hover:border-fg/40`) and focus ring states (`focus:ring-2 focus:ring-primary/20`).
+- **Color Blocks & Release Notes Card**: Replaced dark cards with soft dark gray/surface cards (`var(--surface)`), added a full Release Notes card layout (Date: `JULY 2026`, Badge: `v2.4 RELEASE`, Title, Description, and CTA), and enforced flex wrapping bounds (`w-full min-w-0 max-w-xl`) to eliminate single-word sentence wrapping.
+- **Pricing & Table Density**: Raised pricing card padding (`p-8`), enlarged price numbers (`text-4xl md:text-5xl font-bold tracking-tight`), increased comparison table row height (`py-4 px-6`), bolded the first column (`font-semibold`), and added alternating row contrast (`odd:bg-surface/50`).
+- **Modular Component Architecture**: Extracted monolithic `LiveSandbox.jsx` into 8 focused, reusable sub-components in `frontend/src/features/playground/ui/components/` (`HeaderNav`, `HeroSection`, `PaletteSection`, `TypographySection`, `ComponentsSection`, `ColorBlocksSection`, `PricingSection`, `FooterSection`), keeping every source file under 120 lines to comply with `GEMINI.md`.
+- **Glassmorphism & Single-Weight Tall Font Fixes**: Fixed Google Fonts CDN URL parsing in `LiveSandbox.jsx` for single-weight display fonts (such as `Bebas Neue`), ensuring tall fonts render cleanly without HTTP 400 errors. Added uppercase font transformations for tall display headlines, added glassmorphic navbar styling (`backdrop-filter: blur(16px) saturate(180%)`), enabled outline button hover fill states (`hover:bg-[var(--primary)] hover:text-[var(--bg)]`), and added agency brand title support (`RED LOVE`).
+
+### Verification
+- Production Vite build passes cleanly in 3.22 seconds with 0 warnings or errors.
+
+## Context File Generation Pipeline Optimization (Previous)
+
+### Completed
+- **Primary Model Migration**: Switched the default model from `llama-3.3-70b-versatile` to `llama-3.1-8b-instant` in `llm.py` and `context_engine.py` for faster and more cost-effective context generation.
+- **Asynchronous Parallel Orchestration**: Rewrote Node function definitions (`generate_draft` and `verify_draft`) in `context_engine.py` to be asynchronous (`async def`). 
+- **120s Timeout & Mistral Fallback**: Wrapped primary LLM generation in a strict 120-second timeout. Added automatic fallback handler to target `mistral-large-latest` if the primary model times out or encounters errors.
+- **One-time Verification Loop**: Modified the `StateGraph` in `context_engine.py` to connect the `verify` node directly to the `END` node, removing the feedback retry loop and limiting execution to a single run.
+- **SSE Streaming Integration**: Added a `/context` endpoint that executes worker tasks in parallel using `asyncio.gather()` and uses an `asyncio.Queue` to stream completed context documents to the client via `StreamingResponse` (Server-Sent Events).
+- **Node.js Gateway Streaming**: Refactored `generateContext` in `context.controller.js` to pipe the Python service's SSE stream directly to the client's Express response stream.
+- **Frontend Stream Processing**: Upgraded `context.store.js` to support functional state updaters, modified `context.api.js` to perform raw `fetch` requests for stream reading, and refactored `useContextFlow.js` to parse SSE chunks as they arrive, providing real-time UI updates on compilation progress.
+
+### Verification
+- Frontend production Vite build compiles successfully with zero warnings/errors.
+- Python compilation checks on `context_engine.py`, `routes.py`, and `llm.py` pass cleanly.
+
+## LLM Migration, Validation Fixes & Prompt Upgrades (Previous)
+
+### Completed
+- **Lenis Scroll Interference Resolved**: Appended the attribute `data-lenis-prevent="true"` to the main container inside `PlaygroundPreview.jsx`. This signals the global Lenis smooth scrolling instance to ignore scrolling events within this viewport, restoring full native trackpad and mouse wheel scrolling on the new tab preview window.
 - **Sandbox Scrollability Repaired**: Removed `max-h-[85vh]` constraints and hidden scrollbar classes from the outer wrapper of `LiveSandbox.jsx`. Now, the parent layout handles sizing and scrolling natively. This allows the preview in the new tab to scroll natively through the entire design using standard browser scrollbars, and preserves natural frame scrolling inside the playground device view.
 - **Open in New Tab Sandbox Route Added**: Registered `/playground/preview/:sessionId` path inside `AppRoutes.jsx` to load `PlaygroundPreview.jsx` full-screen, bypassing sidebar and chat panels. Wired an "Open in New Tab" header button inside `Playground.jsx` (utilizing `ExternalLink` icon) to launch the new route, backing draft session previews via cached localStorage and active database sessions.
 - **Dynamic Font Imports Injection**: Added real-time Google Font and Fontshare dynamic CDNs imports inside `LiveSandbox.jsx` via React `useMemo` hooks. This ensures custom fonts requested by the AI (such as Satoshi, Montserrat, Bebas Neue, Outfit, or Playfair Display) are instantly loaded and rendered by the browser without page refreshes.

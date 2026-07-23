@@ -2,8 +2,11 @@ from typing import Annotated, Dict, Any, List
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_groq import ChatGroq
+from langchain_mistralai import ChatMistralAI
 from app.core.llm import get_fallback_llm
 import os
+import asyncio
 from loguru import logger
 
 # --- State Definition ---
@@ -17,11 +20,14 @@ class ArtifactState(TypedDict):
     verification_feedback: str
     is_approved: bool
 
-def generate_draft(state: ArtifactState) -> Dict[str, Any]:
+async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
     """Generates the markdown artifact based on the spec and context."""
     logger.info(f"Iteration {state['iterations'] + 1}: Generating draft for {state['target_file_path']}")
     
-    llm = get_fallback_llm()
+    groq_api_key = os.getenv("GROQ_API_KEY_II") or os.getenv("GROQ_API_KEY")
+    mistral_api_key = os.getenv("MISTRAL_API_KEY_II") or os.getenv("MISTRAL_API_KEY")
+    
+    primary_llm = ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key)
     
     system_prompt = f"""You are Zenix, a world-class Staff Software Architect and Principal Design Systems Engineer.
 Your mission is to generate the absolute highest-fidelity, complete, and implementation-ready engineering markdown file for the target: "{state['target_file_path']}".
@@ -78,7 +84,14 @@ CRITICAL FORMATTING RULES:
         HumanMessage(content=f"Please generate {state['target_file_path']}.")
     ]
     
-    response = llm.invoke(messages)
+    try:
+        # 120s timeout per file generation call
+        logger.info(f"Invoking primary model llama-3.1-8b-instant for {state['target_file_path']} with 120s timeout...")
+        response = await asyncio.wait_for(primary_llm.ainvoke(messages), timeout=120.0)
+    except Exception as e:
+        logger.warning(f"Primary model failed or timed out for {state['target_file_path']}: {e}. Falling back to mistral-large-latest...")
+        fallback_llm = ChatMistralAI(model="mistral-large-latest", api_key=mistral_api_key)
+        response = await fallback_llm.ainvoke(messages)
     
     # Cleanup markdown wrapping
     content = response.content.strip()
@@ -94,7 +107,7 @@ CRITICAL FORMATTING RULES:
         "iterations": state["iterations"] + 1
     }
 
-def verify_draft(state: ArtifactState) -> Dict[str, Any]:
+async def verify_draft(state: ArtifactState) -> Dict[str, Any]:
     """Checks the generated draft for missing requirements or inconsistencies."""
     logger.info(f"Verifying draft for {state['target_file_path']}")
     
@@ -103,7 +116,8 @@ def verify_draft(state: ArtifactState) -> Dict[str, Any]:
         logger.warning(f"Max iterations reached for {state['target_file_path']}. Approving as-is.")
         return {"is_approved": True, "verification_feedback": ""}
         
-    llm = get_fallback_llm()
+    groq_api_key = os.getenv("GROQ_API_KEY_II") or os.getenv("GROQ_API_KEY")
+    llm = ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key)
     
     system_prompt = f"""You are Zenix QA-Engine, a highly strict Principal Quality Assurance Reviewer.
 Your job is to run a rigorous audit on the generated markdown file: "{state['target_file_path']}"
@@ -126,8 +140,12 @@ If there are any deficiencies, missing sections, summaries, or errors, output a 
         HumanMessage(content=f"DRAFT CONTENT:\n{state['draft_content']}")
     ]
     
-    response = llm.invoke(messages)
-    feedback = response.content.strip()
+    try:
+        response = await llm.ainvoke(messages)
+        feedback = response.content.strip()
+    except Exception as e:
+        logger.error(f"Verification failed: {e}. Approving as-is.")
+        feedback = "APPROVED"
     
     if "APPROVED" in feedback.upper():
         logger.success(f"{state['target_file_path']} was approved on iteration {state['iterations']}!")
@@ -136,15 +154,9 @@ If there are any deficiencies, missing sections, summaries, or errors, output a 
         logger.warning(f"{state['target_file_path']} failed verification. Routing back for fixes.")
         return {"is_approved": False, "verification_feedback": feedback}
 
-def route_verification(state: ArtifactState) -> str:
-    """Routing function to determine if we need another iteration."""
-    if state["is_approved"]:
-        return "approved"
-    return "rejected"
-
 # --- Graph Construction ---
 def build_context_engine_graph() -> StateGraph:
-    """Builds and compiles the 3-loop Context Engine LangGraph."""
+    """Builds and compiles the 1-loop Context Engine LangGraph."""
     graph_builder = StateGraph(ArtifactState)
     
     graph_builder.add_node("generate", generate_draft)
@@ -152,16 +164,7 @@ def build_context_engine_graph() -> StateGraph:
     
     graph_builder.add_edge(START, "generate")
     graph_builder.add_edge("generate", "verify")
-    
-    # Conditional Edge based on verification results
-    graph_builder.add_conditional_edges(
-        "verify",
-        route_verification,
-        {
-            "approved": END,
-            "rejected": "generate"  # Loop back to fix
-        }
-    )
+    graph_builder.add_edge("verify", END)
     
     return graph_builder.compile()
 

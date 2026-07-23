@@ -16,8 +16,15 @@ export const generateContext = async (req, res, next) => {
     
     if (!response.ok) throw new Error("Failed to fetch from python service");
     
-    const result = await response.json();
-    res.status(200).json(result);
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    
+    for await (const chunk of response.body) {
+      res.write(chunk);
+    }
+    
+    res.end();
   } catch (error) {
     next(error);
   }

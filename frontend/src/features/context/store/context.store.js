@@ -7,7 +7,9 @@ export const useContextStore = create(
       isGenerating: false,
       generatedFiles: [],
       setGenerating: (val) => set({ isGenerating: val }),
-      setGeneratedFiles: (files) => set({ generatedFiles: files }),
+      setGeneratedFiles: (files) => set((state) => ({
+        generatedFiles: typeof files === 'function' ? files(state.generatedFiles) : files
+      })),
       reset: () => set({ isGenerating: false, generatedFiles: [] }),
     }),
     {

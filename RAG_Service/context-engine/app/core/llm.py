@@ -11,9 +11,9 @@ def get_fallback_llm():
     """
     Returns an LLM with fallbacks: Groq -> Mistral -> Gemini.
     """
-    groq_llm = ChatGroq(model_name="llama-3.3-70b-versatile")
+    groq_llm = ChatGroq(model_name="llama-3.1-8b-instant")
     mistral_llm = ChatMistralAI(model="mistral-large-latest")
-    gemini_llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest")
+    gemini_llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
     
     # Configure fallbacks
     return groq_llm.with_fallbacks([mistral_llm, gemini_llm])
@@ -26,7 +26,7 @@ def get_fallback_llm_ii():
     mistral_api_key_ii = os.getenv("MISTRAL_API_KEY_II")
     gemini_api_key_ii = os.getenv("GEMINI_API_KEY_II")
     
-    groq_llm = ChatGroq(model_name="llama-3.3-70b-versatile", api_key=groq_api_key_ii)
+    groq_llm = ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key_ii)
     mistral_llm = ChatMistralAI(model="mistral-large-latest", api_key=mistral_api_key_ii)
     gemini_llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=gemini_api_key_ii)
     

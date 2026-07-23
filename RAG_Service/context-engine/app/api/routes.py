@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import json
+import asyncio
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 from loguru import logger
@@ -272,7 +273,7 @@ async def generate_artifact(request: ArtifactRequest):
             "is_approved": False
         }
         
-        result = context_engine_graph.invoke(graph_input)
+        result = await context_engine_graph.ainvoke(graph_input)
         draft = result.get("draft_content", "")
         iters = result.get("iterations", 0)
         
@@ -299,7 +300,7 @@ async def generate_project_context(request: ContextRequest):
     from pathlib import Path
     
     spec = request.refinedSpec or ""
-    logger.info(f"Generating bulk context using spec: {spec[:100]}...")
+    logger.info(f"Generating bulk context in parallel using spec: {spec[:100]}...")
     
     files_to_generate = [
         ("agents.md", "agents"),
@@ -308,9 +309,9 @@ async def generate_project_context(request: ContextRequest):
         ("project-overview.md", "project_overview")
     ]
     
-    result_dict = {}
+    queue = asyncio.Queue()
     
-    for fpath, key in files_to_generate:
+    async def worker(fpath, key):
         try:
             template_content = ""
             template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / fpath
@@ -344,13 +345,39 @@ async def generate_project_context(request: ContextRequest):
                 "is_approved": False
             }
             
-            graph_res = context_engine_graph.invoke(graph_input)
-            result_dict[key] = graph_res.get("draft_content", "")
+            graph_res = await context_engine_graph.ainvoke(graph_input)
+            draft = graph_res.get("draft_content", "")
+            
+            await queue.put({"key": key, "content": draft, "status": "completed"})
+            return key, draft
         except Exception as e:
             logger.error(f"Failed to generate context file {fpath}: {e}")
-            result_dict[key] = f"Failed to generate: {e}"
-            
-    return result_dict
+            err_msg = f"Failed to generate: {e}"
+            await queue.put({"key": key, "content": err_msg, "status": "failed"})
+            return key, err_msg
+
+    async def event_generator():
+        tasks = [asyncio.create_task(worker(fpath, key)) for fpath, key in files_to_generate]
+        gather_task = asyncio.create_task(asyncio.gather(*tasks, return_exceptions=True))
+        
+        completed_count = 0
+        while completed_count < len(files_to_generate):
+            try:
+                item = await asyncio.wait_for(queue.get(), timeout=1.0)
+                yield f"data: {json.dumps(item)}\n\n"
+                completed_count += 1
+            except asyncio.TimeoutError:
+                if gather_task.done() and queue.empty():
+                    break
+                continue
+            except Exception as e:
+                logger.error(f"Streaming error: {e}")
+                break
+                
+        if not gather_task.done():
+            await gather_task
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 class TaskRequest(BaseModel):
     project_id: str = None
