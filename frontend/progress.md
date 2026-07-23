@@ -11,11 +11,11 @@
 - **Modular Component Architecture**: Extracted monolithic `LiveSandbox.jsx` into 8 focused, reusable sub-components in `frontend/src/features/playground/ui/components/` (`HeaderNav`, `HeroSection`, `PaletteSection`, `TypographySection`, `ComponentsSection`, `ColorBlocksSection`, `PricingSection`, `FooterSection`), keeping every source file under 120 lines to comply with `GEMINI.md`.
 - **Glassmorphism & Single-Weight Tall Font Fixes**: Fixed Google Fonts CDN URL parsing in `LiveSandbox.jsx` for single-weight display fonts (such as `Bebas Neue`), ensuring tall fonts render cleanly without HTTP 400 errors. Added uppercase font transformations for tall display headlines, added glassmorphic navbar styling (`backdrop-filter: blur(16px) saturate(180%)`), enabled outline button hover fill states (`hover:bg-[var(--primary)] hover:text-[var(--bg)]`), and added agency brand title support (`RED LOVE`).
 - **DESIGN.md Context Document Engine**: Upgraded Python Playground service (`playground.py`), Express controller (`playground.controller.js`), and frontend Playground toolbar (`Playground.jsx`) to auto-generate and display a complete, implementation-ready `DESIGN.md` specification document (matching `DESIGN_TEMPLATE.md`). Includes a real-time `DESIGN.md` slide-over Markdown drawer with one-click **Copy DESIGN.md** and **Download .md** export actions for AI coding agents.
-- **GSAP Motion Intelligence Integration**: Extracted 8 official GSAP AI skill modules (`gsap-core`, `gsap-timeline`, `gsap-scrolltrigger`, `gsap-plugins`, `gsap-utils`, `gsap-react`, `gsap-performance`, `gsap-frameworks`, `examples`) into `RAG_Service/context-engine/app/knowledge/ui/animations/`. Cleaned up temporary `/gsap` workspace folder.
+- **Dynamic Section Removal & Visibility Engine**: Added `hiddenSections` and `sections` token support to `LiveSandbox.jsx` and `playground.py`. Users can now prompt Zenix AI to hide, remove, or isolate any section on the canvas (e.g. "remove pricing section", "hide footer", "only keep hero and typography"). Supports granular visibility toggling across `hero`, `header`, `palette`, `typography`, `components`, `colorblocks`, `pricing`, and `footer`.
 
 ### Verification
-- Python Py_compile (`app/langgraph/context_engine.py`, `app/langgraph/playground.py`, `app/core/design_knowledge.py`) succeeded with 0 errors.
-- Production Vite build passes cleanly in 4.58 seconds with 0 warnings or errors.
+- Python Py_compile (`app/langgraph/playground.py`, `app/langgraph/context_engine.py`, `app/core/design_knowledge.py`) succeeded with 0 errors.
+- Production Vite build passes cleanly in 9.66 seconds with 0 warnings or errors.
 
 ## Context File Generation Pipeline Optimization (Previous)
 

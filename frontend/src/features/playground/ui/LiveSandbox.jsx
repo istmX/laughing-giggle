@@ -153,7 +153,25 @@ export const LiveSandbox = ({ tokens = {} }) => {
     { category: 'Red Love Agency Membership Open', desc: 'Save your spot for custom brand architecture, design tokens, and live interactive prototypes.', bg: 'var(--secondary)', color: '#ffffff', isPromo: true },
   ]
 
+  const heroTitle = tokens?.heroTitle || tokens?.title
+  const heroSubhead = tokens?.heroSubhead || tokens?.subhead || tokens?.bio
+  const images = tokens?.images || {}
+  const heroImage = images.heroImage || tokens?.heroImage
+  const heroVariant = layout.heroVariant || tokens?.heroVariant
   const isTallFont = headingFont.toLowerCase().includes('bebas') || headingFont.toLowerCase().includes('satoshi')
+
+  const hiddenSections = Array.isArray(tokens?.hiddenSections) 
+    ? tokens.hiddenSections.map(s => String(s).toLowerCase())
+    : []
+  const sectionsConfig = tokens?.sections || {}
+
+  const isHidden = (sectionName) => {
+    const name = sectionName.toLowerCase()
+    if (hiddenSections.includes(name)) return true
+    if (sectionsConfig[sectionName] === false) return true
+    if (sectionsConfig[name] === false) return true
+    return false
+  }
 
   return (
     <div style={isolatedStyle} className="p-0 transition-all duration-500 rounded-b-2xl select-none min-h-full w-full">
@@ -180,14 +198,25 @@ export const LiveSandbox = ({ tokens = {} }) => {
         .display-lg { font-family: var(--heading-font); font-size: clamp(1.8rem, 4vw, 3.2rem); font-weight: 600; line-height: 1.12; letter-spacing: ${isTallFont ? '0.02em' : '-0.02em'}; text-transform: ${isTallFont ? 'uppercase' : 'none'}; }
       `}</style>
 
-      <HeaderNav activeTab={activeTab} setActiveTab={setActiveTab} brandName={brandName} glassmorphism={glassmorphism} />
-      <HeroSection brandName={brandName} alignment={alignment} />
-      <PaletteSection systemSwatches={systemSwatches} />
-      <TypographySection headingFont={headingFont} bodyFont={bodyFont} />
-      <ComponentsSection activeTab={activeTab} setActiveTab={setActiveTab} />
-      <ColorBlocksSection colorBlocks={colorBlocks} />
-      <PricingSection tickerVal={tickerVal} />
-      <FooterSection brandName={brandName} />
+      {!isHidden('nav') && !isHidden('header') && (
+        <HeaderNav activeTab={activeTab} setActiveTab={setActiveTab} brandName={brandName} glassmorphism={glassmorphism} />
+      )}
+      {!isHidden('hero') && (
+        <HeroSection 
+          brandName={brandName} 
+          heroTitle={heroTitle} 
+          heroSubhead={heroSubhead} 
+          heroImage={heroImage} 
+          heroVariant={heroVariant} 
+          alignment={alignment} 
+        />
+      )}
+      {!isHidden('palette') && <PaletteSection systemSwatches={systemSwatches} />}
+      {!isHidden('typography') && <TypographySection headingFont={headingFont} bodyFont={bodyFont} />}
+      {!isHidden('components') && <ComponentsSection activeTab={activeTab} setActiveTab={setActiveTab} />}
+      {!isHidden('colorblocks') && !isHidden('blocks') && <ColorBlocksSection colorBlocks={colorBlocks} />}
+      {!isHidden('pricing') && <PricingSection tickerVal={tickerVal} />}
+      {!isHidden('footer') && <FooterSection brandName={brandName} />}
     </div>
   )
 }

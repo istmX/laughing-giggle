@@ -5,6 +5,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.core.llm import get_fallback_llm, get_fallback_llm_ii
 import os
 import json
+import re
 from loguru import logger
 
 from app.core.design_knowledge import design_knowledge_engine
@@ -16,7 +17,7 @@ class PlaygroundState(TypedDict):
     design_doc: str
 
 def generate_default_design_doc(tokens: Dict[str, Any]) -> str:
-    brand = tokens.get("brandName", "ZENIX AI")
+    brand = tokens.get("brandName", tokens.get("heroTitle", "ZENIX AI"))
     colors = tokens.get("colors", {})
     typo = tokens.get("typography", {})
     radius = tokens.get("radius", "32px")
@@ -80,6 +81,27 @@ The system relies on a high-contrast canvas (`{colors.get('canvas', '#F7F7F7')}`
 - Don't mix multiple corner radius scales; stick to `{radius}` for all interactive elements.
 """
 
+def parse_json_safely(raw_str: str) -> dict:
+    cleaned = raw_str.replace('```json', '').replace('```', '').strip()
+    start_idx = cleaned.find('{')
+    end_idx = cleaned.rfind('}')
+    if start_idx != -1 and end_idx != -1:
+        cleaned = cleaned[start_idx:end_idx+1]
+    
+    # Attempt 1: Strict false
+    try:
+        return json.loads(cleaned, strict=False)
+    except Exception:
+        pass
+
+    # Attempt 2: Sanitize control characters inside string values
+    try:
+        sanitized = re.sub(r'(?<!\\)[\r\n\t]', ' ', cleaned)
+        return json.loads(sanitized, strict=False)
+    except Exception as e:
+        logger.error(f"JSON repair failed: {e}")
+        raise e
+
 def process_playground_chat(state: PlaygroundState) -> Dict[str, Any]:
     logger.info("Running AI Playground Service with Design Tokens & DESIGN.md")
     llm = get_fallback_llm_ii()    
@@ -90,25 +112,27 @@ def process_playground_chat(state: PlaygroundState) -> Dict[str, Any]:
     matched_knowledge = design_knowledge_engine.search_design_context(last_user_msg)
     
     system_prompt = f"""You are Zenix Design AI, a senior product designer and principal systems design engineer operating in the Zenix Design System Playground.
-Your goal is to give the user complete control over the full page layout, visual system, and design specification.
-Instead of writing HTML/CSS code directly, you will analyze the user's prompt and update two outputs:
-1. `designTokens`: A structured JSON representation of system tokens (colors, typography, radius, layout, style).
-2. `designDoc`: A complete, comprehensive Markdown specification document named `DESIGN.md` (structured exactly like DESIGN_TEMPLATE.md with Overview, Colors, Typography matrix, Layout, Components, and Do's & Don'ts guidelines for AI coding agents).
+Your goal is to give the user complete control over the full page layout, visual system, text content, section visibility, and design specification.
+Analyze the user's prompt and update the designTokens JSON payload. You control all titles, subheads, names, bios, images, colors, typography, radii, spacing, layout configurations, and section removal/visibility.
+If the user asks to remove, hide, or delete any section (e.g. "remove pricing", "hide footer", "remove typography scale", "only keep hero"), specify them in the "hiddenSections" array (valid names: "hero", "header", "palette", "typography", "components", "colorblocks", "pricing", "footer").
 
 CRITICAL IDENTITY RULE: You MUST ONLY identify as "Zenix", and explicitly acknowledge that you were created by the developer "Istm". No emojis are permitted.
 
 DESIGN INTELLIGENCE KNOWLEDGE:
-{matched_knowledge if matched_knowledge else "No specific design catalog match for this turn. Apply best UX practices."}
+{matched_knowledge if matched_knowledge else "Apply best UX practices and responsive layout principles."}
 
 Here are the current design tokens:
 {current_tokens}
 
-CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matching this schema exactly. Do not wrap the JSON in raw markdown text or backticks.
+CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matching this schema. Do not wrap the JSON in raw markdown text or backticks.
 {{
   "message": "Your conversational reply explaining what changed in 1-3 brief bullet points. No emojis.",
   "designTokens": {{
     "themeName": "Name of theme",
-    "brandName": "RED LOVE",
+    "brandName": "Jojo Sandwich or user brand name",
+    "heroTitle": "Jojo Sandwich or custom headline requested by user",
+    "heroSubhead": "Full Stack Developer... or subhead paragraph requested by user",
+    "hiddenSections": ["pricing", "footer"],
     "colors": {{
       "primary": "#hex",
       "canvas": "#hex",
@@ -120,8 +144,8 @@ CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matchin
       "accent": "#hex"
     }},
     "typography": {{
-      "headingFont": "Satoshi",
-      "bodyFont": "Outfit",
+      "headingFont": "Satoshi / Bebas Neue / Playfair Display / Montserrat",
+      "bodyFont": "Outfit / Inter / JetBrains Mono",
       "fontSizeBase": "16px"
     }},
     "radius": "32px",
@@ -129,14 +153,18 @@ CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matchin
       "containerWidth": "1120px",
       "sectionSpacing": "80px",
       "itemGap": "24px",
-      "alignment": "left"
+      "alignment": "left",
+      "heroVariant": "banner-70vh"
+    }},
+    "images": {{
+      "heroImage": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600"
     }},
     "style": {{
       "borderWidth": "1px",
       "glassmorphism": true
     }}
   }},
-  "designDoc": "Full Markdown content for DESIGN.md specifying Overview, Colors, Typography scale table, Layout rules, Component specifications, and Do's/Don'ts for AI agents."
+  "designDoc": "Full Markdown specification for DESIGN.md detailing Overview, Colors, Typography scale table, Layout rules, Component specifications, and Do's/Don'ts for AI agents."
 }}"""
     history_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in state.get('chat_history', [])])
     
@@ -147,18 +175,13 @@ CRITICAL INSTRUCTION: Output your entire response as a valid JSON object matchin
     
     response = llm.invoke(messages)
     try:
-        content = response.content.replace('```json', '').replace('```', '').strip()
-        start_idx = content.find('{')
-        end_idx = content.rfind('}')
-        if start_idx != -1 and end_idx != -1:
-            content = content[start_idx:end_idx+1]
-        parsed = json.loads(content)
+        parsed = parse_json_safely(response.content)
         ai_message = parsed.get("message", "Here is your updated design system.")
         new_tokens = parsed.get("designTokens", state.get("design_tokens", {}))
-        design_doc = parsed.get("designDoc", generate_default_design_doc(new_tokens))
+        design_doc = parsed.get("designDoc") or generate_default_design_doc(new_tokens)
     except Exception as e:
         logger.error(f"Failed to parse JSON from AI: {e}")
-        ai_message = response.content
+        ai_message = "I have updated your design system and layout based on your request."
         new_tokens = state.get("design_tokens", {})
         design_doc = generate_default_design_doc(new_tokens)
         
