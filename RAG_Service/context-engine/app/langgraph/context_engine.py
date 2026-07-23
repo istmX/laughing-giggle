@@ -20,6 +20,8 @@ class ArtifactState(TypedDict):
     verification_feedback: str
     is_approved: bool
 
+from app.core.design_knowledge import design_knowledge_engine
+
 async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
     """Generates the markdown artifact based on the spec and context."""
     logger.info(f"Iteration {state['iterations'] + 1}: Generating draft for {state['target_file_path']}")
@@ -29,6 +31,9 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
     
     primary_llm = ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key)
     
+    matched_design_knowledge = design_knowledge_engine.search_design_context(state.get('refined_spec', ''))
+    rag_context = f"{state.get('rag_context', '')}\n\n--- MATCHED DESIGN INTELLIGENCE & SYSTEM TOKENS ---\n{matched_design_knowledge}" if matched_design_knowledge else state.get('rag_context', '')
+
     system_prompt = f"""You are Zenix, a world-class Staff Software Architect and Principal Design Systems Engineer.
 Your mission is to generate the absolute highest-fidelity, complete, and implementation-ready engineering markdown file for the target: "{state['target_file_path']}".
 
@@ -40,7 +45,7 @@ We are architecting a project based on this finalized specification and user req
 Your output MUST be a complete, production-grade markdown document. Do not summarize, do not use placeholder text, do not write "TODO", and do not leave sections blank. Every single module, feature, block, and list item must be fully fleshed out with exhaustive technical descriptions.
 
 --- ARCHITECTURAL RULES & UI KNOWLEDGE ---
-{state['rag_context']}
+{rag_context}
 
 --- REFERENCE TEMPLATE & BOUNDARY BLUEPRINT ---
 {state['reference_template']}
