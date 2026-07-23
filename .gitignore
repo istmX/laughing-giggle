@@ -149,6 +149,8 @@ mcp.json
 # Python
 venv/
 __pycache__/
+__pycache__
+pychance/
 *.pyc
 .pytest_cache/
 .ruff_cache/
