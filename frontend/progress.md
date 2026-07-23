@@ -10,9 +10,12 @@
 - **Pricing & Table Density**: Raised pricing card padding (`p-8`), enlarged price numbers (`text-4xl md:text-5xl font-bold tracking-tight`), increased comparison table row height (`py-4 px-6`), bolded the first column (`font-semibold`), and added alternating row contrast (`odd:bg-surface/50`).
 - **Modular Component Architecture**: Extracted monolithic `LiveSandbox.jsx` into 8 focused, reusable sub-components in `frontend/src/features/playground/ui/components/` (`HeaderNav`, `HeroSection`, `PaletteSection`, `TypographySection`, `ComponentsSection`, `ColorBlocksSection`, `PricingSection`, `FooterSection`), keeping every source file under 120 lines to comply with `GEMINI.md`.
 - **Glassmorphism & Single-Weight Tall Font Fixes**: Fixed Google Fonts CDN URL parsing in `LiveSandbox.jsx` for single-weight display fonts (such as `Bebas Neue`), ensuring tall fonts render cleanly without HTTP 400 errors. Added uppercase font transformations for tall display headlines, added glassmorphic navbar styling (`backdrop-filter: blur(16px) saturate(180%)`), enabled outline button hover fill states (`hover:bg-[var(--primary)] hover:text-[var(--bg)]`), and added agency brand title support (`RED LOVE`).
+- **DESIGN.md Context Document Engine**: Upgraded Python Playground service (`playground.py`), Express controller (`playground.controller.js`), and frontend Playground toolbar (`Playground.jsx`) to auto-generate and display a complete, implementation-ready `DESIGN.md` specification document (matching `DESIGN_TEMPLATE.md`). Includes a real-time `DESIGN.md` slide-over Markdown drawer with one-click **Copy DESIGN.md** and **Download .md** export actions for AI coding agents.
+- **Design Intelligence Knowledge Engine**: Integrated canonical datasets (84 UI styles, 192 color palettes, 74 typography pairings, GSAP motion skeletons, and responsive UX rules) into subfolders (`styles/`, `colors/`, `typography/`, `animations/`, `ux/`, `stacks/`, `templates/`) under `RAG_Service/context-engine/app/knowledge/ui/`. Cleaned root directory of all loose files. Updated `app/core/design_knowledge.py` loader paths to search subfolders dynamically.
 
 ### Verification
-- Production Vite build passes cleanly in 3.22 seconds with 0 warnings or errors.
+- Python Py_compile (`app/langgraph/playground.py` and `app/core/design_knowledge.py`) succeeded with 0 errors.
+- Production Vite build passes cleanly in 5.81 seconds with 0 warnings or errors.
 
 ## Context File Generation Pipeline Optimization (Previous)
 

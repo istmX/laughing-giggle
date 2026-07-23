@@ -7,6 +7,8 @@ import os
 import json
 from loguru import logger
 
+from app.core.design_knowledge import design_knowledge_engine
+
 class PlaygroundState(TypedDict):
     chat_history: List[Dict[str, str]]
     design_tokens: Dict[str, Any]
@@ -83,6 +85,9 @@ def process_playground_chat(state: PlaygroundState) -> Dict[str, Any]:
     llm = get_fallback_llm_ii()    
     
     current_tokens = json.dumps(state.get("design_tokens", {}), indent=2)
+    history = state.get('chat_history', [])
+    last_user_msg = history[-1]['content'] if history else ""
+    matched_knowledge = design_knowledge_engine.search_design_context(last_user_msg)
     
     system_prompt = f"""You are Zenix Design AI, a senior product designer and principal systems design engineer operating in the Zenix Design System Playground.
 Your goal is to give the user complete control over the full page layout, visual system, and design specification.
@@ -91,6 +96,9 @@ Instead of writing HTML/CSS code directly, you will analyze the user's prompt an
 2. `designDoc`: A complete, comprehensive Markdown specification document named `DESIGN.md` (structured exactly like DESIGN_TEMPLATE.md with Overview, Colors, Typography matrix, Layout, Components, and Do's & Don'ts guidelines for AI coding agents).
 
 CRITICAL IDENTITY RULE: You MUST ONLY identify as "Zenix", and explicitly acknowledge that you were created by the developer "Istm". No emojis are permitted.
+
+DESIGN INTELLIGENCE KNOWLEDGE:
+{matched_knowledge if matched_knowledge else "No specific design catalog match for this turn. Apply best UX practices."}
 
 Here are the current design tokens:
 {current_tokens}
