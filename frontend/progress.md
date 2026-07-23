@@ -2,12 +2,10 @@
 
 ### Completed
 - Removed the separate PM Wizard page flow (`NewProjectPage`) before creating a project.
-- Replaced `/projects/:projectId` with a comprehensive **Project Onboarding & Onboarding Cockpit** screen featuring:
-  - Editable project title and description inputs.
-  - Interactive onboarding selection cards (Chat with Zenix AI, GitHub Import, Upload Spec Document, Blueprint Templates) with custom styling and "Coming Soon" badges.
-  - Sidebar setup configuration selectors for target platform, tech stack presets, and design vibe styling.
-  - A locked blueprints status checklist mapping the 4 core compiled files.
-  - Debounced auto-saving of cockpit title, description, and setup choices to the backend MongoDB `wizard_state`.
+- Replaced `/projects/:projectId` with a simplified, premium **Project Onboarding Cockpit** page that:
+  - Displays a clean visual checklist of the 4 locked blueprint files (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`).
+  - Presents clean source setup options (Chat with Zenix AI, GitHub Import, Choose Template, Upload Specification) with custom styled cards and "Coming Soon" tags.
+  - Focuses user attention on a single primary action card to **Chat with Zenix AI**, which redirects the user to the chat workspace to describe their idea and start compilation.
 - Decoupled Lucide brand dependencies by replacing the `Github` icon with a custom `GitFork` icon.
 - Updated `EmptyState` in the developer chat workspace to detect the project description and render a prominent suggestion card to start the interview directly using the onboarding cockpit description.
 - Automatically redirecting active or in-progress projects to the workspace chat.
