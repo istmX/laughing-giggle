@@ -255,7 +255,7 @@ export function ProjectWorkspace() {
               <MessageScrollerViewport className="px-4 pt-6">
                 <MessageScrollerContent className="max-w-3xl mx-auto pb-44 w-full">
                   {!hasMessages && (
-                    <div className="min-h-[60vh] flex items-center justify-center">
+                    <div className="min-h-[60vh] w-full min-w-0 flex items-center justify-center">
                       <EmptyState 
                         onSuggestion={(s) => setInputValue(s)} 
                         projectDescription={project?.project_description} 
@@ -273,26 +273,26 @@ export function ProjectWorkspace() {
                     >
                       <MessageScrollerItem messageId={msg.id} scrollAnchor={msg.role === 'user'} className="w-full">
                         {msg.role === 'user' ? (
-                          <div className="flex justify-end py-3">
-                            <div className="max-w-[72%] text-right">
-                              <p className="text-[15px] text-ink leading-[1.65] font-normal w-full max-w-[60ch] block">
+                          <div className="py-3 w-full text-right">
+                            <div className="max-w-[72%] min-w-0 ml-auto text-left inline-block bg-surface-soft/40 px-4 py-3 rounded-2xl border border-hairline/60">
+                              <p className="text-[15px] text-ink leading-[1.65] font-normal break-words">
                                 {msg.content}
                               </p>
                               {msg.timestamp && (
-                                <span className="text-[12px] text-ink-muted/55 font-mono mt-1 block">
+                                <span className="text-[11px] text-ink-muted/50 font-mono mt-1.5 block text-right">
                                   {msg.timestamp}
                                 </span>
                               )}
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-start gap-4 py-5">
+                          <div className="flex items-start gap-4 py-5 w-full min-w-0">
                             <div className="shrink-0 mt-1">
                               <AiIcon isAnimating={isProcessing && i === messages.length - 1} />
                             </div>
-                            <div className="flex-1 min-w-0 max-w-2xl">
+                            <div className="flex-1 min-w-0 max-w-2xl w-full">
                               {cleanMessageContent(msg.content) && (
-                                <div className="notion-markdown">
+                                <div className="notion-markdown w-full min-w-0">
                                   <ReactMarkdown 
                                     remarkPlugins={[remarkGfm]}
                                     components={{

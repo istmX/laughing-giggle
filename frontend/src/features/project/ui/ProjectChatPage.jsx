@@ -167,7 +167,7 @@ Your requirements have been cataloged. You can trigger the context engine to bui
                     scrollAnchor={msg.role === 'user'}
                   >
                     <div
-                      className={`flex gap-4 p-5 rounded-2xl border transition-all ${
+                      className={`flex gap-4 p-5 rounded-2xl border transition-all w-full min-w-0 ${
                         msg.role === 'user'
                           ? 'bg-surface/50 border-hairline/80 ml-12'
                           : 'bg-surface border-hairline mr-12'
@@ -180,14 +180,14 @@ Your requirements have been cataloged. You can trigger the context engine to bui
                       >
                         {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                       </div>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="text-caption font-semibold text-ink">
                             {msg.role === 'user' ? 'You' : 'Zenix Architect'}
                           </span>
                           <span className="text-[10px] text-ink-muted">{msg.timestamp}</span>
                         </div>
-                        <div className="text-body-sm text-ink-muted whitespace-pre-wrap leading-relaxed">
+                        <div className="text-body-sm text-ink-muted whitespace-pre-wrap leading-relaxed break-words">
                           {msg.content}
                         </div>
                       </div>

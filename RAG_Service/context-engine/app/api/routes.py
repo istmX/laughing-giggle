@@ -12,13 +12,16 @@ from app.langgraph.playground import playground_graph
 from app.langgraph.developer import developer_graph
 from app.langgraph.task_engine import task_engine_graph
 from app.langgraph.documentation_engine import documentation_engine_graph
+from app.core.llm import get_fallback_llm
 
 router = APIRouter(prefix="/api/orchestrate", tags=["orchestration"])
 retriever = ZenixRetriever(k=5)
 
 class IdeaRequest(BaseModel):
-    idea_id: str
-    prompt: str
+    idea_id: str = None
+    ideaId: str = None
+    prompt: str = None
+    idea: str = None
 
 class IdeaResponse(BaseModel):
     idea_id: str
@@ -32,30 +35,63 @@ async def process_initial_idea(request: IdeaRequest):
     Receives the raw user idea from the Node.js backend, runs it through the Qdrant 
     RAG system, and returns the formatted context ready to be fed into the PM Wizard.
     """
-    logger.info(f"Processing new idea request: {request.idea_id}")
+    actual_idea_id = request.idea_id or request.ideaId
+    actual_prompt = request.prompt or request.idea
+
+    if not actual_idea_id:
+        raise HTTPException(status_code=400, detail="idea_id or ideaId is required")
+    if not actual_prompt:
+        raise HTTPException(status_code=400, detail="prompt or idea is required")
+
+    logger.info(f"Processing new idea request: {actual_idea_id}")
     
-    if not request.prompt:
-        raise HTTPException(status_code=400, detail="Prompt cannot be empty")
-        
     try:
+        # Step 0: Classify if the prompt is actually a software idea/description
+        classification_prompt = (
+            "You are a validation assistant. Classify if the following user input describes a software application, "
+            "tool, website, feature, or tech idea that they want to build. "
+            "If it is a general greeting (like 'hi', 'hello', 'good morning', 'yo'), casual question, off-topic statement, "
+            "banter, or request for information unrelated to building software, classify it as FALSE.\n\n"
+            f"User Input: \"{actual_prompt}\"\n\n"
+            "Respond with exactly one word (TRUE or FALSE) and no other text."
+        )
+        from langchain_core.messages import HumanMessage, SystemMessage
+        llm = get_fallback_llm()
+        classification_res = llm.invoke([SystemMessage(content=classification_prompt)])
+        classification = classification_res.content.strip().upper()
+        
+        logger.info(f"Prompt classification result for '{actual_prompt}': {classification}")
+
+        if "FALSE" in classification:
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="greeting",
+                rag_context="",
+                generated_questions=[
+                    "Hi there! Zenix is designed to build complete developer context files for your software. "
+                    "Tell me about the app or feature you want to create (e.g., 'A real-time Kanban board with offline sync') "
+                    "to get started!"
+                ]
+            )
+
         # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant
-        retrieved_docs = retriever.retrieve_context(request.prompt)
+        retrieved_docs = retriever.retrieve_context(actual_prompt)
         
         # Step 2: Format the raw LangChain documents into a single string for the LLM
         formatted_context = retriever.format_context(retrieved_docs)
         
         # Step 3: Run the PM Wizard LangGraph to generate clarification questions
         graph_input = {
-            "idea_prompt": request.prompt,
+            "idea_prompt": actual_prompt,
             "rag_context": formatted_context,
             "messages": []
         }
         graph_result = pm_wizard_graph.invoke(graph_input)
         
-        logger.success(f"Successfully processed idea {request.idea_id} through RAG and LangGraph")
+        logger.success(f"Successfully processed idea {actual_idea_id} through RAG and LangGraph")
         
         return IdeaResponse(
-            idea_id=request.idea_id,
+            idea_id=actual_idea_id,
             status="success",
             rag_context=formatted_context,
             generated_questions=graph_result["generated_questions"]
