@@ -40,17 +40,18 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
     try:
         llm = get_fallback_llm()
         prompt = (
-            f"You are Zenix, a premier Software Product Architect (created by developer 'Istm').\n"
-            f"Your task is to analyze the user's initial software idea: \"{idea_prompt}\"\n"
-            f"And the clarifying question: \"{question}\"\n"
-            "Based on these, generate exactly 3 diverse, highly specific, and technically concrete multiple-choice answer options that the user can choose from.\n\n"
-            "GUIDELINES FOR THE OPTIONS:\n"
-            "1. BE SPECIFIC AND TECHNICAL: Do not generate vague or generic answers. Include real protocols, frameworks, database types, or visual style terms (e.g. 'PostgreSQL with PostGIS for location queries', 'WebSockets via Socket.io', or 'Clean neo-brutalism').\n"
-            "2. ENSURE DIVERSITY: Each option should represent a distinct engineering pathway or design aesthetic so the user has meaningful choices.\n"
-            "3. KEEP THEM CONCISE: Keep each option under 12 words so they fit neatly on UI buttons. Avoid emojis.\n"
-            "4. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings. Do not use markdown envelopes or markdown blocks (no ```json). Start directly with the opening bracket '['.\n\n"
+            f"You are Zenix, a premier Software Product Architect and Technical Product Manager (created by developer 'Istm').\n"
+            f"User's software idea: \"{idea_prompt}\"\n"
+            f"Clarifying question: \"{question}\"\n\n"
+            "GUIDELINES FOR OPTIONS:\n"
+            "1. DOMAIN ACCURACY: Check the idea and question intent first!\n"
+            "   - If the idea is a Portfolio, Agency Showcase, Landing Page, or Visual Site: DO NOT generate database options (e.g. PostgreSQL, MySQL, Firestore, DynamoDB, MongoDB)!\n"
+            "   - Generate domain-relevant options matching the question (e.g. Agency specializations: 'Branding & UI/UX', 'Full-Stack Web Dev', '3D & Motion Design' | Developer skills: 'React, Next.js & TS', 'Python & FastAPI', 'Full-Stack Node.js' | Layout aesthetics: 'Dark Terminal/IDE style', 'Sleek Minimalist Editorial', 'Dynamic Bento Grid').\n"
+            "2. ENSURE DIVERSITY: Each option should represent a distinct, meaningful choice.\n"
+            "3. CONCISE: Keep each option under 8 words so they fit neatly on UI buttons. Avoid emojis.\n"
+            "4. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings. Do not use markdown blocks.\n\n"
             "Example format:\n"
-            "[\"PostgreSQL with PostGIS\", \"MongoDB with geospatial index\", \"Supabase database\"]"
+            "[\"Branding & UI/UX Design\", \"Full-Stack Web Development\", \"3D & Motion Graphics\"]"
         )
         from langchain_core.messages import SystemMessage
         res = llm.invoke([SystemMessage(content=prompt)])
@@ -63,7 +64,7 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
         return json.loads(content)
     except Exception as e:
         logger.error(f"Failed to generate options: {e}")
-        return ["Option A", "Option B", "Option C"]
+        return ["Branding & UI/UX", "Full-Stack Web Dev", "3D & Motion Design"]
 
 @router.post("/idea", response_model=IdeaResponse)
 async def process_initial_idea(request: IdeaRequest):

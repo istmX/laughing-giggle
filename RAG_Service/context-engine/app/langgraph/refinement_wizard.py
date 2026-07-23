@@ -5,6 +5,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from app.core.llm import get_fallback_llm
 import os
 from loguru import logger
+from app.core.design_knowledge import design_knowledge_engine
 
 class RefinementState(TypedDict):
     idea_prompt: str
@@ -12,52 +13,68 @@ class RefinementState(TypedDict):
     refined_spec: str
 
 def refine_spec(state: RefinementState) -> Dict[str, Any]:
-    logger.info("Running Refinement Graph: Synthesizing Specification")
+    logger.info("Running Refinement Graph: Synthesizing Specification with Design Intelligence")
     
     llm = get_fallback_llm()
-    
+    idea = state['idea_prompt']
     qa_text = "\n".join([f"Q: {qa['question']}\nA: {qa['answer']}" for qa in state['questions_and_answers']])
     
-    system_prompt = """You are a Senior Technical Architect at Zenix (created by developer "Istm").
-Your task is to take a user's raw software idea and their answers to your clarifying questions, and synthesize them into a highly professional, comprehensive, and production-grade Technical Specification Document.
+    # Query Design Intelligence Catalogs
+    matched_knowledge = design_knowledge_engine.search_design_context(idea)
+    
+    system_prompt = f"""You are Senior Technical Architect and Principal Design Systems Engineer at Zenix (created by developer "Istm").
+Your task is to synthesize a user's software idea and Q&A answers into a production-grade Technical Specification Document.
 
-This document serves as the absolute single source of truth for downstream AI coding agents to implement the application. It must be written in a professional, developer-first, and highly structured tone. No emojis are permitted.
+ZENIX DESIGN INTELLIGENCE & CATALOGS:
+{matched_knowledge if matched_knowledge else "Apply modern design system tokens, Satoshi/Bebas Neue fonts, 32px radii, and GSAP motion principles."}
 
-Your output MUST be structured as a detailed Markdown document containing the following sections:
+CRITICAL DOMAIN & ARCHITECTURE RULES:
+1. DOMAIN CHECK & OVER-ENGINEERING PREVENTION:
+   - If the project is a **Portfolio, Agency Showcase, Landing Page, Developer Showcase, or Visual Site**:
+     * **STRICT BAN**: DO NOT generate MongoDB schemas, Mongoose models, Node/Express backend APIs, WebSockets, or JWT login/registration flows!
+     * Stack: **Next.js + TypeScript + Tailwind CSS + GSAP Motion**.
+     * Replace database/auth sections with **DESIGN SYSTEM & TOKENS SPECIFICATION** (Hex colors, Satoshi / Bebas Neue typography scale, 32px pill radii, 1120px max-width) and **GSAP MOTION SPECIFICATION** (ScrollTrigger, stagger animations, hover micro-interactions).
+   - If the project is a **Mobile App**:
+     * Stack: **Expo + React Native + TypeScript + NativeWind**.
+   - If and ONLY IF the project is a **Full-Stack SaaS / Platform**:
+     * Include database schemas, REST endpoints, and authentication middleware.
 
-1. EXECUTIVE SUMMARY & CORE OBJECTIVES
-   - Brief vision statement, target audience, and primary problem definition.
-   - Core value proposition and non-negotiable user journeys.
+2. STRUCTURE FOR AI CODING AGENTS:
+Your output MUST be a complete Markdown document formatted as follows:
 
-2. COMPREHENSIVE FUNCTIONAL REQUIREMENTS
-   - Exhaustive list of core features, divided by domain (e.g., auth, dashboard, feeds, settings, etc.).
-   - Explicit user flows, button-trigger states, and navigation maps.
+# Technical Specification
 
-3. ARCHITECTURAL & TECHNOLOGY STACK DECISIONS
-   - Detailed stack recommendations based on the user's answers (e.g. Next.js, React, or React Native frontend; Node/Express backend; MongoDB, Supabase, or PostgreSQL database; Zustand for client state).
-   - Real-time/offline layer requirements (e.g., WebSockets, Socket.io, Firebase, or standard API polling).
-   - Core folder tree structure conforming to Feature-Based Architecture rules (src/pages, src/features, src/shared).
+## EXECUTIVE SUMMARY & CORE OBJECTIVES
+- Vision statement, target audience, core value proposition, and non-negotiable user journeys.
 
-4. DATA MODEL & SCHEMA SPECIFICATION
-   - Complete schema designs (either Mongoose schemas or SQL tables) listing all collections/tables, fields, data types, indexes, and primary/foreign relationships.
-   - Define exact keys, types (e.g., ObjectId, String, Boolean), and required fields.
+## COMPREHENSIVE FUNCTIONAL REQUIREMENTS
+- Explicit user flows, page sections, featured project showcases, and interactive elements.
 
-5. API ROUTE & COMMUNICATION CONTRACTS
-   - Table of main REST endpoints (path, method, request payload, success response body).
-   - WebSocket events (if real-time was selected) with event name, payload format, and listener actions.
+## ARCHITECTURAL & TECHNOLOGY STACK DECISIONS
+- Exact tech stack matching domain rules (Next.js + TS + GSAP for web/portfolio, Expo for mobile).
+- Feature-based folder tree structure (src/pages, src/features, src/shared).
 
-6. SECURITY, SCALE & DEPLOYMENT STRATEGY
-   - Auth strategy (e.g. Clerk, Firebase, JWT) and routing permissions.
-   - Offline-first capabilities, cache policies, and sync strategies.
+## DESIGN SYSTEM, TOKENS & GSAP MOTION SPECIFICATION
+- Exact Hex color palette (Primary, Canvas, Surface, Border, Secondary, Accent).
+- Typography scale matrix (display-xl, display-lg, headline, body, eyebrow font faces and metrics).
+- Layout tokens (1120px container width, 80px section spacing, 32px corner radius).
+- GSAP animation blueprints (ScrollTrigger pins, stagger delays, ease curves, hover transitions).
+
+## DATA MODEL / CONTENT STRUCTURE
+- For Portfolios/Showcases: Document static JSON content schemas (projects, skills, experience, case studies).
+- For Full-Stack SaaS only: Document database schemas (tables/collections, fields, types, indexes).
+
+## SECURITY, PERFORMANCE & DEPLOYMENT STRATEGY
+- Responsive performance rules, image optimization, Vercel/Netlify hosting strategy.
 
 CRITICAL INSTRUCTIONS:
-- Do NOT output any markdown backtick block wrapping (i.e. do not start with ```markdown or end with ```). Start directly with the `# Technical Specification` title.
-- Do NOT include any conversational fluff, greetings, notes, introductions, or follow-up questions.
-- Every section must be completely filled out with realistic, production-ready specifications. Absolutely NO placeholders, "TODO" comments, or summarized checklists are allowed."""
+- Do NOT output markdown envelope wrapping (no ```markdown). Start directly with # Technical Specification.
+- Absolutely NO placeholders, "TODO" comments, or summarized checklists. Every single token and rule must be fully written out.
+"""
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Original Idea:\n{state['idea_prompt']}\n\nQ&A History:\n{qa_text}")
+        HumanMessage(content=f"Original Idea:\n{idea}\n\nQ&A History:\n{qa_text}")
     ]
     
     response = llm.invoke(messages)
