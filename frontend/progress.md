@@ -1,4 +1,21 @@
-## Zenix RAG Service Consolidation & API Alignment (Latest)
+## Project Onboarding Cockpit & Chat Refinement (Latest)
+
+### Completed
+- Removed the separate PM Wizard page flow (`NewProjectPage`) before creating a project.
+- Replaced `/projects/:projectId` with a comprehensive **Project Onboarding & Onboarding Cockpit** screen featuring:
+  - Editable project title and description inputs.
+  - Interactive onboarding selection cards (Chat with Zenix AI, GitHub Import, Upload Spec Document, Blueprint Templates) with custom styling and "Coming Soon" badges.
+  - Sidebar setup configuration selectors for target platform, tech stack presets, and design vibe styling.
+  - A locked blueprints status checklist mapping the 4 core compiled files.
+  - Debounced auto-saving of cockpit title, description, and setup choices to the backend MongoDB `wizard_state`.
+- Decoupled Lucide brand dependencies by replacing the `Github` icon with a custom `GitFork` icon.
+- Updated `EmptyState` in the developer chat workspace to detect the project description and render a prominent suggestion card to start the interview directly using the onboarding cockpit description.
+- Automatically redirecting active or in-progress projects to the workspace chat.
+
+### Verification
+- Production build compilation successfully passes via `npm run build` with zero errors.
+
+## Zenix RAG Service Consolidation & API Alignment (Previous)
 
 ### Completed
 - Merged the 10 obsolete templates inside [knowledge/context/](RAG_Service/context-engine/app/knowledge/context/) into **4 core visual/functional blueprints**:

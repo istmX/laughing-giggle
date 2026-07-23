@@ -28,7 +28,9 @@ const SUGGESTIONS = [
  * EmptyState — beautiful centered hero shown when no messages exist yet.
  * Includes a gradient icon, headline, subtitle, and 2×2 suggestion grid.
  */
-export function EmptyState({ onSuggestion }) {
+export function EmptyState({ onSuggestion, projectDescription }) {
+  const showCustomSuggestion = projectDescription && projectDescription.trim().length > 0;
+
   return (
     <div className="flex flex-col items-center justify-center h-full w-full px-4 pb-32 text-center">
       {/* Monochrome Brand Box Icon — Styled per Figma-design-analysis block system */}
@@ -60,6 +62,23 @@ export function EmptyState({ onSuggestion }) {
         and generate your project context.
       </motion.p>
 
+      {showCustomSuggestion && (
+        <motion.button
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25 }}
+          whileHover={{ scale: 1.01, y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onSuggestion(projectDescription)}
+          className="text-left w-full max-w-lg p-5 rounded-2xl border-2 border-brand-indigo/35 bg-brand-indigo/5 hover:bg-brand-indigo/10 transition-colors mb-6 cursor-pointer group"
+        >
+          <span className="block text-xs font-mono font-bold text-brand-indigo uppercase tracking-wider mb-2">🚀 Start with Cockpit Description</span>
+          <span className="block text-[14.5px] font-medium text-ink leading-relaxed line-clamp-2">
+            {projectDescription}
+          </span>
+        </motion.button>
+      )}
+
       {/* 2×2 suggestion grid */}
       <motion.div
         initial="hidden"
@@ -80,7 +99,7 @@ export function EmptyState({ onSuggestion }) {
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onSuggestion(s.desc)}
-            className="text-left p-4 rounded-xl border border-hairline bg-canvas hover:bg-surface-soft hover:border-ink/20 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 group"
+            className="text-left p-4 rounded-xl border border-hairline bg-canvas hover:bg-surface-soft hover:border-ink/20 hover:shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20 group cursor-pointer"
           >
             <span className="text-lg mb-1 block">{s.icon}</span>
             <span className="block text-sm font-medium text-ink mb-0.5 group-hover:text-ink">

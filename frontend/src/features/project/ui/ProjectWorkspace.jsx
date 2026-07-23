@@ -256,7 +256,10 @@ export function ProjectWorkspace() {
                 <MessageScrollerContent className="max-w-3xl mx-auto pb-44 w-full">
                   {!hasMessages && (
                     <div className="min-h-[60vh] flex items-center justify-center">
-                      <EmptyState onSuggestion={(s) => setInputValue(s)} />
+                      <EmptyState 
+                        onSuggestion={(s) => setInputValue(s)} 
+                        projectDescription={project?.project_description} 
+                      />
                     </div>
                   )}
 
