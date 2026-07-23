@@ -48,12 +48,23 @@ async def process_initial_idea(request: IdeaRequest):
     try:
         # Step 0: Classify if the prompt is actually a software idea/description
         classification_prompt = (
-            "You are a validation assistant. Classify if the following user input describes a software application, "
-            "tool, website, feature, or tech idea that they want to build. "
-            "If it is a general greeting (like 'hi', 'hello', 'good morning', 'yo'), casual question, off-topic statement, "
-            "banter, or request for information unrelated to building software, classify it as FALSE.\n\n"
+            "ROLE:\n"
+            "You are the Zenix Project Classification Engine. Your sole responsibility is to analyze user input "
+            "and determine if it describes a software application, website, feature, automation script, database system, "
+            "or technical software idea that the user wants to design, build, or implement.\n\n"
+            "CLASSIFICATION CRITERIA:\n"
+            "- Classify as TRUE if the input contains a request or description of software products, features, pages, "
+            "code generation, algorithms, or technical design concepts (e.g., 'a dating site', 'add login buttons', "
+            "'python script to parse excel', 'kanban board app'). Even vague software ideas like 'an app to track habits' "
+            "or 'a simple landing page' are TRUE.\n"
+            "- Classify as FALSE if the input consists of general greetings ('hi', 'hello', 'good morning', 'hey', 'yo', 'what\'s up'), "
+            "casual banter, off-topic questions ('how are you', 'tell me a joke', 'write an essay about space', 'how to bake cake'), "
+            "general search requests, or statements completely unrelated to software development.\n\n"
+            "EVALUATION TARGET:\n"
             f"User Input: \"{actual_prompt}\"\n\n"
-            "Respond with exactly one word (TRUE or FALSE) and no other text."
+            "OUTPUT FORMAT:\n"
+            "Respond with exactly one word: either TRUE or FALSE. Do not include markdown code blocks, explanation, "
+            "whitespace, punctuation, or any other characters."
         )
         from langchain_core.messages import HumanMessage, SystemMessage
         llm = get_fallback_llm()

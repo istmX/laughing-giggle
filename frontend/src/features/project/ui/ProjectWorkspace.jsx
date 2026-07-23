@@ -20,6 +20,7 @@ import { EmptyState } from './components/EmptyState'
 import { GenerationProgress } from './components/GenerationProgress'
 import { SpecReadyPanel } from './components/SpecReadyPanel'
 import { ArtifactsPanel } from './components/ArtifactsPanel'
+import { WizardDrawer } from './components/WizardDrawer'
 
 import { useProjectData } from '../hooks/useProjectData'
 import { useChatHandlers } from '../hooks/useChatHandlers'
@@ -182,6 +183,9 @@ export function ProjectWorkspace() {
       </div>
     )
   }
+
+  const lastMessage = messages[messages.length - 1]
+  const isWizardActive = lastMessage && lastMessage.role === 'assistant' && lastMessage.options?.length > 0 && !project?.wizard_state?.isComplete
 
   return (
     <div className="flex h-dvh w-full bg-background overflow-hidden text-foreground font-sans" data-lenis-prevent="true">
@@ -353,42 +357,7 @@ export function ProjectWorkspace() {
                                 </div>
                               )}
 
-                              {msg.options?.length > 0 && (
-                                <motion.div
-                                  initial="hidden"
-                                  animate="visible"
-                                  variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } }
-                                  }}
-                                  className="flex flex-wrap gap-2 mt-4"
-                                >
-                                  {msg.options.map((opt, idx) => (
-                                    <motion.button
-                                      key={idx}
-                                      variants={{ hidden: { opacity: 0, y: 4 }, visible: { opacity: 1, y: 0 } }}
-                                      whileHover={{ y: -1 }}
-                                      disabled={isProcessing}
-                                      onClick={() => handleSend(opt)}
-                                      className="px-3.5 py-1.5 rounded-full border border-hairline bg-canvas hover:bg-surface-soft hover:border-ink/25 text-[13px] font-normal text-ink transition-all disabled:opacity-40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
-                                    >
-                                      {opt}
-                                    </motion.button>
-                                  ))}
-                                  {!msg.options.some(o => o.toLowerCase().includes('zenix decide')) && (
-                                    <motion.button
-                                      variants={{ hidden: { opacity: 0, y: 4 }, visible: { opacity: 1, y: 0 } }}
-                                      whileHover={{ y: -1 }}
-                                      disabled={isProcessing}
-                                      onClick={() => handleSend('Let Zenix decide')}
-                                      className="px-3.5 py-1.5 rounded-full bg-ink hover:opacity-85 text-[13px] font-normal text-canvas transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
-                                    >
-                                      <Sparkles className="h-3 w-3" />
-                                      Let Zenix decide
-                                    </motion.button>
-                                  )}
-                                </motion.div>
-                              )}
+
                             </div>
                           </div>
                         )}
@@ -561,6 +530,19 @@ export function ProjectWorkspace() {
         sidebarWidth={sidebarWidth}
         handleMouseDown={handleMouseDown}
       />
+
+      <AnimatePresence>
+        {isWizardActive && (
+          <WizardDrawer
+            questionText={cleanMessageContent(lastMessage.content)}
+            options={lastMessage.options}
+            onSubmit={(val) => handleSend(val)}
+            isLoading={isProcessing}
+            currentStep={messages.filter(m => m.role === 'user').length}
+            totalSteps={10}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
