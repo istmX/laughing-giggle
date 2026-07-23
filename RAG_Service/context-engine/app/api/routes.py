@@ -39,14 +39,17 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
     try:
         llm = get_fallback_llm()
         prompt = (
-            "You are Zenix, a premier Software Product Architect.\n"
-            f"For the user's software idea: \"{idea_prompt}\"\n"
+            f"You are Zenix, a premier Software Product Architect (created by developer 'Istm').\n"
+            f"Your task is to analyze the user's initial software idea: \"{idea_prompt}\"\n"
             f"And the clarifying question: \"{question}\"\n"
-            "Generate exactly 3 diverse, highly specific multiple-choice answer options that the user can pick from.\n"
-            "Keep each option short, descriptive, and technical (under 12 words).\n\n"
-            "Output ONLY a raw JSON array of 3 strings. Do not use markdown formatting.\n"
-            "Example:\n"
-            "[\"Option A\", \"Option B\", \"Option C\"]"
+            "Based on these, generate exactly 3 diverse, highly specific, and technically concrete multiple-choice answer options that the user can choose from.\n\n"
+            "GUIDELINES FOR THE OPTIONS:\n"
+            "1. BE SPECIFIC AND TECHNICAL: Do not generate vague or generic answers. Include real protocols, frameworks, database types, or visual style terms (e.g. 'PostgreSQL with PostGIS for location queries', 'WebSockets via Socket.io', or 'Clean neo-brutalism').\n"
+            "2. ENSURE DIVERSITY: Each option should represent a distinct engineering pathway or design aesthetic so the user has meaningful choices.\n"
+            "3. KEEP THEM CONCISE: Keep each option under 12 words so they fit neatly on UI buttons. Avoid emojis.\n"
+            "4. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings. Do not use markdown envelopes or markdown blocks (no ```json). Start directly with the opening bracket '['.\n\n"
+            "Example format:\n"
+            "[\"PostgreSQL with PostGIS\", \"MongoDB with geospatial index\", \"Supabase database\"]"
         )
         from langchain_core.messages import SystemMessage
         res = llm.invoke([SystemMessage(content=prompt)])

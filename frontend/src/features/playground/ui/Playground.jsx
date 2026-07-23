@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Download, Layout, Code2, Sparkles, Wand2, Paintbrush } from 'lucide-react'
+import { Plus, Trash2, Send, PlaySquare, ArrowLeft, Loader2, PanelLeftClose, PanelLeftOpen, Search, Monitor, Smartphone, Download, Layout, Code2, Sparkles, Wand2, Paintbrush, ExternalLink } from 'lucide-react'
 import { usePlayground } from '../hooks/usePlayground'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -23,12 +23,21 @@ export const Playground = () => {
   } = usePlayground()
 
   const [input, setInput] = useState('')
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [editingSessionId, setEditingSessionId] = useState(null)
   const [editTitle, setEditTitle] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [previewMode, setPreviewMode] = useState('desktop') // desktop, mobile
   
+  const handleOpenNewTab = () => {
+    if (activeSessionId) {
+      window.open(`/playground/preview/${activeSessionId}`, '_blank');
+    } else {
+      localStorage.setItem('zenix_playground_draft_tokens', JSON.stringify(activeSession?.tokens || {}));
+      window.open(`/playground/preview/draft`, '_blank');
+    }
+  }
+
   const chatScrollRef = useRef(null)
   const chatEndRef = useRef(null)
   const textareaRef = useRef(null)
@@ -93,9 +102,8 @@ export const Playground = () => {
         </button>
       )}
 
-      {/* Unified Sidebar */}
       {isSidebarOpen && (
-        <div className="w-[260px] border-r border-hairline bg-surface-soft flex flex-col shrink-0 transition-all duration-300 z-20">
+        <div className="absolute md:relative top-0 bottom-0 left-0 w-[260px] border-r border-hairline bg-surface-soft flex flex-col shrink-0 transition-all duration-300 z-30 shadow-xl md:shadow-none h-full">
           <div className="h-14 px-4 border-b border-hairline flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <Link to="/dashboard" className="text-ink-muted hover:text-ink transition-colors flex items-center justify-center p-1 -ml-1 rounded hover:bg-canvas">
@@ -236,6 +244,13 @@ export const Playground = () => {
               </button>
               <button className="p-1.5 rounded transition-all text-ink-muted hover:text-ink hover:bg-canvas" title="View Code">
                 <Code2 className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={handleOpenNewTab}
+                className="p-1.5 rounded transition-all text-ink-muted hover:text-ink hover:bg-canvas" 
+                title="Open in New Tab"
+              >
+                <ExternalLink className="h-4 w-4" />
               </button>
             </div>
           )}
