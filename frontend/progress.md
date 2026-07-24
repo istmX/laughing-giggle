@@ -17,7 +17,12 @@
    - Extended primary document generation timeout cap to **35.0 seconds** to allow comprehensive `agents.md`, `design.md`, `architecture.md`, and `project-overview.md` blueprint compilation.
    - Fixed vector retriever context search query in `routes.py` (`retriever.retrieve_context(spec[:300])`), ensuring real context chunks are retrieved instead of querying literal filename strings (`"project-overview.md..."`).
 
-3. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
+3. **Total System Prompt Overhaul & Dynamic RAG Alignment (`prompts/`, `langgraph/`)**:
+   - Purged all hardcoded tech stacks (Next.js, Supabase, GSAP, Stripe, Vercel) from system prompts across `refinement_wizard.py` and `context_engine.py`.
+   - Refactored `refinement_prompt.py` (`buildRefinementPrompt`) and `context_prompt.py` (`buildFileContextPrompt`) into modular, dynamic prompt builders that synthesize context directly from user prompts and RAG knowledge catalogs (`app/knowledge/ui/` & `app/knowledge/context/`).
+   - Aligned execution 100% with [`workflow.md`](file:///workspaces/laughing-giggle/workflow.md) and [`context.png`](file:///workspaces/laughing-giggle/context.png). Each of the 4 blueprint files (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`) receives specialized task directives, producing 4 completely distinct context files without duplicate text.
+
+4. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
    - Integrated NVIDIA Cloud API DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) with 1M-token context length as Primary #1 model.
    - Configured `thinking: True` with **`reasoning_effort: "medium"`**, balancing deep architectural reasoning with fast 12s–20s response times.
    - Set a strict **40.0-second timeout cap** on specification refinement (`asyncio.wait_for`), preventing GitHub Codespaces 60s HTTP proxy gateway timeouts.

@@ -94,6 +94,16 @@ This document tracks all system architecture bugs, root causes, and verified res
   1. Raised primary LLM generation timeout in `context_engine.py` to **35.0 seconds** and wrapped backup LLM invocation in an internal `try/except` block with a clean baseline specification fallback.
   2. Updated `routes.py` to query `retriever.retrieve_context(spec[:300] if spec else fpath)` using the actual specification text.
 
+### 15. Total System Prompt Overhaul & Dynamic RAG Alignment (`prompts/`, `langgraph/`)
+- **Symptom**: System prompts were hardcoding exact tech stacks (Next.js 14+ App Router, Supabase Auth, Prisma ORM, GSAP, Stripe, Vercel) regardless of what the user asked for. Generic prompts caused all 4 blueprint files (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`) to output identical `# Technical Specification` content.
+- **Root Cause**:
+  1. System prompts in `refinement_wizard.py` and `context_engine.py` contained hardcoded framework strings instead of dynamically reading user prompts and RAG knowledge catalogs (`app/knowledge/ui/` and `app/knowledge/context/`).
+  2. Obsolete legacy prompt files (`context_prompt.py`, `refinement_prompt.py`) contained dead 12-key JSON schemas and JS syntax bugs (`JSON.stringify`).
+- **Resolution**:
+  1. Purged all hardcoded framework and library strings from system prompts.
+  2. Refactored `refinement_prompt.py` (`buildRefinementPrompt`) and `context_prompt.py` (`buildFileContextPrompt`) into specialized, dynamic prompt builder functions.
+  3. Aligned execution 100% with [`workflow.md`](file:///workspaces/laughing-giggle/workflow.md) and [`context.png`](file:///workspaces/laughing-giggle/context.png). Each file now receives distinct task directives, dynamically generating 4 completely different, high-fidelity context blueprints.
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol

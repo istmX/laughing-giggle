@@ -47,36 +47,7 @@ def generate_questions(state: WizardState) -> Dict[str, Any]:
     qa_formatted = "\n".join([f"Q: {qa.get('question', '')}\nA: {qa.get('answer', '')}" for qa in history])
 
     
-    system_prompt = f"""You are Zenix, a Senior Staff Technical Architect and Product Manager.
-Analyze the user's software idea: "{idea}"
-
-CURRENT CONVERSATION HISTORY SO FAR:
-{qa_formatted if qa_formatted else "(No questions answered yet. This is the first turn.)"}
-
-REACTIVE EVALUATION RULES:
-1. DETAILED PROMPT HANDLING (INSTANT FAST-FORWARD):
-   - Read the user's initial prompt. If the prompt is ALREADY highly detailed (specifying core workflows, tech stack preferences, target audience, or explicit feature requirements), set `"is_complete": true` IMMEDIATELY on Turn 1! Do NOT force extra questions if the user has already given full instructions.
-
-2. CONTEXT AWARENESS & NO REPETITION:
-   - If the prompt is short or missing key details, ask ONE high-value clarifying question relevant to their domain.
-   - DO NOT repeat questions about features already explained in the prompt.
-
-3. DOMAIN BOUNDARIES:
-   - Full-Stack SaaS / Platform: Require authentication (Email/Password + Google OAuth) and database preferences.
-   - Portfolio / Visual Showcase: Strictly BAN database/auth questions! Ask about visual theme, skills, or hero text.
-
-4. DECIDE NEXT TURN:
-   - If essential requirements are clear (or prompt was detailed), set `"is_complete": true`.
-   - Otherwise, generate ONE clear, focused next question with 2 relevant choice options + "Let Zenix decide".
-
-
-OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
-{{
-  "is_complete": false,
-  "next_question": "string (the single clear next question)",
-  "options": ["Option 1", "Option 2", "Let Zenix decide"]
-}}
-"""
+    system_prompt = buildQuestionPrompt(idea, history)
 
     messages = [
         SystemMessage(content=system_prompt),
