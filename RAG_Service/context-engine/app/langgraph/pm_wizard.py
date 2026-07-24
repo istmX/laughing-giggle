@@ -78,47 +78,52 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
 }}
 """
 
-    messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content="Evaluate history and return the next question or completion state.")
-    ]
-    
-    response = llm.invoke(messages)
-    
-    try:
-        raw = getattr(response, "content", response)
-        if isinstance(raw, list):
-            raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
-        raw_text = str(raw).replace('```json', '').replace('```', '').strip()
-
-        start_idx = raw_text.find('{')
-        end_idx = raw_text.rfind('}')
-        if start_idx != -1 and end_idx != -1:
-            raw_text = raw_text[start_idx:end_idx+1]
-        data = json.loads(raw_text)
-        
-        is_complete = data.get("is_complete", False)
-        next_q = data.get("next_question", "")
-        opts = data.get("options", [])
-
-        if not next_q:
-            is_complete = True
-
-        if opts and "Let Zenix decide" not in opts:
-            opts.append("Let Zenix decide")
+    # Attempt 1: Invocation & Parsing
+    for attempt in range(2):
+        try:
+            if attempt == 1:
+                logger.warning("Retrying PM Wizard question generation with backup LLM...")
+                backup_llm = get_load_balanced_llm(1)
+                response = backup_llm.invoke(messages)
             
-        return {
-            "next_question": next_q,
-            "options": opts,
-            "is_complete": is_complete
-        }
-    except Exception as e:
-        logger.error(f"Failed to parse next question: {e}")
-        return {
-            "next_question": "",
-            "options": [],
-            "is_complete": True
-        }
+            raw = getattr(response, "content", response)
+            if isinstance(raw, list):
+                raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+            raw_text = str(raw).replace('```json', '').replace('```', '').strip()
+
+            start_idx = raw_text.find('{')
+            end_idx = raw_text.rfind('}')
+            if start_idx != -1 and end_idx != -1:
+                raw_text = raw_text[start_idx:end_idx+1]
+            data = json.loads(raw_text)
+            
+            is_complete = data.get("is_complete", False)
+            next_q = data.get("next_question", "")
+            opts = data.get("options", [])
+
+            if not is_complete and not next_q:
+                next_q = "What is the primary feature or workflow of your application?"
+                opts = ["Core User Dashboard & Workflows", "Authentication & Database Setup", "Let Zenix decide"]
+
+            if opts and "Let Zenix decide" not in opts:
+                opts.append("Let Zenix decide")
+                
+            return {
+                "next_question": next_q,
+                "options": opts,
+                "is_complete": is_complete,
+                "error": False
+            }
+        except Exception as e:
+            logger.error(f"Failed to parse next question (attempt {attempt + 1}): {e}")
+
+    # Fallback response if all retries fail: return fallback question instead of empty completed state
+    return {
+        "next_question": "What is the primary feature or workflow of your application?",
+        "options": ["Core User Dashboard & Workflows", "Authentication & Database Setup", "Let Zenix decide"],
+        "is_complete": False,
+        "error": True
+    }
 
 
 

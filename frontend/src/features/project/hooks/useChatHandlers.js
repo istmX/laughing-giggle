@@ -1,9 +1,13 @@
 import { getProjectArtifacts } from '@/features/artifacts/api/artifacts.api'
-import { generateArtifacts, generateSingleArtifact, analyzeIdea, processConversation, developerChat } from '../api/ai.api'
-import { createIdea } from '../api/ideas.api'
+import { generateArtifacts, generateSingleArtifact } from '../api/ai.api'
 import { updateProject } from '../api/projects.api'
 import { useChatStore } from '../store/useChatStore'
 import { toast } from 'react-hot-toast'
+import {
+  handleNewIdeaFlow,
+  handleDevChatFlow,
+  handleWizardTurnFlow,
+} from './useChatWorkflowHelpers'
 
 // Strip options from all messages — called on every user send
 function clearAllOptions(messages) {
@@ -33,7 +37,6 @@ export function useChatHandlers({
   abortControllerRef,
   inputRef,
 }) {
-
   const parseAIResponse = (res) => {
     try {
       if (!res) return {}
@@ -57,7 +60,6 @@ export function useChatHandlers({
     }
   }
 
-
   const syncStateToBackend = async (newState, updates = {}) => {
     try { await updateProject(token, projectId, { wizard_state: newState, ...updates }) }
     catch (err) { console.error('Failed to sync state', err) }
@@ -73,7 +75,6 @@ export function useChatHandlers({
         setArtifacts(pending)
         setActiveArtifact(pending[0])
         
-        // Execute parallel generation across all 4 context blueprint files
         const results = await Promise.allSettled(
           pending.map(item => generateSingleArtifact(token, projectId, item.file_path))
         )
@@ -95,7 +96,6 @@ export function useChatHandlers({
       toast.error('Failed to generate artifacts.')
     } finally { setIsGeneratingArtifacts(false) }
   }
-
 
   const handleSend = async (overrideValue = null) => {
     const text = overrideValue !== null ? overrideValue : inputValue
@@ -122,113 +122,39 @@ export function useChatHandlers({
 
     try {
       if (!ideaId) {
-        const ideaRes = await createIdea(token, { prompt: text })
-        const newIdeaId = ideaRes.data?._id || ideaRes._id
-        setIdeaId(newIdeaId)
-
-        const convoRes = await processConversation(token, newIdeaId, { history: [] })
-        const rawConvo = convoRes?.response || convoRes?.data || convoRes
-        const parsedConvo = parseAIResponse(rawConvo)
-        const isComplete = rawConvo?.is_complete ?? parsedConvo.is_complete ?? false
-        const refinedSpec = rawConvo?.refined_spec || parsedConvo.refined_spec || ''
-
-        const title = rawConvo?.project_title || parsedConvo.project_title || 'Untitled Project'
-        const description = rawConvo?.project_description || parsedConvo.project_description || text
-        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
-
-
-
-        if (isComplete) {
-          setSpecContent(refinedSpec)
-          setShowSpecReady(true)
-          await syncStateToBackend(
-            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: null, refinedSpec: refinedSpec, isComplete: true },
-            { project_title: title, project_description: description }
-          )
-          handleGenerateArtifacts(newIdeaId)
-        } else {
-
-          const opts = Array.isArray(parsedConvo.options) ? parsedConvo.options : []
-          const qMsg = {
-            id: `q-${Date.now()}`,
-            role: 'assistant',
-            content: parsedConvo.next_question || 'What is the primary feature?',
-            options: opts,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-          useChatStore.getState().addMessage(qMsg)
-          await syncStateToBackend(
-            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false },
-            { project_title: title, project_description: description }
-          )
-        }
-
-
-      } else if (project?.wizard_state?.isComplete) {
-        const hist = []
-        const currentMsgs = useChatStore.getState().messages
-        for (let i = 0; i < currentMsgs.length - 1; i += 2) {
-          if (currentMsgs[i].role === 'user' && currentMsgs[i + 1]?.role === 'assistant') {
-            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i + 1].content })
-          }
-        }
-        const res = await developerChat(token, projectId, { prompt: text, history: hist })
-        const aiMessage = {
-          id: `dev-${Date.now()}`,
-          role: 'assistant',
-          content: res?.content || res?.data?.content || 'No response received.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-        useChatStore.getState().addMessage(aiMessage)
-
-        const updatedArtifacts = res?.updatedArtifacts || res?.data?.updatedArtifacts
-        if (Array.isArray(updatedArtifacts) && updatedArtifacts.length > 0) {
-          aiMessage.affectedFiles = updatedArtifacts.map(a => a.file_path)
-          setArtifacts(prev => prev.map(a => {
-            const u = updatedArtifacts.find(u => u.file_path === a.file_path)
-            return u ? { ...a, content: u.content } : a
-          }))
-          if (activeArtifact) {
-            const activeUpdate = updatedArtifacts.find(u => u.file_path === activeArtifact.file_path)
-            if (activeUpdate) setActiveArtifact(prev => ({ ...prev, content: activeUpdate.content }))
-          }
-        }
-        await syncStateToBackend({
-          ...project.wizard_state,
-          devChatHistory: [...(project.wizard_state.devChatHistory || []), { question: text, answer: aiMessage.content }]
+        await handleNewIdeaFlow({
+          text,
+          token,
+          setIdeaId,
+          setProject,
+          setSpecContent,
+          setShowSpecReady,
+          syncStateToBackend,
+          handleGenerateArtifacts,
+          parseAIResponse,
         })
-
+      } else if (project?.wizard_state?.isComplete) {
+        await handleDevChatFlow({
+          text,
+          token,
+          projectId,
+          project,
+          setArtifacts,
+          activeArtifact,
+          setActiveArtifact,
+          syncStateToBackend,
+        })
       } else {
-        const hist = []
-        const currentMsgs = useChatStore.getState().messages
-        let currentPrompt = currentMsgs[0]?.content || ''
-        for (let i = 1; i < currentMsgs.length - 1; i += 2) {
-          if (currentMsgs[i].role === 'assistant' && currentMsgs[i + 1]?.role === 'user') {
-            hist.push({ question: currentMsgs[i].content, answer: currentMsgs[i + 1].content })
-          }
-        }
-        hist.push({ question: currentMsgs[currentMsgs.length - 1]?.content || '', answer: text })
-
-        const res = await processConversation(token, ideaId, { history: hist })
-        const parsed = parseAIResponse(res)
-
-        if (parsed.is_complete) {
-          setSpecContent(parsed.refined_spec)
-          setShowSpecReady(true)
-          await syncStateToBackend({ ideaId, prompt: currentPrompt, history: hist, currentQuestion: null, refinedSpec: parsed.refined_spec, isComplete: true })
-          handleGenerateArtifacts(ideaId)
-        } else {
-          const opts = Array.isArray(parsed.options) ? parsed.options : []
-          const qMsg = {
-            id: `q-${Date.now()}`,
-            role: 'assistant',
-            content: parsed.next_question || 'Any other details?',
-            options: opts,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-          useChatStore.getState().addMessage(qMsg)
-          await syncStateToBackend({ ideaId, prompt: currentPrompt, history: hist, currentQuestion: { question: qMsg.content, options: opts }, refinedSpec: null, isComplete: false })
-        }
+        await handleWizardTurnFlow({
+          text,
+          token,
+          ideaId,
+          setSpecContent,
+          setShowSpecReady,
+          syncStateToBackend,
+          handleGenerateArtifacts,
+          parseAIResponse,
+        })
       }
     } catch (err) {
       if (err?.name === 'AbortError' || controller.signal.aborted) return

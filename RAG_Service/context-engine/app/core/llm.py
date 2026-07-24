@@ -68,20 +68,15 @@ def get_provider_pool():
 
     # 2. Secondary Gemini 3.5 Flash Model Fallback
     if primary_gemini:
-        try:
-            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
-        except Exception as e:
-            logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
-            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
-
-
+        gemini_primary = ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini)
+        gemini_fallback = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini)
+        llms.append(gemini_primary.with_fallbacks([gemini_fallback]))
 
     # 3. Secondary Gemini API Key Fallback
     if secondary_gemini and secondary_gemini != primary_gemini:
-        try:
-            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini))
-        except Exception as e:
-            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
+        sec_primary = ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini)
+        sec_fallback = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini)
+        llms.append(sec_primary.with_fallbacks([sec_fallback]))
 
 
     # 4. Mistral & Groq Fallbacks

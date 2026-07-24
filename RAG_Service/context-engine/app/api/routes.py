@@ -180,9 +180,9 @@ async def process_initial_idea(request: IdeaRequest):
 
             async def run_retrieval():
                 try:
-                    docs = retriever.retrieve_context(actual_prompt)
+                    docs = await asyncio.to_thread(retriever.retrieve_context, actual_prompt)
                     fmt = retriever.format_context(docs)
-                    tav = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
+                    tav = await tavily_service.search_web_async(f"2026 tech stack best practices for {actual_prompt}")
                     if tav:
                         fmt += "\n\n" + tav
                     return fmt

@@ -7,7 +7,7 @@ This document tracks all system architecture bugs, root causes, and verified res
 ## 🛠️ System Bug & Root Cause Memory Register
 
 ### 1. GitHub Codespaces 60s Gateway Timeout (504 Gateway Timeout & `TypeError: Failed to fetch`)
-- **Symptom**: Frontend browser console threw `auth.api.js:38 POST https://.../api/ai/analyze/6a6315eb... 504 (Gateway Timeout)` followed by `TypeError: Failed to fetch`.
+- **Symptom**: Frontend browser console threw `auth.api.js:38 POST https://.../api/ai/analyze/<idea-id> 504 (Gateway Timeout)` followed by `TypeError: Failed to fetch`.
 - **Root Cause**: The frontend (`useChatHandlers.js`) was making **two sequential backend calls** (`analyzeIdea()` then `processConversation()`) on a single user submission. Each call triggered full Python LLM orchestration sequentially (~30s + ~35s = ~65s total). GitHub Codespaces HTTP Ingress proxies enforce a strict **60-second gateway timeout cap**, causing the proxy to cut the HTTP connection right before the second request completed!
 - **Resolution**: Eliminated the redundant `analyzeIdea()` call from `useChatHandlers.js`. `processConversation()` handles title generation, classification, Q&A, and specification synthesis in a single unified API roundtrip well under 25 seconds.
 
@@ -44,7 +44,8 @@ This document tracks all system architecture bugs, root causes, and verified res
 - **Root Cause**: `TavilyClient.search()` was executing synchronously without a timeout limit. When Tavily API servers took more than 60 seconds to respond, Codespaces proxy dropped the browser connection, resulting in a false CORS/ERR_FAILED error on the client while Python finished in the background 30 seconds later!
 - **Resolution**: Refactored `tavily_search.py` with an `asyncio.wait_for(..., timeout=4.0)` cap. If Tavily web search doesn't respond within **4.0 seconds**, Zenix skips Tavily cleanly and immediately proceeds with DeepSeek V4 Flash generation in under 15 seconds!
 
-### 7. Performance Boost & 25-Second Refinement Timeout Cap (`llm.py` & `refinement_wizard.py`)
+### 7. Performance Boost & 25-Second Refinement Timeout Cap (`llm.py` & `refinement_wizard.py`) [SUPERSEDED]
+> **Note**: Superseded by current 40.0-second timeout cap and DeepSeek V4 Flash medium reasoning configuration (see `frontend/progress.md`).
 - **Symptom**: Technical specification synthesis took 91 seconds when DeepSeek V4 Flash ran high reasoning, causing Codespaces HTTP Ingress Proxy to cut the browser connection at 60 seconds with a 504 Gateway Timeout.
 - **Root Cause**: DeepSeek V4 Flash was set as Primary #1 with `reasoning_effort: "high"` across all tasks without a timeout cap.
 - **Resolution**:
@@ -67,7 +68,8 @@ This document tracks all system architecture bugs, root causes, and verified res
 - **Root Cause**: The backup LLM execution inside the `except` block of `refinement_wizard.py` did not have an internal `try/except` guard. When the backup model timed out, it threw an unhandled `TimeoutError` that crashed the route handler.
 - **Resolution**: Wrapped the backup LLM execution in an internal `try/except` block with a safe fallback text generator.
 
-### 11. DeepSeek V4 Flash Primary Instant Direct Mode (`llm.py` & `refinement_wizard.py`)
+### 11. DeepSeek V4 Flash Primary Instant Direct Mode (`llm.py` & `refinement_wizard.py`) [HISTORICAL]
+> **Note**: Historical reference. Current canonical configuration uses `thinking: True` with `reasoning_effort: "medium"` and 40.0s timeout cap.
 - **Requirement**: Maximize specification generation speed and eliminate Codespaces HTTP gateway timeouts while retaining 100% architectural detail.
 - **Resolution**:
   1. Configured DeepSeek V4 Flash via NVIDIA Free API as Primary #1 provider with `thinking: False` in `llm.py`.

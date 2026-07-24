@@ -1,5 +1,10 @@
 ## Comprehensive Architecture, LLM Engine & Fix Progress Summary (Latest)
 
+### Canonical System Configuration
+- **LLM Engine**: DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) via NVIDIA Cloud API configured with `thinking: True` and `reasoning_effort: "medium"`.
+- **Refinement Timeout**: 40.0-second timeout cap on specification synthesis.
+- **Historical Memory Entries**: Note that older memory entries in `memory.md` (specifically Entry #7 [25s/Gemini] and Entry #11 [thinking: False]) are superseded by this canonical configuration.
+
 ### Completed Work & System Enhancements
 
 1. **Q&A Turn Acceleration & Turn > 1 Overhead Removal (`routes.py`)**:
