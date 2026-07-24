@@ -1,4 +1,20 @@
-## List Replace/Strip Resolution & Hardcoded Fallback Removal (Latest)
+## ChatNVIDIA DeepSeek V4 Flash Free Cloud API Integration (Latest)
+
+### Completed
+- **DeepSeek V4 Flash Primary LLM Provider (`llm.py`)**:
+  - Integrated `langchain_nvidia_ai_endpoints.ChatNVIDIA(model="deepseek-ai/deepseek-v4-flash")` as the #1 primary LLM intelligence engine in `llm.py`.
+  - Configured 1M-token context length, 16,384 max token output, and high reasoning effort (`extra_body={"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}`).
+- **NVIDIA Environment Variable Support (`.env` & `.env.example`)**:
+  - Added `NVIDIA_API_KEY=` across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Automatic Multi-Provider Fallback Chain**:
+  - Pool Order: DeepSeek V4 Flash (NVIDIA Free Cloud API) → Gemini 3.5 Flash (Primary Key) → Gemini 3.5 Flash (Secondary Key) → Mistral Large → Groq Llama 3.1 8B.
+
+### Verification
+- `langchain-nvidia-ai-endpoints` (v1.4.3) successfully installed in Python virtual environment.
+- Python compilation check (`py_compile`) passed cleanly with 0 errors across `llm.py`, `context_engine.py`, `pm_wizard.py`, and `routes.py`.
+
+## List Replace/Strip Resolution & Hardcoded Fallback Removal (Previous)
+
 
 ### Completed
 - **`pm_wizard.py` List `.replace()` Crash Resolution**:

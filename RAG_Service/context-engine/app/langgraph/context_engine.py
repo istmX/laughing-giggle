@@ -161,7 +161,7 @@ CRITICAL FORMATTING:
     
     try:
         logger.info(f"Invoking multi-provider LLM chain for {target_name}...")
-        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=35.0)
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=18.0)
         raw = getattr(response, "content", response)
         if isinstance(raw, list):
             raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
@@ -169,11 +169,12 @@ CRITICAL FORMATTING:
     except Exception as e:
         logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with backup provider...")
         backup_llm = get_load_balanced_llm(start_index + 1)
-        response = await backup_llm.ainvoke(messages)
+        response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=20.0)
         raw = getattr(response, "content", response)
         if isinstance(raw, list):
             raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
         content = str(raw).strip()
+
 
     
     # Clean markdown wrapping if present
