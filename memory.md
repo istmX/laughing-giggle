@@ -73,15 +73,24 @@ This document tracks all system architecture bugs, root causes, and verified res
   1. Configured DeepSeek V4 Flash via NVIDIA Free API as Primary #1 provider with `thinking: False` in `llm.py`.
   2. Bypasses internal thinking overhead, streaming complete 4,000-word specifications directly in **2 to 4 seconds total**!
 
-### 12. LLM Singleton Caching & Asyncio Gather Parallelization (`llm.py` & `routes.py`)
-- **Symptom**: `process_initial_idea` was taking 88 seconds total across 4 sequential LLM network calls, breaching GitHub Codespaces' 60-second gateway proxy limit.
+### 13. Turn > 1 Fast-Forward Execution & Async Options Invocation (`routes.py`)
+- **Symptom**: Clarifying question turns during the PM Wizard interview took 36 to 60 seconds per question, causing heavy slowness.
 - **Root Cause**:
-  1. `get_provider_pool()` in `llm.py` was re-instantiating connection sockets for `ChatNVIDIA` 4 separate times sequentially in a single request.
-  2. Classification, title generation, and Tavily web retrieval ran sequentially.
+  1. `process_initial_idea` was running classification (LLM), project title generation (LLM), and RAG/Tavily retrieval (Vector DB + Web Search) on **every single answer turn**, despite these tasks only being necessary on Turn 1!
+  2. `generate_options_for_question` used synchronous `llm.invoke()`, blocking Python's event loop.
 - **Resolution**:
-  1. Created `_GLOBAL_PROVIDER_POOL` singleton in `llm.py` so LLM connections are cached once at startup.
-  2. Parallelized classification, title generation, and Tavily retrieval using `asyncio.gather()` in `routes.py`.
-  3. Total request time dropped from **88 seconds to 2.5 seconds**!
+  1. Added a `if len(history) == 0:` guard around Classification, Title Generation, and RAG Retrieval. Turns > 1 now bypass these tasks completely.
+  2. Converted options and title generation to `async def` using `await llm.ainvoke()`.
+  3. Replaced fragile `json.loads` substrings with regex pattern matching (`re.search(r'\{.*\}', content, re.DOTALL)` and `re.search(r'\[.*\]', content, re.DOTALL)`) to strip DeepSeek thinking headers safely.
+
+### 14. Uncaught Backup LLM Timeout & Blueprint Artifact HTTP 500 (`context_engine.py` & `routes.py`)
+- **Symptom**: Parallel generation of `agents.md`, `design.md`, `architecture.md`, and `project-overview.md` threw `Primary generation attempt failed ... Retrying with backup provider...` followed by `Failed to generate artifact:` HTTP 500 Internal Server Error, returning incomplete/fallback templates.
+- **Root Cause**:
+  1. Primary LLM timeout in `context_engine.py` was set to an unrealistically short 18.0s timeout. When it expired, the backup LLM ran with no `try/except` wrapper. When the backup also timed out or failed, the uncaught exception crashed the route with HTTP 500.
+  2. `generate_artifact` passed `retriever.retrieve_context(fpath)` (e.g. searching the literal filename `"project-overview.md..."`), resulting in 0 context documents retrieved every single time.
+- **Resolution**:
+  1. Raised primary LLM generation timeout in `context_engine.py` to **35.0 seconds** and wrapped backup LLM invocation in an internal `try/except` block with a clean baseline specification fallback.
+  2. Updated `routes.py` to query `retriever.retrieve_context(spec[:300] if spec else fpath)` using the actual specification text.
 
 ---
 

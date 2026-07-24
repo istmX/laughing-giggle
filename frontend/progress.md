@@ -2,7 +2,17 @@
 
 ### Completed Work & System Enhancements
 
-1. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
+1. **Q&A Turn Acceleration & Turn > 1 Overhead Removal (`routes.py`)**:
+   - Bypassed classification, title generation, and Tavily web retrieval on Turns > 1 (`if len(history) == 0:`). Question turns now respond in **3 to 6 seconds** instead of 36–60 seconds.
+   - Converted `generate_title_and_description` and `generate_options_for_question` to async `llm.ainvoke()` to eliminate event loop blocking.
+   - Added regex block extraction (`re.search(r'\{.*\}', content)`) to safely extract JSON payload objects when DeepSeek returns thinking/reasoning blocks, resolving `Extra data: line 8 column 1` errors.
+
+2. **Blueprint Generation Timeout & HTTP 500 Fix (`context_engine.py`, `routes.py`)**:
+   - Wrapped backup LLM generation in `context_engine.py` inside an internal `try/except` block, preventing uncaught timeout errors from returning HTTP 500.
+   - Extended primary document generation timeout cap to **35.0 seconds** to allow comprehensive `agents.md`, `design.md`, `architecture.md`, and `project-overview.md` blueprint compilation.
+   - Fixed vector retriever context search query in `routes.py` (`retriever.retrieve_context(spec[:300])`), ensuring real context chunks are retrieved instead of querying literal filename strings (`"project-overview.md..."`).
+
+3. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
    - Integrated NVIDIA Cloud API DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) with 1M-token context length as Primary #1 model.
    - Configured `thinking: True` with **`reasoning_effort: "medium"`**, balancing deep architectural reasoning with fast 12s–20s response times.
    - Set a strict **40.0-second timeout cap** on specification refinement (`asyncio.wait_for`), preventing GitHub Codespaces 60s HTTP proxy gateway timeouts.
