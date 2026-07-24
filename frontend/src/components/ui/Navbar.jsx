@@ -118,9 +118,14 @@ export function Navbar() {
           />
         )}
 
-        <div className="flex items-center gap-3 px-2 group/logo cursor-pointer relative z-10">
-          <span className="font-semibold tracking-tight text-[15px] text-zinc-900 dark:text-white">Zenix</span>
-        </div>
+        <a href="/" className="flex items-center px-1 group/logo cursor-pointer relative z-10" aria-label="Zenix Home">
+          <img 
+            src={document.documentElement.classList.contains('dark') ? '/dark_logo.png' : '/light_logo.png'} 
+            alt="Zenix Logo" 
+            className="w-[72px] h-[72px] object-contain transition-transform duration-200 group-hover/logo:scale-105"
+            onError={(e) => { e.currentTarget.style.display = 'none' }}
+          />
+        </a>
 
         <div className="hidden md:flex items-center gap-1 relative z-10">
           {NAV_LINKS.map((link, idx) => (
@@ -218,7 +223,18 @@ export function Navbar() {
         className="fixed inset-0 z-40 bg-white dark:bg-[#0b0b0d] pt-24 px-6 pb-6 hidden flex-col"
         style={{ display: 'none', opacity: 0 }}
       >
-        <div className="flex flex-col gap-6 text-2xl font-medium tracking-tight">
+        <div className="flex items-center justify-between pb-6 border-b border-zinc-100 dark:border-zinc-800">
+          <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Appearance</span>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-900 dark:text-white"
+          >
+            {theme === 'light' ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-300" />}
+            <span>{theme === 'light' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+        </div>
+        <div className="flex flex-col gap-6 text-2xl font-medium tracking-tight pt-6">
           {NAV_LINKS.map((link) => (
             <a key={link.name} href={link.href} className="mobile-link text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 pb-4">
               {link.name}

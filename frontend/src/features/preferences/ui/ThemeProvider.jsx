@@ -36,12 +36,7 @@ export const ThemeProvider = ({ children }) => {
     }
 
     const resolvedTheme = (theme === 'dark' || theme === 'midnight' || theme === 'emerald' || theme === 'sunset') ? 'dark' : 'light'
-
-    if (isDashboard) {
-      root.classList.add(resolvedTheme)
-    } else {
-      root.classList.add('light')
-    }
+    root.classList.add(resolvedTheme)
 
     return () => clearTimeout(timer)
   }, [theme, location.pathname])

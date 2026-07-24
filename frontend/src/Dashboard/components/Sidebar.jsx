@@ -253,19 +253,26 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
             >
               {/* Mobile header */}
               <div className="flex items-center justify-between h-14 px-3 border-b border-hairline/50 shrink-0">
-                <span className="text-[15px] font-[700] tracking-tight font-mono">ZENIX</span>
+                <Link to="/" className="flex items-center">
+                  <img 
+                    src={document.documentElement.classList.contains('dark') ? '/dark_logo.png' : '/light_logo.png'} 
+                    alt="Zenix Logo" 
+                    className="w-[64px] h-[64px] object-contain"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
+                </Link>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={handleNewProject}
                     title="New project"
-                    className="flex items-center justify-center h-6 w-6 rounded-md text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
+                    className="flex items-center justify-center h-7 w-7 rounded-md text-ink-muted hover:text-ink hover:bg-surface-soft transition-colors"
                   >
-                    <Plus className="h-[14px] w-[14px]" />
+                    <Plus className="h-[15px] w-[15px]" />
                   </button>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     aria-label="Close mobile menu"
-                    className="flex items-center justify-center h-6 w-6 rounded-md hover:bg-surface-soft text-ink-muted hover:text-ink transition-colors"
+                    className="flex items-center justify-center h-7 w-7 rounded-md hover:bg-surface-soft text-ink-muted hover:text-ink transition-colors"
                   >
                     <X className="h-[14px] w-[14px]" />
                   </button>
@@ -322,7 +329,14 @@ export function Sidebar({ isSidebarOpen, setIsSidebarOpen, isMobileMenuOpen, set
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 className="flex items-center gap-2 overflow-hidden"
               >
-                <span className="text-[15px] font-[700] tracking-tight font-mono whitespace-nowrap">ZENIX</span>
+                <Link to="/" className="flex items-center">
+                  <img 
+                    src={document.documentElement.classList.contains('dark') ? '/dark_logo.png' : '/light_logo.png'} 
+                    alt="Zenix Logo" 
+                    className="w-[64px] h-[64px] object-contain"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
+                </Link>
               </motion.div>
             ) : (
               <motion.div

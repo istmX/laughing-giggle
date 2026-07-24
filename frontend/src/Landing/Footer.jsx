@@ -35,7 +35,12 @@ export default function Footer() {
           
           <div className="col-span-2 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <span className="font-semibold tracking-tight text-zinc-900 dark:text-white">Zenix</span>
+              <img 
+                src={document.documentElement.classList.contains('dark') ? '/dark_logo.png' : '/light_logo.png'} 
+                alt="Zenix Logo" 
+                className="w-[72px] h-[72px] object-contain"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
             </div>
             <p className="text-zinc-500 dark:text-zinc-400 text-xs max-w-xs leading-relaxed font-light">
               Structured architecture and development context blueprints for modern software engineering workflows.

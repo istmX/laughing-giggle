@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware'
 export const usePreferencesStore = create(
   persist(
     (set) => ({
-      theme: 'light',
+      theme: 'system',
       setTheme: (theme) => set({ theme }),
     }),
     {

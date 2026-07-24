@@ -11,10 +11,15 @@ const AuthShell = ({ children, panelTitle, panelDescription, panelEyebrow = 'Dev
         <header className="flex items-center justify-between px-2 py-2 sm:px-4">
           <Link
             to="/"
-            className="inline-flex min-h-11 items-center text-[21px] font-[var(--font-weight-540)] tracking-[-0.04em] text-ink outline-none transition-opacity hover:opacity-60 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ink/30"
+            className="inline-flex min-h-11 items-center outline-none transition-opacity hover:opacity-60 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ink/30"
             aria-label="Zenix home"
           >
-            zenix<span className="ml-0.5 -translate-y-2 text-[11px]">*</span>
+            <img 
+              src={document.documentElement.classList.contains('dark') ? '/dark_logo.png' : '/light_logo.png'} 
+              alt="Zenix Logo" 
+              className="w-[72px] h-[72px] object-contain"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
           </Link>
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
             Context first

@@ -113,15 +113,27 @@ This document tracks all system architecture bugs, root causes, and verified res
   1. Integrated async Tavily Web Search with a **4.0-second timeout cap** into `refinement_wizard.py` (`buildRefinementPrompt`), injecting live 2026 framework rules and breaking change warnings.
   2. Implemented `DELETE /api/projects/{idea_id}` in `routes.py` to purge generated artifact files and reset session context memory when a user deletes a project.
 
-### 17. Permanent Resolution: High-Speed LLM Dispatch for 4-File Context Generation (`context_engine.py`, `routes.py`)
-- **Symptom**: Generating `agents.md`, `design.md`, and `architecture.md` hit primary/backup LLM timeouts (55s/35s) and fell back to appending hardcoded bullet points.
+### 17. Permanent Resolution: Dedicated Fast Model Chain (`get_context_llm()`) & Sequential Dispatch (`context_engine.py`, `llm.py`, `routes.py`)
+- **Symptom**: Generating `agents.md`, `design.md`, and `architecture.md` hit primary/backup LLM timeouts (55s/35s) and fell back to template output.
 - **Root Cause**:
-  1. `context_engine.py` was calling `get_load_balanced_llm()`, which invoked slow reasoning models (DeepSeek / OpenRouter) that take 50+ seconds per file or rate-limit when 4 parallel calls hit at once.
-  2. All 4 worker tasks in `routes.py` were launched on the exact same millisecond, triggering rate-limit queues on provider endpoints.
+  1. `get_provider_pool()` included `ChatNVIDIA` (DeepSeek V4 Flash) as primary. When context generation called `get_load_balanced_llm()`, NVIDIA's free API endpoint throttled or took 55+ seconds on heavy markdown tasks.
+  2. Bursting 4 parallel tasks hit provider rate-limits simultaneously.
 - **Resolution**:
-  1. Updated `generate_draft` in `context_engine.py` to use `get_interactive_llm()` (Gemini 3.5 Flash primary + Groq Llama 3.1 8B backup), which compiles 500-line markdown files in **2 to 4 seconds**.
-  2. Staggered background worker task dispatch in `routes.py` with a **200ms sleep delay**, preventing concurrent API rate-limiting.
-  3. Replaced 3-line fallback text with full dynamic reference template injection (`reference_template`), guaranteeing that even if a network drop occurs, full 400+ line documents are rendered.
+  1. Implemented `get_context_llm()` in `llm.py`, using **Gemini 3.5 Flash primary + Groq Llama 3.1 8B backup ONLY**. Strictly excludes `ChatNVIDIA` / DeepSeek / Mistral from the 4-file context pipeline.
+  2. Updated `context_engine.py` to invoke `get_context_llm(start_index)`.
+  3. Made worker execution 100% sequential in `routes.py` (`await worker(fpath, key)`), streaming each file cleanly every ~1.8 seconds with **zero API rate-limit collisions**.
+  4. Updated `GEMINI.md` and `frontend/AGENTS.md` with mandatory Legacy Code Purge and Sequential Model Dispatch rules.
+
+### 18. Model Order Re-Ordering & Dynamic Theme Engine Overhaul (`llm.py`, `ThemeProvider.jsx`, `Navbar.jsx`)
+- **Symptom**: `get_context_llm()` lacked DeepSeek at final fallback, ThemeProvider forced light mode on non-dashboard routes, OS system theme preference was ignored on initial load, and mobile theme toggle was unresponsive.
+- **Root Cause**:
+  1. `get_context_llm()` only included Flash models without deep fallback options.
+  2. `ThemeProvider.jsx` contained `if (isDashboard) ... else root.classList.add('light')`, overriding theme toggles across standard marketing pages.
+  3. `preferences.store.js` defaulted to `'light'` instead of system preference tracking (`'system'`).
+- **Resolution**:
+  1. Updated `get_context_llm()` in `llm.py` to use **Gemini 3.5 Flash ➔ Gemini 2.5 Flash ➔ Groq Llama 3.1 8B FIRST**, placing `ChatNVIDIA` (DeepSeek V4 Flash) strictly at the **very end** of the fallback list as final backup.
+  2. Set default store theme to `'system'` in `preferences.store.js` and removed non-dashboard light override in `ThemeProvider.jsx`.
+  3. Copied `light_logo.png` and `dark_logo.png` to `frontend/public/` and updated `Navbar.jsx` to render dynamic logos matching active theme contrast, adding a dedicated theme switcher inside the Mobile Navigation Overlay.
 
 ---
 

@@ -2,7 +2,7 @@ from typing import Annotated, Dict, Any, List
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.core.llm import get_load_balanced_llm, get_interactive_llm
+from app.core.llm import get_load_balanced_llm, get_interactive_llm, get_context_llm
 import os
 import asyncio
 from loguru import logger
@@ -105,23 +105,21 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
         HumanMessage(content=f"Please generate the complete, production-grade {target_name} context file now based on the specification and design intelligence above.")
     ]
     
-    # PERMANENT SPEED & RELIABILITY FIX: Use high-speed interactive LLM (Gemini 3.5 Flash / Groq)
-    # Generates 500 lines of Markdown in 2-4 seconds flat without rate-limit timeouts.
-    llm = get_interactive_llm()
     start_index = FILE_LOAD_BALANCER_INDEX.get(target_name.lower(), 0)
+    llm = get_context_llm(start_index)
 
     try:
-        logger.info(f"Invoking high-speed interactive LLM chain for {target_name}...")
-        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=30.0)
+        logger.info(f"Invoking dedicated high-speed context LLM chain for {target_name}...")
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=25.0)
         raw = getattr(response, "content", response)
         if isinstance(raw, list):
             raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
         content = str(raw).strip()
     except Exception as e:
-        logger.error(f"Primary high-speed generation failed for {target_name}: {e}. Retrying with backup provider...")
+        logger.error(f"Primary high-speed generation failed for {target_name}: {e}. Retrying with secondary fast provider...")
         try:
-            backup_llm = get_load_balanced_llm(start_index + 1)
-            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=25.0)
+            backup_llm = get_context_llm(start_index + 1)
+            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=15.0)
             raw = getattr(response, "content", response)
             if isinstance(raw, list):
                 raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
