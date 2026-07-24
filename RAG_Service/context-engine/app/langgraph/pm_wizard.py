@@ -54,18 +54,21 @@ CURRENT CONVERSATION HISTORY SO FAR:
 {qa_formatted if qa_formatted else "(No questions answered yet. This is the first turn.)"}
 
 REACTIVE EVALUATION RULES:
-1. CONTEXT AWARENESS & NO REPETITION:
-   - Read what the user stated in their initial prompt and previous Q&A answers.
-   - If the initial prompt already describes the core application feature/workflow (e.g. "flashcards, quizzes, and notes using Gemini API"), DO NOT ask "What is the primary feature or workflow?".
-   - Instead, ask specific, high-value feature/design questions (e.g. "How should flashcard study sessions be structured?" or "What level of user authentication do you prefer?").
+1. DETAILED PROMPT HANDLING (INSTANT FAST-FORWARD):
+   - Read the user's initial prompt. If the prompt is ALREADY highly detailed (specifying core workflows, tech stack preferences, target audience, or explicit feature requirements), set `"is_complete": true` IMMEDIATELY on Turn 1! Do NOT force extra questions if the user has already given full instructions.
 
-2. DOMAIN BOUNDARIES:
+2. CONTEXT AWARENESS & NO REPETITION:
+   - If the prompt is short or missing key details, ask ONE high-value clarifying question relevant to their domain.
+   - DO NOT repeat questions about features already explained in the prompt.
+
+3. DOMAIN BOUNDARIES:
    - Full-Stack SaaS / Platform: Require authentication (Email/Password + Google OAuth) and database preferences.
    - Portfolio / Visual Showcase: Strictly BAN database/auth questions! Ask about visual theme, skills, or hero text.
 
-3. DECIDE NEXT TURN:
-   - If all essential requirements to build the app specification are clear (or 2-3 turns answered), set `"is_complete": true`.
-   - Otherwise, generate ONE clear, focused next question with 2 relevant, project-specific choice options + "Let Zenix decide".
+4. DECIDE NEXT TURN:
+   - If essential requirements are clear (or prompt was detailed), set `"is_complete": true`.
+   - Otherwise, generate ONE clear, focused next question with 2 relevant choice options + "Let Zenix decide".
+
 
 OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
 {{

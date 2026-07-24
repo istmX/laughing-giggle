@@ -1,4 +1,25 @@
-## Environment & Package Fixes, Mongoose Warning Resolution & Live Tech Stack Sync (Latest)
+## Gemini 3.5 Flash Model Integration & Prompt Hardcoding Purge (Latest)
+
+### Completed
+- **Gemini 3.5 Flash Integration (`llm.py`)**:
+  - Configured `ChatGoogleGenerativeAI(model="gemini-3.5-flash")` as the primary intelligence model for Zenix Context Analysis, Q&A evaluation, and 4-file blueprint generation.
+  - Added support for dual Gemini API keys (`GOOGLE_GEMINI_API_KEY` and `GEMINI_SECONDARY_KEY`) across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Total Purge of Hardcoded Feature & Token Strings**:
+  - Removed all hardcoded hex color codes (`#08080A`, `#6366F1`) and fixed font faces (`Bebas Neue`) from system prompts.
+  - Purged specific hardcoded feature string examples (`flashcards`, `notes`, `decks`, `quizzes`) from system prompts in `question_prompt.py`, `pm_wizard.py`, `refinement_wizard.py`, and `context_engine.py`. Prompts now use pure behavioral rules and dynamic domain reasoning.
+- **Full-Stack SaaS Mandatory Rules**:
+  - System prompts now automatically mandate **User Authentication** (Email/Password + Google OAuth) and **Database Schemas** (PostgreSQL/Supabase ORM or MongoDB) for all SaaS platforms.
+- **Dual Motion Engine Standard**:
+  - System prompts now specify **Framer Motion (`framer-motion`)** for interactive component micro-states & 3D card flips, and **GSAP + ScrollTrigger** for scroll-linked page reveals & hero timelines.
+- **`problem.md` + `progress.md` Directives in `agents.md`**:
+  - System prompts in `context_engine.py` instruct generated `agents.md` files to require AI coding agents to create and maintain both `progress.md` (task log) and `problem.md` (system flaw analysis & architecture fix tracking).
+
+### Verification
+- Python syntax check (`py_compile`) passed cleanly with 0 errors across `llm.py`, `question_prompt.py`, `pm_wizard.py`, `refinement_wizard.py`, and `context_engine.py`.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 16.00s with 0 errors.
+
+## Environment & Package Fixes, Mongoose Warning Resolution & Live Tech Stack Sync (Previous)
+
 
 ### Completed
 - **Tavily AI Package Installation (`requirements.txt`)**:

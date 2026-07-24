@@ -36,9 +36,10 @@ export function useChatHandlers({
 
   const parseAIResponse = (res) => {
     try {
+      if (!res) return {}
       if (typeof res === 'object' && !res.content && (res.project_title || res.next_question || res.is_complete !== undefined)) return res
       let content = res.content || res.data?.content || res
-      if (typeof content !== 'string') return content
+      if (typeof content !== 'string') return typeof content === 'object' ? content : {}
       content = content.replace(/```json/gi, '').replace(/```/g, '').trim()
       const startObj = content.indexOf('{')
       const startArr = content.indexOf('[')
@@ -48,12 +49,14 @@ export function useChatHandlers({
       if (startObj !== -1 && (startArr === -1 || startObj < startArr)) { start = startObj; end = endObj }
       else if (startArr !== -1) { start = startArr; end = endArr }
       if (start !== -1 && end !== -1 && end > start) content = content.substring(start, end + 1)
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      return typeof parsed === 'object' && parsed !== null ? parsed : {}
     } catch (e) {
       console.error('Failed to parse AI response:', e, res)
       return {}
     }
   }
+
 
   const syncStateToBackend = async (newState, updates = {}) => {
     try { await updateProject(token, projectId, { wizard_state: newState, ...updates }) }

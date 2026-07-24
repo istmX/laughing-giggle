@@ -115,9 +115,10 @@ PROJECT SPECIFICATION & REQUIREMENTS:
 --- DOMAIN BOUNDARY & ARCHITECTURAL REASONING DIRECTIVES ---
 1. ACCURATE DOMAIN ANALYSIS:
    - Carefully evaluate the project specification:
-     * **Full-Stack SaaS / Web Platform**: Applications requiring user accounts, saved notes/flashcards/quizzes, AI API calls, or payment workflows. MANDATE User Authentication (Email/Password + Google OAuth) and Database Schemas (Supabase/PostgreSQL or MongoDB).
+     * **Full-Stack SaaS / Web Platform**: Applications requiring user accounts, persistent user data, external API calls, dashboard analytics, or payments. MANDATE User Authentication (Email/Password + Google OAuth) and Database Schemas (Supabase/PostgreSQL or MongoDB).
      * **Visual Portfolio / Showcase**: Personal developer sites or landing pages. Strictly BAN backend database or auth models. Specify static JSON content schemas (`projects.json`).
      * **Mobile App**: Expo + React Native + TypeScript + NativeWind styling.
+
 
 2. DYNAMIC DESIGN SYSTEM & DUAL ANIMATION ENGINE:
    - **ZERO HARDCODED PALETTES OR FONTS**: Dynamically generate hex colors and typography scale matrices matching the specific project domain and topic. Display fonts for headlines; Satoshi/Inter for body copy—NEVER display fonts for body prose!

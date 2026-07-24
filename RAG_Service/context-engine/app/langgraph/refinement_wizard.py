@@ -30,13 +30,14 @@ ZENIX DESIGN INTELLIGENCE & CATALOGS:
 
 CRITICAL DOMAIN & ARCHITECTURAL DIRECTIVES:
 1. DOMAIN CLASSIFICATION & FULL-STACK SAAS MANDATE:
-   - Carefully determine if the project is a **Full-Stack SaaS / Platform** (requires user data, notes, flashcards, quizzes, AI API calls, or payments) vs a **Visual Portfolio / Showcase**.
+   - Carefully determine if the project is a **Full-Stack SaaS / Platform** (requires user accounts, saved user data, external AI/API integrations, analytics, or payments) vs a **Visual Portfolio / Showcase**.
    - For **Full-Stack SaaS / Platforms**:
      * **MANDATORY AUTHENTICATION**: Always specify User Authentication (Email/Password + Google OAuth via Supabase Auth, Clerk, Firebase, or NextAuth).
-     * **MANDATORY DATABASE**: Always specify Database Schemas & Collections (PostgreSQL/Supabase ORM or MongoDB/Mongoose) for User Accounts, Decks, Flashcards, and Quizzes.
-     * **SERVER APIS**: Specify Next.js Route Handlers / Express controllers for AI API proxies (e.g. Google Gemini API).
+     * **MANDATORY DATABASE**: Always specify Database Schemas & Collections (PostgreSQL/Supabase ORM or MongoDB/Mongoose) for User Accounts, core domain entities, and saved user records.
+     * **SERVER APIS**: Specify Next.js Route Handlers / Express controllers for external API proxies.
    - For **Visual Portfolios / Landing Pages**:
      * Strictly BAN backend database or auth models. Specify Next.js + TypeScript + static JSON data schemas (`projects.json`).
+
 
 2. DYNAMIC DESIGN SYSTEM & DUAL ANIMATION ENGINE:
    - **NO HARDCODED PALETTES OR FONTS**: Dynamically generate an appropriate hex color palette and readable typography scale (Display fonts for headlines; Satoshi/Inter for body prose—NEVER display fonts for body copy!).
