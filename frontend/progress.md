@@ -1,4 +1,23 @@
-## Reactive Q&A Engine, Tavily AI Live Search & Context Engine Architecture Refactor (Latest)
+## Environment & Package Fixes, Mongoose Warning Resolution & Live Tech Stack Sync (Latest)
+
+### Completed
+- **Tavily AI Package Installation (`requirements.txt`)**:
+  - Installed `tavily-python` (v0.7.26) inside Python virtual environment `RAG_Service/context-engine/venv/`.
+  - Added `tavily-python` dependency to `requirements.txt`.
+  - Wrapped `tavily` imports inside `tavily_search.py` with safe `try/except ImportError` blocks so app never crashes if the package is missing.
+- **Environment Variable Synchronization (`.env` & `.env.example`)**:
+  - Added `TAVILY_API_KEY=` environment variables across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Mongoose Deprecation Warning Fix**:
+  - Replaced all deprecated `{ new: true }` options in `findOneAndUpdate()` and `findByIdAndUpdate()` with `{ returnDocument: 'after' }` across Node.js backend files (`artifact.service.js`, `playground.service.js`, `admin.service.js`, `profile.service.js`), resolving terminal warning spam.
+- **Live Tech Stack Documentation Section (`agents.md`)**:
+  - Added strict prompt directives in `context_engine.py` requiring every generated `agents.md` context file to include a dedicated **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"** section detailing breaking framework changes, recommended API patterns, and deprecation warnings.
+
+### Verification
+- Python `py_compile` on `tavily_search.py`, `pm_wizard.py`, `routes.py`, `context_engine.py`, `refinement_wizard.py` passed with 0 errors.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 5.22 seconds with 0 errors.
+
+## Reactive Q&A Engine, Tavily AI Live Search & Context Engine Architecture Refactor (Previous)
+
 
 ### Completed
 - **Smart 2-Turn Fast-Forward Q&A (`pm_wizard.py`)**:

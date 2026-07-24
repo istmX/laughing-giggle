@@ -25,7 +25,7 @@ export const playgroundService = {
     const session = await PlaygroundSession.findOneAndUpdate(
       { _id: sessionId, owner: userId },
       { $push: { chatHistory: { role, content } }, $set: { updatedAt: new Date() } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!session) throw new Error('Session not found');
     return session;
@@ -37,7 +37,7 @@ export const playgroundService = {
     const session = await PlaygroundSession.findOneAndUpdate(
       { _id: sessionId, owner: userId },
       { $set: update },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!session) throw new Error('Session not found');
     return session;
@@ -47,11 +47,12 @@ export const playgroundService = {
     const session = await PlaygroundSession.findOneAndUpdate(
       { _id: sessionId, owner: userId },
       { $set: { title } },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!session) throw new Error('Session not found');
     return session;
   },
+
 
   async deleteSession(sessionId, userId) {
     const result = await PlaygroundSession.deleteOne({ _id: sessionId, owner: userId });

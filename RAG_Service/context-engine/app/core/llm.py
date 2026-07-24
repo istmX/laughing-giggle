@@ -20,40 +20,50 @@ load_dotenv(env_path)
 def get_provider_pool():
     """
     Returns an ordered list of LLM instances for primary usage and worst-case fallback.
-    Primary Keys: GROQ_API_KEY, MISTRAL_API_KEY, GEMINI_API_KEY
-    Worst-case Fallback: GROQ_API_KEY_II, MISTRAL_API_KEY_II, GEMINI_API_KEY_II
+    Prioritizes Gemini 3.5 Flash via GOOGLE_GEMINI_API_KEY & GEMINI_SECONDARY_KEY.
     """
+    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    secondary_gemini = os.getenv("GEMINI_SECONDARY_KEY") or os.getenv("GEMINI_API_KEY_II")
+    
     primary_groq = os.getenv("GROQ_API_KEY")
     primary_mistral = os.getenv("MISTRAL_API_KEY")
-    primary_gemini = os.getenv("GEMINI_API_KEY")
 
     fallback_groq = os.getenv("GROQ_API_KEY_II")
     fallback_mistral = os.getenv("MISTRAL_API_KEY_II")
-    fallback_gemini = os.getenv("GEMINI_API_KEY_II")
 
     llms = []
 
-    # Primary Pool
-    if primary_groq:
-        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
+    # 1. Primary Gemini 3.5 Flash Model (Top Choice)
+    if primary_gemini:
+        try:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
+        except Exception as e:
+            logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
+            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
+
+    # 2. Secondary Gemini API Key Fallback
+    if secondary_gemini and secondary_gemini != primary_gemini:
+        try:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini))
+        except Exception as e:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
+
+    # 3. Mistral & Groq Fallbacks
     if primary_mistral:
         llms.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
-    if primary_gemini:
-        llms.append(ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=primary_gemini))
+    if primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
 
-    # Worst-Case Fallback Pool (Secondary Keys)
-    if fallback_groq and fallback_groq != primary_groq:
-        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
     if fallback_mistral and fallback_mistral != primary_mistral:
         llms.append(ChatMistralAI(model="mistral-large-latest", api_key=fallback_mistral))
-    if fallback_gemini and fallback_gemini != primary_gemini:
-        llms.append(ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=fallback_gemini))
+    if fallback_groq and fallback_groq != primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
 
     if not llms:
-        # Fallback to default constructor if no environment keys set explicitly
         return [ChatGroq(model_name="llama-3.1-8b-instant")]
 
     return llms
+
 
 def get_load_balanced_llm(index: int = 0):
     """

@@ -1,6 +1,13 @@
 import os
-from tavily import TavilyClient
 from loguru import logger
+
+try:
+    from tavily import TavilyClient
+    HAS_TAVILY = True
+except ImportError:
+    TavilyClient = None
+    HAS_TAVILY = False
+    logger.warning("tavily-python package not installed. Live Tavily web search will be disabled.")
 
 class TavilySearchService:
     """
@@ -9,10 +16,15 @@ class TavilySearchService:
     """
     def __init__(self):
         self.api_key = os.getenv("TAVILY_API_KEY")
-        if self.api_key:
-            self.client = TavilyClient(api_key=self.api_key)
+        if self.api_key and HAS_TAVILY and TavilyClient is not None:
+            try:
+                self.client = TavilyClient(api_key=self.api_key)
+            except Exception as e:
+                logger.error(f"Failed to initialize TavilyClient: {e}")
+                self.client = None
         else:
             self.client = None
+
 
     def search_web(self, query: str, max_results: int = 3) -> str:
         """

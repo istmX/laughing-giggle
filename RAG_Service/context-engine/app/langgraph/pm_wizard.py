@@ -54,18 +54,18 @@ CURRENT CONVERSATION HISTORY SO FAR:
 {qa_formatted if qa_formatted else "(No questions answered yet. This is the first turn.)"}
 
 REACTIVE EVALUATION RULES:
-1. READ THE LATEST USER ANSWER CAREFULLY:
-   - Understand what the user just told you in their previous answers.
-   - If the user answered a question, evaluate what technical or functional gap is still missing.
-   - DO NOT repeat questions already answered or ask irrelevant questions!
+1. CONTEXT AWARENESS & NO REPETITION:
+   - Read what the user stated in their initial prompt and previous Q&A answers.
+   - If the initial prompt already describes the core application feature/workflow (e.g. "flashcards, quizzes, and notes using Gemini API"), DO NOT ask "What is the primary feature or workflow?".
+   - Instead, ask specific, high-value feature/design questions (e.g. "How should flashcard study sessions be structured?" or "What level of user authentication do you prefer?").
 
 2. DOMAIN BOUNDARIES:
-   - Portfolio / Visual Showcase: STRICT BAN on database/auth questions! Ask about aesthetics, skills, or hero text.
-   - SaaS / Full-Stack Platform: Ask about primary features/workflows, target users, or tech stack choices (Supabase, Postgres, Mongo, etc.).
+   - Full-Stack SaaS / Platform: Require authentication (Email/Password + Google OAuth) and database preferences.
+   - Portfolio / Visual Showcase: Strictly BAN database/auth questions! Ask about visual theme, skills, or hero text.
 
 3. DECIDE NEXT TURN:
-   - If all essential requirements to build the app specification have been answered (or user provided a complete description), set `"is_complete": true`.
-   - Otherwise, generate ONE clear, focused next question with 2 relevant choice options + "Let Zenix decide".
+   - If all essential requirements to build the app specification are clear (or 2-3 turns answered), set `"is_complete": true`.
+   - Otherwise, generate ONE clear, focused next question with 2 relevant, project-specific choice options + "Let Zenix decide".
 
 OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
 {{
@@ -91,8 +91,9 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
         data = json.loads(raw_text)
         
         is_complete = data.get("is_complete", False)
-        next_q = data.get("next_question", "What is the primary feature of your application?")
-        opts = data.get("options", ["Core Feature Set", "Alternative Workflow", "Let Zenix decide"])
+        next_q = data.get("next_question", "What specific user customization features would you like to prioritize?")
+        opts = data.get("options", ["Custom Preferences", "Standard Defaults", "Let Zenix decide"])
+
         
         if "Let Zenix decide" not in opts:
             opts.append("Let Zenix decide")

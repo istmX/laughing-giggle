@@ -116,16 +116,26 @@ Never leave users staring at blank screens.
 
 ---
 
-# Progress Tracking
+# Progress Tracking & Error Memory
 
-Whenever work is completed:
-Update:
-`context/progress-tracker.md`
-This is mandatory.
+Upon starting implementation on this project for the first time, the AI coding agent MUST create a file named `progress.md` in the project root.
+
+### `progress.md` Lifecycle & Maintenance Rules:
+1. **Initial Creation**:
+   - Create `progress.md` if it does not exist.
+   - Document project goals, completed features, current status, pending tasks, and next steps.
+2. **Feature Updates**:
+   - After completing every meaningful feature or task, update `progress.md` with what was implemented.
+3. **Error Memory Log**:
+   - Whenever an error, crash, or bug is encountered and resolved, add an entry to the **Error Memory Log** section in `progress.md`:
+     - **Bug Description**: What broke or caused the exception.
+     - **Root Cause Analysis**: Why it happened.
+     - **Fix / Prevention Solution**: Exact resolution so future AI sessions solve it instantly.
 
 ---
 
 # Code Standards
+
 
 ## Purpose
 

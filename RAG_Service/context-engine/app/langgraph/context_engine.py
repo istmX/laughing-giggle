@@ -124,8 +124,17 @@ Follow these exact file-specific instructions:
 
 1. IF GENERATING "agents.md":
    - STRICT BAN: DO NOT write about AI agent theory, robotics, sensors, actuators, perception, sensor arrays, or game AI!
+   - MANDATORY PROGRESS & ERROR MEMORY RULE:
+     * Instruct the AI coding agent that upon starting work for the first time, it MUST create a `progress.md` file in the project root.
+     * `progress.md` must log completed features, current status, pending tasks, and an **Error Memory Log** (when an error is encountered and fixed, document the root cause and solution so it can be solved instantly next time).
+   - LIVE TECH STACK DOCS SECTION (TAVILY + REDIS SYNC):
+     * `agents.md` MUST include a dedicated section titled **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"**.
+     * Explicitly detail the exact official documentation rules, breaking framework changes, recommended API patterns, and deprecation warnings fetched for the chosen tech stack (e.g. Next.js 15 App Router rules, React 19 hooks, Supabase SSR auth, Tailwind v4 CSS imports).
+     * Instruct the AI agent to focus strictly on these modern documentation patterns so code never breaks due to outdated API usage.
    - Write ONLY operating instructions for AI coding assistants working on THIS project. Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines.
    - List whitelisted packages matching the project's chosen tech stack. Write out chronological build phases with sub-tasks and validation criteria.
+
+
 
 2. IF GENERATING "design.md":
    - Complete visual design system specification using the provided UI Color & Typography catalogs.

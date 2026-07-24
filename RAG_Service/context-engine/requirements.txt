@@ -21,3 +21,4 @@ langchain-groq
 langchain-mistralai
 langchain-google-genai
 langchain-qdrant
+tavily-python
