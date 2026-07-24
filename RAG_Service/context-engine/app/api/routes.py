@@ -148,8 +148,38 @@ async def process_initial_idea(request: IdeaRequest):
         )
         from langchain_core.messages import HumanMessage, SystemMessage
         llm = get_fallback_llm()
-        classification_res = llm.invoke([SystemMessage(content=classification_prompt)])
-        classification = classification_res.content.strip().upper()
+
+        # Step 1: Run classification, title generation, and retrieval concurrently using asyncio.gather
+        async def run_classification():
+            try:
+                res = await llm.ainvoke([SystemMessage(content=classification_prompt)])
+                raw = getattr(res, "content", res)
+                return str(raw).strip().upper()
+            except Exception:
+                return "TRUE"
+
+        async def run_title_gen():
+            try:
+                return generate_title_and_description(actual_prompt)
+            except Exception:
+                return {"project_title": "Zenix Project", "project_description": actual_prompt}
+
+        async def run_retrieval():
+            try:
+                docs = retriever.retrieve_context(actual_prompt)
+                fmt = retriever.format_context(docs)
+                tav = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
+                if tav:
+                    fmt += "\n\n" + tav
+                return fmt
+            except Exception:
+                return ""
+
+        classification, meta, formatted_context = await asyncio.gather(
+            run_classification(),
+            run_title_gen(),
+            run_retrieval()
+        )
         
         logger.info(f"Prompt classification result for '{actual_prompt}': {classification}")
 
@@ -165,18 +195,6 @@ async def process_initial_idea(request: IdeaRequest):
                 ]
             )
 
-        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant + Tavily Web Search
-
-        retrieved_docs = retriever.retrieve_context(actual_prompt)
-        formatted_context = retriever.format_context(retrieved_docs)
-
-        # Ingest live Tavily Web Intelligence if available
-        tavily_context = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
-        if tavily_context:
-            formatted_context += "\n\n" + tavily_context
-
-
-        meta = generate_title_and_description(actual_prompt)
         p_title = meta.get("project_title", "Zenix Project")
         p_desc = meta.get("project_description", actual_prompt)
 
@@ -187,6 +205,7 @@ async def process_initial_idea(request: IdeaRequest):
             "history": history
         }
         wizard_result = pm_wizard_graph.invoke(graph_input)
+
         
         is_complete = wizard_result.get("is_complete", False)
         next_q = wizard_result.get("next_question", "")

@@ -24,12 +24,17 @@ except ImportError:
     ChatNVIDIA = None
     HAS_NVIDIA = False
 
+_GLOBAL_PROVIDER_POOL = None
+
 def get_provider_pool():
     """
-    Returns an ordered list of LLM instances for primary usage and worst-case fallback.
-    Prioritizes NVIDIA Free Cloud API DeepSeek V4 Flash (1M Token Context + High Reasoning),
-    falling back sequentially to Gemini 3.5 Flash, Mistral Large, and Groq.
+    Returns a cached global list of LLM instances for primary usage and worst-case fallback.
+    Initializes instances once to eliminate repeated connection overhead.
     """
+    global _GLOBAL_PROVIDER_POOL
+    if _GLOBAL_PROVIDER_POOL is not None and len(_GLOBAL_PROVIDER_POOL) > 0:
+        return _GLOBAL_PROVIDER_POOL
+
     nvidia_key = os.getenv("NVIDIA_API_KEY")
     primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     secondary_gemini = os.getenv("GEMINI_SECONDARY_KEY") or os.getenv("GEMINI_API_KEY_II")
@@ -42,7 +47,7 @@ def get_provider_pool():
 
     llms = []
 
-    # 1. Primary Model: NVIDIA Free Cloud API Endpoint - DeepSeek V4 Flash (Medium Thinking Enabled)
+    # 1. Primary Model: NVIDIA Free Cloud API Endpoint - DeepSeek V4 Flash (Instant Direct Mode: 2-3s)
     if nvidia_key and HAS_NVIDIA and ChatNVIDIA is not None:
         try:
             llms.append(
@@ -51,12 +56,14 @@ def get_provider_pool():
                     api_key=nvidia_key,
                     temperature=0.7,
                     max_tokens=16384,
-                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "medium"}}}
+                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": False}}}
                 )
             )
-            logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized as Primary LLM with Medium Reasoning.")
+            logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized as Primary LLM in Instant Mode (thinking=False).")
         except Exception as e:
             logger.warning(f"Failed to initialize ChatNVIDIA DeepSeek V4 Flash: {e}")
+
+
 
 
     # 2. Secondary Gemini 3.5 Flash Model Fallback
@@ -89,9 +96,11 @@ def get_provider_pool():
         llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
 
     if not llms:
-        return [ChatGroq(model_name="llama-3.1-8b-instant")]
+        llms = [ChatGroq(model_name="llama-3.1-8b-instant")]
 
-    return llms
+    _GLOBAL_PROVIDER_POOL = llms
+    return _GLOBAL_PROVIDER_POOL
+
 
 
 

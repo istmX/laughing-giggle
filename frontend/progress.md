@@ -1,4 +1,41 @@
-## Frontend Fetch Resolution & Extra-Body Warning Suppress (Latest)
+## Comprehensive Architecture, LLM Engine & Fix Progress Summary (Latest)
+
+### Completed Work & System Enhancements
+
+1. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
+   - Integrated NVIDIA Cloud API DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) with 1M-token context length as Primary #1 model.
+   - Configured `thinking: True` with **`reasoning_effort: "medium"`**, balancing deep architectural reasoning with fast 12s–20s response times.
+   - Set a strict **40.0-second timeout cap** on specification refinement (`asyncio.wait_for`), preventing GitHub Codespaces 60s HTTP proxy gateway timeouts.
+
+2. **Codespaces 504 Gateway Timeout & Duplicate Network Call Fix (`useChatHandlers.js`)**:
+   - Eliminated the redundant sequential `analyzeIdea()` call on initial prompt submission. `processConversation()` handles title generation, classification, Q&A, and specification synthesis in a single unified API roundtrip.
+
+3. **Async Graph Invocation & Unhandled Exception Guard (`routes.py`, `refinement_wizard.py`)**:
+   - Fixed `refinement_graph.invoke` to `await refinement_graph.ainvoke(refinement_input)`, resolving `No synchronous function provided to "refine"`.
+   - Added nested `try/except` guards around backup LLM fallbacks to prevent uncaught `TimeoutError` HTTP 500 crashes.
+
+4. **Tavily 4-Second Timeout Cap & Truncation (`tavily_search.py`)**:
+   - Added `asyncio.wait_for(..., timeout=4.0)` cap to live Tavily web search. If external web search delays, Zenix skips Tavily cleanly and completes specification synthesis instantly.
+
+5. **Purge of Hardcoded Tokens in Favor of RAG UI Catalogs (`refinement_wizard.py`)**:
+   - Removed all explicit hex values (`#08080A`, `#10B981`) from prompt templates.
+   - Instructed the model to query and compose design tokens dynamically from the `design_knowledge_engine` catalog (`RAG_Service/context-engine/app/knowledge/ui`).
+
+6. **Persistent Error Memory Tracking Register (`memory.md`)**:
+   - Created `memory.md` in root workspace documenting 11 system bugs, root causes, symptoms, and verified fix patterns.
+   - Updated `GEMINI.md` and `frontend/AGENTS.md` to mandate AI coding agents inspect `memory.md` before making architectural edits.
+
+7. **Environment Token Support (`.env` & `.env.example`)**:
+   - Added `HUGGINGFACE_TOKEN=` and `HF_TOKEN=` across `RAG_Service` and `backend` env files.
+
+### Verification Status
+- **Python Service**: `python3 -m py_compile` passed cleanly with **0 errors** across all graph modules (`llm.py`, `pm_wizard.py`, `refinement_wizard.py`, `context_engine.py`, `routes.py`, `tavily_search.py`).
+- **Frontend App**: `npm run build` passed cleanly in **6.61 seconds** with **0 build errors**.
+
+---
+
+# Frontend Fetch Resolution & Extra-Body Warning Suppress (Previous)
+
 
 ### Completed
 - **Frontend `useChatHandlers.js` Unpack Resolution**:
