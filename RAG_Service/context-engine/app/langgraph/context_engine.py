@@ -113,42 +113,40 @@ PROJECT SPECIFICATION & REQUIREMENTS:
 -----------------------------------{feedback_prompt}
 
 --- DOMAIN BOUNDARY & ARCHITECTURAL REASONING DIRECTIVES ---
-1. DOMAIN ANALYSIS: Analyze the project specification and reference blueprint.
-2. OVER-ENGINEERING PREVENTION:
-   - If the project is a Portfolio, Landing Page, Developer Showcase, or Visual Site: DO NOT invent backend MongoDB schemas, Mongoose models, Express server controllers, Socket.io websockets, or Clerk authentication! Focus 100% on Next.js + TypeScript, Tailwind CSS, GSAP animations, responsive media grids, and design system tokens.
-   - If the project is a Mobile App: Use Expo + React Native + TypeScript + NativeWind styling.
-   - Only include database models and server authentication if the user's specification explicitly demands a full-stack backend SaaS platform.
-3. TECH STACK SELECTION: Automatically choose modern tech stacks (Next.js + TypeScript + GSAP for Web, Expo + React Native for Mobile).
+1. ACCURATE DOMAIN ANALYSIS:
+   - Carefully evaluate the project specification:
+     * **Full-Stack SaaS / Web Platform**: Applications requiring user accounts, saved notes/flashcards/quizzes, AI API calls, or payment workflows. MANDATE User Authentication (Email/Password + Google OAuth) and Database Schemas (Supabase/PostgreSQL or MongoDB).
+     * **Visual Portfolio / Showcase**: Personal developer sites or landing pages. Strictly BAN backend database or auth models. Specify static JSON content schemas (`projects.json`).
+     * **Mobile App**: Expo + React Native + TypeScript + NativeWind styling.
+
+2. DYNAMIC DESIGN SYSTEM & DUAL ANIMATION ENGINE:
+   - **ZERO HARDCODED PALETTES OR FONTS**: Dynamically generate hex colors and typography scale matrices matching the specific project domain and topic. Display fonts for headlines; Satoshi/Inter for body copy—NEVER display fonts for body prose!
+   - **DUAL MOTION ENGINE**: Use **Framer Motion (`framer-motion`)** for interactive component states, 3D card flips, tab pills, and modal overlays. Use **GSAP + ScrollTrigger** for scroll-linked page reveals & hero timelines.
 
 Follow these exact file-specific instructions:
 
 1. IF GENERATING "agents.md":
    - STRICT BAN: DO NOT write about AI agent theory, robotics, sensors, actuators, perception, sensor arrays, or game AI!
-   - MANDATORY PROGRESS & ERROR MEMORY RULE:
-     * Instruct the AI coding agent that upon starting work for the first time, it MUST create a `progress.md` file in the project root.
-     * `progress.md` must log completed features, current status, pending tasks, and an **Error Memory Log** (when an error is encountered and fixed, document the root cause and solution so it can be solved instantly next time).
+   - MANDATORY MEMORY FILES DIRECTIVE:
+     * Instruct the AI coding agent that upon starting work, it MUST create and maintain both `progress.md` (task/feature log & error memory) and `problem.md` (system flaw analysis & architecture fix tracking) in the project root.
    - LIVE TECH STACK DOCS SECTION (TAVILY + REDIS SYNC):
-     * `agents.md` MUST include a dedicated section titled **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"**.
-     * Explicitly detail the exact official documentation rules, breaking framework changes, recommended API patterns, and deprecation warnings fetched for the chosen tech stack (e.g. Next.js 15 App Router rules, React 19 hooks, Supabase SSR auth, Tailwind v4 CSS imports).
-     * Instruct the AI agent to focus strictly on these modern documentation patterns so code never breaks due to outdated API usage.
-   - Write ONLY operating instructions for AI coding assistants working on THIS project. Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines.
-   - List whitelisted packages matching the project's chosen tech stack. Write out chronological build phases with sub-tasks and validation criteria.
-
-
+     * `agents.md` MUST include a dedicated section titled **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"** detailing official 2026 framework rules, recommended API patterns, and breaking changes for the chosen tech stack.
+   - Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines. List whitelisted npm packages matching the project's tech stack.
 
 2. IF GENERATING "design.md":
-   - Complete visual design system specification using the provided UI Color & Typography catalogs.
-   - For Portfolios / Visual Sites: MUST use Obsidian Dark Canvas (`#08080A`), Dark Surface (`#121214`), Border (`#27272A`), Primary Accent (`#6366F1` Indigo/Violet), and Secondary Accent (`#00F5D4` Cyan Neon). STRICT BAN on material light blue (`#3498db`, `#2196F3`) or plain light gray backgrounds!
-   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (Bebas Neue / Space Grotesk display headers, Satoshi / Inter body, JetBrains Mono eyebrows), corner radii, container max-widths, and spacing scales.
-   - Detail GSAP motion rules (scroll triggers, stagger delays, ease functions) for interactive web sites.
+   - Complete visual design system specification generated dynamically from UI Color & Typography catalogs.
+   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (Display headlines vs Satoshi/Inter body prose), corner radii, container max-widths, and spacing scales.
+   - Detail Motion rules for both Framer Motion (components/flips) and GSAP (scroll timelines).
 
 3. IF GENERATING "architecture.md":
-   - Complete folder tree structure matching the chosen tech stack.
+   - Complete feature-based folder tree structure (`src/features/*`).
    - Client component hierarchy, layout boundaries, and responsive breakpoints.
-   - For Portfolios / Visual Sites: ZERO BACKEND. Data structures are specified strictly as static JSON content schemas (`projects.json`, `skills.json`, `experience.json`).
+   - For Full-Stack SaaS: Complete Database Schemas (tables/collections, fields, types, indexes) & Auth Strategy.
+   - For Portfolios: Static JSON content schemas (`projects.json`, `skills.json`).
 
 4. IF GENERATING "project-overview.md":
    - Product vision, target audience, non-negotiable user journeys, wireframe screen specs, and core feature requirements.
+
 
 CRITICAL FORMATTING:
 - Output ONLY valid Markdown. Do not wrap in extra markdown block envelopes (no ```markdown).

@@ -26,23 +26,23 @@ def refine_spec(state: RefinementState) -> Dict[str, Any]:
 Your task is to synthesize a user's software idea and Q&A answers into a production-grade Technical Specification Document.
 
 ZENIX DESIGN INTELLIGENCE & CATALOGS:
-{matched_knowledge if matched_knowledge else "Apply modern design system tokens, Satoshi/Bebas Neue fonts, 32px radii, and GSAP motion principles."}
+{matched_knowledge if matched_knowledge else "Extract and synthesize modern design system tokens dynamically based on the project topic."}
 
-CRITICAL Q&A RESOLUTION RULES:
-1. USER CUSTOM CHOICE vs "LET ZENIX DECIDE":
-   - Carefully inspect the Q&A responses:
-     * If the user answered a question with a custom specific choice (e.g. custom color theme, specific skills like Three.js/Rust/Python, or custom layout), HONOUR THE USER'S SELECTION 100%.
-     * If the user answered "Let Zenix decide" or left it open, automatically synthesize optimal choices from the Zenix UI & Design Catalogs (e.g. Obsidian Dark `#08080A` Canvas, `#121214` Surface, `#6366F1` Indigo/Violet, `#00F5D4` Cyan Neon; Bebas Neue & Satoshi fonts; 32px radii).
+CRITICAL DOMAIN & ARCHITECTURAL DIRECTIVES:
+1. DOMAIN CLASSIFICATION & FULL-STACK SAAS MANDATE:
+   - Carefully determine if the project is a **Full-Stack SaaS / Platform** (requires user data, notes, flashcards, quizzes, AI API calls, or payments) vs a **Visual Portfolio / Showcase**.
+   - For **Full-Stack SaaS / Platforms**:
+     * **MANDATORY AUTHENTICATION**: Always specify User Authentication (Email/Password + Google OAuth via Supabase Auth, Clerk, Firebase, or NextAuth).
+     * **MANDATORY DATABASE**: Always specify Database Schemas & Collections (PostgreSQL/Supabase ORM or MongoDB/Mongoose) for User Accounts, Decks, Flashcards, and Quizzes.
+     * **SERVER APIS**: Specify Next.js Route Handlers / Express controllers for AI API proxies (e.g. Google Gemini API).
+   - For **Visual Portfolios / Landing Pages**:
+     * Strictly BAN backend database or auth models. Specify Next.js + TypeScript + static JSON data schemas (`projects.json`).
 
-2. DOMAIN CHECK & OVER-ENGINEERING PREVENTION:
-   - If the project is a **Portfolio, Agency Showcase, Landing Page, Developer Showcase, or Visual Site**:
-     * **STRICT BAN**: DO NOT generate MongoDB schemas, Mongoose models, Node/Express backend APIs, WebSockets, or JWT login/registration flows!
-     * Stack: **Next.js + TypeScript + Tailwind CSS + GSAP Motion** (add Three.js / React Three Fiber if 3D motion is requested).
-     * Replace database/auth sections with **DESIGN SYSTEM & TOKENS SPECIFICATION** (Hex colors, Satoshi / Bebas Neue typography scale, 32px pill radii, 1120px max-width) and **GSAP MOTION SPECIFICATION** (ScrollTrigger, stagger animations, hover micro-interactions).
-   - If the project is a **Mobile App**:
-     * Stack: **Expo + React Native + TypeScript + NativeWind**.
-   - If and ONLY IF the project is a **Full-Stack SaaS / Platform**:
-     * Include database schemas, REST endpoints, and authentication middleware.
+2. DYNAMIC DESIGN SYSTEM & DUAL ANIMATION ENGINE:
+   - **NO HARDCODED PALETTES OR FONTS**: Dynamically generate an appropriate hex color palette and readable typography scale (Display fonts for headlines; Satoshi/Inter for body prose—NEVER display fonts for body copy!).
+   - **DUAL MOTION STANDARD**:
+     * **Framer Motion (`framer-motion`)**: Interactive component micro-states, 3D card flips (flashcards), tab pills, and modal overlays.
+     * **GSAP + ScrollTrigger**: Page scroll reveals, pinned storytelling hero sections, and timeline sequences.
 
 3. STRUCTURE FOR AI CODING AGENTS:
 Your output MUST be a complete Markdown document formatted as follows:
@@ -56,27 +56,26 @@ Your output MUST be a complete Markdown document formatted as follows:
 - Explicit user flows, page sections, featured project showcases, and interactive elements.
 
 ## ARCHITECTURAL & TECHNOLOGY STACK DECISIONS
-- Exact tech stack matching domain rules (Next.js + TS + GSAP for web/portfolio, Expo for mobile).
-- Feature-based folder tree structure (src/pages, src/features, src/shared).
+- Exact tech stack (Full-Stack Next.js + TS + Auth + DB + Framer Motion + GSAP).
+- Feature-based folder tree structure (`src/features/*`).
 
-## DESIGN SYSTEM, TOKENS & GSAP MOTION SPECIFICATION
+## DESIGN SYSTEM, TOKENS & MOTION SPECIFICATION
 - Exact Hex color palette (Primary, Canvas, Surface, Border, Secondary, Accent).
-- Typography scale matrix (display-xl, display-lg, headline, body, eyebrow font faces and metrics).
-- Layout tokens (1120px container width, 80px section spacing, 32px corner radius).
-- GSAP animation blueprints (ScrollTrigger pins, stagger delays, ease curves, hover transitions).
+- Typography scale matrix (Display headlines vs readable Satoshi/Inter body prose).
+- Layout tokens (container width, section spacing, corner radii).
+- Motion blueprints (Framer Motion component flips + GSAP ScrollTrigger timelines).
 
-## DATA MODEL / CONTENT STRUCTURE
-- For Portfolios/Showcases: Document static JSON content schemas (projects, skills, experience, case studies).
-- For Full-Stack SaaS only: Document database schemas (tables/collections, fields, types, indexes).
+## DATA MODEL & DATABASE SCHEMAS
+- For Full-Stack SaaS: Complete database models/tables (Users, Decks, Flashcards, Quizzes, GeminiSummaries).
+- For Portfolios: Static JSON content schemas (`projects.json`, `skills.json`).
 
 ## SECURITY, PERFORMANCE & DEPLOYMENT STRATEGY
-- Responsive performance rules, image optimization, Vercel/Netlify hosting strategy.
+- Authentication strategy, image optimization, Vercel/Netlify hosting.
 
 CRITICAL INSTRUCTIONS:
 - Do NOT output markdown envelope wrapping (no ```markdown). Start directly with # Technical Specification.
-- Absolutely NO placeholders, "TODO" comments, or summarized checklists. Every single token and rule must be fully written out.
+- Absolutely NO placeholders, "TODO" comments, or summarized checklists. Every token and schema must be fully written out.
 """
-
 
     messages = [
         SystemMessage(content=system_prompt),
@@ -86,6 +85,7 @@ CRITICAL INSTRUCTIONS:
     response = llm.invoke(messages)
     
     return {"refined_spec": response.content.strip()}
+
 
 def build_refinement_graph() -> StateGraph:
     graph_builder = StateGraph(RefinementState)
