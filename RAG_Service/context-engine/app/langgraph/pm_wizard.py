@@ -86,7 +86,11 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
     response = llm.invoke(messages)
     
     try:
-        raw_text = response.content.replace('```json', '').replace('```', '').strip()
+        raw = getattr(response, "content", response)
+        if isinstance(raw, list):
+            raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+        raw_text = str(raw).replace('```json', '').replace('```', '').strip()
+
         start_idx = raw_text.find('{')
         end_idx = raw_text.rfind('}')
         if start_idx != -1 and end_idx != -1:
@@ -94,11 +98,13 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
         data = json.loads(raw_text)
         
         is_complete = data.get("is_complete", False)
-        next_q = data.get("next_question", "What specific user customization features would you like to prioritize?")
-        opts = data.get("options", ["Custom Preferences", "Standard Defaults", "Let Zenix decide"])
+        next_q = data.get("next_question", "")
+        opts = data.get("options", [])
 
-        
-        if "Let Zenix decide" not in opts:
+        if not next_q:
+            is_complete = True
+
+        if opts and "Let Zenix decide" not in opts:
             opts.append("Let Zenix decide")
             
         return {
@@ -109,10 +115,11 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
     except Exception as e:
         logger.error(f"Failed to parse next question: {e}")
         return {
-            "next_question": "What is the primary feature or workflow of your application?",
-            "options": ["Core Application Workflow", "Custom Feature Set", "Let Zenix decide"],
-            "is_complete": False
+            "next_question": "",
+            "options": [],
+            "is_complete": True
         }
+
 
 
 

@@ -1,4 +1,17 @@
-## Tavily Search Truncation & Specification List-Strip Resolution (Latest)
+## List Replace/Strip Resolution & Hardcoded Fallback Removal (Latest)
+
+### Completed
+- **`pm_wizard.py` List `.replace()` Crash Resolution**:
+  - Safely extracted string content from `response.content` before calling `.replace()` or `.strip()`, resolving `Failed to parse next question: 'list' object has no attribute 'replace'`.
+  - Removed all hardcoded static default questions (`"What is the primary feature or workflow of your application?"`) from exception fallbacks. If parsing fails, the wizard now automatically marks `is_complete: True` to transition seamlessly to technical specification synthesis.
+- **`context_engine.py` List `.strip()` Crash Resolution**:
+  - Added safe text extraction in `generate_draft()` before calling `.strip()`, preventing primary and backup LLM chain failures when generating `agents.md`, `design.md`, `architecture.md`, and `project-overview.md`.
+
+### Verification
+- Python syntax check (`py_compile`) passed cleanly with 0 errors across `pm_wizard.py`, `context_engine.py`, `refinement_wizard.py`, and `routes.py`.
+
+## Tavily Search Truncation & Specification List-Strip Resolution (Previous)
+
 
 ### Completed
 - **Tavily Query Truncation Fix (`tavily_search.py`)**:
