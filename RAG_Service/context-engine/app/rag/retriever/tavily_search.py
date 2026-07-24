@@ -61,11 +61,31 @@ class TavilySearchService:
             return ""
 
     def search_web(self, query: str, max_results: int = 3) -> str:
-        import asyncio
-        try:
-            return asyncio.run(self.search_web_async(query, max_results))
-        except Exception:
+        """
+        Synchronous search wrapper safely bounded by 250 characters.
+        """
+        if not self.client:
             return ""
+
+        clean_query = query.replace("\n", " ").replace('"', ' ').replace("'", ' ').strip()
+        if len(clean_query) > 250:
+            clean_query = clean_query[:250].rsplit(' ', 1)[0]
+
+        try:
+            res = self.client.search(query=clean_query, search_depth="basic", max_results=max_results)
+            results = res.get("results", [])
+            if not results:
+                return ""
+
+            formatted = "\n--- TAVILY LIVE WEB INTELLIGENCE ---\n"
+            for r in results:
+                formatted += f"Source: {r.get('title', 'Web Result')} ({r.get('url', '')})\n"
+                formatted += f"{r.get('content', '')}\n\n"
+            return formatted
+        except Exception as e:
+            logger.warning(f"Tavily search skipped ({e}).")
+            return ""
+
 
 
 tavily_service = TavilySearchService()

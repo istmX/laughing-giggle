@@ -214,8 +214,9 @@ async def process_initial_idea(request: IdeaRequest):
                 "questions_and_answers": history,
                 "refined_spec": ""
             }
-            refinement_result = refinement_graph.invoke(refinement_input)
+            refinement_result = await refinement_graph.ainvoke(refinement_input)
             logger.success(f"Successfully generated refined specification: {refinement_result['refined_spec'][:100]}...")
+
             return IdeaResponse(
                 idea_id=actual_idea_id,
                 status="success",

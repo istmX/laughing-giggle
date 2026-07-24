@@ -52,9 +52,15 @@ This document tracks all system architecture bugs, root causes, and verified res
   2. Set DeepSeek V4 Flash to `reasoning_effort: "medium"` for balanced 10–15s reasoning speed.
   3. Added `asyncio.wait_for(..., timeout=25.0)` to `refinement_wizard.py`. Total API roundtrips now complete in **3–12 seconds total**, completely eliminating Codespaces proxy 60s timeouts!
 
+### 8. Async Refinement Graph Invocation & Coroutine Warning (`routes.py` & `tavily_search.py`)
+- **Symptom**: Server threw HTTP 500 error: `Failed to process idea: No synchronous function provided to "refine". Either initialize with a synchronous function or invoke via the async API (ainvoke, astream, etc.)`.
+- **Root Cause**: When `refine_spec` in `refinement_wizard.py` was made async (to support `asyncio.wait_for` timeouts), `routes.py` line 212 was still calling `refinement_graph.invoke(...)` synchronously instead of `await refinement_graph.ainvoke(...)`.
+- **Resolution**: Updated `routes.py` line 212 to `await refinement_graph.ainvoke(refinement_input)` and fixed `tavily_search.py` synchronous helper wrapper.
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol
+
 
 
 1. **Never make duplicate sequential API requests** on a single user action.
