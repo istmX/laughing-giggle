@@ -72,14 +72,15 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
             f"User's software idea: \"{idea_prompt}\"\n"
             f"Clarifying question: \"{question}\"\n\n"
             "GUIDELINES FOR OPTIONS:\n"
-            "1. DOMAIN ACCURACY: Check the idea and question intent first!\n"
-            "   - If the idea is a Portfolio, Agency Showcase, Landing Page, or Visual Site: DO NOT generate database options (e.g. PostgreSQL, MySQL, Firestore, DynamoDB, MongoDB)!\n"
-            "   - Generate domain-relevant options matching the question (e.g. Agency specializations: 'Branding & UI/UX', 'Full-Stack Web Dev', '3D & Motion Design' | Developer skills: 'React, Next.js & TS', 'Python & FastAPI', 'Full-Stack Node.js' | Layout aesthetics: 'Dark Terminal/IDE style', 'Sleek Minimalist Editorial', 'Dynamic Bento Grid').\n"
+            "1. DOMAIN ACCURACY & CLARITY:\n"
+            "   - If the question asks about Database / Backend stack for a SaaS: Provide clear, modern choices like 'Supabase / PostgreSQL', 'MongoDB / Mongoose', 'Firebase / Firestore', 'PostgreSQL / Prisma'.\n"
+            "   - If the idea is a Portfolio, Agency Showcase, Landing Page, or Visual Site: DO NOT generate database options! Focus on design aesthetics, featured skills, and portfolio sections.\n"
             "2. ENSURE DIVERSITY: Each option should represent a distinct, meaningful choice.\n"
             "3. CONCISE: Keep each option under 8 words so they fit neatly on UI buttons. Avoid emojis.\n"
-            "4. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings. Do not use markdown blocks.\n\n"
+            "4. ALWAYS INCLUDE 'Let Zenix decide' AS THE FINAL OPTION.\n"
+            "5. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings (2 choices + 'Let Zenix decide'). Do not use markdown blocks.\n\n"
             "Example format:\n"
-            "[\"Branding & UI/UX Design\", \"Full-Stack Web Development\", \"3D & Motion Graphics\"]"
+            "[\"Supabase & PostgreSQL\", \"MongoDB & Node.js\", \"Let Zenix decide\"]"
         )
         from langchain_core.messages import SystemMessage
         res = llm.invoke([SystemMessage(content=prompt)])
@@ -89,10 +90,14 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
         end = content.rfind(']')
         if start != -1 and end != -1:
             content = content[start:end+1]
-        return json.loads(content)
+        opts = json.loads(content)
+        if "Let Zenix decide" not in opts:
+            opts.append("Let Zenix decide")
+        return opts
     except Exception as e:
         logger.error(f"Failed to generate options: {e}")
-        return ["Branding & UI/UX", "Full-Stack Web Dev", "3D & Motion Design"]
+        return ["Supabase & PostgreSQL", "MongoDB & Express", "Let Zenix decide"]
+
 
 @router.post("/idea", response_model=IdeaResponse)
 async def process_initial_idea(request: IdeaRequest):
@@ -264,23 +269,15 @@ async def generate_artifact(request: ArtifactRequest):
         
     logger.info(f"Generating artifact {fpath} for project {pid}")
     
-    # Load the template from knowledge/context/
-    template_content = ""
-    try:
-        base_name = os.path.basename(fpath).lower()
-        if base_name == "readme.md":
-            base_name = "project-overview.md"
-            
-        template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / base_name
-        if template_path.exists():
-            template_content = template_path.read_text(encoding="utf-8")
-            logger.info(f"Loaded template from: {template_path}")
-        else:
-            logger.warning(f"Template not found at: {template_path}")
-    except Exception as e:
-        logger.error(f"Error loading template: {e}")
+    # Load template dynamically based on domain category (portfolio/mobile/saas)
+    template_content = get_template_for_target(fpath, spec)
+    if template_content:
+        logger.info(f"Loaded category template for {fpath}")
+    else:
+        logger.warning(f"No category template found for {fpath}")
         
     ref_template = request.reference_template or template_content
+
     
     try:
         retrieved_docs = retriever.retrieve_context(fpath)

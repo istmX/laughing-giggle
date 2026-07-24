@@ -69,15 +69,22 @@ export function useChatHandlers({
       if (pending?.length > 0) {
         setArtifacts(pending)
         setActiveArtifact(pending[0])
-        for (let i = 0; i < pending.length; i++) {
-          try {
-            const r = await generateSingleArtifact(token, projectId, pending[i].file_path)
-            if (r?.artifact) {
-              setArtifacts(prev => prev.map(a => a._id === pending[i]._id ? { ...a, content: r.artifact.content } : a))
-              if (i === 0) setActiveArtifact(r.artifact)
-            }
-          } catch (e) { console.error('Failed to generate file:', pending[i].file_path, e) }
-        }
+        
+        // Execute parallel generation across all 4 context blueprint files
+        const results = await Promise.allSettled(
+          pending.map(item => generateSingleArtifact(token, projectId, item.file_path))
+        )
+        
+        const updatedList = pending.map((item, idx) => {
+          const res = results[idx]
+          if (res.status === 'fulfilled' && res.value?.artifact) {
+            return { ...item, content: res.value.artifact.content }
+          }
+          return item
+        })
+
+        setArtifacts(updatedList)
+        if (updatedList.length > 0) setActiveArtifact(updatedList[0])
       }
       toast.success('Project artifacts generated!')
     } catch (e) {
@@ -85,6 +92,7 @@ export function useChatHandlers({
       toast.error('Failed to generate artifacts.')
     } finally { setIsGeneratingArtifacts(false) }
   }
+
 
   const handleSend = async (overrideValue = null) => {
     const text = overrideValue !== null ? overrideValue : inputValue

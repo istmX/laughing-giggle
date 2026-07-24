@@ -140,11 +140,11 @@ Avoid giant shared folders.
 [
   {
     "id": "project-1",
-    "title": "ScribbleBox Memory Journal",
-    "category": "Web App",
-    "description": "Screenshot context preservation app built with React, GSAP, and Tailwind CSS.",
+    "title": "Interactive 3D Motion Showcase",
+    "category": "3D & Motion",
+    "description": "Interactive WebGL 3D showcase built with React, Three.js, GSAP, and Tailwind CSS.",
     "thumbnail": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600",
-    "tags": ["React", "TypeScript", "GSAP", "Tailwind"],
+    "tags": ["React", "Three.js", "GSAP", "Tailwind"],
     "liveUrl": "https://example.com",
     "githubUrl": "https://github.com/example/project"
   }

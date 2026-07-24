@@ -71,9 +71,27 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
     start_index = FILE_LOAD_BALANCER_INDEX.get(target_name.lower(), 0)
     llm = get_load_balanced_llm(start_index)
     
+    # Read UI design intelligence files directly from knowledge/ui/
+    ui_knowledge = ""
+    try:
+        color_theory_path = os.path.join(BASE_KNOWLEDGE_DIR, "ui", "colors", "color_theory.md")
+        typography_path = os.path.join(BASE_KNOWLEDGE_DIR, "ui", "typography", "sans_serif_fonts.md")
+        
+        ui_docs = []
+        if os.path.exists(color_theory_path):
+            with open(color_theory_path, "r", encoding="utf-8") as f:
+                ui_docs.append("--- COLOR THEORY CATALOG ---\n" + f.read()[:2000])
+        if os.path.exists(typography_path):
+            with open(typography_path, "r", encoding="utf-8") as f:
+                ui_docs.append("--- TYPOGRAPHY CATALOG ---\n" + f.read()[:2000])
+        if ui_docs:
+            ui_knowledge = "\n\n".join(ui_docs)
+    except Exception as e:
+        logger.error(f"Error reading UI catalog: {e}")
+
     matched_design_knowledge = design_knowledge_engine.search_design_context(spec)
-    rag_context = f"{state.get('rag_context', '')}\n\n--- MATCHED DESIGN INTELLIGENCE & TOKENS ---\n{matched_design_knowledge}" if matched_design_knowledge else state.get('rag_context', '')
-    
+    rag_context = f"{state.get('rag_context', '')}\n\n--- UI KNOWLEDGE & TYPOGRAPHY CATALOGS ---\n{ui_knowledge}\n\n--- MATCHED DESIGN INTELLIGENCE ---\n{matched_design_knowledge}"
+
     reference_template = get_template_for_target(target_name, spec)
 
     feedback = state.get("verification_feedback", "")
@@ -104,19 +122,21 @@ PROJECT SPECIFICATION & REQUIREMENTS:
 
 Follow these exact file-specific instructions:
 
-1. IF GENERATING "agents.md" (OR ".cursorrules" / "GEMINI.md"):
-   - Source of truth for AI agents. Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines.
+1. IF GENERATING "agents.md":
+   - STRICT BAN: DO NOT write about AI agent theory, robotics, sensors, actuators, perception, sensor arrays, or game AI!
+   - Write ONLY operating instructions for AI coding assistants working on THIS project. Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines.
    - List whitelisted packages matching the project's chosen tech stack. Write out chronological build phases with sub-tasks and validation criteria.
 
 2. IF GENERATING "design.md":
-   - Complete visual design system specification.
-   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (display-xl, display-lg, headline, body, eyebrow font faces and metrics), corner radii, container max-widths, and spacing scales.
+   - Complete visual design system specification using the provided UI Color & Typography catalogs.
+   - For Portfolios / Visual Sites: MUST use Obsidian Dark Canvas (`#08080A`), Dark Surface (`#121214`), Border (`#27272A`), Primary Accent (`#6366F1` Indigo/Violet), and Secondary Accent (`#00F5D4` Cyan Neon). STRICT BAN on material light blue (`#3498db`, `#2196F3`) or plain light gray backgrounds!
+   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (Bebas Neue / Space Grotesk display headers, Satoshi / Inter body, JetBrains Mono eyebrows), corner radii, container max-widths, and spacing scales.
    - Detail GSAP motion rules (scroll triggers, stagger delays, ease functions) for interactive web sites.
 
 3. IF GENERATING "architecture.md":
    - Complete folder tree structure matching the chosen tech stack.
    - Client component hierarchy, layout boundaries, and responsive breakpoints.
-   - Include database schemas or REST API contracts ONLY if the project genuinely requires a backend.
+   - For Portfolios / Visual Sites: ZERO BACKEND. Data structures are specified strictly as static JSON content schemas (`projects.json`, `skills.json`, `experience.json`).
 
 4. IF GENERATING "project-overview.md":
    - Product vision, target audience, non-negotiable user journeys, wireframe screen specs, and core feature requirements.
@@ -133,13 +153,14 @@ CRITICAL FORMATTING:
     
     try:
         logger.info(f"Invoking multi-provider LLM chain for {target_name}...")
-        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=90.0)
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=35.0)
         content = response.content.strip()
     except Exception as e:
         logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with backup provider...")
         backup_llm = get_load_balanced_llm(start_index + 1)
         response = await backup_llm.ainvoke(messages)
         content = response.content.strip()
+
     
     # Clean markdown wrapping if present
     if content.startswith("```markdown"):

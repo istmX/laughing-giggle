@@ -28,18 +28,23 @@ Your task is to synthesize a user's software idea and Q&A answers into a product
 ZENIX DESIGN INTELLIGENCE & CATALOGS:
 {matched_knowledge if matched_knowledge else "Apply modern design system tokens, Satoshi/Bebas Neue fonts, 32px radii, and GSAP motion principles."}
 
-CRITICAL DOMAIN & ARCHITECTURE RULES:
-1. DOMAIN CHECK & OVER-ENGINEERING PREVENTION:
+CRITICAL Q&A RESOLUTION RULES:
+1. USER CUSTOM CHOICE vs "LET ZENIX DECIDE":
+   - Carefully inspect the Q&A responses:
+     * If the user answered a question with a custom specific choice (e.g. custom color theme, specific skills like Three.js/Rust/Python, or custom layout), HONOUR THE USER'S SELECTION 100%.
+     * If the user answered "Let Zenix decide" or left it open, automatically synthesize optimal choices from the Zenix UI & Design Catalogs (e.g. Obsidian Dark `#08080A` Canvas, `#121214` Surface, `#6366F1` Indigo/Violet, `#00F5D4` Cyan Neon; Bebas Neue & Satoshi fonts; 32px radii).
+
+2. DOMAIN CHECK & OVER-ENGINEERING PREVENTION:
    - If the project is a **Portfolio, Agency Showcase, Landing Page, Developer Showcase, or Visual Site**:
      * **STRICT BAN**: DO NOT generate MongoDB schemas, Mongoose models, Node/Express backend APIs, WebSockets, or JWT login/registration flows!
-     * Stack: **Next.js + TypeScript + Tailwind CSS + GSAP Motion**.
+     * Stack: **Next.js + TypeScript + Tailwind CSS + GSAP Motion** (add Three.js / React Three Fiber if 3D motion is requested).
      * Replace database/auth sections with **DESIGN SYSTEM & TOKENS SPECIFICATION** (Hex colors, Satoshi / Bebas Neue typography scale, 32px pill radii, 1120px max-width) and **GSAP MOTION SPECIFICATION** (ScrollTrigger, stagger animations, hover micro-interactions).
    - If the project is a **Mobile App**:
      * Stack: **Expo + React Native + TypeScript + NativeWind**.
    - If and ONLY IF the project is a **Full-Stack SaaS / Platform**:
      * Include database schemas, REST endpoints, and authentication middleware.
 
-2. STRUCTURE FOR AI CODING AGENTS:
+3. STRUCTURE FOR AI CODING AGENTS:
 Your output MUST be a complete Markdown document formatted as follows:
 
 # Technical Specification
@@ -71,6 +76,7 @@ CRITICAL INSTRUCTIONS:
 - Do NOT output markdown envelope wrapping (no ```markdown). Start directly with # Technical Specification.
 - Absolutely NO placeholders, "TODO" comments, or summarized checklists. Every single token and rule must be fully written out.
 """
+
 
     messages = [
         SystemMessage(content=system_prompt),
