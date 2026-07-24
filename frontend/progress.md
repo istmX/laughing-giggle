@@ -1,4 +1,21 @@
-## Detailed Prompt Fast-Forwarding & Chat Handler Null-Safety Fix (Latest)
+## Tavily Search Truncation & Specification List-Strip Resolution (Latest)
+
+### Completed
+- **Tavily Query Truncation Fix (`tavily_search.py`)**:
+  - Implemented automatic query cleaning and safe 250-character truncation (`clean_query[:250].rsplit(' ', 1)[0]`) inside `search_web()`.
+  - Solved Tavily API 400-character query limit errors on long detailed user prompts (preventing search failures when processing >400 character prompts).
+- **Specification List-to-String Parsing Fix (`refinement_wizard.py`)**:
+  - Resolved `'list' object has no attribute 'strip'` server crash inside `refine_spec`.
+  - Added safe type-checking and list-to-string joining (`"\n".join(...)`) so that structured message lists or content arrays returned by Gemini/fallback models are safely converted into clean Markdown strings before returning.
+- **Python Service Backend Connection (`backend/.env`)**:
+  - Configured `PYTHON_SERVICE_URL=http://127.0.0.1:8000` in `backend/.env` for local microservice communication.
+
+### Verification
+- Python compilation check (`py_compile`) passed cleanly with 0 errors across all context engine modules (`tavily_search.py`, `refinement_wizard.py`, `pm_wizard.py`, `context_engine.py`, `question_prompt.py`, `routes.py`).
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 5.69s with 0 errors.
+
+## Detailed Prompt Fast-Forwarding & Chat Handler Null-Safety Fix (Previous)
+
 
 ### Completed
 - **Detailed Prompt Instant Fast-Forwarding (`pm_wizard.py`)**:
