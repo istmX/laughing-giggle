@@ -125,8 +125,6 @@ export function useChatHandlers({
         const ideaRes = await createIdea(token, { prompt: text })
         const newIdeaId = ideaRes.data?._id || ideaRes._id
         setIdeaId(newIdeaId)
-        const analyzeRes = await analyzeIdea(token, newIdeaId)
-        const parsedAnalysis = parseAIResponse(analyzeRes)
 
         const convoRes = await processConversation(token, newIdeaId, { history: [] })
         const rawConvo = convoRes?.response || convoRes?.data || convoRes
@@ -134,9 +132,10 @@ export function useChatHandlers({
         const isComplete = rawConvo?.is_complete ?? parsedConvo.is_complete ?? false
         const refinedSpec = rawConvo?.refined_spec || parsedConvo.refined_spec || ''
 
-        const title = rawConvo?.project_title || parsedConvo.project_title || parsedAnalysis.project_title || 'Untitled Project'
-        const description = rawConvo?.project_description || parsedConvo.project_description || parsedAnalysis.project_description || text
+        const title = rawConvo?.project_title || parsedConvo.project_title || 'Untitled Project'
+        const description = rawConvo?.project_description || parsedConvo.project_description || text
         setProject(prev => ({ ...prev, project_title: title, project_description: description }))
+
 
 
         if (isComplete) {

@@ -471,9 +471,21 @@ Never optimize prematurely.
 
 Optimize obvious bottlenecks.
 
+# Progress & Error Memory Tracking
+
+Two critical memory tracking files exist in the project root:
+
+1. `frontend/progress.md`: Tracks completed frontend tasks, feature statuses, and pending deliverables.
+2. `memory.md`: Tracks system architecture bugs, root causes, gateway timeouts, and verified fix patterns.
+
+**Mandate for AI Coding Agents**:
+- Before modifying frontend API hooks (`useChatHandlers.js`), state management, or network fetchers (`auth.api.js`), inspect `memory.md` to prevent duplicate API roundtrips and timeout bugs.
+- Always update `memory.md` whenever a new bug or network failure is diagnosed and fixed.
+
 ---
 
 # Documentation
+
 
 Write clear code.
 

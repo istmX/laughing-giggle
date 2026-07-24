@@ -471,9 +471,21 @@ Never optimize prematurely.
 
 Optimize obvious bottlenecks.
 
+# Progress & Error Memory Tracking
+
+Two critical memory tracking files exist in the project root:
+
+1. `progress.md`: Tracks completed tasks, feature statuses, and pending deliverables.
+2. `memory.md`: Tracks system architecture bugs, root causes, gateway timeouts, and verified fix patterns.
+
+**Mandate for AI Agents**:
+- Before making code changes or diagnosing an error, AI agents MUST inspect `memory.md` to avoid repeating past architectural bugs (such as duplicate sequential API calls or direct list-string method invocations).
+- After fixing any meaningful bug or error, update both `progress.md` and `memory.md` immediately with the symptom, root cause, and verified resolution.
+
 ---
 
 # Documentation
+
 
 Write clear code.
 
