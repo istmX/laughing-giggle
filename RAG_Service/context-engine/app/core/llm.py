@@ -51,12 +51,13 @@ def get_provider_pool():
                     api_key=nvidia_key,
                     temperature=0.7,
                     max_tokens=16384,
-                    extra_body={"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}
+                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}}
                 )
             )
             logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized as primary LLM.")
         except Exception as e:
             logger.warning(f"Failed to initialize ChatNVIDIA DeepSeek V4 Flash: {e}")
+
 
     # 2. Primary Gemini 3.5 Flash Model Fallback
     if primary_gemini:

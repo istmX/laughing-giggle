@@ -1,4 +1,19 @@
-## Purge of Hardcoded Tokens in Favor of RAG UI Knowledge Catalogs (Latest)
+## Frontend Fetch Resolution & Extra-Body Warning Suppress (Latest)
+
+### Completed
+- **Frontend `useChatHandlers.js` Unpack Resolution**:
+  - Unpacked `convoRes.response || convoRes.data || convoRes` to extract `is_complete` and `refined_spec`. This eliminates frontend `TypeError: Failed to fetch` by accurately resolving full spec objects.
+- **Title Generator JSON Parsing Fix (`routes.py`)**:
+  - Safely extracted text from DeepSeek V4 Flash message objects in `generate_title_and_description()`, resolving `Extra data: line 8 column 1 (char 200)`.
+- **NVIDIA Extra Body Warning Suppressed (`llm.py`)**:
+  - Configured `ChatNVIDIA` with `model_kwargs={"extra_body": ...}`, cleanly suppressing python console warnings.
+
+### Verification
+- `py_compile` passed cleanly with 0 errors across `llm.py` and `routes.py`.
+- Frontend production build (`npm run build`) passed cleanly in 6.42s.
+
+## Purge of Hardcoded Tokens in Favor of RAG UI Knowledge Catalogs (Previous)
+
 
 ### Completed
 - **`refinement_wizard.py` Hardcoded Token Purge**:

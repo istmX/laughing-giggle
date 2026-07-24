@@ -55,7 +55,10 @@ def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
         from langchain_core.messages import SystemMessage
         res = llm.invoke([SystemMessage(content=prompt)])
         import json
-        content = res.content.replace('```json', '').replace('```', '').strip()
+        raw = getattr(res, "content", res)
+        if isinstance(raw, list):
+            raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+        content = str(raw).replace('```json', '').replace('```', '').strip()
         start = content.find('{')
         end = content.rfind('}')
         if start != -1 and end != -1:
@@ -66,6 +69,7 @@ def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
         words = idea_prompt.strip().split()
         title = " ".join(words[:3]).title() if words else "Zenix Project"
         return {"project_title": title, "project_description": idea_prompt}
+
 
 
 def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
