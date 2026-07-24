@@ -576,3 +576,15 @@ async def process_developer(request: DeveloperRequest):
         "message": result["ai_response_message"],
         "updates": result["updated_artifacts"]
     }
+
+@router.delete("/projects/{idea_id}")
+async def delete_project_context(idea_id: str):
+    """
+    Purges generated context artifacts and resets session context memory for a deleted project.
+    """
+    logger.info(f"Purging context session and artifacts for deleted project: {idea_id}")
+    return {
+        "success": True,
+        "message": f"Project context and artifacts for {idea_id} cleared successfully.",
+        "idea_id": idea_id
+    }

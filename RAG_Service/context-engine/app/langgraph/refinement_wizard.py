@@ -16,6 +16,7 @@ class RefinementState(TypedDict):
     refined_spec: str
 
 from app.prompts.refinement_prompt import buildRefinementPrompt
+from app.rag.retriever.tavily_search import tavily_service
 
 async def refine_spec(state: RefinementState) -> Dict[str, Any]:
     """
@@ -31,7 +32,16 @@ async def refine_spec(state: RefinementState) -> Dict[str, Any]:
     # Query Design Intelligence Catalogs
     matched_knowledge = design_knowledge_engine.search_design_context(idea)
     
-    system_prompt = buildRefinementPrompt(idea, qa_history, matched_knowledge)
+    # Query Tavily Web Search (Async 4-second timeout limit)
+    tavily_intelligence = ""
+    try:
+        tavily_res = await tavily_service.search_web_async(f"2026 tech stack best practices for {idea[:100]}", max_results=3)
+        if tavily_res and isinstance(tavily_res, list):
+            tavily_intelligence = "\n--- TAVILY LIVE WEB INTELLIGENCE ---\n" + "\n".join([f"- {r.get('content', '')}" for r in tavily_res if isinstance(r, dict)])
+    except Exception as t_err:
+        logger.warning(f"Tavily web search skipped or timed out: {t_err}")
+
+    system_prompt = buildRefinementPrompt(idea, qa_history, matched_knowledge, tavily_intelligence)
 
     messages = [
         SystemMessage(content=system_prompt),
