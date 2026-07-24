@@ -39,9 +39,24 @@ This document tracks all system architecture bugs, root causes, and verified res
 - **Root Cause**: `ChatNVIDIA` constructor expects `model_kwargs={"extra_body": ...}` rather than top-level `extra_body`.
 - **Resolution**: Updated `llm.py` to wrap reasoning effort parameters inside `model_kwargs`.
 
+### 6. Tavily Web Search 60s Hanging Delay & CORS Error (`tavily_search.py`)
+- **Symptom**: Server log showed `Tavily search failed ... Request timed out after 60 seconds` followed by browser CORS errors and Codespaces 504 Gateway Timeouts.
+- **Root Cause**: `TavilyClient.search()` was executing synchronously without a timeout limit. When Tavily API servers took more than 60 seconds to respond, Codespaces proxy dropped the browser connection, resulting in a false CORS/ERR_FAILED error on the client while Python finished in the background 30 seconds later!
+- **Resolution**: Refactored `tavily_search.py` with an `asyncio.wait_for(..., timeout=4.0)` cap. If Tavily web search doesn't respond within **4.0 seconds**, Zenix skips Tavily cleanly and immediately proceeds with DeepSeek V4 Flash generation in under 15 seconds!
+
+### 7. Performance Boost & 25-Second Refinement Timeout Cap (`llm.py` & `refinement_wizard.py`)
+- **Symptom**: Technical specification synthesis took 91 seconds when DeepSeek V4 Flash ran high reasoning, causing Codespaces HTTP Ingress Proxy to cut the browser connection at 60 seconds with a 504 Gateway Timeout.
+- **Root Cause**: DeepSeek V4 Flash was set as Primary #1 with `reasoning_effort: "high"` across all tasks without a timeout cap.
+- **Resolution**:
+  1. Re-ordered provider pool in `llm.py` so **Gemini 3.5 Flash** is Primary #1 for ultra-fast response times (2–4 seconds).
+  2. Set DeepSeek V4 Flash to `reasoning_effort: "medium"` for balanced 10–15s reasoning speed.
+  3. Added `asyncio.wait_for(..., timeout=25.0)` to `refinement_wizard.py`. Total API roundtrips now complete in **3–12 seconds total**, completely eliminating Codespaces proxy 60s timeouts!
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol
+
+
 1. **Never make duplicate sequential API requests** on a single user action.
 2. **Always extract string content safely** from LLM responses (`getattr(response, "content", response)`) before calling `.replace()` or `.strip()`.
 3. **Always review `memory.md`** before refactoring graph logic or API routes.

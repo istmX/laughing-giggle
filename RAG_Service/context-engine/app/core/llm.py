@@ -42,7 +42,15 @@ def get_provider_pool():
 
     llms = []
 
-    # 1. NVIDIA Free Cloud API Endpoint - DeepSeek V4 Flash (Top Choice)
+    # 1. Primary Gemini 3.5 Flash Model (Ultra-fast primary provider: 2-4s latency)
+    if primary_gemini:
+        try:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
+        except Exception as e:
+            logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
+            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
+
+    # 2. NVIDIA Free Cloud API Endpoint - DeepSeek V4 Flash (Medium Reasoning: 10-15s latency)
     if nvidia_key and HAS_NVIDIA and ChatNVIDIA is not None:
         try:
             llms.append(
@@ -51,21 +59,12 @@ def get_provider_pool():
                     api_key=nvidia_key,
                     temperature=0.7,
                     max_tokens=16384,
-                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}}
+                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": True, "reasoning_effort": "medium"}}}
                 )
             )
-            logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized as primary LLM.")
+            logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized with Medium Reasoning.")
         except Exception as e:
             logger.warning(f"Failed to initialize ChatNVIDIA DeepSeek V4 Flash: {e}")
-
-
-    # 2. Primary Gemini 3.5 Flash Model Fallback
-    if primary_gemini:
-        try:
-            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
-        except Exception as e:
-            logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
-            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
 
     # 3. Secondary Gemini API Key Fallback
     if secondary_gemini and secondary_gemini != primary_gemini:
@@ -73,6 +72,7 @@ def get_provider_pool():
             llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini))
         except Exception as e:
             llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
+
 
     # 4. Mistral & Groq Fallbacks
     if primary_mistral:

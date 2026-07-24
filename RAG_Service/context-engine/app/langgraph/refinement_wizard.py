@@ -12,11 +12,12 @@ class RefinementState(TypedDict):
     questions_and_answers: List[Dict[str, str]]
     refined_spec: str
 
-def refine_spec(state: RefinementState) -> Dict[str, Any]:
+async def refine_spec(state: RefinementState) -> Dict[str, Any]:
+    """Node that synthesizes the refined technical specification."""
     logger.info("Running Refinement Graph: Synthesizing Specification with Design Intelligence")
     
     llm = get_fallback_llm()
-    idea = state['idea_prompt']
+    idea = state.get("idea_prompt", "")
     qa_text = "\n".join([f"Q: {qa['question']}\nA: {qa['answer']}" for qa in state['questions_and_answers']])
     
     # Query Design Intelligence Catalogs
@@ -79,22 +80,23 @@ CRITICAL INSTRUCTIONS:
 - Absolutely NO placeholders, "TODO" comments, or summarized checklists. Every single token, schema, and animation code block must be fully written out.
 """
 
-
-
     messages = [
         SystemMessage(content=system_prompt),
         HumanMessage(content=f"Original Idea:\n{idea}\n\nQ&A History:\n{qa_text}")
     ]
     
-    response = llm.invoke(messages)
+    try:
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=25.0)
+    except Exception as e:
+        logger.warning(f"Primary refinement LLM timed out or failed ({e}). Retrying with backup provider...")
+        backup_llm = get_load_balanced_llm(1)
+        response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=20.0)
     
     raw_content = getattr(response, "content", response)
     if isinstance(raw_content, list):
         raw_content = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw_content])
     
     return {"refined_spec": str(raw_content).strip()}
-
-
 
 def build_refinement_graph() -> StateGraph:
     graph_builder = StateGraph(RefinementState)

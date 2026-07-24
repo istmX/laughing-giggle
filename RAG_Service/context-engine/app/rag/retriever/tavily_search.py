@@ -26,28 +26,30 @@ class TavilySearchService:
             self.client = None
 
 
-    def search_web(self, query: str, max_results: int = 3) -> str:
+    async def search_web_async(self, query: str, max_results: int = 3) -> str:
         """
-        Executes a targeted AI search and returns formatted markdown context snippets.
-        Ensures query length is safely under the Tavily 400-character limit.
+        Executes a targeted AI search asynchronously with a strict 4-second timeout limit.
+        Ensures search never stalls the LLM pipeline or causes 60-second gateway timeouts.
         """
+        import asyncio
         if not self.client:
             logger.warning("Tavily API key not found. Skipping live web search.")
             return ""
 
-        # Clean and safely truncate query to max 250 characters to stay well under Tavily's 400 limit
         clean_query = query.replace("\n", " ").replace('"', ' ').replace("'", ' ').strip()
         if len(clean_query) > 250:
             clean_query = clean_query[:250].rsplit(' ', 1)[0]
 
         try:
             logger.info(f"Executing Tavily AI Search for: '{clean_query}'")
-            res = self.client.search(query=clean_query, search_depth="basic", max_results=max_results)
+            loop = asyncio.get_event_loop()
+            res = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: self.client.search(query=clean_query, search_depth="basic", max_results=max_results)),
+                timeout=4.0
+            )
             results = res.get("results", [])
-            
             if not results:
                 return ""
-
 
             formatted = "\n--- TAVILY LIVE WEB INTELLIGENCE ---\n"
             for r in results:
@@ -55,7 +57,15 @@ class TavilySearchService:
                 formatted += f"{r.get('content', '')}\n\n"
             return formatted
         except Exception as e:
-            logger.error(f"Tavily search failed for '{query}': {e}")
+            logger.warning(f"Tavily search timed out or skipped ({e}). Proceeding instantly with DeepSeek V4 Flash...")
             return ""
+
+    def search_web(self, query: str, max_results: int = 3) -> str:
+        import asyncio
+        try:
+            return asyncio.run(self.search_web_async(query, max_results))
+        except Exception:
+            return ""
+
 
 tavily_service = TavilySearchService()
