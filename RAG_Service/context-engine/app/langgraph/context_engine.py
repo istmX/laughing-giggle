@@ -2,7 +2,7 @@ from typing import Annotated, Dict, Any, List
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.core.llm import get_fallback_llm, get_fallback_llm_ii
+from app.core.llm import get_load_balanced_llm
 import os
 import asyncio
 from loguru import logger
@@ -20,6 +20,14 @@ class ArtifactState(TypedDict):
     is_approved: bool
 
 BASE_KNOWLEDGE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge")
+
+# Target file index mapping for Load Balancer distribution
+FILE_LOAD_BALANCER_INDEX = {
+    "agents.md": 0,
+    "design.md": 1,
+    "architecture.md": 2,
+    "project-overview.md": 3,
+}
 
 def get_template_for_target(target_file: str, spec: str) -> str:
     spec_lower = spec.lower()
@@ -52,17 +60,24 @@ def get_template_for_target(target_file: str, spec: str) -> str:
     return ""
 
 async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
-    """Generates high-fidelity markdown context artifacts matching the project category."""
+    """Generates high-fidelity markdown context artifacts matching the project category using load-balanced AI providers."""
     target_name = os.path.basename(state['target_file_path'])
-    logger.info(f"Generating draft for {target_name}")
+    iterations = state.get('iterations', 0) + 1
+    logger.info(f"Generating draft for {target_name} (Iteration {iterations})")
     
     spec = state.get('refined_spec', '')
-    llm = get_fallback_llm_ii()
+    
+    # Load Balancer: Rotate starting provider based on target file name to distribute concurrent calls
+    start_index = FILE_LOAD_BALANCER_INDEX.get(target_name.lower(), 0)
+    llm = get_load_balanced_llm(start_index)
     
     matched_design_knowledge = design_knowledge_engine.search_design_context(spec)
     rag_context = f"{state.get('rag_context', '')}\n\n--- MATCHED DESIGN INTELLIGENCE & TOKENS ---\n{matched_design_knowledge}" if matched_design_knowledge else state.get('rag_context', '')
     
     reference_template = get_template_for_target(target_name, spec)
+
+    feedback = state.get("verification_feedback", "")
+    feedback_prompt = f"\n\nREVISION FEEDBACK FROM PREVIOUS PASS:\n{feedback}\nPlease fix these issues immediately." if feedback else ""
 
     system_prompt = f"""You are Zenix, a Staff Software Architect and Principal Design Systems Engineer (created by developer "Istm").
 Your mission is to generate the highest-fidelity, complete, and implementation-ready markdown context file for: "{target_name}".
@@ -77,7 +92,7 @@ PROJECT SPECIFICATION & REQUIREMENTS:
 
 --- REFERENCE TEMPLATE BLUEPRINT ---
 {reference_template}
------------------------------------
+-----------------------------------{feedback_prompt}
 
 --- DOMAIN BOUNDARY & ARCHITECTURAL REASONING DIRECTIVES ---
 1. DOMAIN ANALYSIS: Analyze the project specification and reference blueprint.
@@ -121,9 +136,9 @@ CRITICAL FORMATTING:
         response = await asyncio.wait_for(llm.ainvoke(messages), timeout=90.0)
         content = response.content.strip()
     except Exception as e:
-        logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with fallback...")
-        fallback_llm = get_fallback_llm()
-        response = await fallback_llm.ainvoke(messages)
+        logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with backup provider...")
+        backup_llm = get_load_balanced_llm(start_index + 1)
+        response = await backup_llm.ainvoke(messages)
         content = response.content.strip()
     
     # Clean markdown wrapping if present
@@ -136,14 +151,30 @@ CRITICAL FORMATTING:
         
     return {
         "draft_content": content.strip(),
-        "iterations": state.get("iterations", 0) + 1,
+        "iterations": iterations,
         "is_approved": True,
         "verification_feedback": ""
     }
 
 async def verify_draft(state: ArtifactState) -> Dict[str, Any]:
-    """Single-pass fast approval node to prevent rate-limit loops."""
-    return {"is_approved": True, "verification_feedback": ""}
+    """Verification pass checking completeness and quality of the draft."""
+    content = state.get("draft_content", "")
+    iterations = state.get("iterations", 1)
+    
+    # Fast path: Approve if content is comprehensive (>1200 chars) or max iterations (3) reached
+    if len(content) > 1200 or iterations >= 3:
+        return {"is_approved": True, "verification_feedback": ""}
+        
+    # Request improvement if draft is too short
+    return {
+        "is_approved": False,
+        "verification_feedback": "The generated document is too short or incomplete. Expand all sections with exhaustive detail, design tokens, and technical standards."
+    }
+
+def route_verification(state: ArtifactState) -> str:
+    if state.get("is_approved", True) or state.get("iterations", 1) >= 3:
+        return END
+    return "generate"
 
 # --- Graph Construction ---
 def build_context_engine_graph() -> StateGraph:
@@ -152,7 +183,8 @@ def build_context_engine_graph() -> StateGraph:
     graph_builder.add_node("verify", verify_draft)
     graph_builder.add_edge(START, "generate")
     graph_builder.add_edge("generate", "verify")
-    graph_builder.add_edge("verify", END)
+    graph_builder.add_conditional_edges("verify", route_verification, {END: END, "generate": "generate"})
     return graph_builder.compile()
 
 context_engine_graph = build_context_engine_graph()
+

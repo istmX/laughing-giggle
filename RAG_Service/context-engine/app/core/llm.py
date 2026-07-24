@@ -7,42 +7,74 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
 load_dotenv(env_path)
 
-def get_fallback_llm():
-    """
-    Returns an LLM with fallbacks: Groq -> Mistral -> Gemini.
-    """
-    groq_llm = ChatGroq(model_name="llama-3.1-8b-instant")
-    mistral_llm = ChatMistralAI(model="mistral-large-latest")
-    gemini_llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
-    
-    return groq_llm.with_fallbacks([mistral_llm, gemini_llm])
+import os
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from langchain_mistralai import ChatMistralAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from loguru import logger
 
-def get_fallback_llm_ii():
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
+load_dotenv(env_path)
+
+def get_provider_pool():
     """
-    Returns an LLM chain with multi-provider fallbacks across Groq, Mistral, and Gemini.
-    Automatically switches to the next available AI if 429 rate limits or errors occur.
+    Returns an ordered list of LLM instances for primary usage and worst-case fallback.
+    Primary Keys: GROQ_API_KEY, MISTRAL_API_KEY, GEMINI_API_KEY
+    Worst-case Fallback: GROQ_API_KEY_II, MISTRAL_API_KEY_II, GEMINI_API_KEY_II
     """
-    groq_api_key_ii = os.getenv("GROQ_API_KEY_II") or os.getenv("GROQ_API_KEY")
-    groq_api_key_i = os.getenv("GROQ_API_KEY")
-    mistral_api_key_ii = os.getenv("MISTRAL_API_KEY_II") or os.getenv("MISTRAL_API_KEY")
-    mistral_api_key_i = os.getenv("MISTRAL_API_KEY")
-    gemini_api_key = os.getenv("GEMINI_API_KEY_II") or os.getenv("GEMINI_API_KEY")
+    primary_groq = os.getenv("GROQ_API_KEY")
+    primary_mistral = os.getenv("MISTRAL_API_KEY")
+    primary_gemini = os.getenv("GEMINI_API_KEY")
+
+    fallback_groq = os.getenv("GROQ_API_KEY_II")
+    fallback_mistral = os.getenv("MISTRAL_API_KEY_II")
+    fallback_gemini = os.getenv("GEMINI_API_KEY_II")
 
     llms = []
-    if groq_api_key_ii:
-        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key_ii))
-    if groq_api_key_i and groq_api_key_i != groq_api_key_ii:
-        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_api_key_i))
-    if mistral_api_key_ii:
-        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=mistral_api_key_ii))
-    if mistral_api_key_i and mistral_api_key_i != mistral_api_key_ii:
-        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=mistral_api_key_i))
-    if gemini_api_key:
-        llms.append(ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=gemini_api_key))
+
+    # Primary Pool
+    if primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
+    if primary_mistral:
+        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
+    if primary_gemini:
+        llms.append(ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=primary_gemini))
+
+    # Worst-Case Fallback Pool (Secondary Keys)
+    if fallback_groq and fallback_groq != primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
+    if fallback_mistral and fallback_mistral != primary_mistral:
+        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=fallback_mistral))
+    if fallback_gemini and fallback_gemini != primary_gemini:
+        llms.append(ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=fallback_gemini))
 
     if not llms:
-        return get_fallback_llm()
+        # Fallback to default constructor if no environment keys set explicitly
+        return [ChatGroq(model_name="llama-3.1-8b-instant")]
 
-    primary = llms[0]
-    fallbacks = llms[1:]
+    return llms
+
+def get_load_balanced_llm(index: int = 0):
+    """
+    Returns an LLM chain starting at the given index in the provider pool,
+    with all other pool members configured as automatic sequential fallbacks.
+    """
+    pool = get_provider_pool()
+    if not pool:
+        return ChatGroq(model_name="llama-3.1-8b-instant")
+
+    # Rotate starting provider based on index (Round-Robin)
+    start_idx = index % len(pool)
+    ordered_pool = pool[start_idx:] + pool[:start_idx]
+
+    primary = ordered_pool[0]
+    fallbacks = ordered_pool[1:]
     return primary.with_fallbacks(fallbacks) if fallbacks else primary
+
+def get_fallback_llm():
+    return get_load_balanced_llm(0)
+
+def get_fallback_llm_ii():
+    return get_load_balanced_llm(1)
+

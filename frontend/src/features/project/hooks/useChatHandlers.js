@@ -116,12 +116,13 @@ export function useChatHandlers({
         setIdeaId(newIdeaId)
         const analyzeRes = await analyzeIdea(token, newIdeaId)
         const parsedAnalysis = parseAIResponse(analyzeRes)
-        const title = parsedAnalysis.project_title || 'Untitled Project'
-        const description = parsedAnalysis.project_description || text
-        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
 
         const convoRes = await processConversation(token, newIdeaId, { history: [] })
         const parsedConvo = parseAIResponse(convoRes)
+        const title = parsedConvo.project_title || parsedAnalysis.project_title || 'Untitled Project'
+        const description = parsedConvo.project_description || parsedAnalysis.project_description || text
+        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
+
 
         if (parsedConvo.is_complete) {
           setSpecContent(parsedConvo.refined_spec)
@@ -146,6 +147,7 @@ export function useChatHandlers({
             { project_title: title, project_description: description }
           )
         }
+
 
       } else if (project?.wizard_state?.isComplete) {
         const hist = []

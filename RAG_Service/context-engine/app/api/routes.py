@@ -35,6 +35,34 @@ class IdeaResponse(BaseModel):
     next_question: Optional[str] = None
     options: Optional[List[str]] = None
     refined_spec: Optional[str] = None
+    project_title: Optional[str] = None
+    project_description: Optional[str] = None
+
+def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
+    try:
+        llm = get_fallback_llm()
+        prompt = (
+            f"You are Zenix Project Naming Engine.\n"
+            f"User idea: \"{idea_prompt}\"\n\n"
+            "Task: Generate a sleek 2-4 word project title and a 1-sentence developer summary.\n"
+            "Output JSON format ONLY:\n"
+            "{\"project_title\": \"Sleek Name\", \"project_description\": \"One sentence description.\"}"
+        )
+        from langchain_core.messages import SystemMessage
+        res = llm.invoke([SystemMessage(content=prompt)])
+        import json
+        content = res.content.replace('```json', '').replace('```', '').strip()
+        start = content.find('{')
+        end = content.rfind('}')
+        if start != -1 and end != -1:
+            content = content[start:end+1]
+        return json.loads(content)
+    except Exception as e:
+        logger.error(f"Failed to generate title/description: {e}")
+        words = idea_prompt.strip().split()
+        title = " ".join(words[:3]).title() if words else "Zenix Project"
+        return {"project_title": title, "project_description": idea_prompt}
+
 
 def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
     try:
@@ -129,6 +157,10 @@ async def process_initial_idea(request: IdeaRequest):
         formatted_context = retriever.format_context(retrieved_docs)
 
         # Case 1: Initial call or first turn with empty questions list
+        meta = generate_title_and_description(actual_prompt)
+        p_title = meta.get("project_title", "Zenix Project")
+        p_desc = meta.get("project_description", actual_prompt)
+
         if not questions:
             graph_input = {
                 "idea_prompt": actual_prompt,
@@ -154,7 +186,9 @@ async def process_initial_idea(request: IdeaRequest):
                 is_complete=False,
                 next_question=next_q,
                 options=options,
-                refined_spec=None
+                refined_spec=None,
+                project_title=p_title,
+                project_description=p_desc
             )
         else:
             # Case 3: All questions answered -> synthesize specification
@@ -174,8 +208,11 @@ async def process_initial_idea(request: IdeaRequest):
                 is_complete=True,
                 next_question=None,
                 options=None,
-                refined_spec=refinement_result["refined_spec"]
+                refined_spec=refinement_result["refined_spec"],
+                project_title=p_title,
+                project_description=p_desc
             )
+
             
     except Exception as e:
         logger.error(f"Failed to process idea: {e}")
