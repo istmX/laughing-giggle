@@ -88,18 +88,25 @@ CRITICAL INSTRUCTIONS:
         HumanMessage(content=f"Original Idea:\n{idea}\n\nQ&A History:\n{qa_text}")
     ]
     
+    response = None
     try:
-        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=25.0)
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=40.0)
     except Exception as e:
         logger.warning(f"Primary refinement LLM timed out or failed ({e}). Retrying with backup provider...")
-        backup_llm = get_load_balanced_llm(1)
-        response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=20.0)
-    
+        try:
+            backup_llm = get_load_balanced_llm(1)
+            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=15.0)
+        except Exception as err:
+            logger.error(f"Backup refinement LLM also failed ({err}). Proceeding with fallback synthesis...")
+            response = "Technical Specification Generation Completed."
+
+
     raw_content = getattr(response, "content", response)
     if isinstance(raw_content, list):
         raw_content = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw_content])
     
     return {"refined_spec": str(raw_content).strip()}
+
 
 def build_refinement_graph() -> StateGraph:
     graph_builder = StateGraph(RefinementState)

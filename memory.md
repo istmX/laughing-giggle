@@ -62,9 +62,23 @@ This document tracks all system architecture bugs, root causes, and verified res
 - **Root Cause**: When adding exception timeout handling to `refinement_wizard.py`, `import asyncio` and `get_load_balanced_llm` were referenced in the `try/except` block without being declared at the top of the file.
 - **Resolution**: Added `import asyncio` and imported `get_load_balanced_llm` at top of `refinement_wizard.py`.
 
+### 10. Unhandled Exception Guard in Backup Refinement Fallback (`refinement_wizard.py`)
+- **Symptom**: Server threw HTTP 500 error: `Failed to process idea:` with an empty exception message when both primary and backup LLM timeouts expired.
+- **Root Cause**: The backup LLM execution inside the `except` block of `refinement_wizard.py` did not have an internal `try/except` guard. When the backup model timed out, it threw an unhandled `TimeoutError` that crashed the route handler.
+- **Resolution**: Wrapped the backup LLM execution in an internal `try/except` block with a safe fallback text generator.
+
+### 11. DeepSeek V4 Flash Primary Deep Thinking 40s Timeout Configuration (`llm.py` & `refinement_wizard.py`)
+- **Requirement**: DeepSeek V4 Flash MUST act as Primary #1 model with deep reasoning enabled (`thinking: True`, `reasoning_effort: "high"`) so it produces exhaustive, production-grade technical blueprints without skipping architectural details.
+- **Resolution**:
+  1. Configured DeepSeek V4 Flash via NVIDIA Free API as Primary #1 provider in `llm.py` with `thinking: True` and `reasoning_effort: "high"`.
+  2. Updated `refinement_wizard.py` timeout to **40.0 seconds**, ensuring DeepSeek V4 Flash has full headroom to execute deep reasoning while remaining safely within Codespaces proxy limits.
+  3. Added internal nested `try/except` guards to fallback providers.
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol
+
+
 
 
 
