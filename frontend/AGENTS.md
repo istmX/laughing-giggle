@@ -195,6 +195,16 @@ Never implement multiple unrelated features together.
 
 ---
 
+# Mandatory Legacy Code Purge & Model Dispatch Rules
+
+1. **Mandatory Legacy Code Clean-Up Rule**:
+   - Whenever an AI agent modifies, refactors, or replaces a feature, prompt, or function, it MUST scan the full codebase and permanently remove all dead/legacy code, unused variables, outdated prompt templates, and old fallback logic associated with that feature across all files.
+
+2. **Sequential Dedicated Model Dispatch for Blueprint Files**:
+   - The 4 context blueprint files (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`) MUST be generated sequentially using dedicated high-speed provider models per file (`get_interactive_llm()`). Parallel bursting of 4 concurrent LLM calls is strictly prohibited to prevent API rate-limits and timeouts.
+
+---
+
 # Folder Structure
 
 Use Feature-Based Architecture.

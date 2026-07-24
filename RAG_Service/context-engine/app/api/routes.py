@@ -445,25 +445,15 @@ async def generate_project_context(request: ContextRequest):
             return key, err_msg
 
     async def event_generator():
-        tasks = [asyncio.create_task(worker(fpath, key)) for fpath, key in files_to_generate]
-        gather_task = asyncio.create_task(asyncio.gather(*tasks, return_exceptions=True))
-        
-        completed_count = 0
-        while completed_count < len(files_to_generate):
+        for fpath, key in files_to_generate:
             try:
-                item = await asyncio.wait_for(queue.get(), timeout=1.0)
-                yield f"data: {json.dumps(item)}\n\n"
-                completed_count += 1
-            except asyncio.TimeoutError:
-                if gather_task.done() and queue.empty():
-                    break
-                continue
+                logger.info(f"Starting sequential generation for {fpath}...")
+                await worker(fpath, key)
+                if not queue.empty():
+                    item = await queue.get()
+                    yield f"data: {json.dumps(item)}\n\n"
             except Exception as e:
-                logger.error(f"Streaming error: {e}")
-                break
-                
-        if not gather_task.done():
-            await gather_task
+                logger.error(f"Streaming error on {fpath}: {e}")
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 

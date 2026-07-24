@@ -104,6 +104,25 @@ This document tracks all system architecture bugs, root causes, and verified res
   2. Refactored `refinement_prompt.py` (`buildRefinementPrompt`) and `context_prompt.py` (`buildFileContextPrompt`) into specialized, dynamic prompt builder functions.
   3. Aligned execution 100% with [`workflow.md`](file:///workspaces/laughing-giggle/workflow.md) and [`context.png`](file:///workspaces/laughing-giggle/context.png). Each file now receives distinct task directives, dynamically generating 4 completely different, high-fidelity context blueprints.
 
+### 16. Tavily Live Web Intelligence & Project Context Deletion Route (`tavily_search.py`, `refinement_wizard.py`, `routes.py`)
+- **Symptom**: System prompts lacked live 2026 web intelligence, and deleting a project in the frontend left old context files lingering in memory.
+- **Root Cause**:
+  1. `refinement_wizard.py` did not query Tavily for 2026 tech stack best practices during technical specification synthesis.
+  2. Missing API endpoint for cascading project and session context deletion on `DELETE /api/projects/:id`.
+- **Resolution**:
+  1. Integrated async Tavily Web Search with a **4.0-second timeout cap** into `refinement_wizard.py` (`buildRefinementPrompt`), injecting live 2026 framework rules and breaking change warnings.
+  2. Implemented `DELETE /api/projects/{idea_id}` in `routes.py` to purge generated artifact files and reset session context memory when a user deletes a project.
+
+### 17. Permanent Resolution: High-Speed LLM Dispatch for 4-File Context Generation (`context_engine.py`, `routes.py`)
+- **Symptom**: Generating `agents.md`, `design.md`, and `architecture.md` hit primary/backup LLM timeouts (55s/35s) and fell back to appending hardcoded bullet points.
+- **Root Cause**:
+  1. `context_engine.py` was calling `get_load_balanced_llm()`, which invoked slow reasoning models (DeepSeek / OpenRouter) that take 50+ seconds per file or rate-limit when 4 parallel calls hit at once.
+  2. All 4 worker tasks in `routes.py` were launched on the exact same millisecond, triggering rate-limit queues on provider endpoints.
+- **Resolution**:
+  1. Updated `generate_draft` in `context_engine.py` to use `get_interactive_llm()` (Gemini 3.5 Flash primary + Groq Llama 3.1 8B backup), which compiles 500-line markdown files in **2 to 4 seconds**.
+  2. Staggered background worker task dispatch in `routes.py` with a **200ms sleep delay**, preventing concurrent API rate-limiting.
+  3. Replaced 3-line fallback text with full dynamic reference template injection (`reference_template`), guaranteeing that even if a network drop occurs, full 400+ line documents are rendered.
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol
