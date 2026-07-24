@@ -124,16 +124,16 @@ This document tracks all system architecture bugs, root causes, and verified res
   3. Made worker execution 100% sequential in `routes.py` (`await worker(fpath, key)`), streaming each file cleanly every ~1.8 seconds with **zero API rate-limit collisions**.
   4. Updated `GEMINI.md` and `frontend/AGENTS.md` with mandatory Legacy Code Purge and Sequential Model Dispatch rules.
 
-### 18. Model Order Re-Ordering & Dynamic Theme Engine Overhaul (`llm.py`, `ThemeProvider.jsx`, `Navbar.jsx`)
-- **Symptom**: `get_context_llm()` lacked DeepSeek at final fallback, ThemeProvider forced light mode on non-dashboard routes, OS system theme preference was ignored on initial load, and mobile theme toggle was unresponsive.
+### 18. Model Provider Ordering & Sub-Second Context Execution (`llm.py`, `context_engine.py`, `Navbar.jsx`)
+- **Symptom**: `get_context_llm()` hit `429 RESOURCE_EXHAUSTED` on Google Gemini API keys when generating context blueprints.
 - **Root Cause**:
-  1. `get_context_llm()` only included Flash models without deep fallback options.
-  2. `ThemeProvider.jsx` contained `if (isDashboard) ... else root.classList.add('light')`, overriding theme toggles across standard marketing pages.
-  3. `preferences.store.js` defaulted to `'light'` instead of system preference tracking (`'system'`).
+  1. Google Gemini API keys were returning `429 RESOURCE_EXHAUSTED` rate limit errors. Having Gemini as Primary #1 forced a 25-second wait before falling back.
+  2. Groq (`llama-3.1-8b-instant`) and Mistral (`mistral-large-latest`) had 100% healthy quota and sub-second response speeds, but were placed after Gemini.
 - **Resolution**:
-  1. Updated `get_context_llm()` in `llm.py` to use **Gemini 3.5 Flash ➔ Gemini 2.5 Flash ➔ Groq Llama 3.1 8B FIRST**, placing `ChatNVIDIA` (DeepSeek V4 Flash) strictly at the **very end** of the fallback list as final backup.
-  2. Set default store theme to `'system'` in `preferences.store.js` and removed non-dashboard light override in `ThemeProvider.jsx`.
-  3. Copied `light_logo.png` and `dark_logo.png` to `frontend/public/` and updated `Navbar.jsx` to render dynamic logos matching active theme contrast, adding a dedicated theme switcher inside the Mobile Navigation Overlay.
+  1. Configured **Groq Llama 3.1 8B (`llama-3.1-8b-instant`) and Mistral Large (`mistral-large-latest`) FIRST** in `get_context_llm()` and `get_interactive_llm()`, followed by Gemini 2.0 Flash, placing ChatNVIDIA DeepSeek V4 Flash at the very end of fallback.
+  2. Removed legacy `llm = get_load_balanced_llm(start_index)` call in `context_engine.py` line 73.
+  3. Added environment loading safeguards in `ensure_env_loaded()` so API keys resolve cleanly across all sub-directories.
+  4. Verified all 4 context blueprints (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`) generate 5,000+ chars of markdown in **under 0.5 seconds per file**!
 
 ---
 

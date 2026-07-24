@@ -70,7 +70,6 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
     
     # Load Balancer: Rotate starting provider based on target file name to distribute concurrent calls
     start_index = FILE_LOAD_BALANCER_INDEX.get(target_name.lower(), 0)
-    llm = get_load_balanced_llm(start_index)
     
     # Read UI design intelligence files directly from knowledge/ui/
     ui_knowledge = ""
@@ -110,7 +109,7 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
 
     try:
         logger.info(f"Invoking dedicated high-speed context LLM chain for {target_name}...")
-        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=25.0)
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=55.0)
         raw = getattr(response, "content", response)
         if isinstance(raw, list):
             raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
@@ -119,7 +118,7 @@ async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
         logger.error(f"Primary high-speed generation failed for {target_name}: {e}. Retrying with secondary fast provider...")
         try:
             backup_llm = get_context_llm(start_index + 1)
-            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=15.0)
+            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=35.0)
             raw = getattr(response, "content", response)
             if isinstance(raw, list):
                 raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])

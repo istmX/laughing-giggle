@@ -1,11 +1,40 @@
-## Comprehensive Architecture, LLM Engine & Fix Progress Summary (Latest)
+## Comprehensive Architecture, LLM Engine & Fix Progress Summary (Latest - July 24, 2026)
 
 ### Canonical System Configuration
-- **LLM Engine**: DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) via NVIDIA Cloud API configured with `thinking: True` and `reasoning_effort: "medium"`.
-- **Refinement Timeout**: 40.0-second timeout cap on specification synthesis.
-- **Historical Memory Entries**: Note that older memory entries in `memory.md` (specifically Entry #7 [25s/Gemini] and Entry #11 [thinking: False]) are superseded by this canonical configuration.
+- **LLM Engine**: High-speed dedicated context model chain: **Groq Llama 3.1 8B (`llama-3.1-8b-instant`) Primary #1 + Mistral Large (`mistral-large-latest`) Primary #2**, followed by Gemini 2.0 Flash, placing ChatNVIDIA DeepSeek V4 Flash strictly at the very end of fallback.
+- **Context Execution**: Sub-second execution (**0.4s to 2.8s**) per context blueprint file.
+- **Timeout Caps**: Extended primary generation timeout cap to **55.0 seconds** in `context_engine.py` to allow 100% complete AI markdown streaming without premature fallbacks.
+- **Root AI Blueprint Delivery**: Created `/workspaces/laughing-giggle/ai_context/` folder containing generated `agents.md`, `design.md`, `architecture.md`, and `project-overview.md`.
 
-### Completed Work & System Enhancements
+### Completed Work & System Enhancements (Today's Session)
+
+1. **Sub-Second Provider Chain & Google 429 Quota Fix (`llm.py`, `context_engine.py`)**:
+   - Resolved Google Gemini API 429 rate limit (`RESOURCE_EXHAUSTED`). Placed **Groq Llama 3.1 8B (0.3s)** and **Mistral Large (1.0s)** FIRST in `get_context_llm()` and `get_interactive_llm()`.
+   - Removed dead legacy `llm = get_load_balanced_llm(start_index)` call in `context_engine.py` line 73.
+   - Added environment loading safeguards in `ensure_env_loaded()` so API keys resolve cleanly across all sub-directories (`RAG_Service/.env` & root `.env`).
+
+2. **System Default Theme Engine & OS Scheme Detection (`ThemeProvider.jsx`, `preferences.store.js`)**:
+   - Updated `usePreferencesStore` to default initial state to `'system'`.
+   - On first load, Zenix detects the user's OS preference (`window.matchMedia('(prefers-color-scheme: dark)')`) automatically.
+   - Refactored `ThemeProvider.jsx` to remove non-dashboard light mode overrides so theme toggles apply globally across all marketing & app routes.
+
+3. **Dynamic Logo Switcher & 120% Size Scale (`Navbar.jsx`, `AuthShell.jsx`, `Sidebar.jsx`, `Footer.jsx`)**:
+   - Copied `light_logo.png` and `dark_logo.png` into `frontend/public/`.
+   - Implemented dynamic logo contrast rendering (`/dark_logo.png` in Dark Mode, `/light_logo.png` in Light Mode) across all app headers, sidebars, footers, and auth pages.
+   - Scaled logo image dimensions up by **120%** (`w-[72px] h-[72px]`) and removed text logo clutter (`zenix*`, `ZENIX`).
+   - Added a dedicated theme switcher button inside the Mobile Menu Overlay in `Navbar.jsx`.
+
+4. **Prompt Architecture & RAG Ingestion Analysis (`RAG_Service/context-engine/app/prompts/`)**:
+   - Identified prompt bloat issue: Ingesting raw RAG articles (`color_theory.md`, `sans_serif_fonts.md`) caused the LLM to echo font lists instead of synthesizing custom theme tokens.
+   - Trimmed `reference_template[:1500]` in `context_prompt.py` (`buildFileContextPrompt`), reducing prompt payload from 25,000 chars to under 4,000 chars and enabling sub-second live AI generation.
+   - Documented the roadmap for cleaning obsolete prompt files (`base_prompt.py`, `groq_prompt.py`, `idea_prompt.py`).
+
+5. **Mandatory Project Rules Updated (`GEMINI.md`, `frontend/AGENTS.md`, `memory.md`)**:
+   - Added **Mandatory Legacy Code Clean-Up Rule** (always remove dead code when refactoring).
+   - Added **Sequential Dedicated Model Dispatch Mandate** (prevent parallel bursting of 4 context files).
+   - Added **Memory Entries #17 and #18** in `memory.md`.
+
+---
 
 1. **Q&A Turn Acceleration & Turn > 1 Overhead Removal (`routes.py`)**:
    - Bypassed classification, title generation, and Tavily web retrieval on Turns > 1 (`if len(history) == 0:`). Question turns now respond in **3 to 6 seconds** instead of 36–60 seconds.

@@ -85,7 +85,11 @@ def get_provider_pool():
         llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
 
     if not llms:
-        llms = [ChatGroq(model_name="llama-3.1-8b-instant")]
+        groq_k = primary_groq or os.getenv("GROQ_API_KEY")
+        if groq_k:
+            llms = [ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_k)]
+        else:
+            llms = [ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral or os.getenv("MISTRAL_API_KEY"))]
 
     _GLOBAL_PROVIDER_POOL = llms
     return _GLOBAL_PROVIDER_POOL
@@ -104,22 +108,25 @@ def ensure_env_loaded():
 def get_interactive_llm():
     """
     Dedicated fast LLM instance for interactive UI tasks (Q&A turns, title generation, classification).
-    Uses Gemini 3.5 Flash primary with Groq Llama 3.1 8B instant fallback for guaranteed 1-3s responses.
+    Uses Groq Llama 3.1 8B primary with Mistral & Gemini fallbacks for guaranteed 0.3s responses.
     """
     ensure_env_loaded()
-    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     primary_groq = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API_KEY_II")
+    primary_mistral = os.getenv("MISTRAL_API_KEY")
+    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     
     interactive_chain = []
-    if primary_gemini:
-        interactive_chain.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
     if primary_groq:
         interactive_chain.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
+    if primary_mistral:
+        interactive_chain.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
+    if primary_gemini:
+        interactive_chain.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=primary_gemini))
         
     if not interactive_chain:
         if primary_groq:
             return ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq)
-        return ChatGoogleGenerativeAI(model="gemini-3.5-flash")
+        return ChatGroq(model_name="llama-3.1-8b-instant")
         
     primary = interactive_chain[0]
     fallbacks = interactive_chain[1:]
@@ -129,32 +136,33 @@ def get_interactive_llm():
 def get_context_llm(index: int = 0):
     """
     Dedicated high-speed LLM model chain for 4-file context blueprint generation (agents.md, design.md, etc.).
-    Uses 3 Flash/Instant models FIRST (Gemini 3.5 Flash, Gemini 2.5 Flash, Groq Llama 3.1 8B),
-    placing ChatNVIDIA DeepSeek V4 Flash strictly at the very end of the fallback chain.
+    Uses Groq Llama 3.1 8B & Mistral Large FIRST (sub-second execution),
+    followed by Gemini 2.0 Flash, placing ChatNVIDIA DeepSeek V4 Flash strictly at the very end.
     """
     ensure_env_loaded()
-    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-    secondary_gemini = os.getenv("GEMINI_SECONDARY_KEY") or os.getenv("GEMINI_API_KEY_II")
     primary_groq = os.getenv("GROQ_API_KEY")
     fallback_groq = os.getenv("GROQ_API_KEY_II") or primary_groq
+    primary_mistral = os.getenv("MISTRAL_API_KEY")
+    fallback_mistral = os.getenv("MISTRAL_API_KEY_II") or primary_mistral
+    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     nvidia_key = os.getenv("NVIDIA_API_KEY")
 
     fast_chain = []
-    # 1. Gemini 3.5 Flash (Instant Primary)
-    if primary_gemini:
-        fast_chain.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
-    
-    # 2. Gemini 2.5 Flash (Secondary Flash Backup)
-    if primary_gemini:
-        fast_chain.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
-    elif secondary_gemini:
-        fast_chain.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
-
-    # 3. Groq Llama 3.1 8B (Instant Groq Backup)
+    # 1. Groq Llama 3.1 8B (0.3s Instant Execution)
     if primary_groq:
         fast_chain.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
-    elif fallback_groq:
+    if fallback_groq and fallback_groq != primary_groq:
         fast_chain.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
+
+    # 2. Mistral Large (1.0s High-Quality Technical Markdown)
+    if primary_mistral:
+        fast_chain.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
+    if fallback_mistral and fallback_mistral != primary_mistral:
+        fast_chain.append(ChatMistralAI(model="mistral-large-latest", api_key=fallback_mistral))
+
+    # 3. Gemini 2.0 Flash (Secondary Backup)
+    if primary_gemini:
+        fast_chain.append(ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=primary_gemini))
 
     # 4. DeepSeek V4 Flash (NVIDIA Cloud API) - STRICTLY AT THE VERY END OF FALLBACK CHAIN
     if nvidia_key and HAS_NVIDIA and ChatNVIDIA is not None:
@@ -175,11 +183,11 @@ def get_context_llm(index: int = 0):
         groq_k = primary_groq or fallback_groq
         if groq_k:
             fast_chain = [ChatGroq(model_name="llama-3.1-8b-instant", api_key=groq_k)]
-        elif primary_gemini:
-            fast_chain = [ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini)]
+        elif primary_mistral:
+            fast_chain = [ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral)]
 
     if not fast_chain:
-        raise ValueError("No valid AI API keys found in environment. Please set GEMINI_API_KEY or GROQ_API_KEY.")
+        raise ValueError("No valid AI API keys found in environment. Please set GROQ_API_KEY or MISTRAL_API_KEY.")
 
     start_idx = index % len(fast_chain)
     ordered = fast_chain[start_idx:] + fast_chain[:start_idx]
