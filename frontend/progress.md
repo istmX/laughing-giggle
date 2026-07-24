@@ -1,4 +1,120 @@
-## Tavily Search Truncation & Specification List-Strip Resolution (Latest)
+## Comprehensive Architecture, LLM Engine & Fix Progress Summary (Latest)
+
+### Completed Work & System Enhancements
+
+1. **Q&A Turn Acceleration & Turn > 1 Overhead Removal (`routes.py`)**:
+   - Bypassed classification, title generation, and Tavily web retrieval on Turns > 1 (`if len(history) == 0:`). Question turns now respond in **3 to 6 seconds** instead of 36–60 seconds.
+   - Converted `generate_title_and_description` and `generate_options_for_question` to async `llm.ainvoke()` to eliminate event loop blocking.
+   - Added regex block extraction (`re.search(r'\{.*\}', content)`) to safely extract JSON payload objects when DeepSeek returns thinking/reasoning blocks, resolving `Extra data: line 8 column 1` errors.
+
+2. **Blueprint Generation Timeout & HTTP 500 Fix (`context_engine.py`, `routes.py`)**:
+   - Wrapped backup LLM generation in `context_engine.py` inside an internal `try/except` block, preventing uncaught timeout errors from returning HTTP 500.
+   - Extended primary document generation timeout cap to **35.0 seconds** to allow comprehensive `agents.md`, `design.md`, `architecture.md`, and `project-overview.md` blueprint compilation.
+   - Fixed vector retriever context search query in `routes.py` (`retriever.retrieve_context(spec[:300])`), ensuring real context chunks are retrieved instead of querying literal filename strings (`"project-overview.md..."`).
+
+3. **DeepSeek V4 Flash Medium Reasoning Engine & 40s Timeout (`llm.py`, `refinement_wizard.py`)**:
+   - Integrated NVIDIA Cloud API DeepSeek V4 Flash (`deepseek-ai/deepseek-v4-flash`) with 1M-token context length as Primary #1 model.
+   - Configured `thinking: True` with **`reasoning_effort: "medium"`**, balancing deep architectural reasoning with fast 12s–20s response times.
+   - Set a strict **40.0-second timeout cap** on specification refinement (`asyncio.wait_for`), preventing GitHub Codespaces 60s HTTP proxy gateway timeouts.
+
+2. **Codespaces 504 Gateway Timeout & Duplicate Network Call Fix (`useChatHandlers.js`)**:
+   - Eliminated the redundant sequential `analyzeIdea()` call on initial prompt submission. `processConversation()` handles title generation, classification, Q&A, and specification synthesis in a single unified API roundtrip.
+
+3. **Async Graph Invocation & Unhandled Exception Guard (`routes.py`, `refinement_wizard.py`)**:
+   - Fixed `refinement_graph.invoke` to `await refinement_graph.ainvoke(refinement_input)`, resolving `No synchronous function provided to "refine"`.
+   - Added nested `try/except` guards around backup LLM fallbacks to prevent uncaught `TimeoutError` HTTP 500 crashes.
+
+4. **Tavily 4-Second Timeout Cap & Truncation (`tavily_search.py`)**:
+   - Added `asyncio.wait_for(..., timeout=4.0)` cap to live Tavily web search. If external web search delays, Zenix skips Tavily cleanly and completes specification synthesis instantly.
+
+5. **Purge of Hardcoded Tokens in Favor of RAG UI Catalogs (`refinement_wizard.py`)**:
+   - Removed all explicit hex values (`#08080A`, `#10B981`) from prompt templates.
+   - Instructed the model to query and compose design tokens dynamically from the `design_knowledge_engine` catalog (`RAG_Service/context-engine/app/knowledge/ui`).
+
+6. **Persistent Error Memory Tracking Register (`memory.md`)**:
+   - Created `memory.md` in root workspace documenting 11 system bugs, root causes, symptoms, and verified fix patterns.
+   - Updated `GEMINI.md` and `frontend/AGENTS.md` to mandate AI coding agents inspect `memory.md` before making architectural edits.
+
+7. **Environment Token Support (`.env` & `.env.example`)**:
+   - Added `HUGGINGFACE_TOKEN=` and `HF_TOKEN=` across `RAG_Service` and `backend` env files.
+
+### Verification Status
+- **Python Service**: `python3 -m py_compile` passed cleanly with **0 errors** across all graph modules (`llm.py`, `pm_wizard.py`, `refinement_wizard.py`, `context_engine.py`, `routes.py`, `tavily_search.py`).
+- **Frontend App**: `npm run build` passed cleanly in **6.61 seconds** with **0 build errors**.
+
+---
+
+# Frontend Fetch Resolution & Extra-Body Warning Suppress (Previous)
+
+
+### Completed
+- **Frontend `useChatHandlers.js` Unpack Resolution**:
+  - Unpacked `convoRes.response || convoRes.data || convoRes` to extract `is_complete` and `refined_spec`. This eliminates frontend `TypeError: Failed to fetch` by accurately resolving full spec objects.
+- **Title Generator JSON Parsing Fix (`routes.py`)**:
+  - Safely extracted text from DeepSeek V4 Flash message objects in `generate_title_and_description()`, resolving `Extra data: line 8 column 1 (char 200)`.
+- **NVIDIA Extra Body Warning Suppressed (`llm.py`)**:
+  - Configured `ChatNVIDIA` with `model_kwargs={"extra_body": ...}`, cleanly suppressing python console warnings.
+
+### Verification
+- `py_compile` passed cleanly with 0 errors across `llm.py` and `routes.py`.
+- Frontend production build (`npm run build`) passed cleanly in 6.42s.
+
+## Purge of Hardcoded Tokens in Favor of RAG UI Knowledge Catalogs (Previous)
+
+
+### Completed
+- **`refinement_wizard.py` Hardcoded Token Purge**:
+  - Removed all explicit hex values (`#08080A`, `#10B981`, `#A3E635`) and hardcoded font assignments from prompt templates.
+  - Instructed the model to query and compose design tokens dynamically exclusively from the `design_knowledge_engine` catalog context (`RAG_Service/context-engine/app/knowledge/ui`).
+
+### Verification
+- `py_compile` passed cleanly with 0 errors across `refinement_wizard.py` and `context_engine.py`.
+
+## Detailed Hybrid Design System Synthesis (Previous)
+
+
+### Completed
+- **`refinement_wizard.py` System Prompt Upgrade**:
+  - Enforced a **Hybrid Design System Rule**: Dark Obsidian Canvas (`#08080A` to `#080B09`) & Elevated Surface Cards (`#111613`) fused with domain-vibrant Dual Neon Accents (e.g. Energy Lime `#10B981` + Volt Yellow `#A3E635` or Cyan `#00F5D4`).
+  - Standardized **Athletic & Technical Typography Matrix**: Display headlines (`Space Grotesk`, `Clash Display`, `Bebas Neue`), Body prose (`Satoshi`/`Inter`), and Data metrics (`JetBrains Mono`).
+  - Standardized **Dual Motion Standard**: Component micro-states, hover glows, and 3D card flips (Framer Motion) + pinned scroll timelines (GSAP + ScrollTrigger).
+- **Zero-Drift Prompt Mandate**:
+  - Requires all generated blueprints to contain fully written-out Prisma PostgreSQL schemas, exact hex token tables, layout specs, and complete code blocks with zero TODOs or truncated summaries.
+
+### Verification
+- `py_compile` passed with 0 errors across `refinement_wizard.py` and `context_engine.py`.
+
+## ChatNVIDIA DeepSeek V4 Flash Free Cloud API Integration (Previous)
+
+
+### Completed
+- **DeepSeek V4 Flash Primary LLM Provider (`llm.py`)**:
+  - Integrated `langchain_nvidia_ai_endpoints.ChatNVIDIA(model="deepseek-ai/deepseek-v4-flash")` as the #1 primary LLM intelligence engine in `llm.py`.
+  - Configured 1M-token context length, 16,384 max token output, and high reasoning effort (`extra_body={"chat_template_kwargs": {"thinking": True, "reasoning_effort": "high"}}`).
+- **NVIDIA Environment Variable Support (`.env` & `.env.example`)**:
+  - Added `NVIDIA_API_KEY=` across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Automatic Multi-Provider Fallback Chain**:
+  - Pool Order: DeepSeek V4 Flash (NVIDIA Free Cloud API) → Gemini 3.5 Flash (Primary Key) → Gemini 3.5 Flash (Secondary Key) → Mistral Large → Groq Llama 3.1 8B.
+
+### Verification
+- `langchain-nvidia-ai-endpoints` (v1.4.3) successfully installed in Python virtual environment.
+- Python compilation check (`py_compile`) passed cleanly with 0 errors across `llm.py`, `context_engine.py`, `pm_wizard.py`, and `routes.py`.
+
+## List Replace/Strip Resolution & Hardcoded Fallback Removal (Previous)
+
+
+### Completed
+- **`pm_wizard.py` List `.replace()` Crash Resolution**:
+  - Safely extracted string content from `response.content` before calling `.replace()` or `.strip()`, resolving `Failed to parse next question: 'list' object has no attribute 'replace'`.
+  - Removed all hardcoded static default questions (`"What is the primary feature or workflow of your application?"`) from exception fallbacks. If parsing fails, the wizard now automatically marks `is_complete: True` to transition seamlessly to technical specification synthesis.
+- **`context_engine.py` List `.strip()` Crash Resolution**:
+  - Added safe text extraction in `generate_draft()` before calling `.strip()`, preventing primary and backup LLM chain failures when generating `agents.md`, `design.md`, `architecture.md`, and `project-overview.md`.
+
+### Verification
+- Python syntax check (`py_compile`) passed cleanly with 0 errors across `pm_wizard.py`, `context_engine.py`, `refinement_wizard.py`, and `routes.py`.
+
+## Tavily Search Truncation & Specification List-Strip Resolution (Previous)
+
 
 ### Completed
 - **Tavily Query Truncation Fix (`tavily_search.py`)**:

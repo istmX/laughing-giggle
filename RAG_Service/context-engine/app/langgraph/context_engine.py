@@ -162,12 +162,23 @@ CRITICAL FORMATTING:
     try:
         logger.info(f"Invoking multi-provider LLM chain for {target_name}...")
         response = await asyncio.wait_for(llm.ainvoke(messages), timeout=35.0)
-        content = response.content.strip()
+        raw = getattr(response, "content", response)
+        if isinstance(raw, list):
+            raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+        content = str(raw).strip()
     except Exception as e:
         logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with backup provider...")
-        backup_llm = get_load_balanced_llm(start_index + 1)
-        response = await backup_llm.ainvoke(messages)
-        content = response.content.strip()
+        try:
+            backup_llm = get_load_balanced_llm(start_index + 1)
+            response = await asyncio.wait_for(backup_llm.ainvoke(messages), timeout=25.0)
+            raw = getattr(response, "content", response)
+            if isinstance(raw, list):
+                raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+            content = str(raw).strip()
+        except Exception as backup_err:
+            logger.error(f"Backup generation also failed for {target_name}: {backup_err}. Using baseline draft template.")
+            content = f"# {target_name.replace('.md', '').title()}\n\n## Overview\n{refined_spec}\n\n## Specification Details\n{state.get('formatted_context', '')}"
+
 
     
     # Clean markdown wrapping if present
@@ -184,6 +195,7 @@ CRITICAL FORMATTING:
         "is_approved": True,
         "verification_feedback": ""
     }
+
 
 async def verify_draft(state: ArtifactState) -> Dict[str, Any]:
     """Verification pass checking completeness and quality of the draft."""

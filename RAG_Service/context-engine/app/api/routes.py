@@ -43,6 +43,17 @@ class IdeaResponse(BaseModel):
     project_description: Optional[str] = None
 
 def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
+    import re
+    try:
+        words = idea_prompt.strip().split()
+        title = " ".join(words[:3]).title() if words else "Zenix Project"
+        return {"project_title": title, "project_description": idea_prompt}
+    except Exception as e:
+        logger.error(f"Failed to generate title/description: {e}")
+        return {"project_title": "Zenix Project", "project_description": idea_prompt}
+
+async def generate_title_and_description_async(idea_prompt: str) -> Dict[str, str]:
+    import re
     try:
         llm = get_fallback_llm()
         prompt = (
@@ -53,13 +64,15 @@ def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
             "{\"project_title\": \"Sleek Name\", \"project_description\": \"One sentence description.\"}"
         )
         from langchain_core.messages import SystemMessage
-        res = llm.invoke([SystemMessage(content=prompt)])
+        res = await llm.ainvoke([SystemMessage(content=prompt)])
         import json
-        content = res.content.replace('```json', '').replace('```', '').strip()
-        start = content.find('{')
-        end = content.rfind('}')
-        if start != -1 and end != -1:
-            content = content[start:end+1]
+        raw = getattr(res, "content", res)
+        if isinstance(raw, list):
+            raw = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw])
+        content = str(raw).replace('```json', '').replace('```', '').strip()
+        match = re.search(r'\{.*\}', content, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
         return json.loads(content)
     except Exception as e:
         logger.error(f"Failed to generate title/description: {e}")
@@ -68,7 +81,9 @@ def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
         return {"project_title": title, "project_description": idea_prompt}
 
 
-def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
+
+async def generate_options_for_question_async(question: str, idea_prompt: str) -> List[str]:
+    import re
     try:
         llm = get_fallback_llm()
         prompt = (
@@ -86,20 +101,23 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
             "5. NO EXPLANATIONS: Output ONLY a raw JSON array containing strings ending with 'Let Zenix decide'. Do not use markdown blocks.\n"
         )
         from langchain_core.messages import SystemMessage
-        res = llm.invoke([SystemMessage(content=prompt)])
+        res = await llm.ainvoke([SystemMessage(content=prompt)])
         import json
         content = res.content.replace('```json', '').replace('```', '').strip()
-        start = content.find('[')
-        end = content.rfind(']')
-        if start != -1 and end != -1:
-            content = content[start:end+1]
-        opts = json.loads(content)
+        match = re.search(r'\[.*\]', content, re.DOTALL)
+        if match:
+            opts = json.loads(match.group(0))
+        else:
+            opts = json.loads(content)
         if "Let Zenix decide" not in opts:
             opts.append("Let Zenix decide")
         return opts
     except Exception as e:
         logger.error(f"Failed to generate options: {e}")
         return ["Modern Standard Stack", "Alternative Stack", "Let Zenix decide"]
+
+def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
+    return ["Modern Standard Stack", "Alternative Stack", "Let Zenix decide"]
 
 
 
@@ -122,30 +140,66 @@ async def process_initial_idea(request: IdeaRequest):
     logger.info(f"Processing new idea request: {actual_idea_id} | History length: {len(history)} | Questions length: {len(questions)}")
     
     try:
-        # Step 0: Classify if the prompt is actually a software idea/description
-        classification_prompt = (
-            "ROLE:\n"
-            "You are the Zenix Project Classification Engine. Your sole responsibility is to analyze user input "
-            "and determine if it describes a software application, website, feature, automation script, database system, "
-            "or technical software idea that the user wants to design, build, or implement.\n\n"
-            "CLASSIFICATION CRITERIA:\n"
-            "- Classify as TRUE if the input contains a request or description of software products, features, pages, "
-            "code generation, algorithms, or technical design concepts (e.g., 'a dating site', 'add login buttons', "
-            "'python script to parse excel', 'kanban board app'). Even vague software ideas like 'an app to track habits' "
-            "or 'a simple landing page' are TRUE.\n"
-            "- Classify as FALSE if the input consists of general greetings ('hi', 'hello', 'good morning', 'hey', 'yo', 'what\'s up'), "
-            "casual banter, off-topic questions ('how are you', 'tell me a joke', 'write an essay about space', 'how to bake cake'), "
-            "general search requests, or statements completely unrelated to software development.\n\n"
-            "EVALUATION TARGET:\n"
-            f"User Input: \"{actual_prompt}\"\n\n"
-            "OUTPUT FORMAT:\n"
-            "Respond with exactly one word: either TRUE or FALSE. Do not include markdown code blocks, explanation, "
-            "whitespace, punctuation, or any other characters."
-        )
-        from langchain_core.messages import HumanMessage, SystemMessage
-        llm = get_fallback_llm()
-        classification_res = llm.invoke([SystemMessage(content=classification_prompt)])
-        classification = classification_res.content.strip().upper()
+        # Optimization: Only run Classification, Title Generation, and RAG Retrieval on Turn 1 (history length == 0)
+        if len(history) == 0:
+            classification_prompt = (
+                "ROLE:\n"
+                "You are the Zenix Project Classification Engine. Your sole responsibility is to analyze user input "
+                "and determine if it describes a software application, website, feature, automation script, database system, "
+                "or technical software idea that the user wants to design, build, or implement.\n\n"
+                "CLASSIFICATION CRITERIA:\n"
+                "- Classify as TRUE if the input contains a request or description of software products, features, pages, "
+                "code generation, algorithms, or technical design concepts (e.g., 'a dating site', 'add login buttons', "
+                "'python script to parse excel', 'kanban board app'). Even vague software ideas like 'an app to track habits' "
+                "or 'a simple landing page' are TRUE.\n"
+                "- Classify as FALSE if the input consists of general greetings ('hi', 'hello', 'good morning', 'hey', 'yo', 'what\'s up'), "
+                "casual banter, off-topic questions ('how are you', 'tell me a joke', 'write an essay about space', 'how to bake cake'), "
+                "general search requests, or statements completely unrelated to software development.\n\n"
+                "EVALUATION TARGET:\n"
+                f"User Input: \"{actual_prompt}\"\n\n"
+                "OUTPUT FORMAT:\n"
+                "Respond with exactly one word: either TRUE or FALSE. Do not include markdown code blocks, explanation, "
+                "whitespace, punctuation, or any other characters."
+            )
+            from langchain_core.messages import HumanMessage, SystemMessage
+            llm = get_fallback_llm()
+
+            async def run_classification():
+                try:
+                    res = await llm.ainvoke([SystemMessage(content=classification_prompt)])
+                    raw = getattr(res, "content", res)
+                    return str(raw).strip().upper()
+                except Exception:
+                    return "TRUE"
+
+            async def run_title_gen():
+                try:
+                    return await generate_title_and_description_async(actual_prompt)
+                except Exception:
+                    return {"project_title": "Zenix Project", "project_description": actual_prompt}
+
+            async def run_retrieval():
+                try:
+                    docs = retriever.retrieve_context(actual_prompt)
+                    fmt = retriever.format_context(docs)
+                    tav = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
+                    if tav:
+                        fmt += "\n\n" + tav
+                    return fmt
+                except Exception:
+                    return ""
+
+            classification, meta, formatted_context = await asyncio.gather(
+                run_classification(),
+                run_title_gen(),
+                run_retrieval()
+            )
+        else:
+            # Fast-forward path for turns > 1
+            classification = "TRUE"
+            words = actual_prompt.strip().split()
+            meta = {"project_title": " ".join(words[:3]).title() if words else "Zenix Project", "project_description": actual_prompt}
+            formatted_context = ""
         
         logger.info(f"Prompt classification result for '{actual_prompt}': {classification}")
 
@@ -161,18 +215,6 @@ async def process_initial_idea(request: IdeaRequest):
                 ]
             )
 
-        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant + Tavily Web Search
-
-        retrieved_docs = retriever.retrieve_context(actual_prompt)
-        formatted_context = retriever.format_context(retrieved_docs)
-
-        # Ingest live Tavily Web Intelligence if available
-        tavily_context = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
-        if tavily_context:
-            formatted_context += "\n\n" + tavily_context
-
-
-        meta = generate_title_and_description(actual_prompt)
         p_title = meta.get("project_title", "Zenix Project")
         p_desc = meta.get("project_description", actual_prompt)
 
@@ -183,6 +225,7 @@ async def process_initial_idea(request: IdeaRequest):
             "history": history
         }
         wizard_result = pm_wizard_graph.invoke(graph_input)
+
         
         is_complete = wizard_result.get("is_complete", False)
         next_q = wizard_result.get("next_question", "")
@@ -210,8 +253,9 @@ async def process_initial_idea(request: IdeaRequest):
                 "questions_and_answers": history,
                 "refined_spec": ""
             }
-            refinement_result = refinement_graph.invoke(refinement_input)
+            refinement_result = await refinement_graph.ainvoke(refinement_input)
             logger.success(f"Successfully generated refined specification: {refinement_result['refined_spec'][:100]}...")
+
             return IdeaResponse(
                 idea_id=actual_idea_id,
                 status="success",
@@ -288,7 +332,8 @@ async def generate_artifact(request: ArtifactRequest):
 
     
     try:
-        retrieved_docs = retriever.retrieve_context(fpath)
+        query_text = spec[:300] if spec else fpath
+        retrieved_docs = retriever.retrieve_context(query_text)
         rag_context = retriever.format_context(retrieved_docs)
         
         # Inject design taste files for design.md

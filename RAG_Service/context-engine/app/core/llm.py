@@ -17,11 +17,25 @@ from loguru import logger
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
 load_dotenv(env_path)
 
+try:
+    from langchain_nvidia_ai_endpoints import ChatNVIDIA
+    HAS_NVIDIA = True
+except ImportError:
+    ChatNVIDIA = None
+    HAS_NVIDIA = False
+
+_GLOBAL_PROVIDER_POOL = None
+
 def get_provider_pool():
     """
-    Returns an ordered list of LLM instances for primary usage and worst-case fallback.
-    Prioritizes Gemini 3.5 Flash via GOOGLE_GEMINI_API_KEY & GEMINI_SECONDARY_KEY.
+    Returns a cached global list of LLM instances for primary usage and worst-case fallback.
+    Initializes instances once to eliminate repeated connection overhead.
     """
+    global _GLOBAL_PROVIDER_POOL
+    if _GLOBAL_PROVIDER_POOL is not None and len(_GLOBAL_PROVIDER_POOL) > 0:
+        return _GLOBAL_PROVIDER_POOL
+
+    nvidia_key = os.getenv("NVIDIA_API_KEY")
     primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     secondary_gemini = os.getenv("GEMINI_SECONDARY_KEY") or os.getenv("GEMINI_API_KEY_II")
     
@@ -33,7 +47,26 @@ def get_provider_pool():
 
     llms = []
 
-    # 1. Primary Gemini 3.5 Flash Model (Top Choice)
+    # 1. Primary Model: NVIDIA Free Cloud API Endpoint - DeepSeek V4 Flash (Instant Direct Mode: 2-3s)
+    if nvidia_key and HAS_NVIDIA and ChatNVIDIA is not None:
+        try:
+            llms.append(
+                ChatNVIDIA(
+                    model="deepseek-ai/deepseek-v4-flash",
+                    api_key=nvidia_key,
+                    temperature=0.7,
+                    max_tokens=16384,
+                    model_kwargs={"extra_body": {"chat_template_kwargs": {"thinking": False}}}
+                )
+            )
+            logger.info("DeepSeek V4 Flash (NVIDIA Free Cloud API) initialized as Primary LLM in Instant Mode (thinking=False).")
+        except Exception as e:
+            logger.warning(f"Failed to initialize ChatNVIDIA DeepSeek V4 Flash: {e}")
+
+
+
+
+    # 2. Secondary Gemini 3.5 Flash Model Fallback
     if primary_gemini:
         try:
             llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
@@ -41,14 +74,17 @@ def get_provider_pool():
             logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
             llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
 
-    # 2. Secondary Gemini API Key Fallback
+
+
+    # 3. Secondary Gemini API Key Fallback
     if secondary_gemini and secondary_gemini != primary_gemini:
         try:
             llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini))
         except Exception as e:
             llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
 
-    # 3. Mistral & Groq Fallbacks
+
+    # 4. Mistral & Groq Fallbacks
     if primary_mistral:
         llms.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
     if primary_groq:
@@ -60,9 +96,12 @@ def get_provider_pool():
         llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
 
     if not llms:
-        return [ChatGroq(model_name="llama-3.1-8b-instant")]
+        llms = [ChatGroq(model_name="llama-3.1-8b-instant")]
 
-    return llms
+    _GLOBAL_PROVIDER_POOL = llms
+    return _GLOBAL_PROVIDER_POOL
+
+
 
 
 def get_load_balanced_llm(index: int = 0):

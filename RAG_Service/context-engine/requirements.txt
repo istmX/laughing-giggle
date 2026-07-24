@@ -21,4 +21,5 @@ langchain-groq
 langchain-mistralai
 langchain-google-genai
 langchain-qdrant
+langchain-nvidia-ai-endpoints
 tavily-python

@@ -125,25 +125,29 @@ export function useChatHandlers({
         const ideaRes = await createIdea(token, { prompt: text })
         const newIdeaId = ideaRes.data?._id || ideaRes._id
         setIdeaId(newIdeaId)
-        const analyzeRes = await analyzeIdea(token, newIdeaId)
-        const parsedAnalysis = parseAIResponse(analyzeRes)
 
         const convoRes = await processConversation(token, newIdeaId, { history: [] })
-        const parsedConvo = parseAIResponse(convoRes)
-        const title = parsedConvo.project_title || parsedAnalysis.project_title || 'Untitled Project'
-        const description = parsedConvo.project_description || parsedAnalysis.project_description || text
+        const rawConvo = convoRes?.response || convoRes?.data || convoRes
+        const parsedConvo = parseAIResponse(rawConvo)
+        const isComplete = rawConvo?.is_complete ?? parsedConvo.is_complete ?? false
+        const refinedSpec = rawConvo?.refined_spec || parsedConvo.refined_spec || ''
+
+        const title = rawConvo?.project_title || parsedConvo.project_title || 'Untitled Project'
+        const description = rawConvo?.project_description || parsedConvo.project_description || text
         setProject(prev => ({ ...prev, project_title: title, project_description: description }))
 
 
-        if (parsedConvo.is_complete) {
-          setSpecContent(parsedConvo.refined_spec)
+
+        if (isComplete) {
+          setSpecContent(refinedSpec)
           setShowSpecReady(true)
           await syncStateToBackend(
-            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: null, refinedSpec: parsedConvo.refined_spec, isComplete: true },
+            { ideaId: newIdeaId, prompt: text, history: [], currentQuestion: null, refinedSpec: refinedSpec, isComplete: true },
             { project_title: title, project_description: description }
           )
           handleGenerateArtifacts(newIdeaId)
         } else {
+
           const opts = Array.isArray(parsedConvo.options) ? parsedConvo.options : []
           const qMsg = {
             id: `q-${Date.now()}`,
