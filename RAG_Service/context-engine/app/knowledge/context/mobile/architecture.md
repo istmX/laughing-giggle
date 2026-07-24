@@ -1,57 +1,249 @@
-# Zenix Architectural Specification — Mobile App Blueprint (Expo & React Native)
+# ScribbleBox Mobile Architectural Specification
 
-This document defines the architecture, folder structure, and data layer for ScribbleBox Mobile.
+## Architecture Goals
+
+The ScribbleBox Mobile architecture should be:
+
+- local-first & offline resilient
+- responsive (smooth 60fps gesture feedback)
+- maintainable
+- understandable
+- type-safe and performant
+
+Avoid unnecessary complexity.
 
 ---
 
-# 1. Architecture Goals & Mobile System Overview
+# System Overview
 
-Mobile architecture should be:
-- local-first & offline resilient
-- responsive (60fps gesture feedback)
-- maintainable and type-safe
-
-```text
 User Mobile Touch Event
        ↓
-Expo Router Screens (Tabs / Stacks)
+Expo Router Screens (Tabs / Stacks with NativeWind Utility Styling)
        ↓
-Client State (Zustand) & Local File System (Expo FileSystem / AsyncStorage)
+Zustand Client Stores & Local Storage Layer (Expo FileSystem + AsyncStorage)
        ↓
-Backend API Sync (Express / Node.js + MongoDB)
-```
+Backend Sync API (Express / Node.js + MongoDB / PostgreSQL)
+       ↓
+ScribbleBox Memory Journal Archive
 
 ---
 
-# 2. Folder Structure Architecture
+# Storage Layers
 
-```text
-app/                            # Expo Router Screen Directory
-├── _layout.tsx                 # Root Stack Navigator & Providers
-├── (tabs)/                     # Tab Navigator Group
-│   ├── _layout.tsx             # Bottom Tab Bar Configuration
-│   ├── index.tsx               # Home / Timeline Screen
-│   ├── collections.tsx         # Memory Collections Screen
-│   └── settings.tsx            # Settings Screen
-├── modal.tsx                   # Screenshot Context Modal
-└── memory/[id].tsx             # Memory Detail View
+## Layer 1
+
+Image File Storage
+
+Technology:
+
+Expo FileSystem
+
+Stores:
+
+- screenshot files on local device storage
+
+Never store raw image binary strings in AsyncStorage.
+
+---
+
+## Layer 2
+
+Metadata Storage
+
+Technology:
+
+AsyncStorage
+
+Stores:
+
+- workspace collections
+- screenshot notes
+- app settings
+- pinned memory states
+- screenshot metadata timestamps
+
+---
+
+## Layer 3
+
+Application Client State
+
+Technology:
+
+Zustand
+
+Stores:
+
+- active collection
+- UI drawer / modal state
+- selected screenshot
+- global search filters
+
+---
+
+# Folder Structure
+
+app/
+
 src/
-├── components/                 # Reusable Mobile UI Elements
-│   ├── Button.tsx              # Native touchable button
-│   ├── Card.tsx                # Memory surface card
-│   └── Header.tsx              # Mobile header component
-├── features/                   # Feature-based logic
-│   ├── collections/
-│   ├── screenshots/
-│   └── timeline/
-├── hooks/                      # Custom Mobile Hooks
-└── stores/                     # Client Zustand Stores
-```
+
+components/
+
+features/
+
+hooks/
+
+services/
+
+stores/
+
+types/
+
+utils/
+
+assets/
 
 ---
 
-# 3. Mobile Layout Standards & Insets
+# Feature Structure
 
-- **Screen Insets**: Top inset `insets.top + 12px`, Bottom inset `insets.bottom + 16px`.
-- **Corner Radii**: Standard `rounded-2xl` (16px) for memory cards, `rounded-full` for badges.
-- **Side Margins**: `px-4` (16px) standard padding.
+features/
+
+home/
+
+collections/
+
+timeline/
+
+settings/
+
+screenshots/
+
+Each feature owns:
+
+- components
+- hooks
+- services
+- types
+
+Avoid giant shared folders.
+
+---
+
+# Mobile Layout Boundaries & Safe Areas
+
+- **Top Inset**: `insets.top + 12px` (Accounts for iPhone notch / dynamic island & Android status bar).
+- **Bottom Inset**: `insets.bottom + 16px` (Accounts for home indicator bar).
+- **Side Padding**: `px-4` (16px) standard phone margin, `px-6` (24px) tablet margin.
+- **Corner Radii**: `rounded-2xl` (16px) for memory cards, `rounded-full` for pill badges.
+- **Touch Target Boundary**: Minimum height `44px` (`min-h-[44px]`), minimum width `44px` (`min-w-[44px]`).
+
+---
+
+# State Management Rules
+
+Use Zustand.
+
+Do NOT use:
+
+- Redux
+- MobX
+- Recoil
+
+Keep stores focused (<150 lines).
+
+Avoid monolithic stores.
+
+---
+
+# Async Data
+
+Use TanStack Query.
+
+Responsibilities:
+
+- caching
+- invalidation
+- async network workflows
+
+Do not misuse Zustand for server-state patterns.
+
+---
+
+# Authentication
+
+Provider:
+
+Clerk (`@clerk/clerk-expo`)
+
+Methods:
+
+- Google
+- Apple
+- Email
+
+Authentication must remain isolated from application client state.
+
+---
+
+# Navigation Map & Expo Router Layout
+
+Root Stack (`app/_layout.tsx`):
+
+├── (tabs)/ (`app/(tabs)/_layout.tsx` - 64px height bottom tab bar)
+│   ├── index (Home / Timeline Tab)
+│   ├── collections (Memory Collections Tab)
+│   └── settings (Settings Tab)
+├── modal (Slide-up Context Note Modal)
+└── memory/[id] (Memory Detail View Stack)
+
+---
+
+# Screenshot Import Flow
+
+User taps "Import Screenshot" button
+       ↓
+Native media picker opens
+       ↓
+File binary copied into Expo FileSystem (`FileSystem.documentDirectory`)
+       ↓
+Screenshot metadata object created (UUID, timestamp, collection ID)
+       ↓
+Metadata stored in AsyncStorage & Zustand store updated
+       ↓
+UI feeds & timeline automatically refresh
+
+---
+
+# Backup Export Flow
+
+Export screenshot metadata JSON
+       ↓
+Export screenshot binary files from Expo FileSystem
+       ↓
+Generate compressed zip package
+       ↓
+User selects mobile share sheet destination
+
+---
+
+# Performance & Native Optimization Rules
+
+Use:
+
+- Virtualized lists (`FlatList` or `FlashList`) for memory feeds
+- `React Native Reanimated` for 60fps gesture animations
+- Image caching and lazy-loading
+
+Avoid:
+
+- large inline style objects
+- JS thread blocking operations
+- unnecessary component re-renders
+
+---
+
+# Offline-First Boundaries
+
+The app supports complete offline access for local screenshot import, context note creation, and memory timeline viewing.
+Network access is required ONLY for authentication token refresh, cloud backups, and AI context generation APIs.
