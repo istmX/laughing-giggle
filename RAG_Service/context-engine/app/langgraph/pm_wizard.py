@@ -27,7 +27,25 @@ def generate_questions(state: WizardState) -> Dict[str, Any]:
     idea = state['idea_prompt']
     history = state.get('history', [])
     
+    # Check for Smart Fast-Forward: If user selected "Let Zenix decide" 2 times in a row, finish wizard immediately
+    consecutive_zenix = 0
+    for qa in reversed(history):
+        ans = qa.get('answer', '').strip().lower()
+        if 'let zenix decide' in ans:
+            consecutive_zenix += 1
+        else:
+            break
+            
+    if consecutive_zenix >= 2:
+        logger.info(f"Smart Fast-Forward triggered ({consecutive_zenix} consecutive 'Let Zenix decide' answers). Completing wizard.")
+        return {
+            "next_question": "",
+            "options": [],
+            "is_complete": True
+        }
+
     qa_formatted = "\n".join([f"Q: {qa.get('question', '')}\nA: {qa.get('answer', '')}" for qa in history])
+
     
     system_prompt = f"""You are Zenix, a Senior Staff Technical Architect and Product Manager.
 Analyze the user's software idea: "{idea}"

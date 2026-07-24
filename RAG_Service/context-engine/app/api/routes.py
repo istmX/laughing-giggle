@@ -16,7 +16,10 @@ from app.langgraph.task_engine import task_engine_graph
 from app.langgraph.documentation_engine import documentation_engine_graph
 from app.core.llm import get_fallback_llm
 
+from app.rag.retriever.tavily_search import tavily_service
+
 router = APIRouter(prefix="/api/orchestrate", tags=["orchestration"])
+
 retriever = ZenixRetriever(k=5)
 
 class IdeaRequest(BaseModel):
@@ -158,9 +161,16 @@ async def process_initial_idea(request: IdeaRequest):
                 ]
             )
 
-        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant
+        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant + Tavily Web Search
+
         retrieved_docs = retriever.retrieve_context(actual_prompt)
         formatted_context = retriever.format_context(retrieved_docs)
+
+        # Ingest live Tavily Web Intelligence if available
+        tavily_context = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
+        if tavily_context:
+            formatted_context += "\n\n" + tavily_context
+
 
         meta = generate_title_and_description(actual_prompt)
         p_title = meta.get("project_title", "Zenix Project")
