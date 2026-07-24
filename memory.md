@@ -57,9 +57,15 @@ This document tracks all system architecture bugs, root causes, and verified res
 - **Root Cause**: When `refine_spec` in `refinement_wizard.py` was made async (to support `asyncio.wait_for` timeouts), `routes.py` line 212 was still calling `refinement_graph.invoke(...)` synchronously instead of `await refinement_graph.ainvoke(...)`.
 - **Resolution**: Updated `routes.py` line 212 to `await refinement_graph.ainvoke(refinement_input)` and fixed `tavily_search.py` synchronous helper wrapper.
 
+### 9. NameError `asyncio` & `get_load_balanced_llm` Unbound Imports (`refinement_wizard.py`)
+- **Symptom**: Python backend threw `WARNING: Primary refinement LLM timed out or failed (name 'asyncio' is not defined). Retrying with backup provider...` followed by `ERROR: Failed to process idea: name 'get_load_balanced_llm' is not defined`.
+- **Root Cause**: When adding exception timeout handling to `refinement_wizard.py`, `import asyncio` and `get_load_balanced_llm` were referenced in the `try/except` block without being declared at the top of the file.
+- **Resolution**: Added `import asyncio` and imported `get_load_balanced_llm` at top of `refinement_wizard.py`.
+
 ---
 
 ## 🔒 Agent Guidelines & Verification Protocol
+
 
 
 
