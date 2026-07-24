@@ -116,16 +116,16 @@ export function NewProjectPage() {
       <div className="w-full max-w-7xl mx-auto pt-24 pb-32 px-4 sm:px-0 flex flex-col lg:flex-row gap-10">
         
         {/* Main Content (Left Grid) */}
-        <div className="flex-1 flex flex-col gap-6">
+        <div className="grow w-full min-w-0 flex flex-col gap-6">
           <div className="border-b border-hairline pb-6">
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft">WORKSPACE INITIALIZATION</span>
             <h1 className="mt-2 text-[32px] md:text-[40px] font-[var(--font-weight-540)] tracking-[-0.04em] text-ink">Choose setup source</h1>
-            <p className="mt-2 text-[14px] text-ink-muted leading-relaxed max-w-xl">
+            <p className="mt-2 text-[14px] text-ink-muted leading-relaxed max-w-[60ch]">
               Select how you want to build and structure this project's developer context. Click <strong className="font-[var(--font-weight-540)] text-ink">Chat with Zenix AI</strong> to begin drafting your project.
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 mt-2">
+          <div className="grid gap-4 md:grid-cols-2 mt-2 w-full">
             {cards.map((card) => {
               const Icon = card.icon
               return (

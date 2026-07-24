@@ -1,30 +1,107 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 import json
+import asyncio
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from loguru import logger
 from app.rag.retriever.retriever import ZenixRetriever
 from app.langgraph.pm_wizard import pm_wizard_graph
-from app.langgraph.context_engine import context_engine_graph
+from app.langgraph.context_engine import context_engine_graph, get_template_for_target
+
 from app.langgraph.refinement_wizard import refinement_graph
 from app.langgraph.playground import playground_graph
 from app.langgraph.developer import developer_graph
 from app.langgraph.task_engine import task_engine_graph
 from app.langgraph.documentation_engine import documentation_engine_graph
+from app.core.llm import get_fallback_llm
+
+from app.rag.retriever.tavily_search import tavily_service
 
 router = APIRouter(prefix="/api/orchestrate", tags=["orchestration"])
+
 retriever = ZenixRetriever(k=5)
 
 class IdeaRequest(BaseModel):
-    idea_id: str
-    prompt: str
+    idea_id: Optional[str] = None
+    ideaId: Optional[str] = None
+    prompt: Optional[str] = None
+    idea: Optional[str] = None
+    history: Optional[List[Dict[str, str]]] = None
+    questions: Optional[List[str]] = None
 
 class IdeaResponse(BaseModel):
     idea_id: str
     status: str
-    rag_context: str
-    generated_questions: List[str]
+    rag_context: str = ""
+    generated_questions: Optional[List[str]] = None
+    is_complete: bool = False
+    next_question: Optional[str] = None
+    options: Optional[List[str]] = None
+    refined_spec: Optional[str] = None
+    project_title: Optional[str] = None
+    project_description: Optional[str] = None
+
+def generate_title_and_description(idea_prompt: str) -> Dict[str, str]:
+    try:
+        llm = get_fallback_llm()
+        prompt = (
+            f"You are Zenix Project Naming Engine.\n"
+            f"User idea: \"{idea_prompt}\"\n\n"
+            "Task: Generate a sleek 2-4 word project title and a 1-sentence developer summary.\n"
+            "Output JSON format ONLY:\n"
+            "{\"project_title\": \"Sleek Name\", \"project_description\": \"One sentence description.\"}"
+        )
+        from langchain_core.messages import SystemMessage
+        res = llm.invoke([SystemMessage(content=prompt)])
+        import json
+        content = res.content.replace('```json', '').replace('```', '').strip()
+        start = content.find('{')
+        end = content.rfind('}')
+        if start != -1 and end != -1:
+            content = content[start:end+1]
+        return json.loads(content)
+    except Exception as e:
+        logger.error(f"Failed to generate title/description: {e}")
+        words = idea_prompt.strip().split()
+        title = " ".join(words[:3]).title() if words else "Zenix Project"
+        return {"project_title": title, "project_description": idea_prompt}
+
+
+def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
+    try:
+        llm = get_fallback_llm()
+        prompt = (
+            f"You are Zenix, a premier Software Product Architect and Technical Product Manager (created by developer 'Istm').\n"
+            f"User's software idea: \"{idea_prompt}\"\n"
+            f"Clarifying question: \"{question}\"\n\n"
+            "GUIDELINES FOR OPTIONS:\n"
+            "1. DYNAMIC INTELLIGENCE & RELIABILITY:\n"
+            "   - Dynamically recommend modern, reliable, developer-friendly, and easy-to-use tech stacks matching the exact question and project intent.\n"
+            "   - Do NOT hardcode outdated or irrelevant stacks. Analyze what is standard, reliable, and modern for the domain.\n"
+            "   - If the idea is a Portfolio, Visual Site, or Showcase: DO NOT invent backend database choices! Focus on visual themes, skills, and layout features.\n"
+            "2. ENSURE DIVERSITY: Each option should represent a distinct, meaningful choice.\n"
+            "3. CONCISE: Keep each option under 8 words so they fit neatly on UI buttons. Avoid emojis.\n"
+            "4. ALWAYS INCLUDE 'Let Zenix decide' AS THE FINAL OPTION.\n"
+            "5. NO EXPLANATIONS: Output ONLY a raw JSON array containing strings ending with 'Let Zenix decide'. Do not use markdown blocks.\n"
+        )
+        from langchain_core.messages import SystemMessage
+        res = llm.invoke([SystemMessage(content=prompt)])
+        import json
+        content = res.content.replace('```json', '').replace('```', '').strip()
+        start = content.find('[')
+        end = content.rfind(']')
+        if start != -1 and end != -1:
+            content = content[start:end+1]
+        opts = json.loads(content)
+        if "Let Zenix decide" not in opts:
+            opts.append("Let Zenix decide")
+        return opts
+    except Exception as e:
+        logger.error(f"Failed to generate options: {e}")
+        return ["Modern Standard Stack", "Alternative Stack", "Let Zenix decide"]
+
+
 
 @router.post("/idea", response_model=IdeaResponse)
 async def process_initial_idea(request: IdeaRequest):
@@ -32,37 +109,126 @@ async def process_initial_idea(request: IdeaRequest):
     Receives the raw user idea from the Node.js backend, runs it through the Qdrant 
     RAG system, and returns the formatted context ready to be fed into the PM Wizard.
     """
-    logger.info(f"Processing new idea request: {request.idea_id}")
+    actual_idea_id = request.idea_id or request.ideaId
+    actual_prompt = request.prompt or request.idea
+    history = request.history or []
+    questions = request.questions or []
+
+    if not actual_idea_id:
+        raise HTTPException(status_code=400, detail="idea_id or ideaId is required")
+    if not actual_prompt:
+        raise HTTPException(status_code=400, detail="prompt or idea is required")
+
+    logger.info(f"Processing new idea request: {actual_idea_id} | History length: {len(history)} | Questions length: {len(questions)}")
     
-    if not request.prompt:
-        raise HTTPException(status_code=400, detail="Prompt cannot be empty")
-        
     try:
-        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant
-        retrieved_docs = retriever.retrieve_context(request.prompt)
-        
-        # Step 2: Format the raw LangChain documents into a single string for the LLM
-        formatted_context = retriever.format_context(retrieved_docs)
-        
-        # Step 3: Run the PM Wizard LangGraph to generate clarification questions
-        graph_input = {
-            "idea_prompt": request.prompt,
-            "rag_context": formatted_context,
-            "messages": []
-        }
-        graph_result = pm_wizard_graph.invoke(graph_input)
-        
-        logger.success(f"Successfully processed idea {request.idea_id} through RAG and LangGraph")
-        
-        return IdeaResponse(
-            idea_id=request.idea_id,
-            status="success",
-            rag_context=formatted_context,
-            generated_questions=graph_result["generated_questions"]
+        # Step 0: Classify if the prompt is actually a software idea/description
+        classification_prompt = (
+            "ROLE:\n"
+            "You are the Zenix Project Classification Engine. Your sole responsibility is to analyze user input "
+            "and determine if it describes a software application, website, feature, automation script, database system, "
+            "or technical software idea that the user wants to design, build, or implement.\n\n"
+            "CLASSIFICATION CRITERIA:\n"
+            "- Classify as TRUE if the input contains a request or description of software products, features, pages, "
+            "code generation, algorithms, or technical design concepts (e.g., 'a dating site', 'add login buttons', "
+            "'python script to parse excel', 'kanban board app'). Even vague software ideas like 'an app to track habits' "
+            "or 'a simple landing page' are TRUE.\n"
+            "- Classify as FALSE if the input consists of general greetings ('hi', 'hello', 'good morning', 'hey', 'yo', 'what\'s up'), "
+            "casual banter, off-topic questions ('how are you', 'tell me a joke', 'write an essay about space', 'how to bake cake'), "
+            "general search requests, or statements completely unrelated to software development.\n\n"
+            "EVALUATION TARGET:\n"
+            f"User Input: \"{actual_prompt}\"\n\n"
+            "OUTPUT FORMAT:\n"
+            "Respond with exactly one word: either TRUE or FALSE. Do not include markdown code blocks, explanation, "
+            "whitespace, punctuation, or any other characters."
         )
+        from langchain_core.messages import HumanMessage, SystemMessage
+        llm = get_fallback_llm()
+        classification_res = llm.invoke([SystemMessage(content=classification_prompt)])
+        classification = classification_res.content.strip().upper()
         
+        logger.info(f"Prompt classification result for '{actual_prompt}': {classification}")
+
+        if "FALSE" in classification:
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="greeting",
+                rag_context="",
+                generated_questions=[
+                    "Hi there! Zenix is designed to build complete developer context files for your software. "
+                    "Tell me about the app or feature you want to create (e.g., 'A real-time Kanban board with offline sync') "
+                    "to get started!"
+                ]
+            )
+
+        # Step 1: Retrieve relevant UI/UX and architectural chunks from Qdrant + Tavily Web Search
+
+        retrieved_docs = retriever.retrieve_context(actual_prompt)
+        formatted_context = retriever.format_context(retrieved_docs)
+
+        # Ingest live Tavily Web Intelligence if available
+        tavily_context = tavily_service.search_web(f"2026 tech stack best practices for {actual_prompt}")
+        if tavily_context:
+            formatted_context += "\n\n" + tavily_context
+
+
+        meta = generate_title_and_description(actual_prompt)
+        p_title = meta.get("project_title", "Zenix Project")
+        p_desc = meta.get("project_description", actual_prompt)
+
+        # Reactive Turn-by-Turn Wizard Invocation
+        graph_input = {
+            "idea_prompt": actual_prompt,
+            "rag_context": formatted_context,
+            "history": history
+        }
+        wizard_result = pm_wizard_graph.invoke(graph_input)
+        
+        is_complete = wizard_result.get("is_complete", False)
+        next_q = wizard_result.get("next_question", "")
+        options = wizard_result.get("options", ["Let Zenix decide"])
+
+        if not is_complete and len(history) < 10:
+            logger.info(f"Serving reactive turn question (History len {len(history)}): '{next_q}' with options {options}")
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="success",
+                rag_context=formatted_context,
+                generated_questions=[next_q],
+                is_complete=False,
+                next_question=next_q,
+                options=options,
+                refined_spec=None,
+                project_title=p_title,
+                project_description=p_desc
+            )
+        else:
+            # Case: Wizard marked complete or max 10 questions reached -> synthesize specification
+            logger.info("Wizard complete or max questions reached. Invoking refinement_graph to synthesize final specification.")
+            refinement_input = {
+                "idea_prompt": actual_prompt,
+                "questions_and_answers": history,
+                "refined_spec": ""
+            }
+            refinement_result = refinement_graph.invoke(refinement_input)
+            logger.success(f"Successfully generated refined specification: {refinement_result['refined_spec'][:100]}...")
+            return IdeaResponse(
+                idea_id=actual_idea_id,
+                status="success",
+                rag_context=formatted_context,
+                generated_questions=[],
+                is_complete=True,
+                next_question=None,
+                options=None,
+                refined_spec=refinement_result["refined_spec"],
+                project_title=p_title,
+                project_description=p_desc
+            )
+
+
+            
     except Exception as e:
-        logger.error(f"Failed to process idea through RAG: {e}")
+        logger.error(f"Failed to process idea: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class ArtifactRequest(BaseModel):
@@ -111,23 +277,15 @@ async def generate_artifact(request: ArtifactRequest):
         
     logger.info(f"Generating artifact {fpath} for project {pid}")
     
-    # Load the template from knowledge/context/
-    template_content = ""
-    try:
-        base_name = os.path.basename(fpath).lower()
-        if base_name == "readme.md":
-            base_name = "project-overview.md"
-            
-        template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / base_name
-        if template_path.exists():
-            template_content = template_path.read_text(encoding="utf-8")
-            logger.info(f"Loaded template from: {template_path}")
-        else:
-            logger.warning(f"Template not found at: {template_path}")
-    except Exception as e:
-        logger.error(f"Error loading template: {e}")
+    # Load template dynamically based on domain category (portfolio/mobile/saas)
+    template_content = get_template_for_target(fpath, spec)
+    if template_content:
+        logger.info(f"Loaded category template for {fpath}")
+    else:
+        logger.warning(f"No category template found for {fpath}")
         
     ref_template = request.reference_template or template_content
+
     
     try:
         retrieved_docs = retriever.retrieve_context(fpath)
@@ -158,7 +316,7 @@ async def generate_artifact(request: ArtifactRequest):
             "is_approved": False
         }
         
-        result = context_engine_graph.invoke(graph_input)
+        result = await context_engine_graph.ainvoke(graph_input)
         draft = result.get("draft_content", "")
         iters = result.get("iterations", 0)
         
@@ -185,7 +343,7 @@ async def generate_project_context(request: ContextRequest):
     from pathlib import Path
     
     spec = request.refinedSpec or ""
-    logger.info(f"Generating bulk context using spec: {spec[:100]}...")
+    logger.info(f"Generating bulk context in parallel using spec: {spec[:100]}...")
     
     files_to_generate = [
         ("agents.md", "agents"),
@@ -194,9 +352,9 @@ async def generate_project_context(request: ContextRequest):
         ("project-overview.md", "project_overview")
     ]
     
-    result_dict = {}
+    queue = asyncio.Queue()
     
-    for fpath, key in files_to_generate:
+    async def worker(fpath, key):
         try:
             template_content = ""
             template_path = Path(__file__).resolve().parent.parent / "knowledge" / "context" / fpath
@@ -230,13 +388,39 @@ async def generate_project_context(request: ContextRequest):
                 "is_approved": False
             }
             
-            graph_res = context_engine_graph.invoke(graph_input)
-            result_dict[key] = graph_res.get("draft_content", "")
+            graph_res = await context_engine_graph.ainvoke(graph_input)
+            draft = graph_res.get("draft_content", "")
+            
+            await queue.put({"key": key, "content": draft, "status": "completed"})
+            return key, draft
         except Exception as e:
             logger.error(f"Failed to generate context file {fpath}: {e}")
-            result_dict[key] = f"Failed to generate: {e}"
-            
-    return result_dict
+            err_msg = f"Failed to generate: {e}"
+            await queue.put({"key": key, "content": err_msg, "status": "failed"})
+            return key, err_msg
+
+    async def event_generator():
+        tasks = [asyncio.create_task(worker(fpath, key)) for fpath, key in files_to_generate]
+        gather_task = asyncio.create_task(asyncio.gather(*tasks, return_exceptions=True))
+        
+        completed_count = 0
+        while completed_count < len(files_to_generate):
+            try:
+                item = await asyncio.wait_for(queue.get(), timeout=1.0)
+                yield f"data: {json.dumps(item)}\n\n"
+                completed_count += 1
+            except asyncio.TimeoutError:
+                if gather_task.done() and queue.empty():
+                    break
+                continue
+            except Exception as e:
+                logger.error(f"Streaming error: {e}")
+                break
+                
+        if not gather_task.done():
+            await gather_task
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 class TaskRequest(BaseModel):
     project_id: str = None

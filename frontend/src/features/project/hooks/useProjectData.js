@@ -20,6 +20,7 @@ export function useProjectData(token, projectId) {
   useEffect(() => {
     let isMounted = true
     const loadProject = async () => {
+      useChatStore.getState().clearMessages()
       try {
         const res = await getProject(token, projectId)
         if (res.data && isMounted) {

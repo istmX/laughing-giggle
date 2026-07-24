@@ -19,10 +19,21 @@ export const processConversation = async (req, res, next) => {
     });
 
     try {
+      // Find or create Brief to save the AI-generated questions and answers
+      let brief = await Brief.findOne({ idea: ideaId, owner: userId });
+      if (!brief) {
+        brief = new Brief({ owner: userId, idea: ideaId });
+      }
+
+      // Extract existing question strings
+      const questionsList = brief.questions?.length > 0 
+        ? brief.questions.map(q => q.question) 
+        : [];
+
       const response = await fetch(process.env.PYTHON_SERVICE_URL + "/api/orchestrate/idea", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: ideaDoc.prompt, history, ideaId, userId })
+        body: JSON.stringify({ idea: ideaDoc.prompt, history, ideaId, userId, questions: questionsList })
       });
       
       if (!response.ok) throw new Error("Failed to fetch from python service");
@@ -34,29 +45,36 @@ export const processConversation = async (req, res, next) => {
       generation.metadata = { fallbackUsed: result.fallbackUsed, fallbackProvider: result.fallbackProvider };
       await generation.save();
 
-      // Find or create Brief to save the AI-generated questions and answers
-      let brief = await Brief.findOne({ idea: ideaId, owner: userId });
-      if (!brief) {
-        brief = new Brief({ owner: userId, idea: ideaId });
+      // If Python generated questions for the first time, save them
+      if (result.generated_questions?.length > 0 && (!brief.questions || brief.questions.length === 0)) {
+        brief.questions = result.generated_questions.map((q, idx) => ({
+          key: `q${idx + 1}`,
+          question: q,
+          status: 'pending',
+          answer: null,
+          createdAt: new Date(),
+        }));
       }
 
-      // Map Q&A history to answers object
-      brief.answers = (history || []).reduce((acc, item) => {
-        if (item.question && item.answer !== undefined) {
-          acc[item.question] = item.answer;
-        }
-        return acc;
-      }, {});
+      // Map Q&A history to answers object and update statuses
+      if (history && history.length > 0) {
+        brief.answers = history.reduce((acc, item) => {
+          if (item.question && item.answer !== undefined) {
+            acc[item.question] = item.answer;
+          }
+          return acc;
+        }, {});
 
-      // Map Q&A history to questions array matching schema
-      brief.questions = (history || []).map((item, index) => ({
-        key: `q${index + 1}`,
-        question: item.question,
-        status: 'answered',
-        answer: item.answer,
-        answeredAt: new Date(),
-        createdAt: new Date(),
-      }));
+        // Update the status and answer for answered questions
+        history.forEach(item => {
+          const match = brief.questions.find(q => q.question === item.question);
+          if (match) {
+            match.status = 'answered';
+            match.answer = item.answer;
+            match.answeredAt = new Date();
+          }
+        });
+      }
 
       // Extract metadata fields from the conversation text
       const fullText = (history || []).map(h => `${h.question} ${h.answer}`).join(" ").toLowerCase();

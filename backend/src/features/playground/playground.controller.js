@@ -105,11 +105,11 @@ export const addMessage = async (req, res, next) => {
     const session = await playgroundService.updatePreview(
       req.params.sessionId,
       req.user.id,
-      '', // HTML preview removed, using JSON tokens
+      finalState.designDoc || '',
       finalState.designTokens
     );
 
-    res.status(200).json({ session });
+    res.status(200).json({ session, designDoc: finalState.designDoc });
   } catch (error) {
     next(new AppError(error.message, 500));
   }

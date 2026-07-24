@@ -3,72 +3,126 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.core.llm import get_fallback_llm
+from app.prompts.question_prompt import buildQuestionPrompt
 import os
+import json
 from loguru import logger
 
 # --- State Definition ---
 class WizardState(TypedDict):
     idea_prompt: str
     rag_context: str
-    generated_questions: List[str]
-    messages: Annotated[list, "messages"]
+    history: List[Dict[str, str]]
+    next_question: str
+    options: List[str]
+    is_complete: bool
 
-# --- Node Functions ---
 def generate_questions(state: WizardState) -> Dict[str, Any]:
     """
-    Takes the user's idea and the retrieved RAG context, and uses the LLM
-    to generate highly specific clarification questions.
+    Evaluates original idea + conversation history to generate the SINGLE next best question dynamically.
     """
-    logger.info("Running PM Wizard Graph: Generating Questions")
+    logger.info("Running PM Wizard Graph: Generating Next Reactive Question")
     
     llm = get_fallback_llm()
+    idea = state['idea_prompt']
+    history = state.get('history', [])
     
-    system_prompt = f"""You are Zenix, an expert Software Product Manager.
-Your job is to read the user's initial software idea and ask 3 highly specific, technical, 
-and design-oriented clarification questions.
+    # Check for Smart Fast-Forward: If user selected "Let Zenix decide" 2 times in a row, finish wizard immediately
+    consecutive_zenix = 0
+    for qa in reversed(history):
+        ans = qa.get('answer', '').strip().lower()
+        if 'let zenix decide' in ans:
+            consecutive_zenix += 1
+        else:
+            break
+            
+    if consecutive_zenix >= 2:
+        logger.info(f"Smart Fast-Forward triggered ({consecutive_zenix} consecutive 'Let Zenix decide' answers). Completing wizard.")
+        return {
+            "next_question": "",
+            "options": [],
+            "is_complete": True
+        }
 
-Use the following Zenix architectural rules and UI knowledge to inform your questions:
-{state['rag_context']}
+    qa_formatted = "\n".join([f"Q: {qa.get('question', '')}\nA: {qa.get('answer', '')}" for qa in history])
 
-CRITICAL INSTRUCTIONS:
-- Do not ask generic questions like "Who is the target audience?".
-- Ask about specific technology stacks, color choices, or layout decisions referenced in the UI knowledge.
-- Output ONLY a raw JSON array of strings containing the questions. Do not use markdown wrapping.
-Example:
-["Question 1?", "Question 2?", "Question 3?"]
+    
+    system_prompt = f"""You are Zenix, a Senior Staff Technical Architect and Product Manager.
+Analyze the user's software idea: "{idea}"
+
+CURRENT CONVERSATION HISTORY SO FAR:
+{qa_formatted if qa_formatted else "(No questions answered yet. This is the first turn.)"}
+
+REACTIVE EVALUATION RULES:
+1. DETAILED PROMPT HANDLING (INSTANT FAST-FORWARD):
+   - Read the user's initial prompt. If the prompt is ALREADY highly detailed (specifying core workflows, tech stack preferences, target audience, or explicit feature requirements), set `"is_complete": true` IMMEDIATELY on Turn 1! Do NOT force extra questions if the user has already given full instructions.
+
+2. CONTEXT AWARENESS & NO REPETITION:
+   - If the prompt is short or missing key details, ask ONE high-value clarifying question relevant to their domain.
+   - DO NOT repeat questions about features already explained in the prompt.
+
+3. DOMAIN BOUNDARIES:
+   - Full-Stack SaaS / Platform: Require authentication (Email/Password + Google OAuth) and database preferences.
+   - Portfolio / Visual Showcase: Strictly BAN database/auth questions! Ask about visual theme, skills, or hero text.
+
+4. DECIDE NEXT TURN:
+   - If essential requirements are clear (or prompt was detailed), set `"is_complete": true`.
+   - Otherwise, generate ONE clear, focused next question with 2 relevant choice options + "Let Zenix decide".
+
+
+OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
+{{
+  "is_complete": false,
+  "next_question": "string (the single clear next question)",
+  "options": ["Option 1", "Option 2", "Let Zenix decide"]
+}}
 """
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Here is my idea: {state['idea_prompt']}")
+        HumanMessage(content="Evaluate history and return the next question or completion state.")
     ]
     
     response = llm.invoke(messages)
     
-    # Parse the response into a list
-    import json
     try:
         raw_text = response.content.replace('```json', '').replace('```', '').strip()
-        questions = json.loads(raw_text)
-    except Exception as e:
-        logger.error(f"Failed to parse questions: {e}")
-        questions = ["Could you provide more details about your preferred tech stack?",
-                     "What kind of visual theme are you imagining for this?",
-                     "Are there any specific features you need built first?"]
+        start_idx = raw_text.find('{')
+        end_idx = raw_text.rfind('}')
+        if start_idx != -1 and end_idx != -1:
+            raw_text = raw_text[start_idx:end_idx+1]
+        data = json.loads(raw_text)
+        
+        is_complete = data.get("is_complete", False)
+        next_q = data.get("next_question", "What specific user customization features would you like to prioritize?")
+        opts = data.get("options", ["Custom Preferences", "Standard Defaults", "Let Zenix decide"])
 
-    return {"generated_questions": questions}
+        
+        if "Let Zenix decide" not in opts:
+            opts.append("Let Zenix decide")
+            
+        return {
+            "next_question": next_q,
+            "options": opts,
+            "is_complete": is_complete
+        }
+    except Exception as e:
+        logger.error(f"Failed to parse next question: {e}")
+        return {
+            "next_question": "What is the primary feature or workflow of your application?",
+            "options": ["Core Application Workflow", "Custom Feature Set", "Let Zenix decide"],
+            "is_complete": False
+        }
+
+
 
 # --- Graph Construction ---
 def build_pm_wizard_graph() -> StateGraph:
     """Builds and compiles the PM Wizard LangGraph."""
     graph_builder = StateGraph(WizardState)
-    
     graph_builder.add_node("generate_questions", generate_questions)
-    
     graph_builder.add_edge(START, "generate_questions")
     graph_builder.add_edge("generate_questions", END)
-    
     return graph_builder.compile()
 
-# Instantiate the compiled graph so it can be imported
 pm_wizard_graph = build_pm_wizard_graph()

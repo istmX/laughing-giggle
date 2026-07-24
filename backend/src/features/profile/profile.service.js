@@ -33,7 +33,7 @@ export const profileService = {
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: filtered },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     ).select('-password');
     if (!user) throw new Error('User not found');
     return user;
@@ -44,8 +44,9 @@ export const profileService = {
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: { avatar: pfpUrl } },
-      { new: true }
+      { returnDocument: 'after' }
     ).select('-password');
+
     if (!user) throw new Error('User not found');
     return user;
   },

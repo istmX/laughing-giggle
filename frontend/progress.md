@@ -1,4 +1,158 @@
-## Project Onboarding Cockpit & Chat Refinement (Latest)
+## Tavily Search Truncation & Specification List-Strip Resolution (Latest)
+
+### Completed
+- **Tavily Query Truncation Fix (`tavily_search.py`)**:
+  - Implemented automatic query cleaning and safe 250-character truncation (`clean_query[:250].rsplit(' ', 1)[0]`) inside `search_web()`.
+  - Solved Tavily API 400-character query limit errors on long detailed user prompts (preventing search failures when processing >400 character prompts).
+- **Specification List-to-String Parsing Fix (`refinement_wizard.py`)**:
+  - Resolved `'list' object has no attribute 'strip'` server crash inside `refine_spec`.
+  - Added safe type-checking and list-to-string joining (`"\n".join(...)`) so that structured message lists or content arrays returned by Gemini/fallback models are safely converted into clean Markdown strings before returning.
+- **Python Service Backend Connection (`backend/.env`)**:
+  - Configured `PYTHON_SERVICE_URL=http://127.0.0.1:8000` in `backend/.env` for local microservice communication.
+
+### Verification
+- Python compilation check (`py_compile`) passed cleanly with 0 errors across all context engine modules (`tavily_search.py`, `refinement_wizard.py`, `pm_wizard.py`, `context_engine.py`, `question_prompt.py`, `routes.py`).
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 5.69s with 0 errors.
+
+## Detailed Prompt Fast-Forwarding & Chat Handler Null-Safety Fix (Previous)
+
+
+### Completed
+- **Detailed Prompt Instant Fast-Forwarding (`pm_wizard.py`)**:
+  - Implemented automatic detailed prompt evaluation in `pm_wizard.py`.
+  - When the user submits a comprehensive prompt (specifying core workflows, target audience, tech stack, or explicit feature requirements), Zenix detects that requirements are met and sets `is_complete: true` immediately on Turn 1, bypassing unnecessary Q&A turns to begin blueprint compilation instantly.
+- **Frontend Chat Handler Null-Safety Fix (`useChatHandlers.js`)**:
+  - Resolved `Failed to process message` runtime exception inside `frontend/src/features/project/hooks/useChatHandlers.js`.
+  - Upgraded `parseAIResponse` with strict null/undefined checks (`if (!res) return {}`) and non-string type guards, preventing unhandled parsing crashes when receiving empty or non-standard API responses.
+- **System Audit Documentation (`problem.md`)**:
+  - Created persistent `problem.md` artifact documenting the 4 key context engine flaws (SaaS misclassification bug, hardcoded tokens/fonts, single-engine motion bias, and missing audit tracking directives).
+
+### Verification
+- Python compilation check (`py_compile`) passed cleanly with 0 errors across `pm_wizard.py`, `llm.py`, `routes.py`, `context_engine.py`, and `refinement_wizard.py`.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 12.49s with 0 errors.
+
+## Gemini 3.5 Flash Model Integration & Prompt Hardcoding Purge (Previous)
+
+
+### Completed
+- **Gemini 3.5 Flash Integration (`llm.py`)**:
+  - Configured `ChatGoogleGenerativeAI(model="gemini-3.5-flash")` as the primary intelligence model for Zenix Context Analysis, Q&A evaluation, and 4-file blueprint generation.
+  - Added support for dual Gemini API keys (`GOOGLE_GEMINI_API_KEY` and `GEMINI_SECONDARY_KEY`) across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Total Purge of Hardcoded Feature & Token Strings**:
+  - Removed all hardcoded hex color codes (`#08080A`, `#6366F1`) and fixed font faces (`Bebas Neue`) from system prompts.
+  - Purged specific hardcoded feature string examples (`flashcards`, `notes`, `decks`, `quizzes`) from system prompts in `question_prompt.py`, `pm_wizard.py`, `refinement_wizard.py`, and `context_engine.py`. Prompts now use pure behavioral rules and dynamic domain reasoning.
+- **Full-Stack SaaS Mandatory Rules**:
+  - System prompts now automatically mandate **User Authentication** (Email/Password + Google OAuth) and **Database Schemas** (PostgreSQL/Supabase ORM or MongoDB) for all SaaS platforms.
+- **Dual Motion Engine Standard**:
+  - System prompts now specify **Framer Motion (`framer-motion`)** for interactive component micro-states & 3D card flips, and **GSAP + ScrollTrigger** for scroll-linked page reveals & hero timelines.
+- **`problem.md` + `progress.md` Directives in `agents.md`**:
+  - System prompts in `context_engine.py` instruct generated `agents.md` files to require AI coding agents to create and maintain both `progress.md` (task log) and `problem.md` (system flaw analysis & architecture fix tracking).
+
+### Verification
+- Python syntax check (`py_compile`) passed cleanly with 0 errors across `llm.py`, `question_prompt.py`, `pm_wizard.py`, `refinement_wizard.py`, and `context_engine.py`.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 16.00s with 0 errors.
+
+## Environment & Package Fixes, Mongoose Warning Resolution & Live Tech Stack Sync (Previous)
+
+
+### Completed
+- **Tavily AI Package Installation (`requirements.txt`)**:
+  - Installed `tavily-python` (v0.7.26) inside Python virtual environment `RAG_Service/context-engine/venv/`.
+  - Added `tavily-python` dependency to `requirements.txt`.
+  - Wrapped `tavily` imports inside `tavily_search.py` with safe `try/except ImportError` blocks so app never crashes if the package is missing.
+- **Environment Variable Synchronization (`.env` & `.env.example`)**:
+  - Added `TAVILY_API_KEY=` environment variables across `RAG_Service/.env`, `RAG_Service/.env.example`, `backend/.env`, and `backend/.env.example`.
+- **Mongoose Deprecation Warning Fix**:
+  - Replaced all deprecated `{ new: true }` options in `findOneAndUpdate()` and `findByIdAndUpdate()` with `{ returnDocument: 'after' }` across Node.js backend files (`artifact.service.js`, `playground.service.js`, `admin.service.js`, `profile.service.js`), resolving terminal warning spam.
+- **Live Tech Stack Documentation Section (`agents.md`)**:
+  - Added strict prompt directives in `context_engine.py` requiring every generated `agents.md` context file to include a dedicated **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"** section detailing breaking framework changes, recommended API patterns, and deprecation warnings.
+
+### Verification
+- Python `py_compile` on `tavily_search.py`, `pm_wizard.py`, `routes.py`, `context_engine.py`, `refinement_wizard.py` passed with 0 errors.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 5.22 seconds with 0 errors.
+
+## Reactive Q&A Engine, Tavily AI Live Search & Context Engine Architecture Refactor (Previous)
+
+
+### Completed
+- **Smart 2-Turn Fast-Forward Q&A (`pm_wizard.py`)**:
+  - Upgraded `generate_questions()` in `pm_wizard.py` to evaluate the user's answers reactively on every turn.
+  - Implemented automatic fast-forward detection (`consecutive_zenix >= 2`): if the user selects `"Let Zenix decide"` two times in a row, the wizard automatically completes (`is_complete: True`), avoiding endless redundant question loops.
+- **Tavily AI Real-Time Web Search Integration (`tavily_search.py`)**:
+  - Created `app/rag/retriever/tavily_search.py` wrapper around the Tavily AI Python SDK (`tavily-python`).
+  - Integrated `tavily_service.search_web()` into `routes.py` and `context_engine.py` to dynamically fetch live 2026 tech stack practices, official framework documentation (Next.js 15, React 19, Supabase SSR, Tailwind v4), and open-source UI motion components (**Aceternity UI, Magic UI, Animata, GSAP**).
+- **Dynamic UI Palette Intelligence (No Hardcoded Palette Constraints)**:
+  - Updated `context_engine.py` and system prompts to assemble design tokens dynamically from `app/knowledge/ui/` catalogs, Tavily web search results, or user custom selections—eliminating hardcoded palette constraints.
+- **Master Specification Synthesis (`refinement_wizard.py`)**:
+  - Updated `refine_spec()` prompt rules to honor custom user selections 100% when specified, or dynamically synthesize optimal design system specs when *"Let Zenix decide"* is chosen.
+- **Redis Caching Strategy Architecture (`plan.md`)**:
+  - Documented 0ms Redis caching architecture for Qdrant vector searches, Tavily web search snippets, and context blueprint drafts to prevent rate limiting and accelerate context generation.
+
+### Verification
+- Python compilation check (`py_compile`) on `tavily_search.py`, `pm_wizard.py`, `routes.py`, `context_engine.py`, and `refinement_wizard.py` passed with 0 errors.
+- Production Vite build (`npm run build`) in `frontend` completed cleanly in 5.15 seconds with 0 errors.
+
+## Playground Live Sandbox Global Layout & Impeccable Polish (Previous)
+
+
+### Completed
+- **Single Container Width Standardization**: Enforced a single `max-w-5xl mx-auto w-full px-6` container across the header, marquee loop, hero, color swatches, typography scale, components, color blocks, pricing, and footer sections inside `LiveSandbox.jsx` and its sub-components.
+- **Navbar Elevation & Alignment**: Increased top navbar height (`py-4 backdrop-blur-xl`), increased link typography size (`text-sm font-medium`), aligned contact/get started CTA buttons, and bound the trust marquee loop inside the container width padding.
+- **Hero Hierarchy & Spacing Refactor**: Expanded hero body copy container width (`max-w-2xl w-full min-w-0`), increased paragraph text size (`text-base md:text-lg opacity-85 leading-relaxed`), increased spacing above CTAs, and reduced empty dead space below.
+- **Typography Scale & Contrast Overhaul**: Increased section label contrast (`text-xs font-semibold tracking-widest uppercase opacity-85`), set body copy size to 15–16px (`text-base leading-relaxed`), added generous padding to typography scale matrix rows (`py-8`), and standardized headline font weights (`font-semibold` / `font-bold`).
+- **Unified Button & Form System**: Created a single button system (`h-11`, `var(--radius)`, `px-5`) across primary, secondary, link, and tab controls. Upgraded form inputs with hover borders (`hover:border-fg/40`) and focus ring states (`focus:ring-2 focus:ring-primary/20`).
+- **Color Blocks & Release Notes Card**: Replaced dark cards with soft dark gray/surface cards (`var(--surface)`), added a full Release Notes card layout (Date: `JULY 2026`, Badge: `v2.4 RELEASE`, Title, Description, and CTA), and enforced flex wrapping bounds (`w-full min-w-0 max-w-xl`) to eliminate single-word sentence wrapping.
+- **Pricing & Table Density**: Raised pricing card padding (`p-8`), enlarged price numbers (`text-4xl md:text-5xl font-bold tracking-tight`), increased comparison table row height (`py-4 px-6`), bolded the first column (`font-semibold`), and added alternating row contrast (`odd:bg-surface/50`).
+- **Modular Component Architecture**: Extracted monolithic `LiveSandbox.jsx` into 8 focused, reusable sub-components in `frontend/src/features/playground/ui/components/` (`HeaderNav`, `HeroSection`, `PaletteSection`, `TypographySection`, `ComponentsSection`, `ColorBlocksSection`, `PricingSection`, `FooterSection`), keeping every source file under 120 lines to comply with `GEMINI.md`.
+- **Glassmorphism & Single-Weight Tall Font Fixes**: Fixed Google Fonts CDN URL parsing in `LiveSandbox.jsx` for single-weight display fonts (such as `Bebas Neue`), ensuring tall fonts render cleanly without HTTP 400 errors. Added uppercase font transformations for tall display headlines, added glassmorphic navbar styling (`backdrop-filter: blur(16px) saturate(180%)`), enabled outline button hover fill states (`hover:bg-[var(--primary)] hover:text-[var(--bg)]`), and added agency brand title support (`RED LOVE`).
+- **DESIGN.md Context Document Engine**: Upgraded Python Playground service (`playground.py`), Express controller (`playground.controller.js`), and frontend Playground toolbar (`Playground.jsx`) to auto-generate and display a complete, implementation-ready `DESIGN.md` specification document (matching `DESIGN_TEMPLATE.md`). Includes a real-time `DESIGN.md` slide-over Markdown drawer with one-click **Copy DESIGN.md** and **Download .md** export actions for AI coding agents.
+- **Exhaustive Domain-Specific Reference Template Blueprints**: Replaced outdated monolithic templates with 3 deep, production-grade template suites in `RAG_Service/context-engine/app/knowledge/context/`:
+  - **`portfolio/`**: Tailored for visual portfolios, agency showcases, landing pages, and developer sites (Next.js + TypeScript + GSAP Motion, Satoshi/Bebas Neue fonts, 32px pill radii, 1120px max-width container, static JSON data layers, zero database bloat).
+  - **`mobile/`**: Tailored for mobile apps (Expo + React Native + TypeScript + NativeWind, safe-area insets, 44px min touch targets).
+  - **`saas/`**: Tailored for full-stack platforms (Next.js + PostgreSQL/Supabase ORM + Auth + 240px sidebar dashboards).
+  - Updated `context_engine.py` with `get_template_for_target()` to dynamically route generation requests to the exact template suite.
+
+### Verification
+- Python Py_compile (`app/langgraph/context_engine.py`, `app/langgraph/refinement_wizard.py`, `app/langgraph/pm_wizard.py`, `app/prompts/conversational_prompt.py`, `app/prompts/question_prompt.py`, `app/langgraph/playground.py`) succeeded with 0 errors.
+- Production Vite build passes cleanly in 8.65 seconds with 0 warnings or errors.
+
+## Context File Generation Pipeline Optimization (Previous)
+
+### Completed
+- **Primary Model Migration**: Switched the default model from `llama-3.3-70b-versatile` to `llama-3.1-8b-instant` in `llm.py` and `context_engine.py` for faster and more cost-effective context generation.
+- **Asynchronous Parallel Orchestration**: Rewrote Node function definitions (`generate_draft` and `verify_draft`) in `context_engine.py` to be asynchronous (`async def`). 
+- **120s Timeout & Mistral Fallback**: Wrapped primary LLM generation in a strict 120-second timeout. Added automatic fallback handler to target `mistral-large-latest` if the primary model times out or encounters errors.
+- **One-time Verification Loop**: Modified the `StateGraph` in `context_engine.py` to connect the `verify` node directly to the `END` node, removing the feedback retry loop and limiting execution to a single run.
+- **SSE Streaming Integration**: Added a `/context` endpoint that executes worker tasks in parallel using `asyncio.gather()` and uses an `asyncio.Queue` to stream completed context documents to the client via `StreamingResponse` (Server-Sent Events).
+- **Node.js Gateway Streaming**: Refactored `generateContext` in `context.controller.js` to pipe the Python service's SSE stream directly to the client's Express response stream.
+- **Frontend Stream Processing**: Upgraded `context.store.js` to support functional state updaters, modified `context.api.js` to perform raw `fetch` requests for stream reading, and refactored `useContextFlow.js` to parse SSE chunks as they arrive, providing real-time UI updates on compilation progress.
+
+### Verification
+- Frontend production Vite build compiles successfully with zero warnings/errors.
+- Python compilation checks on `context_engine.py`, `routes.py`, and `llm.py` pass cleanly.
+
+## LLM Migration, Validation Fixes & Prompt Upgrades (Previous)
+
+### Completed
+- **Lenis Scroll Interference Resolved**: Appended the attribute `data-lenis-prevent="true"` to the main container inside `PlaygroundPreview.jsx`. This signals the global Lenis smooth scrolling instance to ignore scrolling events within this viewport, restoring full native trackpad and mouse wheel scrolling on the new tab preview window.
+- **Sandbox Scrollability Repaired**: Removed `max-h-[85vh]` constraints and hidden scrollbar classes from the outer wrapper of `LiveSandbox.jsx`. Now, the parent layout handles sizing and scrolling natively. This allows the preview in the new tab to scroll natively through the entire design using standard browser scrollbars, and preserves natural frame scrolling inside the playground device view.
+- **Open in New Tab Sandbox Route Added**: Registered `/playground/preview/:sessionId` path inside `AppRoutes.jsx` to load `PlaygroundPreview.jsx` full-screen, bypassing sidebar and chat panels. Wired an "Open in New Tab" header button inside `Playground.jsx` (utilizing `ExternalLink` icon) to launch the new route, backing draft session previews via cached localStorage and active database sessions.
+- **Dynamic Font Imports Injection**: Added real-time Google Font and Fontshare dynamic CDNs imports inside `LiveSandbox.jsx` via React `useMemo` hooks. This ensures custom fonts requested by the AI (such as Satoshi, Montserrat, Bebas Neue, Outfit, or Playfair Display) are instantly loaded and rendered by the browser without page refreshes.
+- **Closed Default Sidebar & Responsive Layering**: Initialized the Design Playground sidebar state `isSidebarOpen` as `false` by default to maximize sandbox viewing space. Configured responsive Tailwind classes in `Playground.jsx` so the sidebar acts as an absolute overlay drawer on mobile/tablet viewports and relative side-by-side split screen on desktop.
+- **Constrained Preview Sandbox Width**: Wrapped all layout headers, hero content, swatches, typography matrix listings, form elements, color background grids, plan comparative tables, and footer rows inside `LiveSandbox.jsx` inside a `max-w-4xl mx-auto w-full px-4` centering container. This restricts full-width stretching layout bleeds and ensures cards are beautifully aligned and boxed on high-resolution desktop viewports.
+- **Converted High-Fidelity Design Sandbox**: Replaced the basic preview layout inside `LiveSandbox.jsx` with a complete, converted React/JSX version of `HTML_PREVIEW_TEMPLATE.html`. The new sandbox features a sticky navigation header, infinite scrolling marquee loop, typography weights grid, action buttons, dynamic inputs, modular color block previews, pricing cards, a table blueprint comparator, and a navigation footer. Fully wired up tabs-selection states and counts-up animation ticks using React state, successfully running at 60fps with zero layout unmounts during live token changes.
+- **Detailed AI Playground Prompt System Expanded**: Re-engineered and expanded the system prompt inside `playground.py` to document detailed explanation variables mapping, binding logic for HTML preview components (canvas, text, primary, surface, border, brand, secondary, and accent colors; heading/body fonts; corners radius) and conversational dialogue policies (handling undos, contrast corrections, and keeping replies to a clean 3-bullet confirmation summary without greetings or emojis).
+- **Groq Model Upgraded**: Replaced decommissioned `llama3-70b-8192` model with the current active production model `llama-3.3-70b-versatile` across both primary and secondary fallback configurations.
+- **Pydantic Validation Resolved**: Correctly wrapped request and response model schema definitions inside the Python RAG service with `typing.Optional` to accept `None` inputs/outputs safely in Pydantic v2.
+- **Modal Viewport Layout Fix**: Enforced safe dynamic responsive width bounds (`w-[95vw] sm:w-[500px]`) inside `WizardDrawer.jsx` to prevent modal collapsing bugs in varying viewport configurations.
+- **Dynamic Context Generation**: Generalised `context_engine.py` template generation parameters to build dynamic specifications tailored to the user's custom prompt description (e.g. 20km local chat app) rather than forcing ScribbleBox templates and "13 build phases".
+- **Expanded System Prompts**: Upgraded all skeleton prompts (`refinement_wizard.py`, `playground.py`, `developer.py`, `task_prompt.py`, `documentation_prompt.py`) into highly detailed, technical, structured, and developer-first system prompts.
+- **Disabled Chat Input During Context Build**: Updated `ProjectWorkspace.jsx` to disable the textarea and send button while `isGeneratingArtifacts` is true (compiling the 4 blueprint files), showing a dedicated placeholder `"Compiling blueprint files..."` to prevent the user from typing or sending chat inputs during compilation.
+
+### Verification
+- Production Vite build succeeds cleanly with zero errors.
+
+## Project Onboarding Cockpit & Chat Refinement (Previous)
 
 ### Completed
 - Removed the separate PM Wizard page flow (`NewProjectPage`) before creating a project.

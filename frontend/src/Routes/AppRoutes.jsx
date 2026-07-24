@@ -18,6 +18,7 @@ import TemplateDetailPage from '@/Pages/TemplateDetailPage'
 import { Overview } from '@/Dashboard/components/Overview'
 import { PlaygroundPage } from '@/Dashboard/components/PlaygroundPage'
 import { Playground } from '@/features/playground/ui/Playground'
+import { PlaygroundPreview } from '@/features/playground/ui/PlaygroundPreview'
 import { NewProjectPage } from '@/features/project/ui/NewProjectPage'
 import { ProjectWorkspace } from '@/features/project/ui/ProjectWorkspace'
 import { FavoriteProjects } from '@/features/favorites/ui/FavoriteProjects'
@@ -39,6 +40,7 @@ const AppRoutes = () => {
         <Route path="/projects/:projectId" element={<NewProjectPage />} />
         <Route path="/projects/:projectId/chat" element={<ProjectWorkspace />} />
         <Route path="/playground" element={<Playground />} />
+        <Route path="/playground/preview/:sessionId" element={<PlaygroundPreview />} />
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Overview />} />
           <Route path="favorites" element={<FavoriteProjects />} />

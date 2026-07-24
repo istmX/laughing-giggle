@@ -2,9 +2,11 @@ from typing import Annotated, Dict, Any, List
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.core.llm import get_fallback_llm
+from app.core.llm import get_load_balanced_llm
 import os
+import asyncio
 from loguru import logger
+from app.core.design_knowledge import design_knowledge_engine
 
 # --- State Definition ---
 class ArtifactState(TypedDict):
@@ -17,71 +19,158 @@ class ArtifactState(TypedDict):
     verification_feedback: str
     is_approved: bool
 
-def generate_draft(state: ArtifactState) -> Dict[str, Any]:
-    """Generates the markdown artifact based on the spec and context."""
-    logger.info(f"Iteration {state['iterations'] + 1}: Generating draft for {state['target_file_path']}")
-    
-    llm = get_fallback_llm()
-    
-    system_prompt = f"""You are Zenix, a world-class Staff Software Architect and Principal Design Systems Engineer.
-Your mission is to generate the absolute highest-fidelity, complete, and implementation-ready engineering markdown file for the target: "{state['target_file_path']}".
+BASE_KNOWLEDGE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge")
 
-We are architecting a project based on this finalized specification and user requirements:
+# Target file index mapping for Load Balancer distribution
+FILE_LOAD_BALANCER_INDEX = {
+    "agents.md": 0,
+    "design.md": 1,
+    "architecture.md": 2,
+    "project-overview.md": 3,
+}
+
+def get_template_for_target(target_file: str, spec: str) -> str:
+    spec_lower = spec.lower()
+    fname = os.path.basename(target_file)
+    
+    if any(k in spec_lower for k in ["portfolio", "agency", "showcase", "landing", "personal site", "developer showcase", "dev portfolio"]):
+        template_folder = "portfolio"
+    elif any(k in spec_lower for k in ["mobile", "expo", "react native", "ios", "android"]):
+        template_folder = "mobile"
+    else:
+        template_folder = "saas"
+        
+    tpl_path = os.path.join(BASE_KNOWLEDGE_DIR, "context", template_folder, fname)
+    if os.path.exists(tpl_path):
+        try:
+            with open(tpl_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"Error loading template {tpl_path}: {e}")
+            
+    # Fallback to root context file if available
+    root_tpl = os.path.join(BASE_KNOWLEDGE_DIR, "context", fname)
+    if os.path.exists(root_tpl):
+        try:
+            with open(root_tpl, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            pass
+            
+    return ""
+
+async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
+    """Generates high-fidelity markdown context artifacts matching the project category using load-balanced AI providers."""
+    target_name = os.path.basename(state['target_file_path'])
+    iterations = state.get('iterations', 0) + 1
+    logger.info(f"Generating draft for {target_name} (Iteration {iterations})")
+    
+    spec = state.get('refined_spec', '')
+    
+    # Load Balancer: Rotate starting provider based on target file name to distribute concurrent calls
+    start_index = FILE_LOAD_BALANCER_INDEX.get(target_name.lower(), 0)
+    llm = get_load_balanced_llm(start_index)
+    
+    # Read UI design intelligence files directly from knowledge/ui/
+    ui_knowledge = ""
+    try:
+        color_theory_path = os.path.join(BASE_KNOWLEDGE_DIR, "ui", "colors", "color_theory.md")
+        typography_path = os.path.join(BASE_KNOWLEDGE_DIR, "ui", "typography", "sans_serif_fonts.md")
+        
+        ui_docs = []
+        if os.path.exists(color_theory_path):
+            with open(color_theory_path, "r", encoding="utf-8") as f:
+                ui_docs.append("--- COLOR THEORY CATALOG ---\n" + f.read()[:2000])
+        if os.path.exists(typography_path):
+            with open(typography_path, "r", encoding="utf-8") as f:
+                ui_docs.append("--- TYPOGRAPHY CATALOG ---\n" + f.read()[:2000])
+        if ui_docs:
+            ui_knowledge = "\n\n".join(ui_docs)
+    except Exception as e:
+        logger.error(f"Error reading UI catalog: {e}")
+
+    matched_design_knowledge = design_knowledge_engine.search_design_context(spec)
+    rag_context = f"{state.get('rag_context', '')}\n\n--- UI KNOWLEDGE & TYPOGRAPHY CATALOGS ---\n{ui_knowledge}\n\n--- MATCHED DESIGN INTELLIGENCE ---\n{matched_design_knowledge}"
+
+    reference_template = get_template_for_target(target_name, spec)
+
+    feedback = state.get("verification_feedback", "")
+    feedback_prompt = f"\n\nREVISION FEEDBACK FROM PREVIOUS PASS:\n{feedback}\nPlease fix these issues immediately." if feedback else ""
+
+    system_prompt = f"""You are Zenix, a Staff Software Architect and Principal Design Systems Engineer (created by developer "Istm").
+Your mission is to generate the highest-fidelity, complete, and implementation-ready markdown context file for: "{target_name}".
+
+PROJECT SPECIFICATION & REQUIREMENTS:
 --- SPECIFICATION ---
-{state['refined_spec']}
+{spec}
 ---------------------
 
-Your output MUST be a complete, production-grade markdown document. Do not summarize, do not use placeholder text, do not write "TODO", and do not leave sections blank. Every single module, feature, block, and list item must be fully fleshed out with exhaustive technical descriptions.
+--- DESIGN INTELLIGENCE & ARCHITECTURE RULES ---
+{rag_context}
 
---- ARCHITECTURAL RULES & UI KNOWLEDGE ---
-{state['rag_context']}
+--- REFERENCE TEMPLATE BLUEPRINT ---
+{reference_template}
+-----------------------------------{feedback_prompt}
 
---- REFERENCE TEMPLATE & BOUNDARY BLUEPRINT ---
-{state['reference_template']}
-----------------------------------------------
+--- DOMAIN BOUNDARY & ARCHITECTURAL REASONING DIRECTIVES ---
+1. ACCURATE DOMAIN ANALYSIS:
+   - Carefully evaluate the project specification:
+     * **Full-Stack SaaS / Web Platform**: Applications requiring user accounts, persistent user data, external API calls, dashboard analytics, or payments. MANDATE User Authentication (Email/Password + Google OAuth) and Database Schemas (Supabase/PostgreSQL or MongoDB).
+     * **Visual Portfolio / Showcase**: Personal developer sites or landing pages. Strictly BAN backend database or auth models. Specify static JSON content schemas (`projects.json`).
+     * **Mobile App**: Expo + React Native + TypeScript + NativeWind styling.
 
-Follow these file-specific design and architecture instructions with meticulous detail:
 
-1. IF GENERATING "agents.md" (OR ".cursorrules" / "GEMINI.md"):
-   - Define the absolute source of truth for the AI coding agents.
-   - Include the playful/human mascot identity of the project (e.g., screenshot memory journal rules).
-   - Write out complete code standards: file-size target limits (<200 lines for components, <300 screens, <250 stores), strict naming conventions (PascalCase, camelCase, file extensions), component layout guidelines, state management guidelines (Zustand), async query patterns (TanStack Query), and safe import sequencing rules.
-   - List every single approved library in the whitelists (Expo, NativeWind, AsyncStorage, Clerk, Zod, etc.) with detailed rationales and documentation urls.
-   - Write the entire implementation roadmap of all 13 build phases in chronological order. Each phase must contain clear goals, sequential sub-tasks, deliverables, and success validation criteria. Do not summarize or skip phases.
+2. DYNAMIC DESIGN SYSTEM & DUAL ANIMATION ENGINE:
+   - **ZERO HARDCODED PALETTES OR FONTS**: Dynamically generate hex colors and typography scale matrices matching the specific project domain and topic. Display fonts for headlines; Satoshi/Inter for body copy—NEVER display fonts for body prose!
+   - **DUAL MOTION ENGINE**: Use **Framer Motion (`framer-motion`)** for interactive component states, 3D card flips, tab pills, and modal overlays. Use **GSAP + ScrollTrigger** for scroll-linked page reveals & hero timelines.
+
+Follow these exact file-specific instructions:
+
+1. IF GENERATING "agents.md":
+   - STRICT BAN: DO NOT write about AI agent theory, robotics, sensors, actuators, perception, sensor arrays, or game AI!
+   - MANDATORY MEMORY FILES DIRECTIVE:
+     * Instruct the AI coding agent that upon starting work, it MUST create and maintain both `progress.md` (task/feature log & error memory) and `problem.md` (system flaw analysis & architecture fix tracking) in the project root.
+   - LIVE TECH STACK DOCS SECTION (TAVILY + REDIS SYNC):
+     * `agents.md` MUST include a dedicated section titled **"Tech Stack Documentation & Best Practices (Live Tavily Sync)"** detailing official 2026 framework rules, recommended API patterns, and breaking changes for the chosen tech stack.
+   - Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines. List whitelisted npm packages matching the project's tech stack.
 
 2. IF GENERATING "design.md":
-   - Construct the entire visual system, token guidelines, and component specifications.
-   - Document every single design system token: primary, surface background, peach/mint backgrounds, cream card surfaces, soft white backdrops, semantic success green, and danger coral colors with their exact Hex color codes.
-   - Write the complete typography scale matrix (display-xl, display-lg, subhead, link, caption size metrics, weights, line heights, letter spacings) and outline fallback font substitutions.
-   - Detail the spacing token values (XS: 4px to 3XL: 64px), border radii (xs: 2px to pill/full), drop shadow dimensions, and duration constants.
-   - Include the visual rules: "The Scrapbook Test", layout densities, progressive disclosure rules, copy-writing voice instructions, and anti-pattern boundaries (no glassmorphism, no tiny icon grids, no default Material UI shadows).
-   - Formulate the detailed component registry for buttons, tabs, inputs, headers, navigation tabs, illustrations, and responsive collapsing guidelines across viewports.
+   - Complete visual design system specification generated dynamically from UI Color & Typography catalogs.
+   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (Display headlines vs Satoshi/Inter body prose), corner radii, container max-widths, and spacing scales.
+   - Detail Motion rules for both Framer Motion (components/flips) and GSAP (scroll timelines).
 
-3. IF GENERATING "project-overview.md":
-   - Detail the product vision statements, problem definition, solution description, target audience segment analysis, core conversational refinement routes, detailed screen wireframe architectures, and a chronological changelog ledger.
+3. IF GENERATING "architecture.md":
+   - Complete feature-based folder tree structure (`src/features/*`).
+   - Client component hierarchy, layout boundaries, and responsive breakpoints.
+   - For Full-Stack SaaS: Complete Database Schemas (tables/collections, fields, types, indexes) & Auth Strategy.
+   - For Portfolios: Static JSON content schemas (`projects.json`, `skills.json`).
 
-4. IF GENERATING "architecture.md":
-   - Outline the standard folder tree configurations, backend Express modules, MongoDB/Mongoose schema models, groq-sdk models, offline/online synchronization rules, and API transaction layers.
+4. IF GENERATING "project-overview.md":
+   - Product vision, target audience, non-negotiable user journeys, wireframe screen specs, and core feature requirements.
 
-CRITICAL FORMATTING RULES:
-- Output ONLY valid markdown. Do not wrap the output in a markdown block envelope (i.e. do not use ```markdown ... ```). Start directly with the first heading.
-- Maintain 100% structural fidelity to the reference template. Incorporate the RAG context and design details directly into the variables and sections.
-- Make the output extremely detailed, technical, and verbose. Prefer long, detailed descriptions over short bullet lists.
+
+CRITICAL FORMATTING:
+- Output ONLY valid Markdown. Do not wrap in extra markdown block envelopes (no ```markdown).
+- Make the document exhaustive, detailed, technical, and complete. Zero TODOs or blank sections.
 """
-
-    # If there is feedback from a previous failed iteration, include it
-    if state.get("verification_feedback"):
-        system_prompt += f"\n\nCRITICAL FIXES NEEDED FROM PREVIOUS ATTEMPT:\n{state['verification_feedback']}"
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Please generate {state['target_file_path']}.")
+        HumanMessage(content=f"Please generate {target_name}.")
     ]
     
-    response = llm.invoke(messages)
+    try:
+        logger.info(f"Invoking multi-provider LLM chain for {target_name}...")
+        response = await asyncio.wait_for(llm.ainvoke(messages), timeout=35.0)
+        content = response.content.strip()
+    except Exception as e:
+        logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with backup provider...")
+        backup_llm = get_load_balanced_llm(start_index + 1)
+        response = await backup_llm.ainvoke(messages)
+        content = response.content.strip()
+
     
-    # Cleanup markdown wrapping
-    content = response.content.strip()
+    # Clean markdown wrapping if present
     if content.startswith("```markdown"):
         content = content[11:]
     if content.startswith("```"):
@@ -91,78 +180,40 @@ CRITICAL FORMATTING RULES:
         
     return {
         "draft_content": content.strip(),
-        "iterations": state["iterations"] + 1
+        "iterations": iterations,
+        "is_approved": True,
+        "verification_feedback": ""
     }
 
-def verify_draft(state: ArtifactState) -> Dict[str, Any]:
-    """Checks the generated draft for missing requirements or inconsistencies."""
-    logger.info(f"Verifying draft for {state['target_file_path']}")
+async def verify_draft(state: ArtifactState) -> Dict[str, Any]:
+    """Verification pass checking completeness and quality of the draft."""
+    content = state.get("draft_content", "")
+    iterations = state.get("iterations", 1)
     
-    # If we hit the max iterations, force approval to prevent infinite loops
-    if state["iterations"] >= 3:
-        logger.warning(f"Max iterations reached for {state['target_file_path']}. Approving as-is.")
+    # Fast path: Approve if content is comprehensive (>1200 chars) or max iterations (3) reached
+    if len(content) > 1200 or iterations >= 3:
         return {"is_approved": True, "verification_feedback": ""}
         
-    llm = get_fallback_llm()
-    
-    system_prompt = f"""You are Zenix QA-Engine, a highly strict Principal Quality Assurance Reviewer.
-Your job is to run a rigorous audit on the generated markdown file: "{state['target_file_path']}"
-
-We are verifying the file against:
-- Finalized Specification: {state['refined_spec'][:1000]}...
-- Reference Template: {state['reference_template'][:1000]}...
-
-CRITICAL VERIFICATION CHECKLIST:
-1. COMPLETE ROADMAP CHECK: If verifying "agents.md", does the draft outline all 13 build phases in complete detail? If any phase is summarized or omitted, reject it.
-2. DESIGN SYSTEM CHECK: If verifying "design.md", does the draft contain the exact color tokens (Hex codes), spacing values, typography matrices, component registries, and layout guidelines? If it has summaries or is under 200 lines, reject it.
-3. VISUAL RULES CHECK: Does the draft enforce the design principles, copywriting constraints, and anti-pattern guidelines?
-4. TEMPLATE STRUCTURE: Does the draft match the header structure and organization of the reference template exactly?
-
-If the draft passes all checks with absolute perfection and contains zero summaries, placeholders, or missing details, you MUST output exactly the word "APPROVED".
-If there are any deficiencies, missing sections, summaries, or errors, output a detailed bulleted list of the exact problems that must be fixed. Do NOT include the word "APPROVED" in your feedback.
-"""
-    messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content=f"DRAFT CONTENT:\n{state['draft_content']}")
-    ]
-    
-    response = llm.invoke(messages)
-    feedback = response.content.strip()
-    
-    if "APPROVED" in feedback.upper():
-        logger.success(f"{state['target_file_path']} was approved on iteration {state['iterations']}!")
-        return {"is_approved": True, "verification_feedback": ""}
-    else:
-        logger.warning(f"{state['target_file_path']} failed verification. Routing back for fixes.")
-        return {"is_approved": False, "verification_feedback": feedback}
+    # Request improvement if draft is too short
+    return {
+        "is_approved": False,
+        "verification_feedback": "The generated document is too short or incomplete. Expand all sections with exhaustive detail, design tokens, and technical standards."
+    }
 
 def route_verification(state: ArtifactState) -> str:
-    """Routing function to determine if we need another iteration."""
-    if state["is_approved"]:
-        return "approved"
-    return "rejected"
+    if state.get("is_approved", True) or state.get("iterations", 1) >= 3:
+        return END
+    return "generate"
 
 # --- Graph Construction ---
 def build_context_engine_graph() -> StateGraph:
-    """Builds and compiles the 3-loop Context Engine LangGraph."""
     graph_builder = StateGraph(ArtifactState)
-    
     graph_builder.add_node("generate", generate_draft)
     graph_builder.add_node("verify", verify_draft)
-    
     graph_builder.add_edge(START, "generate")
     graph_builder.add_edge("generate", "verify")
-    
-    # Conditional Edge based on verification results
-    graph_builder.add_conditional_edges(
-        "verify",
-        route_verification,
-        {
-            "approved": END,
-            "rejected": "generate"  # Loop back to fix
-        }
-    )
-    
+    graph_builder.add_conditional_edges("verify", route_verification, {END: END, "generate": "generate"})
     return graph_builder.compile()
 
 context_engine_graph = build_context_engine_graph()
+

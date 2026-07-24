@@ -21,32 +21,64 @@ export function useContextFlow(ideaId) {
     abortControllerRef.current = controller
     setGenerating(true)
     setError(null)
+    setGeneratedFiles([]) // Reset previous files on start
     
     try {
-      const res = await generateProjectContext(token, ideaId, controller.signal)
-      if (res && typeof res === 'object') {
-        const fileKeys = [
-          { key: 'agents', name: 'Agents.md' },
-          { key: 'design', name: 'design.md' },
-          { key: 'architecture', name: 'architecture.md' },
-          { key: 'project_overview', name: 'project-overview.md' }
-        ]
+      const response = await generateProjectContext(token, ideaId, controller.signal)
+      if (!response.ok) {
+        throw new Error('Failed to generate project context.')
+      }
+      
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      
+      const fileKeysMap = {
+        agents: 'Agents.md',
+        design: 'design.md',
+        architecture: 'architecture.md',
+        project_overview: 'project-overview.md'
+      }
 
-        const files = fileKeys
-          .filter(f => res[f.key])
-          .map(f => ({
-            name: f.name,
-            key: f.key,
-            content: typeof res[f.key] === 'string' ? res[f.key] : JSON.stringify(res[f.key], null, 2)
-          }))
-
-        if (files.length > 0) {
-          setGeneratedFiles(files)
-          toast.success('Context files generated successfully!')
-        } else {
-          toast.success('Context generation completed!')
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() // retain incomplete line in buffer
+        
+        for (const line of lines) {
+          const trimmed = line.trim()
+          if (!trimmed.startsWith('data: ')) continue
+          const rawData = trimmed.substring(6)
+          try {
+            const parsed = JSON.parse(rawData)
+            if (parsed.key && parsed.content) {
+              const name = fileKeysMap[parsed.key] || parsed.key
+              
+              setGeneratedFiles(prev => {
+                const exists = prev.some(f => f.key === parsed.key)
+                if (exists) {
+                  return prev.map(f => f.key === parsed.key ? { ...f, content: parsed.content } : f)
+                } else {
+                  return [...prev, { name, key: parsed.key, content: parsed.content }]
+                }
+              })
+              
+              if (parsed.status === 'failed') {
+                toast.error(`Failed to generate ${name}`)
+              } else {
+                toast.success(`${name} generated!`)
+              }
+            }
+          } catch (e) {
+            console.error('Error parsing SSE line:', trimmed, e)
+          }
         }
       }
+      
+      toast.success('Context generation completed!')
     } catch (err) {
       if (err.name === 'AbortError') {
         toast.error('Context generation cancelled.')

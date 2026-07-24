@@ -36,9 +36,10 @@ export function useChatHandlers({
 
   const parseAIResponse = (res) => {
     try {
+      if (!res) return {}
       if (typeof res === 'object' && !res.content && (res.project_title || res.next_question || res.is_complete !== undefined)) return res
       let content = res.content || res.data?.content || res
-      if (typeof content !== 'string') return content
+      if (typeof content !== 'string') return typeof content === 'object' ? content : {}
       content = content.replace(/```json/gi, '').replace(/```/g, '').trim()
       const startObj = content.indexOf('{')
       const startArr = content.indexOf('[')
@@ -48,12 +49,14 @@ export function useChatHandlers({
       if (startObj !== -1 && (startArr === -1 || startObj < startArr)) { start = startObj; end = endObj }
       else if (startArr !== -1) { start = startArr; end = endArr }
       if (start !== -1 && end !== -1 && end > start) content = content.substring(start, end + 1)
-      return JSON.parse(content)
+      const parsed = JSON.parse(content)
+      return typeof parsed === 'object' && parsed !== null ? parsed : {}
     } catch (e) {
       console.error('Failed to parse AI response:', e, res)
       return {}
     }
   }
+
 
   const syncStateToBackend = async (newState, updates = {}) => {
     try { await updateProject(token, projectId, { wizard_state: newState, ...updates }) }
@@ -69,15 +72,22 @@ export function useChatHandlers({
       if (pending?.length > 0) {
         setArtifacts(pending)
         setActiveArtifact(pending[0])
-        for (let i = 0; i < pending.length; i++) {
-          try {
-            const r = await generateSingleArtifact(token, projectId, pending[i].file_path)
-            if (r?.artifact) {
-              setArtifacts(prev => prev.map(a => a._id === pending[i]._id ? { ...a, content: r.artifact.content } : a))
-              if (i === 0) setActiveArtifact(r.artifact)
-            }
-          } catch (e) { console.error('Failed to generate file:', pending[i].file_path, e) }
-        }
+        
+        // Execute parallel generation across all 4 context blueprint files
+        const results = await Promise.allSettled(
+          pending.map(item => generateSingleArtifact(token, projectId, item.file_path))
+        )
+        
+        const updatedList = pending.map((item, idx) => {
+          const res = results[idx]
+          if (res.status === 'fulfilled' && res.value?.artifact) {
+            return { ...item, content: res.value.artifact.content }
+          }
+          return item
+        })
+
+        setArtifacts(updatedList)
+        if (updatedList.length > 0) setActiveArtifact(updatedList[0])
       }
       toast.success('Project artifacts generated!')
     } catch (e) {
@@ -85,6 +95,7 @@ export function useChatHandlers({
       toast.error('Failed to generate artifacts.')
     } finally { setIsGeneratingArtifacts(false) }
   }
+
 
   const handleSend = async (overrideValue = null) => {
     const text = overrideValue !== null ? overrideValue : inputValue
@@ -116,12 +127,13 @@ export function useChatHandlers({
         setIdeaId(newIdeaId)
         const analyzeRes = await analyzeIdea(token, newIdeaId)
         const parsedAnalysis = parseAIResponse(analyzeRes)
-        const title = parsedAnalysis.project_title || 'Untitled Project'
-        const description = parsedAnalysis.project_description || text
-        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
 
         const convoRes = await processConversation(token, newIdeaId, { history: [] })
         const parsedConvo = parseAIResponse(convoRes)
+        const title = parsedConvo.project_title || parsedAnalysis.project_title || 'Untitled Project'
+        const description = parsedConvo.project_description || parsedAnalysis.project_description || text
+        setProject(prev => ({ ...prev, project_title: title, project_description: description }))
+
 
         if (parsedConvo.is_complete) {
           setSpecContent(parsedConvo.refined_spec)
@@ -146,6 +158,7 @@ export function useChatHandlers({
             { project_title: title, project_description: description }
           )
         }
+
 
       } else if (project?.wizard_state?.isComplete) {
         const hist = []

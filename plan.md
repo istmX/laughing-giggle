@@ -1,129 +1,79 @@
-# Zenix RAG Service & AI Orchestration Migration Plan
+# Zenix AI Context Engine & RAG Architecture Plan
 
-This document outlines the architecture and implementation roadmap for migrating the Zenix AI orchestration layer from the legacy Node.js backend (`backend/src/features/ai`) into the new Python-based RAG (Retrieval-Augmented Generation) microservice.
-
----
-
-## 1. The Goal
-Move the complete AI feature set into a dedicated Python microservice (`RAG_Service/context-engine`) powered by FastAPI, LangGraph, and Qdrant. This ensures high-performance vector search, intelligent context chunking, and modular graph execution for generation.
-
-The **immediate focus** is routing the very first user input (the "Idea" prompt) into the RAG system to be chunked, embedded, and enriched with internal knowledge base documents before generation.
+This document defines the architecture, workflow, and implementation roadmap for the Zenix AI Context Microservice (`RAG_Service/context-engine`).
 
 ---
 
-## 2. Architecture of the RAG Microservice
+## 1. Core Workflow Architecture (`context.png` & `workflow.md`)
 
-### Tech Stack
-- **API Framework**: FastAPI + Uvicorn
-- **Orchestration**: LangChain + LangGraph
-- **Vector Store**: Qdrant (local/cloud)
-- **Embeddings**: Sentence Transformers (local fallback) / Google GenAI Embeddings
-- **Parsing**: Markdown + tiktoken
+The AI Context Engine transforms raw user ideas into exhaustive, production-ready AI development context through a 5-stage pipeline:
 
-### Directory Structure
-```text
-RAG_Service/context-engine/
-├── app/
-│   ├── api/          # FastAPI Routes (Idea, Chat, Artifacts)
-│   ├── core/         # App state, Configuration
-│   ├── rag/
-│   │   ├── chunking/    # Splitters (Markdown, Text, Tiktoken)
-│   │   ├── embeddings/  # Embedding model providers
-│   │   ├── retriever/   # Query logic, MMR, Similarity Search
-│   │   ├── vectorstore/ # Qdrant integration
-│   │   └── assembler/   # Assembling retrieved context for prompts
-│   ├── langgraph/    # Graph state machines (PM Wizard, Context Engine)
-│   ├── prompts/      # Refined prompt templates
-│   ├── knowledge/    # Pre-loaded Zenix UI/UX context files (.md)
-│   └── main.py       # Application Entrypoint
+```
+[User Idea]
+    ↓
+[Stage 1: Reactive Turn-by-Turn Q&A (Adaptive, Max 10 Questions)]
+    ↓
+[Stage 2: Master Specification Synthesis + Deep Knowledge RAG & Tavily Live Web Scraping]
+    ↓
+[Stage 3: Redis Caching + Parallel Load-Balanced Blueprint Context Generation]
+    ↓
+[Stage 4: Multi-Pass Verification & Self-Correction Loop (Up to 3 Passes)]
+    ↓
+[Exhaustive 4-File AI Blueprint: agents.md, design.md, architecture.md, project-overview.md]
 ```
 
 ---
 
-## 3. Prioritized Implementation Path
+## 2. Pipeline Stage Breakdown
 
-### Phase 1: RAG Foundation (Current)
-1. **Markdown Chunking Logic**:
-   - Build custom chunking strategies in `app/rag/chunking/` to properly split markdown files by headers (`#`, `##`) without breaking semantic meaning.
-2. **Embeddings & Vector Store**:
-   - Initialize Qdrant vector store in `app/rag/vectorstore/`.
-   - Setup `app/rag/embeddings/` using Sentence Transformers or Google GenAI.
-3. **Complete Data Folder Ingestion**:
-   - The RAG system will ingest the *entire* `backend/src/features/ai/data/` folder (including `ui/` files, `context/` templates, and `Agents.md`). 
-   - This ensures the AI always has access to the exact templates, rules, and formats for how to write output artifacts correctly.
+### Stage 1: Reactive Turn-by-Turn Q&A
+- **Behavior**:
+  - The AI evaluates the user's latest response on **every turn** (reading prompt + full conversation history).
+  - Dynamically generates the **single next best question** and 3 relevant options (always ending with `"Let Zenix decide"`).
+  - **Smart Fast-Forward**: If the user selects `"Let Zenix decide"` 2 times in a row or if the prompt is complete, Zenix immediately finishes the wizard (`is_complete: true`).
+- **Domain Rules**:
+  - **Portfolio / Visual Site**: Strictly bans database/auth questions. Focuses on aesthetics, featured skills, and showcase layouts.
+  - **Full-Stack SaaS / Platform**: Asks about core product workflows, target users, and modern 2026 tech stack choices (Supabase, Postgres, Mongo, Firebase).
+  - **Mobile App**: Asks about iOS/Android, mobile screens, and offline features.
 
-### Phase 2: The "Idea" Ingestion Pipeline
-1. **User Input Routing**:
-   - Expose a FastAPI endpoint `POST /api/orchestrate/idea`.
-   - Node.js backend routes the initial user idea directly to this endpoint.
-2. **Context Retrieval**:
-   - The RAG system embeds the user's idea and searches the Qdrant store for the most relevant architecture, tech stack, and UI/UX documentation.
-3. **PM Wizard Graph Migration**:
-   - Re-implement `conversational.service.js` (PM Wizard) into a LangGraph state graph in `app/langgraph/pm_wizard.py`.
-   - The retrieved RAG context is injected directly into the PM Wizard's system prompt before asking the user follow-up questions.
+### Stage 2: Deep Knowledge RAG + Tavily Live Web Scraping
+- **Dynamic UI/UX Intelligence (No Hardcoded Palette Constraints)**:
+  - Dynamically extracts color palettes, typography scales, and component specs from `app/knowledge/ui/` (`colors/`, `typography/`, `stacks/`, `ux/`).
+  - **Tavily Live Web Scraping (`tavily-python`)**:
+    - Scrapes live web sources for trending design systems, Awwwards showcases, GitHub open-source component repos, and free motion libraries (**Aceternity UI, Magic UI, Animata, GSAP**).
+    - Fetches the latest 2026 official framework documentation (Next.js 15, React 19, Supabase SSR, Tailwind v4).
 
-### Phase 3: The 3-Iteration Self-Correction Loop (Artifact Generation)
-1. **LangGraph Loop Architecture**:
-   - The generation of context artifacts (e.g., `architecture.md`, `ui-tokens.md`) will be governed by a strict 3-iteration LangGraph loop in `context_engine.py`:
-     1. **Prompt & Analyze**: Inject user prompt and RAG templates.
-     2. **Generate**: LLM outputs the first draft of the artifact.
-     3. **Check**: A secondary verification node analyzes the output to find missing data, deviations from the templates, or inconsistencies with the UI knowledge.
-     4. **Fix**: If errors are found, the output is routed back to the LLM for correction.
-     5. **Loop**: This process repeats for a maximum of 3 iterations before finalizing the artifact to guarantee impeccable quality.
-2. **Sequential Streaming**:
-   - Replicate the Node.js sequential streaming logic over FastAPI Server-Sent Events (SSE) or WebSockets to keep the frontend UI reactive.
+### Stage 3: Redis Caching & Parallel Load-Balanced Blueprint Generation
+- **Redis Caching Layer**:
+  - Caches Qdrant vector retrievals, Tavily web search results, and context blueprint drafts in Redis for **0ms instant response times** and token rate-limit protection.
+- **Provider Pool Load Balancer (`app/core/llm.py`)**:
+  - Round-robin distribution of file generation (`agents.md`, `design.md`, `architecture.md`, `project-overview.md`) across primary API keys (Gemini 2.5/3.5 Pro & Flash, Groq Key I, Mistral Key I).
+  - Secondary keys (`_II`) included as **worst-case scenario fallback** to guarantee generation never fails.
+  - **35-Second Per-Task Timeout Guard**: Prevents hanging requests; automatically fails over to backup provider if a task exceeds 35 seconds.
 
-### Phase 4: Context Consolidation (The 4-File Blueprint Strategy)
-1. **Consolidated Output Structure**:
-   - Instead of generating 11/12 individual files (e.g., separating token variables, styling rules, libraries, and roadmap tasks), Zenix will consolidate generated contexts into **4 core blueprints**:
-     - **`agents.md`**: Behaviors, instructions, coding standards, library docs, and the build roadmap task list.
-     - **`design.md`**: Design tokens, layout wrapping guidelines, visual parameters, and component specifications.
-     - **`architecture.md`**: Directory layouts, database schema definitions, and server-side API endpoints.
-     - **`project-overview.md`**: Product goals, core features, primary user flow, and vision.
-
-### Phase 5: Editor-Specific Target Renaming (AI Integration Selector)
-1. **AI Integration Presets in UI**:
-   - Add a configuration dropdown above the generation panel enabling developers to select their AI editor (Cursor, Windsurf, Roo Code, Gemini CLI, etc.).
-2. **File Renaming Logic**:
-   - Map files automatically based on target editor conventions:
-     - Cursor -> Export `agents.md` as `.cursorrules`
-     - Windsurf -> Export `agents.md` as `.windsurfrules`
-     - Roo Code / Cline -> Export `agents.md` as `.clinerules`
-     - Gemini CLI -> Export `agents.md` as `GEMINI.md`
-     - Copilot -> Export `agents.md` as `.github/copilot-instructions.md`
-     - Generic -> Keep as `agents.md`
+### Stage 4: Multi-Pass Verification & Self-Correction Loop
+- **Goal**: Evaluate generated blueprint files across up to **3 passes**.
+- **Rule Enforcement**:
+  - `agents.md`: Strict ban on robotics, sensors, actuators, or AI textbook theory. Focuses 100% on AI coding instructions, code standards (<150 lines/file), and build phases.
+  - `design.md`: Exhaustive design system with full hex palettes, typography scale matrices, layout tokens, and GSAP/Motion animation specifications.
+  - `architecture.md`: Feature-based directory tree (`src/features/*`), client component hierarchies, and static JSON data schemas for visual sites (zero backend bloat).
 
 ---
 
-## 4. Integration Protocol (Node.js <-> Python)
+## 3. Technology Stack
 
-The existing Node.js backend will act as a thin proxy for AI requests.
-- Node.js handles **Authentication** (Firebase JWT) and **Database CRUD** (MongoDB).
-- Node.js forwards validated payloads to `http://localhost:8000/...` (Python RAG Service).
-- Python RAG handles **Vector Search, LangGraph Execution, and LLM Generation**, streaming the results back to Node.js (or directly to the client via a shared token).
-
----
-
-## 5. Reference: The Old Node.js Workflow
-
-For historical context, this is how the legacy Node.js AI orchestration (`backend/src/features/ai`) functioned before the Python RAG migration:
-
-1. **The Wizard (Conversational / Refinement)**: 
-   - A user submits an idea. The `conversational.service.js` handles asking clarifying questions. It uses string matching (like `.includes("react native")`) to automatically map out the tech stack, platform, and UI style into the MongoDB `Brief`.
-   - Once all questions are answered, `refinement.service.js` synthesizes everything into one massive `refinedSpec` string.
-2. **Artifact Generation (The Bottleneck)**:
-   - `artifacts.service.js` creates empty placeholders in the database for `AGENTS.md`, `TASKS.md`, and all `context/` files.
-   - The backend dynamically reads **all** the markdown files inside `data/ui/` (color theory, animations, etc.) and `data/context/` using `fs.readFile` and stuffs them all directly into the system prompt before calling the LLM. 
-3. **Developer Workspace**:
-   - `developer.service.js` runs an interactive chat sandbox. Zenix responds in JSON format containing a conversational `message` and an `updates` array to push live file edits.
+- **API Layer**: FastAPI + Uvicorn
+- **Orchestration**: LangChain + LangGraph
+- **Vector Search / RAG**: Qdrant Vector Store + Sentence Transformers / Google GenAI Embeddings
+- **Web Intelligence**: Tavily AI Search API (`tavily-python`)
+- **Cache Layer**: Redis
+- **Multi-LLM Pool**: Google Gemini (3.5/2.5 Flash & Pro), Groq (`llama-3.1-8b-instant`), Mistral (`mistral-large-latest`)
 
 ---
 
-## 6. API Key Management (Free Tier Strategies)
+## 4. API Key Scoping Strategy
 
-We are utilizing free tier APIs (Groq, Mistral, Google Gemini). To prevent rate-limiting and separate concerns, API keys are scoped explicitly by feature:
+- **Primary Keys (`GROQ_API_KEY`, `MISTRAL_API_KEY`, `GEMINI_API_KEY`, `TAVILY_API_KEY`)**: Used for primary load-balanced RAG, live web scraping, and context generation.
+- **Secondary Keys (`GROQ_API_KEY_II`, `MISTRAL_API_KEY_II`, `GEMINI_API_KEY_II`)**: Reserved for AI Playground dynamic interactive loops, but integrated into context engine fallback chain as worst-case protection.
 
-*   **Primary Keys (e.g., `GROQ_API_KEY`)**: 
-    Used strictly for the **Context Engine** (chunking, RAG generation, core artifact generation, and the developer chat workspace).
-*   **Secondary Keys (e.g., `GROQ_API_KEY_II`)**: 
-    Isolated exclusively for the **AI Playground**. The Playground allows users to converse back-and-forth to generate dynamic HTML/Tailwind Design Systems (`DESIGN.md` templates). Using the `_II` keys ensures playground traffic does not cannibalize rate limits for the core project generation engine.
+

@@ -20,6 +20,7 @@ import { EmptyState } from './components/EmptyState'
 import { GenerationProgress } from './components/GenerationProgress'
 import { SpecReadyPanel } from './components/SpecReadyPanel'
 import { ArtifactsPanel } from './components/ArtifactsPanel'
+import { WizardDrawer } from './components/WizardDrawer'
 
 import { useProjectData } from '../hooks/useProjectData'
 import { useChatHandlers } from '../hooks/useChatHandlers'
@@ -183,6 +184,9 @@ export function ProjectWorkspace() {
     )
   }
 
+  const lastMessage = messages[messages.length - 1]
+  const isWizardActive = lastMessage && lastMessage.role === 'assistant' && lastMessage.options?.length > 0 && !project?.wizard_state?.isComplete
+
   return (
     <div className="flex h-dvh w-full bg-background overflow-hidden text-foreground font-sans" data-lenis-prevent="true">
       <Sidebar
@@ -255,7 +259,7 @@ export function ProjectWorkspace() {
               <MessageScrollerViewport className="px-4 pt-6">
                 <MessageScrollerContent className="max-w-3xl mx-auto pb-44 w-full">
                   {!hasMessages && (
-                    <div className="min-h-[60vh] flex items-center justify-center">
+                    <div className="min-h-[60vh] w-full min-w-0 flex items-center justify-center">
                       <EmptyState 
                         onSuggestion={(s) => setInputValue(s)} 
                         projectDescription={project?.project_description} 
@@ -273,26 +277,26 @@ export function ProjectWorkspace() {
                     >
                       <MessageScrollerItem messageId={msg.id} scrollAnchor={msg.role === 'user'} className="w-full">
                         {msg.role === 'user' ? (
-                          <div className="flex justify-end py-3">
-                            <div className="max-w-[72%] text-right">
-                              <p className="text-[15px] text-ink leading-[1.65] font-normal w-full max-w-[60ch] block">
+                          <div className="py-3 w-full text-right">
+                            <div className="max-w-[72%] min-w-0 ml-auto text-left inline-block bg-surface-soft/40 px-4 py-3 rounded-2xl border border-hairline/60">
+                              <p className="text-[15px] text-ink leading-[1.65] font-normal break-words">
                                 {msg.content}
                               </p>
                               {msg.timestamp && (
-                                <span className="text-[12px] text-ink-muted/55 font-mono mt-1 block">
+                                <span className="text-[11px] text-ink-muted/50 font-mono mt-1.5 block text-right">
                                   {msg.timestamp}
                                 </span>
                               )}
                             </div>
                           </div>
                         ) : (
-                          <div className="flex items-start gap-4 py-5">
+                          <div className="flex items-start gap-4 py-5 w-full min-w-0">
                             <div className="shrink-0 mt-1">
                               <AiIcon isAnimating={isProcessing && i === messages.length - 1} />
                             </div>
-                            <div className="flex-1 min-w-0 max-w-2xl">
+                            <div className="flex-1 min-w-0 max-w-2xl w-full">
                               {cleanMessageContent(msg.content) && (
-                                <div className="notion-markdown">
+                                <div className="notion-markdown w-full min-w-0">
                                   <ReactMarkdown 
                                     remarkPlugins={[remarkGfm]}
                                     components={{
@@ -353,42 +357,7 @@ export function ProjectWorkspace() {
                                 </div>
                               )}
 
-                              {msg.options?.length > 0 && (
-                                <motion.div
-                                  initial="hidden"
-                                  animate="visible"
-                                  variants={{
-                                    hidden: { opacity: 0 },
-                                    visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } }
-                                  }}
-                                  className="flex flex-wrap gap-2 mt-4"
-                                >
-                                  {msg.options.map((opt, idx) => (
-                                    <motion.button
-                                      key={idx}
-                                      variants={{ hidden: { opacity: 0, y: 4 }, visible: { opacity: 1, y: 0 } }}
-                                      whileHover={{ y: -1 }}
-                                      disabled={isProcessing}
-                                      onClick={() => handleSend(opt)}
-                                      className="px-3.5 py-1.5 rounded-full border border-hairline bg-canvas hover:bg-surface-soft hover:border-ink/25 text-[13px] font-normal text-ink transition-all disabled:opacity-40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
-                                    >
-                                      {opt}
-                                    </motion.button>
-                                  ))}
-                                  {!msg.options.some(o => o.toLowerCase().includes('zenix decide')) && (
-                                    <motion.button
-                                      variants={{ hidden: { opacity: 0, y: 4 }, visible: { opacity: 1, y: 0 } }}
-                                      whileHover={{ y: -1 }}
-                                      disabled={isProcessing}
-                                      onClick={() => handleSend('Let Zenix decide')}
-                                      className="px-3.5 py-1.5 rounded-full bg-ink hover:opacity-85 text-[13px] font-normal text-canvas transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/20"
-                                    >
-                                      <Sparkles className="h-3 w-3" />
-                                      Let Zenix decide
-                                    </motion.button>
-                                  )}
-                                </motion.div>
-                              )}
+
                             </div>
                           </div>
                         )}
@@ -480,11 +449,13 @@ export function ProjectWorkspace() {
                   value={inputValue}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isGeneratingArtifacts}
                   placeholder={
-                    project?.wizard_state?.isComplete
-                      ? 'Refine this workspace, update architecture, or ask a question...'
-                      : 'Describe the software you want to build...'
+                    isGeneratingArtifacts
+                      ? 'Compiling blueprint files...'
+                      : project?.wizard_state?.isComplete
+                        ? 'Refine this workspace, update architecture, or ask a question...'
+                        : 'Describe the software you want to build...'
                   }
                   className="flex-1 bg-transparent resize-none border-none outline-none text-[15px] text-ink placeholder:text-ink-muted/50 max-h-[200px] min-h-[26px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] disabled:opacity-50 w-full focus:ring-0 leading-relaxed py-0.5"
                   rows={1}
@@ -503,7 +474,7 @@ export function ProjectWorkspace() {
                 ) : (
                   <button
                     onClick={() => handleSend(null)}
-                    disabled={!inputValue.trim()}
+                    disabled={!inputValue.trim() || isGeneratingArtifacts}
                     aria-label="Send message"
                     className="h-8 w-8 rounded-full bg-ink text-canvas hover:opacity-85 disabled:opacity-30 disabled:bg-surface-soft disabled:text-ink-muted transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-sm"
                   >
@@ -561,6 +532,19 @@ export function ProjectWorkspace() {
         sidebarWidth={sidebarWidth}
         handleMouseDown={handleMouseDown}
       />
+
+      <AnimatePresence>
+        {isWizardActive && (
+          <WizardDrawer
+            questionText={cleanMessageContent(lastMessage.content)}
+            options={lastMessage.options}
+            onSubmit={(val) => handleSend(val)}
+            isLoading={isProcessing}
+            currentStep={messages.filter(m => m.role === 'user').length}
+            totalSteps={10}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }

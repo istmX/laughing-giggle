@@ -50,7 +50,8 @@ export const adminService = {
       if (existing) throw new Error('Username already taken');
     }
 
-    const user = await User.findByIdAndUpdate(userId, { $set: filteredUpdates }, { new: true }).select('-password');
+    const user = await User.findByIdAndUpdate(userId, { $set: filteredUpdates }, { returnDocument: 'after' }).select('-password');
+
     if (!user) throw new Error('User not found');
 
     if (filteredUpdates.email || filteredUpdates.name) {

@@ -18,7 +18,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
   
   const ip = req.ip || req.headers["x-forwarded-for"] || "unknown";
   const key = `rate_limit_playground_${ip}`;
-  const limit = 10;
+  const limit = 60; // Increased limit for real-time interactive design editing
   const windowMs = 60000;
 
   try {
@@ -28,7 +28,7 @@ export const rateLimitMiddleware = async (req, res, next) => {
       .exec();
     
     if (response > limit) {
-      return res.status(429).json({ error: "Too many requests, please try again later." });
+      return res.status(429).json({ error: "Rate limit reached for playground editing. Please wait a moment before sending more messages." });
     }
     next();
   } catch (error) {

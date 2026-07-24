@@ -17,7 +17,7 @@ export const artifactService = {
     const artifact = await Artifact.findOneAndUpdate(
       { _id: artifactId, owner: userId },
       { $set: updates },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!artifact) throw new Error("Artifact not found");
     return artifact;
@@ -27,9 +27,10 @@ export const artifactService = {
     return await Artifact.findOneAndUpdate(
       { project: projectId, owner: userId, file_path: filePath },
       { $set: { content, file_type: fileType } },
-      { new: true, upsert: true }
+      { returnDocument: 'after', upsert: true }
     );
   },
+
 
   async exportArtifactsZip(projectId, userId, res) {
     const artifacts = await Artifact.find({ project: projectId, owner: userId });

@@ -7,28 +7,84 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
 load_dotenv(env_path)
 
-def get_fallback_llm():
+import os
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from langchain_mistralai import ChatMistralAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+from loguru import logger
+
+env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.env"))
+load_dotenv(env_path)
+
+def get_provider_pool():
     """
-    Returns an LLM with fallbacks: Groq -> Mistral -> Gemini.
+    Returns an ordered list of LLM instances for primary usage and worst-case fallback.
+    Prioritizes Gemini 3.5 Flash via GOOGLE_GEMINI_API_KEY & GEMINI_SECONDARY_KEY.
     """
-    groq_llm = ChatGroq(model_name="llama3-70b-8192")
-    mistral_llm = ChatMistralAI(model="mistral-large-latest")
-    gemini_llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest")
+    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    secondary_gemini = os.getenv("GEMINI_SECONDARY_KEY") or os.getenv("GEMINI_API_KEY_II")
     
-    # Configure fallbacks
-    return groq_llm.with_fallbacks([mistral_llm, gemini_llm])
+    primary_groq = os.getenv("GROQ_API_KEY")
+    primary_mistral = os.getenv("MISTRAL_API_KEY")
+
+    fallback_groq = os.getenv("GROQ_API_KEY_II")
+    fallback_mistral = os.getenv("MISTRAL_API_KEY_II")
+
+    llms = []
+
+    # 1. Primary Gemini 3.5 Flash Model (Top Choice)
+    if primary_gemini:
+        try:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
+        except Exception as e:
+            logger.warning(f"Failed to load gemini-3.5-flash, falling back to gemini-2.5-flash: {e}")
+            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=primary_gemini))
+
+    # 2. Secondary Gemini API Key Fallback
+    if secondary_gemini and secondary_gemini != primary_gemini:
+        try:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=secondary_gemini))
+        except Exception as e:
+            llms.append(ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=secondary_gemini))
+
+    # 3. Mistral & Groq Fallbacks
+    if primary_mistral:
+        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=primary_mistral))
+    if primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
+
+    if fallback_mistral and fallback_mistral != primary_mistral:
+        llms.append(ChatMistralAI(model="mistral-large-latest", api_key=fallback_mistral))
+    if fallback_groq and fallback_groq != primary_groq:
+        llms.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=fallback_groq))
+
+    if not llms:
+        return [ChatGroq(model_name="llama-3.1-8b-instant")]
+
+    return llms
+
+
+def get_load_balanced_llm(index: int = 0):
+    """
+    Returns an LLM chain starting at the given index in the provider pool,
+    with all other pool members configured as automatic sequential fallbacks.
+    """
+    pool = get_provider_pool()
+    if not pool:
+        return ChatGroq(model_name="llama-3.1-8b-instant")
+
+    # Rotate starting provider based on index (Round-Robin)
+    start_idx = index % len(pool)
+    ordered_pool = pool[start_idx:] + pool[:start_idx]
+
+    primary = ordered_pool[0]
+    fallbacks = ordered_pool[1:]
+    return primary.with_fallbacks(fallbacks) if fallbacks else primary
+
+def get_fallback_llm():
+    return get_load_balanced_llm(0)
 
 def get_fallback_llm_ii():
-    """
-    Returns an LLM with fallbacks using secondary keys (_II).
-    """
-    groq_api_key_ii = os.getenv("GROQ_API_KEY_II")
-    mistral_api_key_ii = os.getenv("MISTRAL_API_KEY_II")
-    gemini_api_key_ii = os.getenv("GEMINI_API_KEY_II")
-    
-    groq_llm = ChatGroq(model_name="llama3-70b-8192", api_key=groq_api_key_ii)
-    mistral_llm = ChatMistralAI(model="mistral-large-latest", api_key=mistral_api_key_ii)
-    gemini_llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro-latest", api_key=gemini_api_key_ii)
-    
-    return groq_llm.with_fallbacks([mistral_llm, gemini_llm])
+    return get_load_balanced_llm(1)
 
