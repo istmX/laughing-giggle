@@ -9,8 +9,9 @@ Analyze the user's software idea: "{idea}"
 
 2. **STEP 2: DETECT DOMAIN & ENFORCE BOUNDARIES**:
    - **Portfolio / Agency Showcase / Visual Site**: STRICT BAN on database choices, backend APIs, or server auth questions! Ask about visual aesthetic/theme, tech skills to showcase, and hero headline.
-   - **Full-Stack SaaS / Platform**: Ask about primary features/workflows, and technical choices like database & backend stack (e.g. Supabase, PostgreSQL, MongoDB, Firebase).
+   - **Full-Stack SaaS / Platform**: Ask about primary features/workflows, and modern, reliable, developer-friendly tech stack choices (database, framework, auth).
    - **Mobile App**: Ask about target platforms (iOS/Android), mobile screens, and offline features.
+
 
 3. **STEP 3: GAP-FILLING & QUESTION GENERATION**:
    - Generate adaptive questions (between 3 and 10 questions) to fill every requirement gap.

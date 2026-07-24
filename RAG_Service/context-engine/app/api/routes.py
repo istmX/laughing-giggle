@@ -72,15 +72,14 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
             f"User's software idea: \"{idea_prompt}\"\n"
             f"Clarifying question: \"{question}\"\n\n"
             "GUIDELINES FOR OPTIONS:\n"
-            "1. DOMAIN ACCURACY & CLARITY:\n"
-            "   - If the question asks about Database / Backend stack for a SaaS: Provide clear, modern choices like 'Supabase / PostgreSQL', 'MongoDB / Mongoose', 'Firebase / Firestore', 'PostgreSQL / Prisma'.\n"
-            "   - If the idea is a Portfolio, Agency Showcase, Landing Page, or Visual Site: DO NOT generate database options! Focus on design aesthetics, featured skills, and portfolio sections.\n"
+            "1. DYNAMIC INTELLIGENCE & RELIABILITY:\n"
+            "   - Dynamically recommend modern, reliable, developer-friendly, and easy-to-use tech stacks matching the exact question and project intent.\n"
+            "   - Do NOT hardcode outdated or irrelevant stacks. Analyze what is standard, reliable, and modern for the domain.\n"
+            "   - If the idea is a Portfolio, Visual Site, or Showcase: DO NOT invent backend database choices! Focus on visual themes, skills, and layout features.\n"
             "2. ENSURE DIVERSITY: Each option should represent a distinct, meaningful choice.\n"
             "3. CONCISE: Keep each option under 8 words so they fit neatly on UI buttons. Avoid emojis.\n"
             "4. ALWAYS INCLUDE 'Let Zenix decide' AS THE FINAL OPTION.\n"
-            "5. NO EXPLANATIONS: Output ONLY a raw JSON array containing exactly 3 strings (2 choices + 'Let Zenix decide'). Do not use markdown blocks.\n\n"
-            "Example format:\n"
-            "[\"Supabase & PostgreSQL\", \"MongoDB & Node.js\", \"Let Zenix decide\"]"
+            "5. NO EXPLANATIONS: Output ONLY a raw JSON array containing strings ending with 'Let Zenix decide'. Do not use markdown blocks.\n"
         )
         from langchain_core.messages import SystemMessage
         res = llm.invoke([SystemMessage(content=prompt)])
@@ -96,7 +95,8 @@ def generate_options_for_question(question: str, idea_prompt: str) -> List[str]:
         return opts
     except Exception as e:
         logger.error(f"Failed to generate options: {e}")
-        return ["Supabase & PostgreSQL", "MongoDB & Express", "Let Zenix decide"]
+        return ["Modern Standard Stack", "Alternative Stack", "Let Zenix decide"]
+
 
 
 @router.post("/idea", response_model=IdeaResponse)
