@@ -11,11 +11,15 @@
 - **Modular Component Architecture**: Extracted monolithic `LiveSandbox.jsx` into 8 focused, reusable sub-components in `frontend/src/features/playground/ui/components/` (`HeaderNav`, `HeroSection`, `PaletteSection`, `TypographySection`, `ComponentsSection`, `ColorBlocksSection`, `PricingSection`, `FooterSection`), keeping every source file under 120 lines to comply with `GEMINI.md`.
 - **Glassmorphism & Single-Weight Tall Font Fixes**: Fixed Google Fonts CDN URL parsing in `LiveSandbox.jsx` for single-weight display fonts (such as `Bebas Neue`), ensuring tall fonts render cleanly without HTTP 400 errors. Added uppercase font transformations for tall display headlines, added glassmorphic navbar styling (`backdrop-filter: blur(16px) saturate(180%)`), enabled outline button hover fill states (`hover:bg-[var(--primary)] hover:text-[var(--bg)]`), and added agency brand title support (`RED LOVE`).
 - **DESIGN.md Context Document Engine**: Upgraded Python Playground service (`playground.py`), Express controller (`playground.controller.js`), and frontend Playground toolbar (`Playground.jsx`) to auto-generate and display a complete, implementation-ready `DESIGN.md` specification document (matching `DESIGN_TEMPLATE.md`). Includes a real-time `DESIGN.md` slide-over Markdown drawer with one-click **Copy DESIGN.md** and **Download .md** export actions for AI coding agents.
-- **Refinement Wizard Design Intelligence Engine Integration**: Upgraded `refinement_wizard.py` to query `design_knowledge_engine.search_design_context()` and inject design tokens, GSAP motion rules, and typography scales into synthesized `refined_spec` documents. Enforced strict domain boundary rules prohibiting backend MongoDB schemas, Express API contracts, WebSockets, or JWT auth flows for portfolios, developer showcases, and visual websites. Replaced database chapters with **DESIGN SYSTEM, TOKENS & GSAP MOTION SPECIFICATIONS**.
+- **Exhaustive Domain-Specific Reference Template Blueprints**: Replaced outdated monolithic templates with 3 deep, production-grade template suites in `RAG_Service/context-engine/app/knowledge/context/`:
+  - **`portfolio/`**: Tailored for visual portfolios, agency showcases, landing pages, and developer sites (Next.js + TypeScript + GSAP Motion, Satoshi/Bebas Neue fonts, 32px pill radii, 1120px max-width container, static JSON data layers, zero database bloat).
+  - **`mobile/`**: Tailored for mobile apps (Expo + React Native + TypeScript + NativeWind, safe-area insets, 44px min touch targets).
+  - **`saas/`**: Tailored for full-stack platforms (Next.js + PostgreSQL/Supabase ORM + Auth + 240px sidebar dashboards).
+  - Updated `context_engine.py` with `get_template_for_target()` to dynamically route generation requests to the exact template suite.
 
 ### Verification
-- Python Py_compile (`app/langgraph/refinement_wizard.py`, `app/langgraph/pm_wizard.py`, `app/prompts/conversational_prompt.py`, `app/prompts/question_prompt.py`, `app/langgraph/context_engine.py`) succeeded with 0 errors.
-- Production Vite build passes cleanly in 10.39 seconds with 0 warnings or errors.
+- Python Py_compile (`app/langgraph/context_engine.py`, `app/langgraph/refinement_wizard.py`, `app/langgraph/pm_wizard.py`, `app/prompts/conversational_prompt.py`, `app/prompts/question_prompt.py`, `app/langgraph/playground.py`) succeeded with 0 errors.
+- Production Vite build passes cleanly in 8.65 seconds with 0 warnings or errors.
 
 ## Context File Generation Pipeline Optimization (Previous)
 

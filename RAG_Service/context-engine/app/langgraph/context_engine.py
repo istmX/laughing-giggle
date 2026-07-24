@@ -19,18 +19,53 @@ class ArtifactState(TypedDict):
     verification_feedback: str
     is_approved: bool
 
+BASE_KNOWLEDGE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge")
+
+def get_template_for_target(target_file: str, spec: str) -> str:
+    spec_lower = spec.lower()
+    fname = os.path.basename(target_file)
+    
+    if any(k in spec_lower for k in ["portfolio", "agency", "showcase", "landing", "personal site", "developer showcase", "dev portfolio"]):
+        template_folder = "portfolio"
+    elif any(k in spec_lower for k in ["mobile", "expo", "react native", "ios", "android"]):
+        template_folder = "mobile"
+    else:
+        template_folder = "saas"
+        
+    tpl_path = os.path.join(BASE_KNOWLEDGE_DIR, "context", template_folder, fname)
+    if os.path.exists(tpl_path):
+        try:
+            with open(tpl_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception as e:
+            logger.error(f"Error loading template {tpl_path}: {e}")
+            
+    # Fallback to root context file if available
+    root_tpl = os.path.join(BASE_KNOWLEDGE_DIR, "context", fname)
+    if os.path.exists(root_tpl):
+        try:
+            with open(root_tpl, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            pass
+            
+    return ""
+
 async def generate_draft(state: ArtifactState) -> Dict[str, Any]:
-    """Generates high-fidelity markdown context artifacts through dynamic AI reasoning."""
-    logger.info(f"Generating draft for {state['target_file_path']}")
+    """Generates high-fidelity markdown context artifacts matching the project category."""
+    target_name = os.path.basename(state['target_file_path'])
+    logger.info(f"Generating draft for {target_name}")
     
     spec = state.get('refined_spec', '')
     llm = get_fallback_llm_ii()
     
     matched_design_knowledge = design_knowledge_engine.search_design_context(spec)
     rag_context = f"{state.get('rag_context', '')}\n\n--- MATCHED DESIGN INTELLIGENCE & TOKENS ---\n{matched_design_knowledge}" if matched_design_knowledge else state.get('rag_context', '')
+    
+    reference_template = get_template_for_target(target_name, spec)
 
-    system_prompt = f"""You are Zenix, a Staff Software Architect and Principal Design Systems Engineer.
-Your mission is to generate the highest-fidelity, complete, and implementation-ready engineering markdown file for: "{state['target_file_path']}".
+    system_prompt = f"""You are Zenix, a Staff Software Architect and Principal Design Systems Engineer (created by developer "Istm").
+Your mission is to generate the highest-fidelity, complete, and implementation-ready markdown context file for: "{target_name}".
 
 PROJECT SPECIFICATION & REQUIREMENTS:
 --- SPECIFICATION ---
@@ -40,27 +75,28 @@ PROJECT SPECIFICATION & REQUIREMENTS:
 --- DESIGN INTELLIGENCE & ARCHITECTURE RULES ---
 {rag_context}
 
+--- REFERENCE TEMPLATE BLUEPRINT ---
+{reference_template}
+-----------------------------------
+
 --- DOMAIN BOUNDARY & ARCHITECTURAL REASONING DIRECTIVES ---
-1. DYNAMIC DOMAIN ANALYSIS: Analyze the specification to determine whether this project is a Portfolio / Visual Showcase, a Frontend Web Application, a Mobile App, or a Full-Stack Platform.
+1. DOMAIN ANALYSIS: Analyze the project specification and reference blueprint.
 2. OVER-ENGINEERING PREVENTION:
-   - If the project is a Portfolio, Landing Page, or Visual Showcase: DO NOT invent backend MongoDB schemas, Express server controllers, Socket.io websockets, or Clerk authentication unless explicitly requested by the user. Focus 100% on Next.js + TypeScript, Tailwind CSS, GSAP animations, responsive media grids, and design tokens.
-   - If the project is a Mobile App: Use Expo + React Native + TypeScript + NativeWind styling conventions.
-   - Only include database models, API contracts, and server authentication if the user's specification explicitly demands a full-stack backend platform.
-3. TECH STACK SELECTION: Automatically choose modern, industry-standard tech stacks (Next.js + TypeScript for Web, Expo + React Native for Mobile, GSAP for Motion) unless the user specifies a different framework.
+   - If the project is a Portfolio, Landing Page, Developer Showcase, or Visual Site: DO NOT invent backend MongoDB schemas, Mongoose models, Express server controllers, Socket.io websockets, or Clerk authentication! Focus 100% on Next.js + TypeScript, Tailwind CSS, GSAP animations, responsive media grids, and design system tokens.
+   - If the project is a Mobile App: Use Expo + React Native + TypeScript + NativeWind styling.
+   - Only include database models and server authentication if the user's specification explicitly demands a full-stack backend SaaS platform.
+3. TECH STACK SELECTION: Automatically choose modern tech stacks (Next.js + TypeScript + GSAP for Web, Expo + React Native for Mobile).
 
 Follow these exact file-specific instructions:
 
 1. IF GENERATING "agents.md" (OR ".cursorrules" / "GEMINI.md"):
-   - Define the single source of truth for AI coding agents.
-   - Set strict code standards: Component files <150 lines, screens <300 lines, stores <250 lines.
-   - List whitelisted packages matching the project's chosen tech stack (Lucide Icons, Framer Motion / GSAP, etc.).
-   - Write out chronological build phases with sub-tasks, deliverables, and validation criteria. Do not summarize.
+   - Source of truth for AI agents. Set strict code standards: Component files <150 lines, screens <250 lines, stores <200 lines.
+   - List whitelisted packages matching the project's chosen tech stack. Write out chronological build phases with sub-tasks and validation criteria.
 
 2. IF GENERATING "design.md":
    - Complete visual design system specification.
-   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (headings, body, captions), corner radii, container max-widths, and spacing scales.
-   - Detail component registry specifications for buttons, inputs, headers, navigation, and cards.
-   - Specify GSAP motion rules (scroll triggers, stagger delays, ease functions) for interactive web sites.
+   - Document hex colors (Primary, Canvas, Surface, Border, Secondary, Accent), typography scale matrix (display-xl, display-lg, headline, body, eyebrow font faces and metrics), corner radii, container max-widths, and spacing scales.
+   - Detail GSAP motion rules (scroll triggers, stagger delays, ease functions) for interactive web sites.
 
 3. IF GENERATING "architecture.md":
    - Complete folder tree structure matching the chosen tech stack.
@@ -77,15 +113,15 @@ CRITICAL FORMATTING:
 
     messages = [
         SystemMessage(content=system_prompt),
-        HumanMessage(content=f"Please generate {state['target_file_path']}.")
+        HumanMessage(content=f"Please generate {target_name}.")
     ]
     
     try:
-        logger.info(f"Invoking multi-provider LLM chain for {state['target_file_path']}...")
+        logger.info(f"Invoking multi-provider LLM chain for {target_name}...")
         response = await asyncio.wait_for(llm.ainvoke(messages), timeout=90.0)
         content = response.content.strip()
     except Exception as e:
-        logger.error(f"Primary generation attempt failed for {state['target_file_path']}: {e}. Retrying with fallback...")
+        logger.error(f"Primary generation attempt failed for {target_name}: {e}. Retrying with fallback...")
         fallback_llm = get_fallback_llm()
         response = await fallback_llm.ainvoke(messages)
         content = response.content.strip()
