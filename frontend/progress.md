@@ -1,4 +1,15 @@
-## Detailed Hybrid Design System Synthesis (Latest)
+## Purge of Hardcoded Tokens in Favor of RAG UI Knowledge Catalogs (Latest)
+
+### Completed
+- **`refinement_wizard.py` Hardcoded Token Purge**:
+  - Removed all explicit hex values (`#08080A`, `#10B981`, `#A3E635`) and hardcoded font assignments from prompt templates.
+  - Instructed the model to query and compose design tokens dynamically exclusively from the `design_knowledge_engine` catalog context (`RAG_Service/context-engine/app/knowledge/ui`).
+
+### Verification
+- `py_compile` passed cleanly with 0 errors across `refinement_wizard.py` and `context_engine.py`.
+
+## Detailed Hybrid Design System Synthesis (Previous)
+
 
 ### Completed
 - **`refinement_wizard.py` System Prompt Upgrade**:
