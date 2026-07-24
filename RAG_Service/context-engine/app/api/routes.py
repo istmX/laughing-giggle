@@ -7,7 +7,8 @@ from typing import List, Dict, Any, Optional
 from loguru import logger
 from app.rag.retriever.retriever import ZenixRetriever
 from app.langgraph.pm_wizard import pm_wizard_graph
-from app.langgraph.context_engine import context_engine_graph
+from app.langgraph.context_engine import context_engine_graph, get_template_for_target
+
 from app.langgraph.refinement_wizard import refinement_graph
 from app.langgraph.playground import playground_graph
 from app.langgraph.developer import developer_graph
@@ -161,33 +162,29 @@ async def process_initial_idea(request: IdeaRequest):
         retrieved_docs = retriever.retrieve_context(actual_prompt)
         formatted_context = retriever.format_context(retrieved_docs)
 
-        # Case 1: Initial call or first turn with empty questions list
         meta = generate_title_and_description(actual_prompt)
         p_title = meta.get("project_title", "Zenix Project")
         p_desc = meta.get("project_description", actual_prompt)
 
-        if not questions:
-            graph_input = {
-                "idea_prompt": actual_prompt,
-                "rag_context": formatted_context,
-                "messages": []
-            }
-            graph_result = pm_wizard_graph.invoke(graph_input)
-            questions = graph_result["generated_questions"]
-            logger.success(f"Generated 3 clarifying questions: {questions}")
-
-        # Determine current question based on history size
-        num_answered = len(history)
+        # Reactive Turn-by-Turn Wizard Invocation
+        graph_input = {
+            "idea_prompt": actual_prompt,
+            "rag_context": formatted_context,
+            "history": history
+        }
+        wizard_result = pm_wizard_graph.invoke(graph_input)
         
-        if num_answered < len(questions):
-            next_q = questions[num_answered]
-            options = generate_options_for_question(next_q, actual_prompt)
-            logger.info(f"Serving question {num_answered + 1}/{len(questions)}: '{next_q}' with options {options}")
+        is_complete = wizard_result.get("is_complete", False)
+        next_q = wizard_result.get("next_question", "")
+        options = wizard_result.get("options", ["Let Zenix decide"])
+
+        if not is_complete and len(history) < 10:
+            logger.info(f"Serving reactive turn question (History len {len(history)}): '{next_q}' with options {options}")
             return IdeaResponse(
                 idea_id=actual_idea_id,
                 status="success",
                 rag_context=formatted_context,
-                generated_questions=questions,
+                generated_questions=[next_q],
                 is_complete=False,
                 next_question=next_q,
                 options=options,
@@ -196,8 +193,8 @@ async def process_initial_idea(request: IdeaRequest):
                 project_description=p_desc
             )
         else:
-            # Case 3: All questions answered -> synthesize specification
-            logger.info("All questions answered. Invoking refinement_graph to synthesize final specification.")
+            # Case: Wizard marked complete or max 10 questions reached -> synthesize specification
+            logger.info("Wizard complete or max questions reached. Invoking refinement_graph to synthesize final specification.")
             refinement_input = {
                 "idea_prompt": actual_prompt,
                 "questions_and_answers": history,
@@ -209,7 +206,7 @@ async def process_initial_idea(request: IdeaRequest):
                 idea_id=actual_idea_id,
                 status="success",
                 rag_context=formatted_context,
-                generated_questions=questions,
+                generated_questions=[],
                 is_complete=True,
                 next_question=None,
                 options=None,
@@ -217,6 +214,7 @@ async def process_initial_idea(request: IdeaRequest):
                 project_title=p_title,
                 project_description=p_desc
             )
+
 
             
     except Exception as e:
