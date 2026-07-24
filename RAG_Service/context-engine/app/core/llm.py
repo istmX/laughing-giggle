@@ -99,6 +99,28 @@ def get_provider_pool():
 
 
 
+def get_interactive_llm():
+    """
+    Dedicated fast LLM instance for interactive UI tasks (Q&A turns, title generation, classification).
+    Uses Gemini 3.5 Flash primary with Groq Llama 3.1 8B instant fallback for guaranteed 1-3s responses.
+    """
+    primary_gemini = os.getenv("GOOGLE_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    primary_groq = os.getenv("GROQ_API_KEY")
+    
+    interactive_chain = []
+    if primary_gemini:
+        interactive_chain.append(ChatGoogleGenerativeAI(model="gemini-3.5-flash", api_key=primary_gemini))
+    if primary_groq:
+        interactive_chain.append(ChatGroq(model_name="llama-3.1-8b-instant", api_key=primary_groq))
+        
+    if not interactive_chain:
+        return ChatGroq(model_name="llama-3.1-8b-instant")
+        
+    primary = interactive_chain[0]
+    fallbacks = interactive_chain[1:]
+    return primary.with_fallbacks(fallbacks) if fallbacks else primary
+
+
 def get_load_balanced_llm(index: int = 0):
     """
     Returns an LLM chain starting at the given index in the provider pool,
@@ -106,7 +128,7 @@ def get_load_balanced_llm(index: int = 0):
     """
     pool = get_provider_pool()
     if not pool:
-        return ChatGroq(model_name="llama-3.1-8b-instant")
+        return get_interactive_llm()
 
     # Rotate starting provider based on index (Round-Robin)
     start_idx = index % len(pool)
@@ -117,7 +139,7 @@ def get_load_balanced_llm(index: int = 0):
     return primary.with_fallbacks(fallbacks) if fallbacks else primary
 
 def get_fallback_llm():
-    return get_load_balanced_llm(0)
+    return get_interactive_llm()
 
 def get_fallback_llm_ii():
     return get_load_balanced_llm(1)

@@ -177,7 +177,7 @@ CRITICAL FORMATTING:
             content = str(raw).strip()
         except Exception as backup_err:
             logger.error(f"Backup generation also failed for {target_name}: {backup_err}. Using baseline draft template.")
-            content = f"# {target_name.replace('.md', '').title()}\n\n## Overview\n{refined_spec}\n\n## Specification Details\n{state.get('formatted_context', '')}"
+            content = f"# {target_name.replace('.md', '').title()}\n\n## Overview\n{spec}\n\n## Specification Details\n{state.get('formatted_context', '')}"
 
 
     

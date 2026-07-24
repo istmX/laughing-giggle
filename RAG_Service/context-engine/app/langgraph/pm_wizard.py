@@ -2,7 +2,7 @@ from typing import Annotated, Dict, Any, List
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.core.llm import get_fallback_llm
+from app.core.llm import get_fallback_llm, get_load_balanced_llm
 from app.prompts.question_prompt import buildQuestionPrompt
 import os
 import json
@@ -78,13 +78,21 @@ OUTPUT FORMAT (STRICT JSON ONLY - No markdown):
 }}
 """
 
-    # Attempt 1: Invocation & Parsing
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content="Evaluate history and return the next question or completion state.")
+    ]
+
+    # Attempt 1 & Retry 2: Invocation & Parsing
     for attempt in range(2):
         try:
             if attempt == 1:
                 logger.warning("Retrying PM Wizard question generation with backup LLM...")
-                backup_llm = get_load_balanced_llm(1)
-                response = backup_llm.invoke(messages)
+                current_llm = get_load_balanced_llm(1)
+            else:
+                current_llm = llm
+                
+            response = current_llm.invoke(messages)
             
             raw = getattr(response, "content", response)
             if isinstance(raw, list):
