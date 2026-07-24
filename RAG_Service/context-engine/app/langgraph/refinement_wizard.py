@@ -85,7 +85,12 @@ CRITICAL INSTRUCTIONS:
     
     response = llm.invoke(messages)
     
-    return {"refined_spec": response.content.strip()}
+    raw_content = getattr(response, "content", response)
+    if isinstance(raw_content, list):
+        raw_content = "\n".join([str(item.get("text", item) if isinstance(item, dict) else item) for item in raw_content])
+    
+    return {"refined_spec": str(raw_content).strip()}
+
 
 
 def build_refinement_graph() -> StateGraph:

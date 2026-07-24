@@ -29,18 +29,25 @@ class TavilySearchService:
     def search_web(self, query: str, max_results: int = 3) -> str:
         """
         Executes a targeted AI search and returns formatted markdown context snippets.
+        Ensures query length is safely under the Tavily 400-character limit.
         """
         if not self.client:
             logger.warning("Tavily API key not found. Skipping live web search.")
             return ""
 
+        # Clean and safely truncate query to max 250 characters to stay well under Tavily's 400 limit
+        clean_query = query.replace("\n", " ").replace('"', ' ').replace("'", ' ').strip()
+        if len(clean_query) > 250:
+            clean_query = clean_query[:250].rsplit(' ', 1)[0]
+
         try:
-            logger.info(f"Executing Tavily AI Search for: '{query}'")
-            res = self.client.search(query=query, search_depth="basic", max_results=max_results)
+            logger.info(f"Executing Tavily AI Search for: '{clean_query}'")
+            res = self.client.search(query=clean_query, search_depth="basic", max_results=max_results)
             results = res.get("results", [])
             
             if not results:
                 return ""
+
 
             formatted = "\n--- TAVILY LIVE WEB INTELLIGENCE ---\n"
             for r in results:
